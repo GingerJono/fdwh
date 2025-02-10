@@ -1,0 +1,155 @@
+@page "/projects-list"
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using ProjectData
+@inject ProjectService ProjectService
+
+    <!-- Page Header -->
+    <SpkPageHeader PageItems="PageItems" />
+    <!-- Page Header Close -->
+
+    <!-- Start::row-1 -->
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                        <div class="d-flex flex-wrap gap-1 project-list-main">
+                            <SpkButtons Tag="a" href="/projects-create" ButtonClass="btn-primary me-2" ButtonWidth="btn-w-md"><i class="ri-add-line me-1 fw-medium align-middle"></i>New Project</SpkButtons>
+                            <select class="form-control tomselect">
+                                <option value="">Sort By</option>
+                                <option value="Newest">Newest</option>
+                                <option value="Date Added">Date Added</option>
+                                <option value="Type">Type</option>
+                                <option value="A - Z">A - Z</option>
+                            </select>
+                        </div>
+                        <div class="avatar-list-stacked">
+                            @foreach (var team in ProjectService.GetTeam()){
+                                <span class="avatar avatar-sm avatar-rounded">
+                                    <img src="@team.Img" alt="img">
+                                </span>
+                            }
+                            <a class="avatar avatar-sm bg-primary avatar-rounded text-fixed-white" href="javascript:void(0);">
+                                +8
+                            </a>
+                        </div>
+                        <div class="d-flex" role="search">
+                            <input class="form-control me-2" type="search" placeholder="Search Project" aria-label="Search">
+                            <SpkButtons ButtonClass="btn-light text-nowrap" type="submit">Search</SpkButtons>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End::row-1 -->
+
+    <!-- Start::row-2 -->
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card custom-card overflow-hidden">
+                <div class="card-body p-0">
+                    <SpkTables Items="ProjectService.GetProjectHeadersData()" Tableclass="text-nowrap">
+                        @foreach(var projectlist in ProjectService.GetProjectList()){
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-2">
+                                            <span class="avatar avatar-rounded p-1 bg-info-transparent">
+                                                <img src="@projectlist.Project" alt="">
+                                            </span>
+                                        </div>
+                                        <div class="flex-fill">
+                                            <a href="javascript:void(0);" class="fw-medium fs-14 d-block text-truncate project-list-title">@projectlist.ProjectTitle</a>
+                                            <span class="text-muted d-block fs-12">Total <span class="fw-medium text-default">@projectlist.CompletedTasks/@projectlist.TotalTasks</span> tasks completed</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <p class="text-muted mb-0 project-list-description">@projectlist.Description</p>
+                                </td>
+                                <td>
+                                    <div class="avatar-list-stacked">
+                                        @foreach (var assignedTo in projectlist.AssignedTo?.Take(4) ?? Enumerable.Empty<AssignedToItem>())
+                                        {
+                                            <span class="avatar avatar-sm avatar-rounded">
+                                                <img src="@assignedTo.Img" alt="img">
+                                            </span>
+                                        }
+                                        @if (projectlist.AssignedTo?.Count > 4)
+                                        {
+                                            <a class="avatar avatar-sm bg-primary avatar-rounded text-fixed-white" href="javascript:void(0);">
+                                                +@((projectlist.AssignedTo.Count - 4))
+                                            </a> 
+                                        }
+                                    </div>
+                                </td>
+                                <td>
+                                    @projectlist.Assigned
+                                </td>
+                                <td>
+                                   @projectlist.Due
+                                </td>
+                                <td>
+                                    <div>
+                                        <SpkProgress ProgressClass="progress-animate" ProgressSize="progress-xs" ProgressValue="@projectlist.Status">
+                                            <div class="progress-bar bg-primary" style="width: @projectlist.Status%"></div>
+                                        </SpkProgress>
+                                        <div class="mt-1"><span class="text-primary fw-medium">@projectlist.Status%</span> Completed</div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <SpkBadge BadgeClass="@(projectlist.Priority == "Medium" ? "bg-warning-transparent" : projectlist.Priority == "High" ? "bg-danger-transparent" : "bg-success-transparent")">@projectlist.Priority</SpkBadge>
+                                </td>
+                                <td>
+                                    <SpkDropdowns Tag="a" DropdownClass="btn btn-icon btn-sm btn-light" DropdownText="<i class='fe fe-more-vertical'></i>" DropdownToggle=false>
+                                        <ChildContent2>
+                                            <ul class="dropdown-menu">
+                                                <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-eye-line align-middle me-1 d-inline-block"></i>View</a></li>
+                                                <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-edit-line align-middle me-1 d-inline-block"></i>Edit</a></li>
+                                                <li><a class="dropdown-item" href="javascript:void(0);" @onclick="@(() => Deleteproject(projectlist.ProjectId))"><i class="ri-delete-bin-line me-1 align-middle d-inline-block"></i>Delete</a></li>
+                                            </ul>
+                                        </ChildContent2>    
+                                    </SpkDropdowns>
+                                </td>
+                            </tr>
+                        }
+                    </SpkTables>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End::row-2 -->
+    <ul class="pagination justify-content-end">
+        <li class="page-item disabled">
+            <a class="page-link">Previous</a>
+        </li>
+        <li class="page-item"><a class="page-link" href="javascript:void(0);">1</a></li>
+        <li class="page-item"><a class="page-link" href="javascript:void(0);">2</a></li>
+        <li class="page-item"><a class="page-link" href="javascript:void(0);">3</a></li>
+        <li class="page-item">
+            <a class="page-link" href="javascript:void(0);">Next</a>
+        </li>
+    </ul>
+
+    <!-- TomSelect JS -->
+    <script src="@($"{NavigationManager.BaseUri}assets/libs/tom-select/dist/js/tom-select.complete.min.js")"></script>
+    <script src="@($"{NavigationManager.BaseUri}assets/js/tomselect.js")"></script>
+
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Apps" },
+        new SpkPageHeader.PageItem { PageTitle = "Projects" },
+        new SpkPageHeader.PageItem { PageTitle = "Projects List" },
+    };
+    protected void Deleteproject(decimal ProjectId)
+    {
+        var TodoToRemove = ProjectService.GetTodoData().FirstOrDefault(o => o.ProjectId == ProjectId);
+        if (TodoToRemove != null)
+        {
+            ProjectService.GetTodoData().Remove(TodoToRemove);
+        }
+    }
+    
+}

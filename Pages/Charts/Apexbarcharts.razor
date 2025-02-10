@@ -1,0 +1,1268 @@
+@page "/apex-bar-charts"
+@using System.Collections.Generic
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using ApexSeries
+@using ApexCharts
+@using BarData
+@inject BarService BarService
+
+    <!-- Page Header -->
+        <SpkPageHeader PageItems="PageItems" />
+    <!-- Page Header Close -->
+
+    <!-- Start::row-1 -->
+    <div class="row">
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Basic Bar Chart</div>
+                </div>
+                <div class="card-body">
+                    <div id="bar-basic">
+                        <SpkApex TItem="Barbasicchart" Items="Barbasiccharts" ApexHeight="320" ChartOptions="BasicBarChartOptions" Series="BarbasicchartSeriesConfigs" ></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Grouped Bar Chart</div>
+                </div>
+                <div class="card-body">
+                    <div id="bar-group">
+                        <SpkApex TItem="BarGroupedchart" Items="BarGroupedcharts" ApexHeight="320" ChartOptions="GroupedBarChartOptions" Series="BarGroupedchartSeriesConfigs" ></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Stacked Bar Chart</div>
+                </div>
+                <div class="card-body">
+                    <div id="bar-stacked">
+                        <SpkApex TItem="BarStackedchart" Items="BarStackedcharts" ApexHeight="320" Title="Fiction Books Sales" ChartOptions="StackedBarChartOptions" Series="BarStackedchartSeriesConfigs"></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">100% Stacked Bar Chart</div>
+                </div>
+                <div class="card-body">
+                    <div id="bar-full">
+                        <SpkApex TItem="BarFullStackedchart" Items="BarFullStackedcharts" ApexHeight="320" Title="100% Stacked Bar" ChartOptions="FullStackedBarChartOptions" Series="BarFullStackedchartSeriesConfigs"></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Bar Chart With Negative Values</div>
+                </div>
+                <div class="card-body">
+                    <div id="bar-negative">
+                        <SpkApex TItem="BarNegativechart" Items="BarNegativecharts" ApexHeight="320" Title="Mauritius population pyramid 2011" ChartOptions="NegativeBarChartOptions" Series="BarNegativechartSeriesConfigs"></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Bar Chart With Markers</div>
+                </div>
+                <div class="card-body">
+                    <div id="bar-markers">
+                        <SpkApex TItem="BarMarkerschart" Items="BarMarkerscharts" ApexHeight="320" ChartOptions="MarkersBarChartOptions" Series="BarMarkerschartSeriesConfigs"></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Reversed Bar Chart</div>
+                </div>
+                <div class="card-body">
+                    <div id="bar-reversed">
+                        <SpkApex TItem="BarReversedchart" Items="BarReversedcharts" ApexHeight="320" ChartOptions="ReversedBarChartOptions" Series="BarReversedchartSeriesConfigs"></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Bar With Category DataLabels</div>
+                </div>
+                <div class="card-body">
+                    <div id="bar-categories">
+                        <SpkApex TItem="BarDataLabelschart" Items="BarDataLabelscharts" Title="Custom DataLabels" ApexHeight="320" ChartOptions="DataLabelsBarChartOptions" Series="BarDataLabelschartSeriesConfigs"></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Patterned Bar Chart</div>
+                </div>
+                <div class="card-body">
+                    <div id="bar-pattern">
+                        <SpkApex TItem="BarPatternchart" Items="BarPatterncharts" Title="Compare Sales Strategy" ApexHeight="350" ChartOptions="PatternBarChartOptions" Series="BarPatternchartSeriesConfigs"></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Bar With Image Fill</div>
+                </div>
+                <div class="card-body">
+                    <div id="bar-image">
+                        <SpkApex TItem="BarImageFillchart" Items="BarImageFillcharts" Title="Paths filled by clipped image" ApexHeight="350" ChartOptions="ImageFillBarChartOptions" Series="BarImageFillchartSeriesConfigs"></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--End::row-1 -->
+
+    
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Charts" },
+        new SpkPageHeader.PageItem { PageTitle = "Apex Charts" },
+        new SpkPageHeader.PageItem { PageTitle = "Apex Bar Charts" },
+    };
+
+    
+    // Basic Bar Chart Start //
+    private List<Barbasicchart> Barbasiccharts { get; set; } = BarService.GetBarbasiccharts();
+    private ApexChartOptions<Barbasicchart> BasicBarChartOptions { get; set; } = new();
+    private List<SeriesConfig<Barbasicchart>>? BarbasicchartSeriesConfigs { get; set; }
+    //  Basic Bar Chart End //
+
+    // Grouped Bar Chart Start //
+    private List<BarGroupedchart> BarGroupedcharts { get; set; } = BarService.GetBarGroupedcharts();
+    private ApexChartOptions<BarGroupedchart> GroupedBarChartOptions { get; set; } = new();
+    private List<SeriesConfig<BarGroupedchart>>? BarGroupedchartSeriesConfigs { get; set; }
+    //  Grouped Bar Chart End //
+
+    // Stacked Bar Chart Start //
+    private List<BarStackedchart> BarStackedcharts { get; set; } = BarService.GetBarStackedcharts();
+    private ApexChartOptions<BarStackedchart> StackedBarChartOptions { get; set; } = new();
+    private List<SeriesConfig<BarStackedchart>>? BarStackedchartSeriesConfigs { get; set; }
+    //  Stacked Bar Chart End //
+    
+    // FullStacked Bar Chart Start //
+    private List<BarFullStackedchart> BarFullStackedcharts { get; set; } = BarService.GetBarFullStackedcharts();
+    private ApexChartOptions<BarFullStackedchart> FullStackedBarChartOptions { get; set; } = new();
+    private List<SeriesConfig<BarFullStackedchart>>? BarFullStackedchartSeriesConfigs { get; set; }
+    //  FullStacked Bar Chart End //
+
+    // Negative Bar Chart Start //
+    private List<BarNegativechart> BarNegativecharts { get; set; } = BarService.GetBarNegativecharts();
+    private ApexChartOptions<BarNegativechart> NegativeBarChartOptions { get; set; } = new();
+    private List<SeriesConfig<BarNegativechart>>? BarNegativechartSeriesConfigs { get; set; }
+    //  Negative Bar Chart End //
+    
+    // Markers Bar Chart Start //
+    private List<BarMarkerschart> BarMarkerscharts { get; set; } = BarService.GetBarMarkerscharts();
+    private ApexChartOptions<BarMarkerschart> MarkersBarChartOptions { get; set; } = new();
+    private List<SeriesConfig<BarMarkerschart>>? BarMarkerschartSeriesConfigs { get; set; }
+    private void SetGoals(DataPoint<BarMarkerschart> datapoint)
+    {
+        datapoint.Goals = new();
+        var goal = new DataPointGoal { Name = "Expected" };
+        datapoint.Goals.Add(goal);
+
+        switch (datapoint.X.ToString())
+        {
+            case "2011":
+                goal.Value = 14;
+                goal.StrokeWidth = 2;
+                goal.StrokeDashArray = 2;
+                goal.StrokeColor = "#775DD0";
+                break;
+
+            case "2012":
+                goal.Value = 54;
+                goal.StrokeWidth = 5;
+                goal.StrokeHeight = 10;
+                goal.StrokeColor = "#775DD0";
+                break;
+
+            case "2013":
+                goal.Value = 52;
+                goal.StrokeWidth = 10;
+                goal.StrokeHeight = 0;
+                goal.StrokeLineCap = LineCap.Round;
+                goal.StrokeColor = "#775DD0";
+                break;
+
+            case "2014":
+                goal.Value = 61;
+                goal.StrokeWidth = 10;
+                goal.StrokeHeight = 0;
+                goal.StrokeLineCap = LineCap.Round;
+                goal.StrokeColor = "#775DD0";
+                break;
+
+            case "2015":
+                goal.Value = 66;
+                goal.StrokeWidth = 10;
+                goal.StrokeHeight = 0;
+                goal.StrokeLineCap = LineCap.Round;
+                goal.StrokeColor = "#775DD0";
+                break;
+
+            default:
+                goal.Value = 70;
+                goal.StrokeWidth = 5;
+                goal.StrokeHeight = 10;
+                goal.StrokeColor = "#775DD0";
+                break;
+        }
+    }
+    //  Markers Bar Chart End //
+
+    // Reversed Bar Chart Start //
+    private List<BarReversedchart> BarReversedcharts { get; set; } = BarService.GetBarReversedcharts();
+    private ApexChartOptions<BarReversedchart> ReversedBarChartOptions { get; set; } = new();
+    private List<SeriesConfig<BarReversedchart>>? BarReversedchartSeriesConfigs { get; set; }
+    //  Reversed Bar Chart End //
+
+    // DataLabels Bar Chart Start //
+    private List<BarDataLabelschart> BarDataLabelscharts { get; set; } = BarService.GetBarDataLabelscharts();
+    private ApexChartOptions<BarDataLabelschart> DataLabelsBarChartOptions { get; set; } = new();
+    private List<SeriesConfig<BarDataLabelschart>>? BarDataLabelschartSeriesConfigs { get; set; }
+    //  DataLabels Bar Chart End //
+
+    // Pattern Bar Chart Start //
+    private List<BarPatternchart> BarPatterncharts { get; set; } = BarService.GetBarPatterncharts();
+    private ApexChartOptions<BarPatternchart> PatternBarChartOptions { get; set; } = new();
+    private List<SeriesConfig<BarPatternchart>>? BarPatternchartSeriesConfigs { get; set; }
+    //  Pattern Bar Chart End //
+
+
+    // ImageFill Bar Chart Start //
+    private List<BarImageFillchart> BarImageFillcharts { get; set; } = BarService.GetBarImageFillcharts();
+    private ApexChartOptions<BarImageFillchart> ImageFillBarChartOptions { get; set; } = new();
+    private List<SeriesConfig<BarImageFillchart>>? BarImageFillchartSeriesConfigs { get; set; }
+    //  ImageFill Bar Chart End //
+    protected override void OnInitialized() {
+
+        BasicBarChartOptions = new ApexChartOptions<Barbasicchart> {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = true},
+                }, 
+            }, 
+            PlotOptions = new PlotOptions
+            {
+                Bar = new PlotOptionsBar
+                {
+                    BorderRadius = 4,
+                    Horizontal = true
+                }
+            },
+            Grid = new Grid {
+                BorderColor = "#f2f5f7",
+            },
+            DataLabels = new DataLabels {
+                Enabled=false,
+            }, 
+            Colors = new Color(new List<string> { "var(--primary-color)" }),
+            Xaxis =  new XAxis {  
+                Labels = new XAxisLabels {
+                    Show = true,
+                    Style = new() {
+                        Colors = "#8c9097",
+                        FontSize = "11px",
+                        FontWeight = 600,
+                        CssClass = "apexcharts-xaxis-label",
+                    },
+                }
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis // Define the first YAxis object
+                {
+                    Labels = new YAxisLabels
+                    {
+                        Show = true,
+                        Style = new() {
+                            Colors = "#8c9097",
+                            FontSize = "11px",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label",
+                        },
+                    },
+                    Min = 0,
+                    Max = 1500,
+                    StepSize = 300,
+                }
+            },
+        };
+        BarbasicchartSeriesConfigs = new List<SeriesConfig<Barbasicchart>>
+        {
+            new SeriesConfig<Barbasicchart>
+            {
+                SeriesType = SeriesType.Bar,
+                Name = "Country",
+                XValueSelector = e => e.Country ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.GrossValue)
+            },
+        };
+
+        GroupedBarChartOptions = new ApexChartOptions<BarGroupedchart> {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = true},
+                }, 
+            }, 
+            PlotOptions = new PlotOptions
+            {
+                Bar = new PlotOptionsBar
+                {
+                    Horizontal = true,
+                    DataLabels = new PlotOptionsBarDataLabels {
+                    },
+                }
+            },
+            Title = new Title{
+                Style = new TitleStyle {
+                    FontSize= "13px",
+                    FontWeight= "bold",
+                    Color= "#8c9097"
+                },
+            },
+            Grid = new Grid {
+                BorderColor = "#f2f5f7",
+            },
+            DataLabels = new DataLabels {
+                Enabled=false,
+                OffsetX = -6,
+                Style = new () {
+                    FontSize= "10px",
+                },
+            }, 
+            Tooltip =new() {
+                Shared = true,
+                Intersect = false,
+            },
+            Colors = new Color(new List<string> { "var(--primary-color)", "#e354d4" }),
+            Stroke = new Stroke { 
+                Width = 1,
+            },
+            Xaxis =  new XAxis {  
+                Labels = new XAxisLabels {
+                    Show = true,
+                    Style = new() {
+                        Colors = "#8c9097",
+                        FontSize = "11px",
+                        FontWeight = 600,
+                        CssClass = "apexcharts-xaxis-label",
+                    },
+                }
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis // Define the first YAxis object
+                {
+                    Labels = new YAxisLabels
+                    {
+                        Show = true,
+                        Style = new() {
+                            Colors = "#8c9097",
+                            FontSize = "11px",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label",
+                        },
+                    },
+                    Min = 0,
+                    Max = 70,
+                    StepSize = 20,
+                }
+            },
+        };
+        BarGroupedchartSeriesConfigs = new List<SeriesConfig<BarGroupedchart>>
+        {
+            new SeriesConfig<BarGroupedchart>
+            {
+                SeriesType = SeriesType.Bar,
+                Name = "Series-1",
+                XValueSelector = e => e.SeriesData ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.SeriesValue1),
+                ShowDataLabels=true
+            },
+            new SeriesConfig<BarGroupedchart>
+            {
+                SeriesType = SeriesType.Bar,
+                Name = "Series-2",
+                XValueSelector = e => e.SeriesData ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.SeriesValue2),
+                ShowDataLabels=true
+            },
+        };
+
+        StackedBarChartOptions = new ApexChartOptions<BarStackedchart> {
+            Chart = new () {
+                Stacked = true,
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = true},
+                }, 
+            }, 
+            PlotOptions = new PlotOptions
+            {
+                Bar = new PlotOptionsBar
+                {
+                    Horizontal = true,
+                }
+            },
+            Title = new Title{
+                Style = new TitleStyle {
+                    FontSize= "13px",
+                    FontWeight= "bold",
+                    Color= "#8c9097"
+                },
+            },
+            Grid = new Grid {
+                BorderColor = "#f2f5f7",
+            },
+            Colors = new Color(new List<string> { "var(--primary-color)", "#e354d4", "#ff8e6f", "#fe5454", "rgb(12, 163, 231)" }),
+            Stroke = new Stroke { 
+                Width = 1,
+            },
+            Tooltip = new ApexCharts.Tooltip {
+                Y = new() {
+                    Formatter = @"function (val) {
+                        return val + 'K'
+                    }"
+                },
+            },
+            Fill = new Fill {
+                Opacity = 1,
+            },
+            Legend = new Legend  { 
+                Show=true,
+                OffsetX = 40,
+                Position = LegendPosition.Top,
+                HorizontalAlign = Align.Left,
+            }, 
+            Xaxis =  new XAxis {  
+                Labels = new XAxisLabels {
+                    Show = true, 
+                    Formatter = @"function (val) {
+                        return val + 'K'
+                    }",
+                    Style = new() {
+                        Colors = "#8c9097",
+                        FontSize = "11px",
+                        FontWeight = 600,
+                        CssClass = "apexcharts-xaxis-label",
+                    },
+                }
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis // Define the first YAxis object
+                {
+                    Labels = new YAxisLabels
+                    {
+                        Show = true,
+                        Style = new() {
+                            Colors = "#8c9097",
+                            FontSize = "11px",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label",
+                        },
+                    },
+                    Min = 0,
+                    Max = 160,
+                    StepSize = 40,
+                }
+            },
+        };
+        BarStackedchartSeriesConfigs = new List<SeriesConfig<BarStackedchart>>
+        {
+            new SeriesConfig<BarStackedchart>
+            {
+                SeriesType = SeriesType.Bar,
+                Name = "Marine Sprite",
+                XValueSelector = e => e.SalesValue ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.SpriteValue),
+                ShowDataLabels=true
+            },
+            new SeriesConfig<BarStackedchart>
+            {
+                SeriesType = SeriesType.Bar,
+                Name = "Striking Calf",
+                XValueSelector = e => e.SalesValue ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.StrikingValue),
+                ShowDataLabels=true
+            },
+            new SeriesConfig<BarStackedchart>
+            {
+                SeriesType = SeriesType.Bar,
+                Name = "Tank Picture",
+                XValueSelector = e => e.SalesValue ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.TankValue),
+                ShowDataLabels=true
+            },
+            new SeriesConfig<BarStackedchart>
+            {
+                SeriesType = SeriesType.Bar,
+                Name = "Bucket Slope",
+                XValueSelector = e => e.SalesValue ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.BucketValue),
+                ShowDataLabels=true
+            },
+            new SeriesConfig<BarStackedchart>
+            {
+                SeriesType = SeriesType.Bar,
+                Name = "Reborn Kid",
+                XValueSelector = e => e.SalesValue ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.RebornValue),
+                ShowDataLabels=true
+            },
+        };
+
+        FullStackedBarChartOptions = new ApexChartOptions<BarFullStackedchart> {
+            Chart = new () {
+                Stacked = true,
+                StackType = StackType.Percent100,
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = true},
+                }, 
+            }, 
+            PlotOptions = new PlotOptions
+            {
+                Bar = new PlotOptionsBar
+                {
+                    Horizontal = true,
+                }
+            },
+            Title = new Title{
+                Style = new TitleStyle {
+                    FontSize= "13px",
+                    FontWeight= "bold",
+                    Color= "#8c9097"
+                },
+            },
+            Grid = new Grid {
+                BorderColor = "#f2f5f7",
+            },
+            Colors = new Color(new List<string> { "var(--primary-color)", "#e354d4", "rgb(158, 92, 247)", "rgb(254, 84, 84)", "rgb(12, 163, 231)" }),
+            Stroke = new Stroke { 
+                Width = 1,
+            },
+            Tooltip = new ApexCharts.Tooltip {
+                Y = new() {
+                    Formatter = @"function (val) {
+                        return val + 'K'
+                    }"
+                },
+            },
+            Fill = new Fill {
+                Opacity = 1,
+            },
+            Legend = new Legend  { 
+                Show=true,
+                OffsetX = 40,
+                Position = LegendPosition.Top,
+                HorizontalAlign = Align.Left,
+            }, 
+            Xaxis =  new XAxis {  
+                Labels = new XAxisLabels {
+                    Show = true, 
+                    Formatter = @"function (val) {
+                        return val + 'K'
+                    }",
+                    Style = new() {
+                        Colors = "#8c9097",
+                        FontSize = "11px",
+                        FontWeight = 600,
+                        CssClass = "apexcharts-xaxis-label",
+                    },
+                }
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis // Define the first YAxis object
+                {
+                    Labels = new YAxisLabels
+                    {
+                        Show = true,
+                        Style = new() {
+                            Colors = "#8c9097",
+                            FontSize = "11px",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label",
+                        },
+                    },
+                    Min = 0,
+                    Max = 160,
+                    StepSize = 40,
+                }
+            },
+        };
+        BarFullStackedchartSeriesConfigs = new List<SeriesConfig<BarFullStackedchart>>
+        {
+            new SeriesConfig<BarFullStackedchart>
+            {
+                SeriesType = SeriesType.Bar,
+                Name = "Marine Sprite",
+                XValueSelector = e => e.SalesValue ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.SpriteValue),
+                ShowDataLabels=true
+            },
+            new SeriesConfig<BarFullStackedchart>
+            {
+                SeriesType = SeriesType.Bar,
+                Name = "Striking Calf",
+                XValueSelector = e => e.SalesValue ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.StrikingValue),
+                ShowDataLabels=true
+            },
+            new SeriesConfig<BarFullStackedchart>
+            {
+                SeriesType = SeriesType.Bar,
+                Name = "Tank Picture",
+                XValueSelector = e => e.SalesValue ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.TankValue),
+                ShowDataLabels=true
+            },
+            new SeriesConfig<BarFullStackedchart>
+            {
+                SeriesType = SeriesType.Bar,
+                Name = "Bucket Slope",
+                XValueSelector = e => e.SalesValue ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.BucketValue),
+                ShowDataLabels=true
+            },
+            new SeriesConfig<BarFullStackedchart>
+            {
+                SeriesType = SeriesType.Bar,
+                Name = "Reborn Kid",
+                XValueSelector = e => e.SalesValue ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.RebornValue),
+                ShowDataLabels=true
+            },
+        };
+
+        NegativeBarChartOptions = new ApexChartOptions<BarNegativechart> {
+            Chart = new () {
+                Stacked = true,
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = true},
+                }, 
+            }, 
+            PlotOptions = new PlotOptions
+            {
+                Bar = new PlotOptionsBar
+                {
+                    Horizontal = true,
+                    BarHeight = "80%",
+                }
+            },
+            Title = new Title{
+                Style = new TitleStyle {
+                    FontSize= "13px",
+                    FontWeight= "bold",
+                    Color= "#8c9097"
+                },
+            },
+            Grid = new Grid {
+                BorderColor = "#f2f5f7",
+                Xaxis = new() {
+                    Lines = new() {
+                        Show= false,
+                    },
+                },
+            },
+            Colors = new Color(new List<string> { "var(--primary-color)", "#e354d4" }),
+            Stroke = new Stroke { 
+                Width = 1,
+            },
+            Tooltip = new ApexCharts.Tooltip {
+                Shared = false,
+            },
+            Fill = new Fill {
+                Opacity = 1,
+            },
+            Legend = new Legend  { 
+                Show=true,
+                OffsetX = 40,
+                Position = LegendPosition.Bottom,
+                HorizontalAlign = Align.Center,
+            }, 
+            Xaxis =  new XAxis {  
+                Title= new(){
+                    Text = "Percent",
+                    Style= new() {
+                        Color="#8c9097",
+                    },
+                },
+                Labels = new XAxisLabels {
+                    Show = true, 
+                    Style = new() {
+                        Colors = "#8c9097",
+                        FontSize = "11px",
+                        FontWeight = 600,
+                        CssClass = "apexcharts-xaxis-label",
+                    },
+                }
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis // Define the first YAxis object
+                {
+                    Labels = new YAxisLabels
+                    {
+                        Show = true,
+                        Style = new() {
+                            Colors = "#8c9097",
+                            FontSize = "11px",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label",
+                        },
+                    },
+                    Min = -6,
+                    Max = 6,
+                    StepSize = 2,
+                }
+            },
+        };
+        BarNegativechartSeriesConfigs = new List<SeriesConfig<BarNegativechart>>
+        {
+            new SeriesConfig<BarNegativechart>
+            {
+                SeriesType = SeriesType.Bar,
+                Name = "Males",
+                XValueSelector = e => e.populationData ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.MaleValue),
+            },
+            new SeriesConfig<BarNegativechart>
+            {
+                SeriesType = SeriesType.Bar,
+                Name = "Females",
+                XValueSelector = e => e.populationData ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.FemaleValue),
+            },
+        };
+
+        MarkersBarChartOptions = new ApexChartOptions<BarMarkerschart> {
+            Chart = new () {
+                Stacked = true,
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = true},
+                }, 
+            }, 
+            PlotOptions = new PlotOptions
+            {
+                Bar = new PlotOptionsBar
+                {
+                    Horizontal = true,
+                }
+            },
+            Title = new Title{
+                Style = new TitleStyle {
+                    FontSize= "13px",
+                    FontWeight= "bold",
+                    Color= "#8c9097"
+                },
+            },
+            DataLabels = new DataLabels {
+                Enabled=true,
+               Formatter = @"function (val, opt) {
+                    const goals =
+                    opt.w.config.series[opt.seriesIndex].data[opt.dataPointIndex].goals;
+
+                    if (goals && goals.length) {
+                    return `${val} / ${goals[0].value}`;
+                    }
+                    return val;
+                }",
+            }, 
+            Grid = new Grid {
+                BorderColor = "#f2f5f7",
+            },
+            Colors = new Color(new List<string> { "#e354d4" }),
+            Stroke = new Stroke { 
+                Width = 1,
+            },
+            Tooltip = new ApexCharts.Tooltip {
+                Shared = false,
+            },
+            Fill = new Fill {
+                Opacity = 1,
+            },
+            Legend = new Legend  { 
+                Show = true,
+                ShowForSingleSeries = true,
+                CustomLegendItems = new List<string> { "Actual","Expected" },
+                Markers = new() {
+                    FillColors = ["#00E396", "#775DD0"],
+                },
+            }, 
+            Xaxis =  new XAxis {  
+                Labels = new XAxisLabels {
+                    Show = true, 
+                    Style = new() {
+                        Colors = "#8c9097",
+                        FontSize = "11px",
+                        FontWeight = 600,
+                        CssClass = "apexcharts-xaxis-label",
+                    },
+                }
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis 
+                {
+                    Labels = new YAxisLabels
+                    {
+                        Show = true,
+                        Style = new() {
+                            Colors = "#8c9097",
+                            FontSize = "11px",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label",
+                        },
+                    },
+                    Min = 0,
+                    Max = 100,
+                    StepSize = 20,
+                }
+            },
+        };
+        BarMarkerschartSeriesConfigs = new List<SeriesConfig<BarMarkerschart>>
+        {
+            new SeriesConfig<BarMarkerschart>
+            {
+                SeriesType = SeriesType.Bar,
+                Name = "Actual",
+                XValueSelector = e => e.MarkersData ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.GrossValue),
+                ShowDataLabels=true,
+                DataPointMutator=SetGoals
+            },
+        };
+
+        ReversedBarChartOptions = new ApexChartOptions<BarReversedchart> {
+            Chart = new () {
+                Stacked = true,
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = true},
+                }, 
+            }, 
+            Annotations = new Annotations {
+                Xaxis = new List<AnnotationsXAxis> {
+                    new AnnotationsXAxis
+                    {
+                        X = 500, 
+                        BorderColor = "#00E396",
+                        Label = new ApexCharts.Label {
+                            Text = "X annotation",
+                            BorderColor = "00E396",
+                            Style = new Style{ Background="#00E396" , Color="#fff"}
+                        },
+                    },
+                },
+                Yaxis = new List<AnnotationsYAxis> { 
+                    new AnnotationsYAxis
+                    {
+                        Y = "July",
+                        Y2 = "September",
+                        Label = new ApexCharts.Label
+                        {
+                            Text = "Y annotation",
+                        },
+                    },
+                }
+            },
+            PlotOptions = new PlotOptions
+            {
+                Bar = new PlotOptionsBar
+                {
+                    Horizontal = true,
+                }
+            },
+            Title = new Title{
+                Style = new TitleStyle {
+                    FontSize= "13px",
+                    FontWeight= "bold",
+                    Color= "#8c9097"
+                },
+            },
+            DataLabels = new DataLabels {
+                Enabled=true,
+            }, 
+            Grid = new Grid {
+                BorderColor = "#f2f5f7",
+                Xaxis = new() {
+                    Lines = new() {
+                        Show= true,
+                    },
+                },
+            },
+            Colors = new Color(new List<string> { "var(--primary-color)" }),
+            Xaxis =  new XAxis {  
+                Labels = new XAxisLabels {
+                    Show = true, 
+                    Style = new() {
+                        Colors = "#8c9097",
+                        FontSize = "11px",
+                        FontWeight = 600,
+                        CssClass = "apexcharts-xaxis-label",
+                    },
+                }
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis 
+                {
+                    Labels = new YAxisLabels
+                    {
+                        Show = true,
+                        Style = new() {
+                            Colors = "#8c9097",
+                            FontSize = "11px",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label",
+                        },
+                    },
+                    Reversed = true,
+                    AxisTicks = new() {
+                        Show = true,
+                    },
+                    Min = 0,
+                    Max = 700,
+                    StepSize = 200,
+                }
+            },
+        };
+        BarReversedchartSeriesConfigs = new List<SeriesConfig<BarReversedchart>>
+        {
+            new SeriesConfig<BarReversedchart>
+            {
+                SeriesType = SeriesType.Bar,
+                Name = "Month",
+                XValueSelector = e => e.Month ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.GrossValue),
+                ShowDataLabels=true,
+            },
+        };
+
+        DataLabelsBarChartOptions = new ApexChartOptions<BarDataLabelschart> {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = true},
+                }, 
+            }, 
+            PlotOptions = new PlotOptions
+            {
+                Bar = new PlotOptionsBar
+                {
+                    Horizontal = true,
+                    BarHeight = "100%",
+                    Distributed = true,
+                    DataLabels = new PlotOptionsBarDataLabels {
+                        Position = ApexCharts.BarDataLabelPosition.Bottom,
+                    },
+                }
+            },
+            Title = new Title{
+                Align = ApexCharts.Align.Center,
+                Floating = true,
+                Style = new TitleStyle {
+                    FontSize= "13px",
+                    FontWeight= "bold",
+                    Color= "#8c9097"
+                },
+            },
+            Subtitle = new() {
+                Text = "Category Names as DataLabels inside bars",
+                Align = ApexCharts.Align.Center,
+            },
+            DataLabels = new DataLabels {
+                Enabled=true,
+                TextAnchor = ApexCharts.TextAnchor.Start,
+                Style = new() {
+                    Colors = ["#fff"],
+                },
+                Formatter = @"function (val, opt) {
+                    return opt.w.globals.labels[opt.dataPointIndex] + '= '  + val;
+                }",
+                OffsetX = 0,
+                DropShadow = new() {
+                    Enabled = false,
+                },
+            }, 
+            Grid = new Grid {
+                BorderColor = "#f2f5f7",
+            },
+            Tooltip=new ApexCharts.Tooltip {
+                Theme = ApexCharts.Mode.Dark,
+                X= new() {
+                    Show = false,
+                },
+            },
+            Stroke = new Stroke { 
+                Width = 1,
+                Colors = ["#fff"],
+            },
+            Colors = new Color(new List<string> { "var(--primary-color)", "#e354d4", "#ff8e6f", "#fe5454", "rgb(12, 163, 231)", "#fe7c58", "#7b76fe", "#a65e9a", "#0cd7b1", "#e354d4" }),
+            Xaxis =  new XAxis {  
+                Labels = new XAxisLabels {
+                    Show = true, 
+                    Style = new() {
+                        Colors = "#8c9097",
+                        FontSize = "11px",
+                        FontWeight = 600,
+                        CssClass = "apexcharts-xaxis-label",
+                    },
+                }
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis 
+                {
+                    Labels = new YAxisLabels
+                    {
+                        Show = false,
+                    },
+                    Min = 0,
+                    Max = 1400,
+                    StepSize = 300,
+                }
+            },
+        };
+        BarDataLabelschartSeriesConfigs = new List<SeriesConfig<BarDataLabelschart>>
+        {
+            new SeriesConfig<BarDataLabelschart>
+            {
+                SeriesType = SeriesType.Bar,
+                Name = "Country",
+                XValueSelector = e => e.Country ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.GrossValue),
+                ShowDataLabels=true,
+            },
+        };
+
+        PatternBarChartOptions = new ApexChartOptions<BarPatternchart> {
+            Chart = new () {
+                Stacked = true,
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = true},
+                }, 
+                DropShadow = new ApexCharts.DropShadow {
+                    Enabled = true,
+                    Blur = 1,
+                    Opacity = 0.25
+                }
+            }, 
+            PlotOptions = new PlotOptions
+            {
+                Bar = new PlotOptionsBar
+                {
+                    Horizontal = true,
+                    BarHeight = "60%",
+                }
+            },
+            DataLabels = new DataLabels {
+                Enabled=false,
+            }, 
+            Title = new Title{
+                Style = new TitleStyle {
+                    FontSize= "13px",
+                    FontWeight= "bold",
+                    Color= "#8c9097"
+                },
+            },
+            Grid = new Grid {
+                BorderColor = "#f2f5f7",
+            },
+            Colors = new Color(new List<string> { "var(--primary-color)", "#e354d4", "rgb(158, 92, 247)", "rgb(12, 163, 231)" }),
+            Stroke = new Stroke { 
+                Width = 2,
+            },
+            Tooltip = new ApexCharts.Tooltip {
+                Y = new() {
+                    Formatter = @"function (val) {
+                        return val + 'K'
+                    }"
+                },
+            },
+            Legend = new Legend  { 
+                Show = true,
+                Position = LegendPosition.Right,
+                OffsetY = 40,
+            }, 
+            Xaxis =  new XAxis {  
+                Labels = new XAxisLabels {
+                    Show = true, 
+                    Style = new() {
+                        Colors = "#8c9097",
+                        FontSize = "11px",
+                        FontWeight = 600,
+                        CssClass = "apexcharts-xaxis-label",
+                    },
+                }
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis // Define the first YAxis object
+                {
+                    Labels = new YAxisLabels
+                    {
+                        Show = true,
+                        Style = new() {
+                            Colors = "#8c9097",
+                            FontSize = "11px",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label",
+                        },
+                    },
+                    Min = 0,
+                    Max = 120,
+                    StepSize = 30,
+                }
+            },
+            Fill = new Fill {
+                Type = new List<FillType> { FillType.Pattern},
+                Opacity = 1,
+                 Pattern = new FillPattern
+                {
+                    Style = [ApexCharts.FillPatternStyle.Circles,ApexCharts.FillPatternStyle.SlantedLines, ApexCharts.FillPatternStyle.VerticalLines,ApexCharts.FillPatternStyle.HorizontalLines]
+                },
+            },
+        };
+        BarPatternchartSeriesConfigs = new List<SeriesConfig<BarPatternchart>>
+        {
+            new SeriesConfig<BarPatternchart>
+            {
+                SeriesType = SeriesType.Bar,
+                Name = "Marine Sprite",
+                XValueSelector = e => e.SalesValue ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.SpriteValue),
+            },
+            new SeriesConfig<BarPatternchart>
+            {
+                SeriesType = SeriesType.Bar,
+                Name = "Striking Calf",
+                XValueSelector = e => e.SalesValue ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.StrikingValue),
+            },
+            new SeriesConfig<BarPatternchart>
+            {
+                SeriesType = SeriesType.Bar,
+                Name = "Tank Picture",
+                XValueSelector = e => e.SalesValue ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.TankValue),
+            },
+            new SeriesConfig<BarPatternchart>
+            {
+                SeriesType = SeriesType.Bar,
+                Name = "Bucket Slope",
+                XValueSelector = e => e.SalesValue ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.BucketValue),
+            },
+        };
+
+        ImageFillBarChartOptions = new ApexChartOptions<BarImageFillchart> {
+            Chart = new () {
+                Stacked = true,
+                Animations= new ApexCharts.Animations {
+                    Enabled = false,
+                },
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = true},
+                }, 
+            }, 
+            PlotOptions = new PlotOptions
+            {
+                Bar = new PlotOptionsBar
+                {
+                    BarHeight = "100%",
+                    Horizontal = true
+                }
+            },
+            Title = new Title{
+                Align = ApexCharts.Align.Right,
+                OffsetY = 30,
+                Style = new TitleStyle {
+                    FontSize= "13px",
+                    FontWeight= "bold",
+                    Color= "#8c9097"
+                },
+            },
+            Grid = new Grid {
+                BorderColor = "#f2f5f7",
+            },
+            DataLabels = new DataLabels {
+                Enabled=false,
+            }, 
+            Fill = new Fill {
+                Type = new List<FillType> { FillType.Image},
+                Opacity = 0.87,
+                Image = new ApexCharts.FillImage {
+                    Src= "../assets/images/media/media-64.jpg",
+                    Width = 466,
+                    Height = 406,
+                }
+            },
+            Colors = new Color(new List<string> { "var(--primary-color)" }),
+            Stroke = new Stroke { 
+                Width = 0.2,
+                Colors = ["#fff"],
+            },
+            Xaxis =  new XAxis {  
+                Labels = new XAxisLabels {
+                    Show = true,
+                    Style = new() {
+                        Colors = "#8c9097",
+                        FontSize = "11px",
+                        FontWeight = 600,
+                        CssClass = "apexcharts-xaxis-label",
+                    },
+                },
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis // Define the first YAxis object
+                {
+                    AxisBorder = new AxisBorder {
+                        Show = false,
+                    },
+                    AxisTicks = new () {
+                        Show = false,
+                    },
+                    Labels = new YAxisLabels
+                    {
+                        Show = false,
+                    },
+                    Title= new() {
+                        Text= "Weight",
+                        Style = new() {
+                            Color = "#8c9097",
+                        },
+                    },
+                    Min = 0,
+                    Max = 25,
+                    StepSize = 5,
+                }
+            },
+        };
+        BarImageFillchartSeriesConfigs = new List<SeriesConfig<BarImageFillchart>>
+        {
+            new SeriesConfig<BarImageFillchart>
+            {
+                SeriesType = SeriesType.Bar,
+                Name = "Coins",
+                XValueSelector = e => e.CoinsSeries,
+                YAggregateSelector = e => e.Sum(e => e.CoinsValue),
+            },
+        };
+    }
+}

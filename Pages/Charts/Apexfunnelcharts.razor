@@ -1,0 +1,126 @@
+@page "/apex-funnel-charts"
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager 
+@using Sandbox._Spk
+@using ApexSeries
+@using ApexCharts
+@using FunnelData
+@inject FunnelService FunnelService
+
+    <!-- Page Header -->
+    <SpkPageHeader PageItems="PageItems" />
+    <!-- Page Header Close -->
+
+    <!-- Start::row-1 -->
+    <div class="row">
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Basic Funnel Chart</div>
+                </div>
+                <div class="card-body">
+                    <SpkApex TItem="Funnelbasic" ApexHeight="350" Items="Funnelbasics" Title="Recruitment Funnel" Series="FunnelbasicSeriesConfigs" ChartOptions="options1"></SpkApex>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Gradient Funnel Chart</div>
+                </div>
+                <div class="card-body">
+                    <SpkApex TItem="FunnelGradient" ApexHeight="350" Items="FunnelGradients" Title="Pyramid Chart" Series="Funnelbasic1SeriesConfigs" ChartOptions="options2"></SpkApex>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--End::row-1 -->
+
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Charts" },
+        new SpkPageHeader.PageItem { PageTitle = "Apex Charts" },
+        new SpkPageHeader.PageItem { PageTitle = "Apex Funnel Charts" },
+    };
+    private List<Funnelbasic> Funnelbasics { get; set; } = FunnelService.GetFunnelbasics();
+    private ApexChartOptions<Funnelbasic>? options1;
+    private List<SeriesConfig<Funnelbasic>>? FunnelbasicSeriesConfigs { get; set; }
+    
+    private List<FunnelGradient> FunnelGradients { get; set; } = FunnelService.GetFunnelGradients();
+    private ApexChartOptions<FunnelGradient>? options2;
+    private List<SeriesConfig<FunnelGradient>>? Funnelbasic1SeriesConfigs { get; set; }
+    protected override void OnInitialized()
+    {
+        options1 = new ApexChartOptions<Funnelbasic>
+        {
+            DataLabels = new ApexCharts.DataLabels {
+                Enabled = true,
+                Formatter= @"function (val, opt) {
+                return opt.w.globals.labels[opt.dataPointIndex] + ':  ' + val;
+                }",
+            }, 
+            PlotOptions = new PlotOptions
+            {
+                Bar = new PlotOptionsBar
+                {
+                    Horizontal = true,
+                    IsFunnel = true, 
+                }
+            },
+            Colors = new Color(new List<string> {"#5c67f7"}),
+            Title = new Title{
+                Align = ApexCharts.Align.Center,
+            },
+        };
+        FunnelbasicSeriesConfigs = new List<SeriesConfig<Funnelbasic>>
+        {
+            new SeriesConfig<Funnelbasic>
+            {
+                SeriesType = SeriesType.Bar,
+                Name = "Funnel Series",
+                XValueSelector = e => e.Country ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.GrossValue),
+                OrderByDescending=e=>e.Y,
+                ShowDataLabels=true
+            },
+        };
+
+        options2 = new ApexChartOptions<FunnelGradient>
+        {
+            DataLabels = new ApexCharts.DataLabels {
+                Enabled = true,
+                Formatter= @"function (val, opt) {
+                return opt.w.globals.labels[opt.dataPointIndex] 
+                }",
+            }, 
+            Colors = new Color(new List<string> { "#7b76fe", "#0cd7b1", "#fe5454", "#0ca3e7", "#ff8e6f", "#e354d4", "#5c67f7"}),
+            PlotOptions = new PlotOptions
+            {
+                Bar = new PlotOptionsBar
+                {
+                    Horizontal = true,
+                    IsFunnel = true,
+                    Distributed= true,
+                    BarHeight= "80%",
+                }
+            },
+            Title = new Title{
+                Align = ApexCharts.Align.Center,
+            },
+            Legend = new Legend {
+                Show = false,
+            },
+        };
+        Funnelbasic1SeriesConfigs = new List<SeriesConfig<FunnelGradient>>
+        {
+            new SeriesConfig<FunnelGradient>
+            {
+                SeriesType = SeriesType.Bar,
+                Name = "Gross Value",
+                XValueSelector = e => e.Country ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.GrossValue),
+                OrderByDescending=e=>e.Y,
+                ShowDataLabels=true
+            },
+        };
+    }
+}

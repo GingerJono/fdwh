@@ -1,0 +1,569 @@
+@page "/mail"
+@inject IJSRuntime JSRuntime
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using MailData
+@inject MailService MailService
+
+    <!-- QuilEditor Css -->
+    <link rel="stylesheet" href="@($"{NavigationManager.BaseUri}assets/libs/quill/dist/quill.snow.css")">
+
+     <!-- Start::page-header -->
+    <SpkPageHeader PageItems="PageItems" />
+    <!-- End::page-header -->
+
+    <div class="main-mail-container mb-2 gap-2 d-flex">
+        <div class="mail-navigation border @MailNav">
+            <div class="d-grid align-items-top p-3 border-bottom border-block-end-dashed">
+                <SpkButtons ButtonClass="btn-primary d-flex align-items-center justify-content-center" data-bs-toggle="modal" data-bs-target="#mail-Compose">
+                    <i class="ri-add-circle-line fs-16 align-middle me-1"></i>Compose Mail
+                </SpkButtons>
+            </div>
+            <div>
+                <ul class="list-unstyled mail-main-nav overflow-auto" id="mail-main-nav">
+                    <li class="px-0 pt-0">
+                        <span class="fs-11 text-muted op-7 fw-medium">MAILS</span>
+                    </li>
+                    @foreach(var MailList in MailService.GetMailListNavData()) {
+                        <li @onclick="ShowTotalMails" class="@(MailList == MailService.GetMailListNavData().ToList().First() ? "active" : "") mail-type">
+                            <a href="javascript:void(0);">
+                                <div class="d-flex align-items-center">
+                                    <span class="me-2 lh-1">
+                                        <i class="@MailList?.mailIcon align-middle fs-16"></i>
+                                    </span>
+                                    <span class="flex-fill text-nowrap">
+                                        @MailList?.mailname
+                                    </span>
+                                    @if(!string.IsNullOrEmpty(MailList?.badgeValue) == true) {
+                                        <SpkBadge BadgeClass="@($"bg-{MailList?.badgeColor}")" IsRounded=true>@MailList?.badgeValue</SpkBadge>
+                                    }
+                                </div>
+                            </a>
+                        </li>
+                    }
+                    <li class="px-0">
+                        <span class="fs-11 text-muted op-7 fw-medium">LABELS</span>
+                    </li>
+                    <li>
+                        <a href="javascript:void(0);">
+                            <div class="d-flex align-items-center">
+                                <span class="me-2 lh-1">
+                                    <i class="ri-circle-fill align-middle fs-10 fw-medium text-primary1"></i>
+                                </span>
+                                <span class="flex-fill text-nowrap">
+                                    Mail
+                                </span>
+                            </div>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="javascript:void(0);">
+                            <div class="d-flex align-items-center">
+                                <span class="me-2 lh-1">
+                                    <i class="ri-circle-fill align-middle fs-10 fw-medium text-primary2"></i>
+                                </span>
+                                <span class="flex-fill text-nowrap">
+                                    Home
+                                </span>
+                            </div>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="javascript:void(0);">
+                            <div class="d-flex align-items-center">
+                                <span class="me-2 lh-1">
+                                    <i class="ri-circle-fill align-middle fs-10 fw-medium text-primary3"></i>
+                                </span>
+                                <span class="flex-fill text-nowrap">
+                                    Work
+                                </span>
+                            </div>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="javascript:void(0);">
+                            <div class="d-flex align-items-center">
+                                <span class="me-2 lh-1">
+                                    <i class="ri-circle-fill align-middle fs-10 fw-medium text-warning"></i>
+                                </span>
+                                <span class="flex-fill text-nowrap">
+                                    Friends
+                                </span>
+                            </div>
+                        </a>
+                    </li>
+                    <li class="px-0">
+                        <span class="fs-11 text-muted op-7 fw-medium">ONLINE USERS</span>
+                    </li>
+                    <li>
+                        <a href="javascript:void(0);">
+                            <div class="d-flex align-items-top lh-1">
+                                <div class="me-2">
+                                    <span class="avatar avatar-sm online avatar-rounded">
+                                        <img src="../assets/images/faces/4.jpg" alt="">
+                                    </span>
+                                </div>
+                                <div>
+                                    <p class="text-default fw-medium mb-1">Angelica</p>
+                                    <p class="fs-12 text-muted mb-0 fw-normal">Can please send me the file.</p>
+                                </div>
+                            </div>
+                        </a>    
+                    </li>
+                    <li>
+                        <a href="javascript:void(0);">
+                            <div class="d-flex align-items-top lh-1">
+                                <div class="me-2">
+                                    <span class="avatar avatar-sm online avatar-rounded">
+                                        <img src="../assets/images/faces/6.jpg" alt="">
+                                    </span>
+                                </div>
+                                <div>
+                                    <p class="text-default fw-medium mb-1">Rexha</p>
+                                    <p class="fs-12 text-muted mb-0 fw-normal">Waiting for response &#128077;.</p>
+                                </div>
+                            </div>
+                        </a>    
+                    </li>
+                    <li class="px-0">
+                        <span class="fs-11 text-muted op-7 fw-medium">SETTINGS</span>
+                    </li>
+                    <li>
+                        <a href="/mail-settings">
+                            <div class="d-flex align-items-center">
+                                <span class="me-2 lh-1">
+                                    <i class="ti ti-settings align-middle fs-14"></i>
+                                </span>
+                                <span class="flex-fill text-nowrap">
+                                    Settings
+                                </span>
+                            </div>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="total-mails border @TotalMails">
+            <div class="p-3 d-flex align-items-center border-bottom border-block-end-dashed flex-wrap gap-2">
+                <div class="input-group">
+                    <input type="text" class="form-control shadow-none" placeholder="Search Email" aria-describedby="button-addon">
+                    <SpkButtons ButtonClass="btn-primary" id="button-addon"><i class="ri-search-line me-1"></i> Search</SpkButtons>
+                </div>
+            </div>
+            <div class="px-3 p-2 d-flex align-items-center border-bottom flex-wrap gap-2">
+                <div class="me-3">
+                    <input class="form-check-input check-all" type="checkbox" id="checkAll" value="" aria-label="..." @onclick="ToggleSelectAll">
+                </div>
+                <div class="flex-fill">
+                    <h6 class="fw-medium mb-0">All Mails</h6>
+                </div>
+                <div class="d-flex gap-2">
+                    <SpkButtons ButtonClass="btn-icon btn-light me-1 d-lg-none d-block total-mails-close" ButtonSize="btn-sm" @onclick="CloseTotalMails">
+                        <i class="ri-close-line"></i>
+                    </SpkButtons>
+                    <SpkButtons ButtonClass="btn-primary1-light me-1" ButtonSize="btn-sm">
+                        <i class="ri-inbox-archive-line me-1"></i>Archive
+                    </SpkButtons>
+                    <SpkButtons ButtonClass="btn-primary2-light me-1" ButtonSize="btn-sm">
+                        <i class="ri-error-warning-line me-1"></i> Spam
+                    </SpkButtons>
+                    <SpkDropdowns DropdownClass="smbtn-icon btn-primary3-light" Tag="button" DropdownToggle=false DropdownText="<i class='ti ti-dots-vertical'></i>">  
+                        <ChildContent2>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="javascript:void(0);">Recent</a></li>
+                                <li><a class="dropdown-item" href="javascript:void(0);">Unread</a></li>
+                                <li><a class="dropdown-item" href="javascript:void(0);">Mark All Read</a></li>
+                                <li><a class="dropdown-item" href="javascript:void(0);">Delete All</a></li>
+                            </ul>
+                        </ChildContent2>
+                    </SpkDropdowns>
+                </div>
+            </div>
+            <div class="mail-messages overflow-auto" id="mail-messages">
+                <ul class="list-unstyled mb-0 mail-messages-container">
+                    @foreach(var MailList in MailService.GetMailsData()) {
+                        <li @onclick="@(() => ShowMail(MailList))" class="@(MailList == MailService.GetMailsData().ToList().Skip(1).First() ? "active" : "")">
+                            <div class="d-flex align-items-top">
+                                <div class="me-3 mt-1">
+                                    <input class="form-check-input" type="checkbox" id="checkboxNoLabel1" value="" aria-label="..." @bind="@MailList.Selected">
+                                </div>
+                                <div class="me-1 lh-1">
+                                @if(!string.IsNullOrEmpty(MailList.avatarname)) {
+                                    <span class="avatar avatar-md me-2 avatar-rounded mail-msg-avatar @MailList?.userbgColor">@MailList?.avatarname?.Substring(0, 2).ToUpper()</span>
+                                } else {
+                                    <span class="avatar avatar-md me-2 avatar-rounded mail-msg-avatar">
+                                        <img src="@MailList?.Userimg" alt="">
+                                    </span>
+                                }   
+                                </div>
+                                <div class="flex-fill text-truncate">
+                                    <a href="javascript:void(0);" data-bs-toggle="offcanvas"
+                                    data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">
+                                        <p class="mb-1 fs-12 fw-medium">
+                                            @MailList?.UserName 
+                                            @if(!string.IsNullOrEmpty(MailList?.badgeValue)) {
+                                                <SpkBadge BadgeClass="@($"bg-{MailList?.badgeColor}")">@MailList?.badgeValue</SpkBadge>
+                                            }
+                                            <span class="float-end text-muted fw-normal fs-11">
+                                                @if(MailList?.attachment == true) {
+                                                    <span class="me-2"><i class="ri-attachment-2 align-middle fs-12"></i></span>
+                                                }
+                                                @MailList?.Date
+                                            </span>
+                                        </p>
+                                    </a>    
+                                    <div class="mail-msg mb-0">
+                                        <span class="d-block mb-0 fw-medium text-truncate w-75">@MailList?.Title</span>
+                                        <SpkButtons ButtonClass="@($"p-0 lh-1 mail-starred border-0 float-end {(MailList?.Starred == true ? "true" : "")}")">
+                                            <i class="ri-star-fill fs-14"></i>
+                                        </SpkButtons>
+                                        <div class="fs-12 text-muted w-75 text-truncate mail-msg-content">@MailList?.Description</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+        <div class="mail-recepients border">
+            <div class="p-3 border-bottom">
+                <SpkTooltip Tag="button" TooltipClass="btn-primary1-light btn-icon rounded-pill" TooltipPlacement="left" TooltipTitle="Add Recepient">
+                    <i class="ri-add-line"></i>
+                </SpkTooltip>
+            </div>
+            <div class="p-3 d-flex flex-column align-items-center total-mail-recepients" id="mail-recepients">
+                @foreach(var user in MailService.GetRecepientsList()) {
+                    <a href="javascript:void(0);" class="mail-recepeint-person">
+                        <SpkTooltip Tag="span" TooltipClass="@($"{"avatar avatar-rounded"} {(user.IsOnline ? "online" : "offline")}")" TooltipPlacement="left" TooltipTitle="@user.UserName">
+                            <img src="@user.Userimg" alt="">
+                        </SpkTooltip>
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Start::mail information offcanvas -->
+    <div class="offcanvas offcanvas-end mail-info-offcanvas" tabindex="-1" id="offcanvasRight"> 
+        <div class="offcanvas-body p-0">
+            <div class="mails-information">
+                    <div class="mail-info-header d-flex flex-wrap gap-2 align-items-center">
+                        <div class="me-1">
+                            @if(!string.IsNullOrEmpty(ActiveMail?.avatarname)) {
+                                <span class="avatar avatar-md me-2 avatar-rounded mail-msg-avatar @ActiveMail?.userbgColor">
+                                    @ActiveMail?.avatarname?.Substring(0, 2).ToUpper()
+                                </span>
+                            } else {
+                                <span class="avatar avatar-md avatar-rounded mail-msg-avatar me-1">
+                                    <img src="@ActiveMail?.Userimg" alt="">
+                                </span>
+                            }
+                        </div>
+                        <div class="flex-fill">
+                            <h6 class="mb-0 fw-medium">@ActiveMail?.UserName</h6>
+                            <span class="text-muted fs-11">@ActiveMail?.UserMail</span>
+                        </div>
+                        <div class="mail-action-icons">
+                            <SpkTooltip Tag="button" TooltipClass="btn-icon btn-outline-light border" TooltipPlacement="top" TooltipTitle="Starred"><i class="ri-star-line"></i></SpkTooltip>
+                            <SpkTooltip Tag="button" TooltipClass="btn-icon btn-outline-light border ms-1" TooltipPlacement="top" TooltipTitle="Archive"><i class="ri-inbox-archive-line"></i></SpkTooltip>
+                            <SpkTooltip Tag="button" TooltipClass="btn-icon btn-outline-light border ms-1" TooltipPlacement="top" TooltipTitle="Report spam"><i class="ri-spam-2-line"></i></SpkTooltip>
+                            <SpkTooltip Tag="button" TooltipClass="btn-icon btn-outline-light border ms-1" TooltipPlacement="top" TooltipTitle="Delete"><i class="ri-delete-bin-line"></i></SpkTooltip>
+                            <SpkTooltip Tag="button" TooltipClass="btn-icon btn-outline-light border ms-1" TooltipPlacement="top" TooltipTitle="Reply"><i class="ri-reply-line"></i></SpkTooltip>
+                            <SpkButtons ButtonClass="btn-close btn-icon border" ButtonSize="btn-sm" data-bs-dismiss="offcanvas" aria-label="Close"></SpkButtons>
+                        </div>
+                        <div class="responsive-mail-action-icons">
+                            <SpkDropdowns Tag="button" DropdownClass="btn-icon btn-light" DropdownText="<i class='ti ti-dots-vertical'></i>" DropdownToggle=false>
+                                <ChildContent2>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-star-line me-1 align-middle d-inline-block"></i>Starred</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-inbox-archive-line me-1 align-middle d-inline-block"></i>Archive</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-spam-2-line me-1 align-middle d-inline-block"></i>Report Spam</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-delete-bin-line me-1 align-middle d-inline-block"></i>Delete</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-reply-line me-1 align-middle d-inline-block"></i>Reply</a></li>
+                                </ul>
+                                </ChildContent2>
+                            </SpkDropdowns>
+                            <SpkButtons ButtonClass="btn-icon btn-light ms-1 close-button" data-bs-dismiss="offcanvas" aria-label="Close"><i class="ri-close-line"></i></SpkButtons>
+                        </div>
+                    </div>
+                    <div class="mail-info-body p-3 overflow-auto" id="mail-info-body">
+                        <div class="d-sm-flex d-block align-items-center justify-content-between mb-3">
+                            <div>
+                                <p class="fs-20 fw-medium mb-0">@ActiveMail?.Title</p>
+                            </div>
+                            <div class="float-end">
+                                <span class="fs-12 text-muted">@ActiveMail?.Date</span>
+                            </div>
+                        </div>
+                        <div class="main-mail-content mb-3">
+                            <p class="fs-14 fw-medium mb-3">Greetings Mr Jack &#128400;,</p>
+                            <p class="mb-2 text-muted">We're excited to invite you to our upcoming webinar, "Navigating Future Trends," where industry experts will share strategic insights to help you stay ahead in an ever-evolving landscape. Join us on [Date] at [Time] for an engaging session that promises to provide actionable knowledge and valuable perspectives.</p>
+                            <span class="d-block text-muted fw-meidum">Key Highlights :</span>
+                            <ul class="text-muted my-3">
+                                <li class="mb-2">Expert analysis of emerging trends</li>
+                                <li class="mb-2">Practical strategies for staying competitive</li>
+                                <li class="mb-2">Q&A session for personalized insights</li>
+                            </ul>
+                            <p class="mb-2 text-muted">Earth has a diameter of roughly 8,000 miles (13,000 kilometers) and is mostly round because gravity generally pulls matter into a ball. But the spin of our home planet causes it to be squashed at its poles and swollen at the equator, making the true shape of the Earth an "oblate spheroid.".</p>
+                            <p class="mb-0 mt-4">
+                                <span class="d-block">Best Regards,</span>
+                                <span class="d-block">@ActiveMail?.UserName</span>
+                            </p>
+                        </div>
+                        <div class="mail-attachments mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="mb-2"> 
+                                    <span class="fs-14 fw-medium"><i class="ri-attachment-2 me-1 align-middle"></i>Attachments (5.8KB):</span>
+                                </div>
+                                <div class="btn-list">
+                                    <SpkButtons ButtonClass="btn-primary-light" ButtonSize="btn-sm">Download All</SpkButtons>
+                                </div>
+                            </div>    
+                            <div class="mt-2 d-flex flex-wrap gap-3">
+                                <div class="d-flex align-items-center flex-wrap gap-3 border p-2 rounded-2">
+                                    <div class="me-1 lh-1">
+                                        <span class="avatar avatar-md bg-primary">
+                                            <i class="ri-file-pdf-2-line fs-18"></i>
+                                        </span>
+                                    </div>
+                                    <div class="flex-fill">
+                                        <a href="javascript:void(0);">
+                                            <p class="mb-1 fs-12 fw-medium">
+                                                Instructions_file.pdf
+                                            </p>
+                                        </a>
+                                        <div class="fs-12 text-muted text-wrap">2.1KB</div>  
+                                    </div>
+                                    <SpkButtons ButtonClass="ms-auto btn-primary1-light btn-icon" ButtonSize="btn-sm" IsRounded=true><i class="ri-download-line"></i></SpkButtons>
+                                </div>
+                                <div class="d-flex align-items-center flex-wrap gap-3 border p-2 rounded-2">
+                                    <div class="me-1 lh-1">
+                                        <span class="avatar avatar-md bg-primary">
+                                            <i class="ri-file-pdf-line fs-18"></i>
+                                        </span>
+                                    </div>
+                                    <div class="flex-fill">
+                                        <a href="javascript:void(0);">
+                                            <p class="mb-1 fs-12 fw-medium">
+                                                Complete_Folder.doc
+                                            </p>
+                                        </a>
+                                        <div class="fs-12 text-muted text-wrap">1.5KB</div>  
+                                    </div>
+                                    <SpkButtons ButtonClass="ms-auto btn-sm btn-primary1-light btn-icon" ButtonSize="btn-sm" IsRounded=true>
+                                        <i class="ri-download-line"></i>
+                                    </SpkButtons>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mail-images mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="mb-2"> 
+                                    <span class="fs-14 fw-medium"><i class="ri-image-line me-1 align-middle"></i>Images:</span>
+                                </div>
+                                <div class="btn-list">
+                                    <SpkButtons ButtonClass="btn-primary-light" ButtonSize="btn-sm">Download All</SpkButtons>
+                                </div>
+                            </div>    
+                            <div class="mt-2 d-flex flex-wrap gap-3">
+                                <a href="javascript:void(0)">
+                                    <span class="avatar avatar-lg shadow-sm">
+                                        <img src="../assets/images/media/media-74.jpg" alt="">
+                                    </span>
+                                </a>
+                                <a href="javascript:void(0)">
+                                    <span class="avatar avatar-lg shadow-sm">
+                                        <img src="../assets/images/media/media-75.jpg" alt="">
+                                    </span>
+                                </a>
+                                <a href="javascript:void(0)">
+                                    <span class="avatar avatar-lg shadow-sm">
+                                        <img src="../assets/images/media/media-77.jpg" alt="">
+                                    </span>
+                                </a>
+                                <a href="javascript:void(0)">
+                                    <span class="avatar avatar-lg bg-primary-transparent">
+                                        5+
+                                    </span>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="mb-3"> 
+                            <span class="fs-14 fw-medium"><i class="ri-reply-all-line me-1 align-middle d-inline-block"></i>Reply:</span>
+                        </div>
+                        <div class="mail-reply">
+                            <div id="mail-reply-editor">
+                                <SpkEditor @ref="QuillHtml" ShowMainHeader=true ShowFont=true ShowTextFormatting=true ShowBlockFormatting=true ShowHeader=true ShowLists=true ShowColor=true ShowAlignment=true ShowClean=true />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mail-info-footer d-flex flex-wrap gap-2 align-items-center justify-content-between">
+                        <div>
+                            <SpkTooltip Tag="button" TooltipClass="btn-icon btn-primary-light" TooltipPlacement="top" TooltipTitle="Print"><i class="ri-printer-line"></i></SpkTooltip>
+                            <SpkTooltip Tag="button" TooltipClass="btn-icon btn-secondary-light ms-1" TooltipPlacement="top" TooltipTitle="Mark as read"><i class="ri-mail-open-line"></i></SpkTooltip>
+                            <SpkTooltip Tag="button" TooltipClass="btn-icon btn-success-light ms-1" TooltipPlacement="top" TooltipTitle="Reload"><i class="ri-refresh-line"></i></SpkTooltip>
+                        </div>
+                        <div>
+                            <SpkButtons ButtonClass="btn-secondary"><i class="ri-share-forward-line me-1 d-inline-block align-middle"></i>Forward</SpkButtons>
+                            <SpkButtons ButtonClass="btn-danger ms-1"><i class="ri-reply-all-line me-1 d-inline-block align-middle"></i>Reply</SpkButtons>
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </div>
+    <!-- End::mail information offcanvas -->
+    
+    <!-- Start::mail modal -->
+    <div class="modal modal-lg fade" id="mail-Compose" tabindex="-1" aria-labelledby="mail-ComposeLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="mail-ComposeLabel">Compose Mail</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-xl-6 mb-2">
+                            <label for="fromMail" class="form-label">From<sup><i class="ri-star-s-fill text-success fs-8"></i></sup></label>
+                            <input type="email" class="form-control" id="fromMail" value="henrymilo2345@gmail.com">
+                        </div>
+                        <div class="col-xl-6 mb-2">
+                            <label for="toMail" class="form-label">To<sup><i class="ri-star-s-fill text-success fs-8"></i></sup></label>
+                            <select class="form-control tomselect-multiple" name="toMail" id="toMail" multiple>
+                                <option value="Choice 1" selected>jay@gmail.com</option>
+                                <option value="Choice 2">kia@gmail.com</option>
+                                <option value="Choice 3">don@gmail.com</option>
+                                <option value="Choice 4">kimo@gmail.com</option>
+                            </select>
+                        </div>
+                        <div class="col-xl-6 mb-2">
+                            <label for="mailCC" class="form-label text-dark fw-medium">Cc</label>
+                            <input type="email" class="form-control" id="mailCC">
+                        </div>
+                        <div class="col-xl-6 mb-2">
+                            <label for="mailBcc" class="form-label text-dark fw-medium">Bcc</label>
+                            <input type="email" class="form-control" id="mailBcc">
+                        </div>
+                        <div class="col-xl-12 mb-2">
+                            <label for="Subject" class="form-label">Subject</label>
+                            <input type="text" class="form-control" id="Subject" placeholder="Subject">
+                        </div>
+                        <div class="col-xl-12">
+                            <label class="col-form-label">Content :</label>
+                            <div class="mail-compose">
+                                <div id="mail-compose-editor">
+                                    <SpkEditor @ref="QuillHtml" ShowMainHeader=true ShowFont=true ShowTextFormatting=true ShowBlockFormatting=true ShowHeader=true ShowLists=true ShowColor=true ShowAlignment=true ShowClean=true />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <SpkButtons ButtonClass="btn-light" data-bs-dismiss="modal">Cancel</SpkButtons>
+                    <SpkButtons ButtonClass="btn-primary">Send</SpkButtons>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End::mail modal -->
+
+    <!-- TomSelect JS -->
+    <script src="@($"{NavigationManager.BaseUri}assets/libs/tom-select/dist/js/tom-select.complete.min.js")"></script>
+    <script src="@($"{NavigationManager.BaseUri}assets/js/tomselect.js")"></script>
+
+    <!-- Quill Editor JS -->
+    <script src="@($"{NavigationManager.BaseUri}assets/libs/quill/dist/quill.js")"></script>
+
+
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Pages" },
+        new SpkPageHeader.PageItem { PageTitle = "Email" },
+        new SpkPageHeader.PageItem { PageTitle = "Mail" },
+    };
+    MailList? ActiveMail { get; set; }
+    string? MailNav;
+    string? TotalMails;
+    int screenSize;
+    protected override void OnInitialized()
+    {
+        ActiveMail = MailService.GetMailsData().FirstOrDefault();
+        if(screenSize < 992) {
+            MailNav = "d-block";
+            TotalMails = "d-none";
+        }
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("window.interop.initializeTooltips");
+            DotNetObjectReference<Mailapp> dotNetObjectReference;
+            dotNetObjectReference = DotNetObjectReference.Create(this);
+            await JSRuntime.InvokeVoidAsync("resizeFunctions.addresizeListener", dotNetObjectReference);
+
+            screenSize = await JSRuntime.InvokeAsync<int>("interop.inner", "innerWidth");
+            if(screenSize < 992) {
+                MailNav = "d-block";
+                TotalMails = "d-none";
+            }
+            else {
+                TotalMails = "d-block";
+                MailNav = "d-block";
+            }
+        }
+    }
+    private void ShowMail(MailList Selected)
+    {
+        ActiveMail = Selected;
+    }    
+    private void ShowTotalMails()
+    {     
+        if(screenSize < 992) {
+            TotalMails = "d-block";
+            MailNav = "d-none";
+        }
+        else {
+            TotalMails = "d-block";
+            MailNav = "d-block";
+        }
+    }
+    private void CloseTotalMails()
+    {
+        TotalMails = "d-none";
+        MailNav = "d-block";
+    }
+
+    private List<int> WindowPreSize = new List<int>();
+    [JSInvokable]
+    public void OnWindowResize(int position)
+    {
+        screenSize = position;
+        if(position < 992) {
+            MailNav = "d-block";
+            TotalMails = "d-none";
+        }
+        else {
+            TotalMails = "d-block";
+            MailNav = "d-block";
+        }
+        StateHasChanged();
+    }
+
+    <!-- QuilEditor JS Start -->
+     private SpkEditor ? QuillHtml;
+    <!-- QuilEditor JS Start -->
+    private bool selectAll;
+    private void ToggleSelectAll()
+    {
+        selectAll = !selectAll;
+        foreach (var mailList in MailService.GetMailsData())
+        {
+            mailList.Selected = selectAll;
+        }
+    }
+}
+
+

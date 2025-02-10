@@ -1,0 +1,530 @@
+@page "/apex-candlestick-charts"
+@using System.Collections.Generic
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using ApexSeries
+@using ApexCharts
+@using CandlestickData
+@inject CandlestickService CandlestickService
+
+    <!-- Page Header -->
+        <SpkPageHeader PageItems="PageItems" />
+    <!-- Page Header Close -->
+
+    <!-- Start::row-1 -->
+    <div class="row">
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Basic Candlestick Chart</div>
+                </div>
+                <div class="card-body">
+                    <div id="basic-candlestick">
+                        <SpkApex TItem="Candlestickbasicchart" Items="Candlestickbasiccharts" Title="CandleStick Chart" ChartOptions="CandlestickbasicOptions" XAxisType="XAxisType.Datetime" Series="CandlestickbasicchartSeriesConfigs"></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Candlestick Synced With Brush Chart</div>
+                </div>
+                <div class="card-body">
+                        <SpkApex TItem="CandlestickSyncedchart" Items="CandlestickSyncedcharts" ChartOptions="CandlestickBrushoptions1" XAxisType="XAxisType.Datetime" Series="CandlestickSyncedchartSeriesConfigs" ApexHeight="215"></SpkApex>
+                        <SpkApex TItem="CandlestickSyncedchart2" Items="CandlestickSyncedcharts2" ChartOptions="CandlestickBrushoptions2" XAxisType="XAxisType.Datetime" Series="CandlestickSyncedchart2SeriesConfigs" ApexHeight="120"></SpkApex>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Candlestick With Category X-Axis</div>
+                </div>
+                <div class="card-body">
+                    <div id="candlestick-categoryx">
+                        <SpkApex TItem="CandlestickAnnotationchart" Items="CandlestickAnnotationcharts" Title="CandleStick Chart - Category X-axis" ChartOptions="CandlestickAnnotationOptions" Series="CandlestickAnnotationchartSeriesConfigs"></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Candlestick With Line Chart</div>
+                </div>
+                <div class="card-body">
+                    <div id="candlestick-line">
+                        <SpkApex TItem="CandlestickLinechart" Items="CandlestickLinecharts" Title="CandleStick Chart" ChartOptions="CandlestickLineOptions" Series="CandlestickLinechartSeriesConfigs" XAxisType="XAxisType.Datetime"></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--End::row-1 -->
+
+                
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Charts" },
+        new SpkPageHeader.PageItem { PageTitle = "Apex Charts" },
+        new SpkPageHeader.PageItem { PageTitle = "Apex Candlestick Charts" },
+    };
+
+    // Crypto Candle Chart Start //
+    private List<Candlestickbasicchart> Candlestickbasiccharts { get; set; } = CandlestickService.GetCandlestickbasicData();
+    private ApexChartOptions<Candlestickbasicchart> CandlestickbasicOptions { get; set; } = new();
+    private List<SeriesConfig<Candlestickbasicchart>>? CandlestickbasicchartSeriesConfigs { get; set; }
+    // Crypto Candle Chart End //
+    
+    // Crypto Candle Chart Start //
+    private List<CandlestickSyncedchart> CandlestickSyncedcharts { get; set; } = CandlestickService.GetCandlestickSyncedData();
+    private List<CandlestickSyncedchart2> CandlestickSyncedcharts2 { get; set; } = CandlestickService.GetCandlestickSyncedData2();
+    private ApexChartOptions<CandlestickSyncedchart> CandlestickBrushoptions1 { get; set; } = new();
+    private ApexChartOptions<CandlestickSyncedchart2> CandlestickBrushoptions2 { get; set; } = new();
+    private List<SeriesConfig<CandlestickSyncedchart>>? CandlestickSyncedchartSeriesConfigs { get; set; }
+    private List<SeriesConfig<CandlestickSyncedchart2>>? CandlestickSyncedchart2SeriesConfigs { get; set; }
+    // Crypto Candle Chart End //
+
+    // Crypto Candle Chart Start //
+    private List<CandlestickAnnotationchart> CandlestickAnnotationcharts { get; set; } = CandlestickService.GetCandlestickAnnotationData();
+    private ApexChartOptions<CandlestickAnnotationchart> CandlestickAnnotationOptions { get; set; } = new();
+    private List<SeriesConfig<CandlestickAnnotationchart>>? CandlestickAnnotationchartSeriesConfigs { get; set; }
+    // Crypto Candle Chart End //
+
+    // Crypto Candle Chart Start //
+    private List<CandlestickLinechart> CandlestickLinecharts { get; set; } = CandlestickService.GetCandlestickLineData();
+    private ApexChartOptions<CandlestickLinechart> CandlestickLineOptions { get; set; } = new();
+    private List<SeriesConfig<CandlestickLinechart>>? CandlestickLinechartSeriesConfigs { get; set; }
+    // Crypto Candle Chart End //
+    protected override void OnInitialized() {
+
+        CandlestickbasicOptions = new ApexChartOptions<Candlestickbasicchart> {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = true, Zoomin = true, Zoomout = true,Pan = true, Reset = true,  Download = true},
+                }, 
+                Height = 350,
+            },  
+            Title = new Title{
+                Text = "Product Trends by Month",
+                Style = new TitleStyle {
+                    FontSize= "13px",
+                    FontWeight= "bold",
+                    Color= "#8c9097"
+                },
+            },
+            Grid = new Grid {
+                BorderColor = "#f2f5f7",
+            },
+            Stroke=new Stroke{
+                Width=2,
+            },
+            Colors = new Color(new List<string> { "#5c67f7" ,"#e354d4"}),
+            Legend=new Legend{
+                Show=false,
+            },
+            PlotOptions = new PlotOptions {
+                Candlestick = new PlotOptionsCandlestick  {
+                    Colors = new () {
+                        Upward = "#5c67f7",
+                        Downward = "#e354d4"
+                    }
+                 },
+            },
+            Xaxis  =  new XAxis {
+                Labels = new XAxisLabels {
+                    Show = true,
+                    Style = new() {
+                        Colors = "#8c9097",
+                        FontSize = "11px",
+                        FontWeight = 600,
+                        CssClass = "apexcharts-xaxis-label",
+                    },
+                }
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis // Define the first YAxis object
+                {
+                    Tooltip= new () {
+                        Enabled = true
+                    },
+                    Labels = new YAxisLabels
+                    {
+                        Show = true,
+                        Style = new() {
+                            Colors = "#8c9097",
+                            FontSize = "11px",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label",
+                        },
+                    },
+                    Min = 6560.00,
+                    Max = 6660.00,
+                    StepSize = 20.00,
+                }
+            },
+        };
+        CandlestickbasicchartSeriesConfigs = new List<SeriesConfig<Candlestickbasicchart>>
+        {
+            new SeriesConfig<Candlestickbasicchart>
+            {
+                Name = "datetime",
+                XValueSelector = e => e.Date ,
+                OpenSelector = e => e.Open,
+                HighSelector=e => e.High,
+                LowSelector=e => e.Low,
+                CloseSelector=e => e.Close
+            },
+        };
+
+        const string mainChartId2 = "mainChart";
+        CandlestickBrushoptions1 = new ApexChartOptions<CandlestickSyncedchart> {
+            Chart = new () {
+                Id = mainChartId2,
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = false},
+                }, 
+            },  
+            Title = new Title{
+                Style = new TitleStyle {
+                    FontSize= "13px",
+                    FontWeight= "bold",
+                    Color= "#8c9097"
+                },
+            },
+            Grid = new Grid {
+                BorderColor = "#f2f5f7",
+            },
+            Stroke=new Stroke{
+                Width=2,
+            },
+            Colors = new Color(new List<string> { "#5c67f7" ,"#e354d4"}),
+            Legend=new Legend{
+                Show=false,
+            },
+            PlotOptions = new PlotOptions {
+                Candlestick = new PlotOptionsCandlestick  {
+                    Colors = new () {
+                        Upward = "#5c67f7",
+                        Downward = "#e354d4"
+                    }
+                 },
+            },
+            Xaxis  =  new XAxis {
+                Labels = new XAxisLabels {
+                    Show = true,
+                    Style = new() {
+                        Colors = "#8c9097",
+                        FontSize = "11px",
+                        FontWeight = 600,
+                        CssClass = "apexcharts-xaxis-label",
+                    },
+                }
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis 
+                {
+                    Tooltip= new () {
+                        Enabled = true
+                    },
+                    Labels = new YAxisLabels
+                    {
+                        Show = true,
+                        Style = new() {
+                            Colors = "#8c9097",
+                            FontSize = "11px",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label",
+                        },
+                    },
+                }
+            },
+        };
+        
+        CandlestickSyncedchartSeriesConfigs = new List<SeriesConfig<CandlestickSyncedchart>>
+        {
+            new SeriesConfig<CandlestickSyncedchart>
+            {
+                Name = "datetime",
+                XValueSelector = e => e.Date ,
+                OpenSelector = e => e.Open,
+                HighSelector=e => e.High,
+                LowSelector=e => e.Low,
+                CloseSelector=e => e.Close
+            },
+        };
+
+        CandlestickBrushoptions2 = new ApexChartOptions<CandlestickSyncedchart2> {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = false},
+                },
+                Brush = new ApexCharts.Brush { Enabled = true, Target = mainChartId2 },
+                Selection = new Selection
+                {
+                    Enabled = true,
+                    Xaxis = new SelectionXaxis
+                    {
+                        Min = 1484850600000,
+                        Max = 1512844200000,
+                    }
+                }
+            },  
+            Title = new Title{
+                Style = new TitleStyle {
+                    FontSize= "13px",
+                    FontWeight= "bold",
+                    Color= "#8c9097"
+                },
+            },
+            Grid = new Grid {
+                BorderColor = "#f2f5f7",
+            },
+            Colors = new Color(new List<string> { "#5c67f7" ,"#e354d4"}),
+            Legend=new Legend{
+                Show=false,
+            },
+            PlotOptions = new PlotOptions {
+                Bar = new PlotOptionsBar {
+                    Horizontal = false,
+                    ColumnWidth = "80%",
+                    Colors = new (){
+                        Ranges = new () {
+                            new (){
+                                From = -1000,
+                                To = 0,
+                                Color = "#ff8e6f"
+                            },
+                            new (){
+                                From = 1,
+                                To = 10000,
+                                Color = "#fe5454"
+                            }
+                        }
+                    }
+                }
+            },
+            Xaxis  =  new XAxis {
+                Labels = new XAxisLabels {
+                    Show = true,
+                    Style = new() {
+                        Colors = "#8c9097",
+                        FontSize = "11px",
+                        FontWeight = 600,
+                        CssClass = "apexcharts-xaxis-label",
+                    },
+                }
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis // Define the first YAxis object
+                {
+                    Tooltip= new () {
+                        Enabled = true
+                    },
+                    Labels = new YAxisLabels
+                    {
+                        Show = false,
+                        Style = new() {
+                            Colors = "#8c9097",
+                            FontSize = "11px",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label",
+                        },
+                    },
+                }
+            },
+        };
+        
+        CandlestickSyncedchart2SeriesConfigs = new List<SeriesConfig<CandlestickSyncedchart2>>
+        {
+            new SeriesConfig<CandlestickSyncedchart2>
+            {
+                SeriesType=SeriesType.Bar,
+                Name = "Quantity",
+                XValueSelector = e => e.Date ,
+                YValueSelector = e => e.Quantity,
+            },
+        };
+
+        CandlestickAnnotationOptions = new ApexChartOptions<CandlestickAnnotationchart> {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = true, Zoomin = true, Zoomout = true,Pan = true, Reset = true,  Download = true},
+                }, 
+                Height = 350,
+            },  
+            Title = new Title{
+                Style = new TitleStyle {
+                    FontSize= "13px",
+                    FontWeight= "bold",
+                    Color= "#8c9097"
+                },
+            },
+            Grid = new Grid {
+                BorderColor = "#f2f5f7",
+            },
+            Stroke=new Stroke{
+                Width=2,
+            },
+            Colors = new Color(new List<string> { "#5c67f7" ,"#e354d4"}),
+            Legend=new Legend{
+                Show=false,
+            },
+            PlotOptions = new PlotOptions {
+                Candlestick = new PlotOptionsCandlestick  {
+                    Colors = new () {
+                        Upward = "#5c67f7",
+                        Downward = "#e354d4"
+                    }
+                 },
+            },
+            Annotations = new Annotations {
+                Xaxis = new List<AnnotationsXAxis> {
+                    new AnnotationsXAxis {
+                        X = 1511395200000, 
+                        BorderColor = "#5b67c7",
+                        Label = new ApexCharts.Label {
+                            Text = "Annotation Test",
+                            OffsetY = 7,
+                            BorderColor = "#5b67c7",
+                            Orientation = ApexCharts.Orientation.Horizontal,
+                            Style = new Style{ Background="#5b67c7" , Color="#fff", FontSize="12px"}
+                        },
+                    }   
+                },
+            },
+            Xaxis  =  new XAxis {
+                Type = XAxisType.Datetime,
+                Labels = new XAxisLabels {
+                    Show = true,
+                    Style = new() {
+                        Colors = "#8c9097",
+                        FontSize = "11px",
+                        FontWeight = 600,
+                        CssClass = "apexcharts-xaxis-label",
+                    },
+                }
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis // Define the first YAxis object
+                {
+                    Tooltip= new () {
+                        Enabled = true
+                    },
+                    Labels = new YAxisLabels
+                    {
+                        Show = true,
+                        Style = new() {
+                            Colors = "#8c9097",
+                            FontSize = "11px",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label",
+                        },
+                    },
+                    Min = 6560.00,
+                    Max = 6660.00,
+                    StepSize = 20.00,
+                }
+            },
+        };
+        CandlestickAnnotationchartSeriesConfigs = new List<SeriesConfig<CandlestickAnnotationchart>>
+        {
+            new SeriesConfig<CandlestickAnnotationchart>
+            {
+                Name = "datetime",
+                XValueSelector = e => e.AnnotationsDate ?? "unknown",
+                OpenSelector = e => e.Open,
+                HighSelector=e => e.High,
+                LowSelector=e => e.Low,
+                CloseSelector=e => e.Close
+            },
+        };
+
+        CandlestickLineOptions = new ApexChartOptions<CandlestickLinechart> {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = true, Zoomin = true, Zoomout = true,Pan = true, Reset = true,  Download = true},
+                }, 
+                Height = 350,
+            },  
+            Title = new Title{
+                Text = "Product Trends by Month",
+                Style = new TitleStyle {
+                    FontSize= "13px",
+                    FontWeight= "bold",
+                    Color= "#8c9097"
+                },
+            },
+            Grid = new Grid {
+                BorderColor = "#f2f5f7",
+            },
+            Stroke=new Stroke{
+                Width=2,
+            },
+            Colors = new Color(new List<string> { "#5c67f7" ,"#e354d4","#0ca3e7"}),
+            PlotOptions = new PlotOptions {
+                Candlestick = new PlotOptionsCandlestick  {
+                    Colors = new () {
+                        Upward = "#5c67f7",
+                        Downward = "#e354d4"
+                    }
+                 },
+            },
+            Xaxis  =  new XAxis {
+                Labels = new XAxisLabels {
+                    Show = true,
+                    Style = new() {
+                        Colors = "#8c9097",
+                        FontSize = "11px",
+                        FontWeight = 600,
+                        CssClass = "apexcharts-xaxis-label",
+                    },
+                }
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis // Define the first YAxis object
+                {
+                    Tooltip= new () {
+                        Enabled = true
+                    },
+                    Labels = new YAxisLabels
+                    {
+                        Show = true,
+                        Style = new() {
+                            Colors = "#8c9097",
+                            FontSize = "11px",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label",
+                        },
+                    },
+                    Min = 6560.00,
+                    Max = 6660.00,
+                    StepSize = 20.00,
+                }
+            },
+        };
+        CandlestickLinechartSeriesConfigs = new List<SeriesConfig<CandlestickLinechart>>
+        {
+            new SeriesConfig<CandlestickLinechart>
+            {
+                Name = "line",
+                XValueSelector = e => e.LinesDate ?? "unknown",
+                OpenSelector = e => e.Open,
+                HighSelector=e => e.High,
+                LowSelector=e => e.Low,
+                CloseSelector=e => e.Close
+            },
+            new SeriesConfig<CandlestickLinechart>
+            {
+                SeriesType=SeriesType.Line,
+                Name = "line",
+                XValueSelector = e => e.LinesDate ?? "unknown",
+                YValueSelector = e => e.LinesValue,
+            },
+        };
+    }
+}

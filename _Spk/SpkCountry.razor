@@ -1,0 +1,37 @@
+@using CardModel
+
+@code {
+    [Parameter] public CountryCardModel? CountryCard { get; set; }    
+}
+    
+<li>
+    @if(!string.IsNullOrEmpty(CountryCard?.img)) {
+        <div class="d-flex align-items-start gap-3">
+                <div class="lh-1">
+                    <span class="avatar avatar-sm p-1 bg-light border">
+                        <img src="@CountryCard?.img" alt="">
+                    </span>
+                </div>
+                <div class="flex-fill">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <span class="d-block fw-medium mb-2 lh-1">@CountryCard?.title</span>
+                        <span class="fs-14 fw-medium d-block lh-1">@CountryCard?.value</span>
+                    </div>
+                    <SpkProgress ProgressClass="p-1" ProgressSize="progress-md" ProgressValue="@CountryCard?.percent">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated @CountryCard?.color" style="width: @CountryCard?.percent%"></div>
+                    </SpkProgress>
+                </div>
+        </div>
+    }
+    else {
+        <div class="@CountryCard?.customclass">
+            <div class="d-flex mb-1">
+                <span>@CountryCard?.title</span>
+                <span class="ms-auto fs-14 fw-semibold">@CountryCard?.value</span>
+            </div>
+            <div class="progress progress-md p-1">
+                <div class="progress-bar progress-bar-striped progress-bar-animated  @CountryCard?.color" role="progressbar" style="width: @CountryCard?.percent%;" aria-valuenow="@CountryCard?.percent" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+        </div>
+    }
+</li>

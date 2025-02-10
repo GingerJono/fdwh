@@ -1,0 +1,72 @@
+
+@typeparam TItem where TItem : class
+@using Sandbox._Spk
+@using ApexCharts
+@using ApexSeries
+@using CardModel
+
+@code {
+    [Parameter] public MarketCap? MainCard { get; set; }
+    [Parameter] public List<TItem>? ChartItems { get; set; }
+    [Parameter] public ApexChartOptions<TItem>? ChartOptions { get; set; }
+    [Parameter] public List<SeriesConfig<TItem>>? SeriesConfigs { get; set; }
+}
+
+
+@if(MainCard != null){
+    <div class="card custom-card overflow-hidden">
+        <div class="card-body">
+            <div class="d-flex align-items-end justify-content-between flex-wrap">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <div class="lh-1">
+                            <span class="avatar avatar-rounded avatar-md">
+                                <img src="@MainCard.CryptoImg" alt="">
+                            </span>
+                        </div>
+                        <div>
+                            <h6 class="fw-medium mb-0">@MainCard.CryptoTitle</h6>
+                            <span class="text-muted"> @MainCard.CryptoSubTitle</span>
+                        </div>
+                    </div>
+                    @if(!string.IsNullOrEmpty(MainCard.Volume)){
+                        <div>
+                            <div class="mb-1">
+                                <span class="fs-20 fw-medium lh-1 text-primary mb-1">@MainCard.CryptoValue</span> 
+                                <span class="mb-0 text-muted ms-2"><span class="text-muted">Vol:</span><span class="text-success fw-medium"> (@MainCard.Volume)</span></span>
+                            </div>
+                            <p class="fw-medium mb-0">@MainCard.CryptoValue2 <span class="mb-1 fw-normal fs-13 text-muted">(@MainCard.CryptoValue2Sub / USD)</span></p>
+                        </div>
+                    }else {
+                        <div class="fs-24 d-block d-flex align-items-center fw-medium">
+                            @MainCard.CryptoValue
+                            <span class="fs-12 text-primary1 op-7 fw-normal ms-1"> @MainCard.Percentage
+                                <i class="@(MainCard.IsIncreased? "ti ti-arrow-big-up-line":"ti ti-arrow-big-down-line") ms-1 d-inline-flex"></i>
+                            </span>
+                            <SpkBadge BadgeClass="@(MainCard.IsIncreased? "bg-success fs-10 ms-2":"bg-danger fs-10 ms-2")">24H</SpkBadge>
+                        </div>
+                    }
+                </div>
+                <div class="text-end ms-auto">
+                    @if(!string.IsNullOrEmpty(MainCard.Volume)){
+                        <div class="">
+                            <p class="tx-14 mb-1 fw-semibold text-dark">Market Cap:</p>
+                            <p class="mb-0 fs-14">@MainCard.CryptoUsd<span class="text-success mb-0 font-weight-normal tx-13">
+                                    @MainCard.CryptoRatio<span class="@(MainCard.IsIncreased? "text-success":"text-danger") numberfont">( @MainCard.Percentage)</span>
+                                </span>
+                            </p>
+                        </div>
+                    }else {
+                        <div class="">
+                            <span class="fs-15 text-primary">@MainCard.CryptoRatio</span>
+                            <span class="text-success ms-1">@MainCard.CryptoUsd</span>
+                        </div>
+                    }
+                    <div class="mt-4 w-100">
+                        <SpkApex TItem="TItem" ChartOptions="ChartOptions" Items="ChartItems"  Series="SeriesConfigs" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

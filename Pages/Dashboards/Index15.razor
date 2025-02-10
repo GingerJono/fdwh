@@ -1,0 +1,549 @@
+@page "/index15"
+@using ApexCharts
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using ApexSeries
+@using CardModel
+@using School
+@inject SchoolService SchoolService
+        <!-- Start::page-header -->
+        <SpkPageHeader PageItems="PageItems" />
+        <!-- End::page-header -->
+             
+         
+        <!-- Start::Row-1 -->
+        <div class="row">
+            @foreach(var School in SchoolService.GetSchoolcardData()){
+                <div class="col-sm-6 col-xxl">
+                    <SpkSchool Schoolcard="School"></SpkSchool>
+                </div>
+            }
+        </div>
+        <!-- End::Row-1 -->
+
+        <!-- Start::Row-2 -->
+        <div class="row">
+            <div class="col-xl-7">
+                <div class="card custom-card">
+                    <div class="card-header justify-content-between">
+                        <div class="card-title">
+                            Attendance Report
+                        </div>
+                        <SpkDropdowns Tag="a" DropdownClass="btn btn-sm btn-light" DropdownText="Sort By <i class='ri-arrow-down-s-line align-middle ms-1 d-inline-block'></i>" DropdownToggle=false>
+                            <ChildContent2>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="javascript:void(0);">This Week</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Last Week</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">This Month</a></li>
+                                </ul>
+                            </ChildContent2>
+                        </SpkDropdowns>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex gap-5 mb-3 align-items-center justify-content-center flex-wrap flex-xl-nowrap">
+                            <div class="d-flex align-items-center gap-2 me-5">
+                                <div class="lh-1">
+                                    <span class="avatar avatar-md avatar-rounded bg-primary2">
+                                        <i class="ri-id-card-line fs-16"></i>
+                                    </span>
+                                </div>
+                                <div>
+                                    <div class="fw-medium fs-14">3,875</div>
+                                    <div class="text-muted">Staff</div>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-2 me-5">
+                                <div class="lh-1">
+                                    <span class="avatar avatar-md avatar-rounded bg-secondary">
+                                        <i class="ri-graduation-cap-line fs-16"></i>
+                                    </span>
+                                </div>
+                                <div>
+                                    <div class="fw-medium fs-14">25,875</div>
+                                    <div class="text-muted">Students</div>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-2 me-4">
+                                <div class="lh-1">
+                                    <span class="avatar avatar-md avatar-rounded bg-primary">
+                                        <i class="ri-presentation-line fs-16"></i>
+                                    </span>
+                                </div>
+                                <div>
+                                    <div class="fw-medium fs-14">1,687</div>
+                                    <div class="text-muted">Teachers</div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                        <div id="attendance">
+                            <SpkApex TItem="Attendance" ApexHeight="336" ChartOptions="AttendanceChartOptions" Items="attendance" Series="AttendanceSeriesConfig"></SpkApex>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-5">
+                <div class="card custom-card overflow-hidden">
+                    <div class="card-header justify-content-between">
+                        <div class="card-title">
+                            Teachers List
+                        </div>
+                        <SpkButtons Tag="a" ButtonClass="bg-light text-default" ButtonSize="btn-sm"> View All<i class="ti ti-arrow-narrow-right ms-1"></i> </SpkButtons>
+                    </div>
+                    <div class="card-body p-0">
+                        <SpkTables Items="SchoolService.GetTeachersHeadersData()" Tableclass="text-nowrap teachers-list" >
+                            @foreach(var list in SchoolService.GetTeachersData()){
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <img src="@list.TeacherImg" alt="" class="avatar avatar-sm">
+                                            <a href="javascript:void(0);" class="fw-medium">@list.Teacher</a>
+                                        </div>
+                                    </td>
+                                    <td><span class="fs-12 text-muted d-block">@list.Qualification</span></td>
+                                    <td><div class="text-@list.SubjectClass fw-medium">@list.Subject</div></td>
+                                    <td>
+                                        <SpkButtons ButtonClass="btn-light btn-icon table-icon" ButtonSize="btn-sm"><i class="ri-arrow-right-s-line"></i></SpkButtons>
+                                    </td>
+                                </tr>
+                            }
+                        </SpkTables>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End::Row-2 -->
+
+        <!-- Start::Row-3 -->
+        <div class="row">
+            <div class="col-xxl-4">
+                <div class="card custom-card overflow-hidden">
+                    <div class="card-header justify-content-between">
+                        <div class="card-title">
+                            Notice Board
+                        </div>
+                        <SpkButtons Tag="a" ButtonClass="fs-12 text-muted btn-light" ButtonSize="btn-sm">View All<i class="ti ti-arrow-narrow-right ms-1"></i></SpkButtons>
+                    </div>
+                    <div class="card-body p-0">
+                        <SpkTables>
+                            @foreach(var notice in SchoolService.GetNoticeListData()){
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="svg-@notice.NoticeColor">
+                                                @((MarkupString)(notice.NoticeIcon ?? string.Empty))
+                                            </div>
+                                            <div class="flex-fill">
+                                                <div>
+                                                    <div class="fw-medium d-block my-1 fs-14">@((MarkupString)(notice.Notice ?? string.Empty))</div>
+                                                    <p class="text-muted fs-12 mb-0">@((MarkupString)(notice.NoticeDesc ?? string.Empty))</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <SpkBadge BadgeClass="bg-light text-dark">@((MarkupString)(notice.NoticeDate ?? string.Empty))</SpkBadge>
+                                    </td>
+                                </tr>
+                            }
+                        </SpkTables>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xxl-4">
+                <div class="card custom-card">
+                    <div class="card-header justify-content-between">
+                        <div class="card-title">
+                            Students Overview
+                        </div>
+                        <SpkDropdowns Tag="a" DropdownClass="btn-light text-muted btn-sm " DropdownToggle=false DropdownText="Sort By <i class='ri-arrow-down-s-line align-middle ms-1 d-inline-block'></i>">
+                            <ChildContent2>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="javascript:void(0);">This Week</a></li>
+                                        <li><a class="dropdown-item" href="javascript:void(0);">Last Week</a></li>
+                                        <li><a class="dropdown-item" href="javascript:void(0);">This Month</a></li>
+                                </ul>
+                            </ChildContent2>
+                        </SpkDropdowns>
+                    </div>
+                    <div class="card-body pb-1">
+                        <div id="students-applicants">
+                            <SpkApex TItem="Students" ApexHeight="282" ChartOptions="StudentsChartOptions" Items="students" Series="StudentsSeriesConfig"></SpkApex>
+                        </div>
+                    </div>
+                    <div class="card-footer p-0">
+                        <div class="row mt-0">
+                            <div class="col-6 border-end border-inline-end-dashed text-center p-3">
+                                <p class="mb-1 fw-medium">Boys</p>
+                                <h5 class="text-primary fw-medium">12.34K</h5>
+                            </div>
+                            <div class="col-6 text-center p-3">
+                                <p class="mb-1 fw-medium">Girls</p>
+                                <h5 class="text-secondary fw-medium">10.19K</h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xxl-4">
+                <div class="card custom-card">
+                    <div class="card-header justify-content-between">
+                        <div class="card-title">
+                            Activity
+                        </div>
+                        <SpkButtons Tag="a" ButtonClass="btn-light text-muted" ButtonSize="btn-sm">View All<i class="ti ti-arrow-narrow-right ms-1"></i></SpkButtons>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled school-activity-list">
+                            @foreach(var activity in SchoolService.GetSchoolActivity()){
+                                <li>
+                                    <SpkProductActivity productactivity="activity"></SpkProductActivity>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End::Row-3 -->
+
+        <!-- Start::Row-4 -->
+        <div class="row">
+            <div class="col-xl-8">
+                <div class="card custom-card">
+                    <div class="card-header justify-content-between">
+                        <div class="card-title">
+                            Star Students
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="d-flex flex-wrap gap-2">
+                                <div>
+                                    <input class="form-control form-control-sm" type="text" placeholder="Search Here" aria-label=".form-control-sm example">
+                                </div>
+                                <SpkDropdowns Tag="a" DropdownClass="btn btn-primary btn-sm " DropdownToggle=false DropdownText="Sort By<i class='ri-arrow-down-s-line align-middle ms-1 d-inline-block'></i>">
+                                    <ChildContent2>
+                                        <ul class="dropdown-menu" role="menu">
+                                            <li><a class="dropdown-item" href="javascript:void(0);">New</a></li>
+                                            <li><a class="dropdown-item" href="javascript:void(0);">Popular</a></li>
+                                            <li><a class="dropdown-item" href="javascript:void(0);">Relevant</a></li>
+                                        </ul>
+                                    </ChildContent2>
+                                </SpkDropdowns>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-0 pt-2">
+                        <SpkTables Tableclass="text-nowrap" Items="SchoolService.GetStudentsHeadersData()">
+                            @foreach(var Students in SchoolService.GetStudentsData()){
+                                <tr>
+                                    <td class="">@Students.id</td>
+                                    <td class="">@Students.Studentsid</td>
+                                    <td class="">
+                                        <div class="d-flex align-items-center">
+                                            <a href="javascript:void(0);" class="avatar avatar-xs avatar-rounded me-2">
+                                                <img src="@Students.StudentImg" alt="img">
+                                            </a>
+                                            <a href="javascript:void(0);">@Students.Student</a>
+                                        </div>
+                                    </td>
+                                    <td class="">@Students.Class</td>
+                                    <td class="">@Students.Section</td>
+                                    <td class="">@Students.Marks</td>
+                                    <td class="">@Students.GPA</td>
+                                    <td class="">
+                                        <span class="@(Students.Status ?"text-success":"text-danger") fw-medium">@(Students.Status ?"Pass":"Fail")</span>
+                                    </td>
+                                    <td class="">
+                                        <SpkDropdowns Tag="a" DropdownClass="tx-inverse" DropdownMainClass="d-inline-block" DropdownText="<i class='bi bi-three-dots'></i>" DropdownToggle=false>
+                                            <ChildContent2>
+                                                <ul class="dropdown-menu dropdown-menu-end">
+                                                    <li><a href="javascript:void(0);" class="dropdown-item">Action</a></li>
+                                                    <li><a href="javascript:void(0);" class="dropdown-item">Another Action</a></li>
+                                                    <li><a href="javascript:void(0);" class="dropdown-item">Something Else Here</a></li>
+                                                </ul>
+                                            </ChildContent2>
+                                        </SpkDropdowns>
+                                    </td>
+                                </tr>
+                            }
+                        </SpkTables>
+                    </div>
+                    <div class="card-footer border-top-0">
+                        <div class="d-sm-flex align-items-center bg-light p-3 py-2 rounded my-1">
+                            <div> Showing 5 Entries <i class="bi bi-arrow-right ms-2 fw-medium"></i></div>
+                            <div class="ms-auto mt-2 mt-sm-0">
+                                <nav aria-label="Page navigation" class="pagination-style-4">
+                                    <ul class="pagination mb-0 gap-1">
+                                        <li class="page-item disabled"> <a class="page-link" href="javascript:void(0);"> Prev </a> </li>
+                                        <li class="page-item active"><a class="page-link" href="javascript:void(0);">1</a></li>
+                                        <li class="page-item"><a class="page-link" href="javascript:void(0);">2</a></li>
+                                        <li class="page-item"> <a class="page-link text-primary" href="javascript:void(0);"> next </a> </li>
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-4">
+                <div class="card custom-card overflow-hidden">
+                    <div class="card-header justify-content-between">
+                        <div class="card-title">
+                            Exam Results
+                        </div>
+                        <SpkButtons Tag="a" ButtonClass="bg-light btn-light text-muted" ButtonSize="btn-sm">View All<i class="ti ti-arrow-narrow-right ms-1"></i></SpkButtons>
+                    </div>
+                    <div class="card-body p-0">
+                        <SpkTables Items="SchoolService.GetResultsHeadersData()" Tableclass="text-nowrap">
+                            @foreach(var result in SchoolService.GetResultsData()){
+                                
+                                    <tr>
+                                        <td>#@result.id</td>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div>
+                                                    <span class="avatar avatar-sm">
+                                                        <img src="@result.StudentImg" alt="img">
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <span class="d-block fw-semibold lh-1 mb-1">@result.Student</span>
+                                                    <span class="fs-13 text-muted">@result.Subject</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>@result.Subject</td>
+                                        <td class="@result.ScoreClass">@result.Score</td>
+                                    </tr>
+                            }
+                        </SpkTables>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End::Row-4 -->
+
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Dashboards" },
+        new SpkPageHeader.PageItem { PageTitle = "School" },
+    };
+
+    // Attendance Start //
+    private List<Attendance> attendance { get; set; } = SchoolService.GetAttendance();
+    private ApexChartOptions<Attendance> AttendanceChartOptions { get; set; } = new();
+    private List<SeriesConfig<Attendance>>? AttendanceSeriesConfig { get; set; }
+    
+    // Attendance End //
+
+    // Students Start //
+    private List<Students> students { get; set; } = SchoolService.GetStudents();
+    private ApexChartOptions<Students> StudentsChartOptions { get; set; } = new();
+    private List<SeriesConfig<Students>>? StudentsSeriesConfig { get; set; } 
+    // Students End //
+
+    protected override void OnInitialized() {
+        AttendanceChartOptions = new ApexChartOptions<Attendance> {
+            Chart = new () {
+                RedrawOnWindowResize= true,
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = false},
+                }, 
+                Animations = new() {
+                    Speed = 500,
+                },
+                Stacked = true,
+                DropShadow = new ApexCharts.DropShadow {
+                    Enabled = true,
+                    Color = ["transparent", "transparent", "#000"],
+                    Top = 5,
+                    Left = 0,
+                    Blur = 3,
+                    Opacity = 0.1
+                },
+            },
+            Grid = new Grid {
+                BorderColor = "#f1f1f1",
+                StrokeDashArray = 3
+            },
+            Colors = new Color(new List<string> {"rgb(158, 92, 247)", "rgb(255, 93, 159)", "var(--primary-color)"}),
+            DataLabels = new DataLabels {
+                Enabled = false,
+            }, 
+            Stroke = new Stroke { 
+                Curve = [Curve.Smooth],
+                Width = [1, 1, 0],
+                DashArray = [4, 0, 0, 0],
+                Show= true,
+            }, 
+            Xaxis =  new XAxis {
+                AxisTicks = new () {
+                    Show = false,
+                },
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis {
+                    Min = 0,
+                    Max = 900,
+                    StepSize = 100,
+                    Labels = new YAxisLabels {
+                        Formatter= @"function (value) {return value;}",
+                        Show = true,
+                    },
+                },
+            }, 
+            PlotOptions = new PlotOptions {
+                Bar = new PlotOptionsBar {
+                    Horizontal = false,
+                    BorderRadius = 2,
+                    ColumnWidth = "15%",
+                }
+            },
+            Fill = new Fill {
+                Colors = ["rgb(158, 92, 247)", "rgb(255, 93, 159)", "var(--primary-color)"],
+                Opacity = 0.025,
+                Type = new List<FillType> {FillType.Gradient,FillType.Gradient,FillType.Solid},
+                Gradient = new ApexCharts.FillGradient {
+                    ShadeIntensity = 1,
+                    Shade = ApexCharts.GradientShade.Light,
+                    Type = ApexCharts.GradientType.Vertical,
+                    GradientToColors = new Color(new List<string> {"rgb(158, 92, 247)", "rgb(255, 93, 159)", "var(--primary-color)"}),
+                    OpacityFrom = [0.2,0.2,1],
+                    OpacityTo = [0.2,0.2,1],
+                    Stops = [0, 100],
+                }
+            },
+            Legend = new Legend {
+                Show = false,
+            },
+            Markers = new (){
+                Hover = new (){
+                    SizeOffset = 5,
+                },
+            },
+        };
+        AttendanceSeriesConfig = new List<SeriesConfig<Attendance>>
+        {
+            new SeriesConfig<Attendance>
+            {
+                SeriesType = SeriesType.Area,
+                Name="Staff",
+                XValueSelector = e => e.Month ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.Staff),
+            },
+            new SeriesConfig<Attendance>
+            {
+                SeriesType = SeriesType.Area,
+                Name="Students",
+                XValueSelector = e => e.Month ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.Students),
+            },
+            new SeriesConfig<Attendance>
+            {
+                SeriesType = SeriesType.Bar,
+                Name="Teachers",
+                XValueSelector = e => e.Month ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.Teachers),
+            },
+        };
+
+        StudentsChartOptions = new ApexChartOptions<Students> {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = false},
+                }, 
+                DropShadow = new ApexCharts.DropShadow {
+                    Enabled = true,
+                    Color = ["var(--primary-color)", "rgb(215, 124, 247)", "rgb(12, 215, 177)"],
+                    Top = 7,
+                    Left = 0,
+                    Blur = 3,
+                    Opacity = 0.1
+                }
+            },
+            Grid = new Grid {
+                BorderColor = "#f1f1f1",
+                StrokeDashArray = 3
+            },
+            Stroke = new Stroke { 
+                Curve = Curve.Smooth,
+                Width = [2, 2,2],
+            },
+            Colors = new Color(new List<string> {"var(--primary-color)", "rgb(215, 124, 247)", "rgb(12, 215, 177)"}),
+            DataLabels = new DataLabels {
+                Enabled = false,
+            }, 
+            Legend = new Legend {
+                Show = true,
+                Position = LegendPosition.Top,
+                HorizontalAlign = Align.Center,
+                Markers=  new(){
+                    Width =  5,
+                    Height = 5,
+                    Radius=50
+                },
+            },
+            Tooltip = new Tooltip { 
+                Enabled= true,
+                Theme = ApexCharts.Mode.Dark
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis {
+                    Show = true,
+                    Labels = new YAxisLabels {
+                        Formatter = @"function (y) {
+                            return y.toFixed(0) + '';
+                        }"
+                    },
+                    Title = new () {
+                        Style = new () {
+                            Color = "#adb5be",
+                            FontSize = "14px",
+                            FontFamily = "poppins, sans-serif",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label",
+                        },
+                    },
+                    Min = 25,
+                    Max = 60,
+                    StepSize = 5,
+                },
+            },
+            Xaxis =  new XAxis {
+                AxisBorder = new () {
+                    Show = true,
+                    Color = "#e9e9e9",
+                    OffsetX = 0,
+                    OffsetY = 0,
+                },
+                AxisTicks = new () {
+                    Show = true,
+                    Color = "#e9e9e9",
+                    OffsetX = 0,
+                    OffsetY = 0,
+                },
+                Labels = new XAxisLabels {
+                    Show = true,
+                    Rotate = -90
+                },
+            },
+        };
+        StudentsSeriesConfig = new List<SeriesConfig<Students>>
+        {
+            new SeriesConfig<Students>
+            {
+                SeriesType = SeriesType.Line,
+                Name="Projects",
+                XValueSelector = e => e.Week ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.Projects),
+            },
+            new SeriesConfig<Students>
+            {
+                SeriesType = SeriesType.Line,
+                Name="Tasks",
+                XValueSelector = e => e.Week ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.Tasks),
+            },
+        };
+    }
+}

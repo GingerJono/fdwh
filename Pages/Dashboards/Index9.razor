@@ -1,0 +1,827 @@
+@page "/index9"
+@using ApexCharts
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using ApexSeries
+@using CardModel
+@using Projects
+@inject ProjectsService ProjectsService
+
+
+            <!-- Start::page-header -->
+            <SpkPageHeader PageItems="PageItems" />
+            <!-- End::page-header -->
+
+            <!-- Start::row-1 -->
+            <div class="row">
+                <div class="col-xxl-5">
+                    <div class="card custom-card main-dashboard-banner project-dashboard-banner overflow-hidden">
+                        <div class="card-body p-4">
+                            <div class="row justify-content-between">
+                                <div class="col-xxl-8 col-xl-5 col-lg-5 col-md-5 col-sm-5">
+                                    <h4 class="mb-1 fw-medium text-fixed-white">Manage Projects</h4>
+                                    <p class="mb-3 text-fixed-white op-7">Manage projects effortlessly with our one-click solution, streamlining your workflow.</p>
+                                    <SpkButtons Tag="a" ButtonClass="btn-primary1 d-inline-flex align-items-center" ButtonSize="btn-sm">Manage Now<i class="ti ti-arrow-narrow-right ms-1"></i></SpkButtons>
+                                </div>
+                                <div class="col-xxl-4 col-xl-7 col-lg-7 col-md-7 col-sm-7 d-sm-block d-none text-end my-auto">
+                                    <img src="../assets/images/media/media-85.png" alt="" class="img-fluid">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card custom-card overflow-hidden">
+                        <div class="card-header justify-content-between">
+                            <div class="card-title">
+                                Team 
+                            </div>
+                            <SpkButtons Tag="a" ButtonClass="btn btn-light" ButtonSize="btn-sm">View All</SpkButtons>
+                        </div>
+                        <div class="card-body p-0">
+                            <SpkTables Tableclass="text-nowrap mb-0" Items="ProjectsService.GetTeamHeadersData()">
+                                @foreach(var Team in ProjectsService.GetTeamListData()) {
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex">
+                                                <span class="avatar avatar-sm avatar-rounded">
+                                                    <img src="@Team.MemberImg" class="" alt="">
+                                                </span>
+                                                <div class="flex-1 ms-2">
+                                                    <span class="d-block fw-semibold">@Team.Member</span>
+                                                    <a href="javascript:void(0);" class="text-muted fs-12">@Team.Design</a>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="fw-medium">@Team.Works</span>
+                                        </td>
+                                        <td>
+                                            <SpkBadge BadgeClass="@(Team.ISOnline ? "bg-success-transparent":"bg-danger-transparent")">@(Team.ISOnline ? "Online":"Offline")</SpkBadge>
+                                        </td>
+                                        <td>
+                                            <span class="">@Team.TasksCompleted/ <span class="text-muted">@Team.TasksTotal</span></span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-list">
+                                                <SpkTooltip Tag="a" TooltipClass="btn btn-icon btn-sm rounded-pill mb-0 btn-primary-light" TooltipTitle="Assign" TooltipPlacement="top"><i class="ti ti-user-plus align-middle"></i></SpkTooltip>
+                                                <SpkTooltip Tag="a" TooltipClass="btn btn-icon btn-sm rounded-pill mb-0 btn-info-light" TooltipTitle="Mail" TooltipPlacement="top"><i class="ti ti-at align-middle"></i></SpkTooltip>
+                                                <SpkTooltip Tag="a" TooltipClass="btn btn-icon btn-sm rounded-pill mb-0 btn-primary2-light" TooltipTitle="View" TooltipPlacement="top"><i class="ti ti-eye align-middle"></i></SpkTooltip>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </SpkTables>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xxl-7">
+                    <div class="row">
+                        @foreach(var Projects in ProjectsService.GetProjectsCardData()){
+                            <div class="col-xxl-3 col-md-6">
+                                <SpkProjectsCard ProjectsMainCard="Projects" ChartItems="ProjectsService.GetProjectsChart(Projects)" ChartOptions="GenerateDynamicChartOptions(Projects)" SeriesConfigs="GenerateDynamicSeriesConfigs()"></SpkProjectsCard>
+                            </div>
+                        }
+                    </div>
+                    <div class="card custom-card">
+                        <div class="card-header justify-content-between">
+                            <div class="card-title">Project Statistics</div>
+                            <SpkDropdowns Tag="a" DropdownClass="btn btn-sm btn-light" DropdownToggle=false DropdownText="Last Week <i class='ri-arrow-down-s-line align-middle ms-1 d-inline-block'></i>">
+                                <ChildContent2>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="javascript:void(0);">Today</a></li>
+                                        <li><a class="dropdown-item" href="javascript:void(0);">Last Week</a></li>
+                                        <li><a class="dropdown-item" href="javascript:void(0);">Last Month</a></li>
+                                        <li><a class="dropdown-item" href="javascript:void(0);">Last Year</a></li>
+                                    </ul>
+                                </ChildContent2>
+                            </SpkDropdowns>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex gap-5 align-items-center p-3 justify-content-around bg-light mx-2 flex-wrap flex-xl-nowrap">
+                                <div class="d-flex gap-3 align-items-center flex-wrap">
+                                    <div class="avatar avatar-lg flex-shrink-0 bg-primary-transparent avatar-rounded svg-primary shadow-sm border border-primary border-opacity-25">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256"><path d="M184,89.57V84c0-25.08-37.83-44-88-44S8,58.92,8,84v40c0,20.89,26.25,37.49,64,42.46V172c0,25.08,37.83,44,88,44s88-18.92,88-44V132C248,111.3,222.58,94.68,184,89.57ZM232,132c0,13.22-30.79,28-72,28-3.73,0-7.43-.13-11.08-.37C170.49,151.77,184,139,184,124V105.74C213.87,110.19,232,122.27,232,132ZM72,150.25V126.46A183.74,183.74,0,0,0,96,128a183.74,183.74,0,0,0,24-1.54v23.79A163,163,0,0,1,96,152,163,163,0,0,1,72,150.25Zm96-40.32V124c0,8.39-12.41,17.4-32,22.87V123.5C148.91,120.37,159.84,115.71,168,109.93ZM96,56c41.21,0,72,14.78,72,28s-30.79,28-72,28S24,97.22,24,84,54.79,56,96,56ZM24,124V109.93c8.16,5.78,19.09,10.44,32,13.57v23.37C36.41,141.4,24,132.39,24,124Zm64,48v-4.17c2.63.1,5.29.17,8,.17,3.88,0,7.67-.13,11.39-.35A121.92,121.92,0,0,0,120,171.41v23.46C100.41,189.4,88,180.39,88,172Zm48,26.25V174.4a179.48,179.48,0,0,0,24,1.6,183.74,183.74,0,0,0,24-1.54v23.79a165.45,165.45,0,0,1-48,0Zm64-3.38V171.5c12.91-3.13,23.84-7.79,32-13.57V172C232,180.39,219.59,189.4,200,194.87Z"></path></svg>
+                                    </div>
+                                    <div>
+                                        <span class="mb-1 d-block">Total Revenue</span> 
+                                        <div class="d-flex align-items-end gap-2">
+                                            <h4 class="mb-0">$475,896</h4> 
+                                            <div class="fs-13"> 
+                                                <span class="op-7"> Increased By </span>  
+                                                <SpkBadge BadgeClass="bg-success align-middle op-9">5.6%<i class="ti ti-trending-up"></i></SpkBadge>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="d-flex gap-3 align-items-center flex-wrap">
+                                    <div class="avatar avatar-lg flex-shrink-0 bg-primary1-transparent avatar-rounded svg-primary1 shadow-sm border border-primary1 border-opacity-25">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256"><path d="M230.91,172A8,8,0,0,1,228,182.91l-96,56a8,8,0,0,1-8.06,0l-96-56A8,8,0,0,1,36,169.09l92,53.65,92-53.65A8,8,0,0,1,230.91,172ZM220,121.09l-92,53.65L36,121.09A8,8,0,0,0,28,134.91l96,56a8,8,0,0,0,8.06,0l96-56A8,8,0,1,0,220,121.09ZM24,80a8,8,0,0,1,4-6.91l96-56a8,8,0,0,1,8.06,0l96,56a8,8,0,0,1,0,13.82l-96,56a8,8,0,0,1-8.06,0l-96-56A8,8,0,0,1,24,80Zm23.88,0L128,126.74,208.12,80,128,33.26Z"></path></svg>
+                                    </div>
+                                    <div>
+                                        <span class="mb-1 d-block">Total Projects</span> 
+                                        <div class="d-flex align-items-end gap-2">
+                                            <h4 class="mb-0">75,896</h4> 
+                                            <div class="fs-13"> 
+                                                <span class="op-7"> Increased By </span>  
+                                                <SpkBadge BadgeClass="bg-danger align-middle op-9">1.6%<i class="ti ti-trending-down"></i></SpkBadge>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="project-statistics">
+                                <SpkApex TItem="ProjectStatistics" ApexHeight="353" ChartOptions="StatisticsChartOptions" Items="projectstatistics" Series="ProjectStatisticsSeriesConfig"></SpkApex>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--End::row-1 -->
+
+            <!-- Start:: row-2 -->
+            <div class="row">
+                <div class="col-xxl-4">
+                    <div class="card custom-card">
+                        <div class="card-header justify-content-between">
+                            <div class="card-title">
+                                Running Projects List
+                            </div>
+                            <SpkButtons ButtonClass="btn-primary-light" ButtonSize="btn-sm">View All</SpkButtons>
+                        </div>
+                        <div class="p-3 pb-2">
+                            <div class="d-flex align-items-start gap-3 mb-3">
+                                <div class="flex-grow-1">
+                                    <p class="fw-medium mb-1 fs-14">Web application design <SpkTooltip Tag="a" TooltipClass="text-info" TooltipPlacement="top" TooltipTitle="Get Info"><i class="ri-information-2-line fs-13 op-7 lh-1 align-middle"></i></SpkTooltip>
+                                    </p>
+                                    <p class="text-muted mb-1 fw-normal fs-12">At vero eos et accusamus et iusto odio.</p>
+                                    <div>Status: <span class="text-success fw-normal fs-12">75% completed</span></div>
+                                </div>
+                                <div class="flex-shrink-0 text-end">
+                                    <p class="mb-3 fs-11 text-muted"><i class="ri-time-line  text-muted fs-11 align-middle lh-1 me-1 d-inline-block"></i>2mins ago</p>
+                                    <div class="avatar-list-stacked">
+                                        <span class="avatar avatar-sm avatar-rounded">
+                                            <img src="../assets/images/faces/11.jpg" alt="img">
+                                        </span>
+                                        <span class="avatar avatar-sm avatar-rounded">
+                                            <img src="../assets/images/faces/2.jpg" alt="img">
+                                        </span>
+                                        <span class="avatar avatar-sm avatar-rounded">
+                                            <img src="../assets/images/faces/5.jpg" alt="img">
+                                        </span>
+                                        <span class="avatar avatar-sm avatar-rounded">
+                                            <img src="../assets/images/faces/6.jpg" alt="img">
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <SpkProgress ProgressClass="rounded-pill p-1 ms-auto bg-primary-transparent" ProgressSize="progress-lg" ProgressValue="90">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated rounded-pill" style="width: 90%"></div>
+                                </SpkProgress>
+                            </div>
+                        </div>
+                        <div class="p-3 pb-2">
+                            <div class="d-flex align-items-start gap-3 mb-3">
+                                <div class="flex-grow-1">
+                                    <p class="fw-medium mb-1 fs-14">Designing New Template <SpkTooltip Tag="a" TooltipClass="text-info" TooltipPlacement="top" TooltipTitle="Get Info"><i class="ri-information-2-line fs-13 op-7 lh-1 align-middle"></i></SpkTooltip></p>
+                                    <p class="text-muted mb-1 fw-normal fs-12">At vero eos et accusamus et iusto odio.</p>
+                                    <div>Status: <span class="text-warning fw-medium fs-12">45% completed</span></div>
+                                </div>
+                                <div class="flex-shrink-0 text-end">
+                                    <p class="mb-3 fs-11 text-muted"><i class="ri-time-line  text-muted fs-11 align-middle lh-1 me-1 d-inline-block"></i>15mins ago</p>
+                                    <div class="avatar-list-stacked">
+                                        <span class="avatar avatar-sm avatar-rounded">
+                                            <img src="../assets/images/faces/11.jpg" alt="img">
+                                        </span>
+                                        <span class="avatar avatar-sm avatar-rounded">
+                                            <img src="../assets/images/faces/8.jpg" alt="img">
+                                        </span>
+                                        <span class="avatar avatar-sm avatar-rounded">
+                                            <img src="../assets/images/faces/2.jpg" alt="img">
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <SpkProgress ProgressClass="rounded-pill p-1 ms-auto bg-primary1-transparent" ProgressSize="progress-lg" ProgressValue="45">
+                                    <div class="progress-bar bg-primary1 progress-bar-striped progress-bar-animated rounded-pill" style="width: 45%"></div>
+                                </SpkProgress>
+                            </div>
+                        </div>
+                        <div class="p-3">
+                            <div class="d-flex align-items-start gap-3 mb-3">
+                                <div class="flex-grow-1">
+                                    <p class="fw-medium mb-1 fs-14">Web application design <SpkTooltip Tag="a" TooltipClass="text-info" TooltipPlacement="top" TooltipTitle="Get Info"><i class="ri-information-2-line fs-13 op-7 lh-1 align-middle"></i></SpkTooltip></p>
+                                    <p class="text-muted mb-1 fs-12">At vero eos et accusamus et iusto odio.</p>
+                                    <div>Status: <span class="text-success fw-medium fs-12">65% completed</span></div>
+                                </div>
+                                <div class="flex-shrink-0 text-end">
+                                    <p class="mb-3 fs-11 text-muted"><i class="ri-time-line  text-muted fs-11 align-middle lh-1 me-1 d-inline-block"></i>20mins ago</p>
+                                    <div class="avatar-list-stacked">
+                                        <div class="avatar-list-stacked">
+                                            <span class="avatar avatar-sm avatar-rounded">
+                                                <img src="../assets/images/faces/15.jpg" alt="img">
+                                            </span>
+                                            <span class="avatar avatar-sm avatar-rounded">
+                                                <img src="../assets/images/faces/3.jpg" alt="img">
+                                            </span>
+                                            <a class="avatar avatar-sm bg-primary border avatar-rounded text-fixed-white" href="javascript:void(0);"> 2+ </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <SpkProgress ProgressClass="rounded-pill p-1 ms-auto bg-primary2-transparent" ProgressSize="progress-lg" ProgressValue="65">
+                                    <div class="progress-bar bg-primary2 progress-bar-striped progress-bar-animated rounded-pill" style="width: 65%"></div>
+                                </SpkProgress>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xxl-3 col-lg-6">
+                    <div class="card custom-card">
+                        <div class="card-header justify-content-between">
+                            <div class="card-title">Monthly Targets</div>
+                            <SpkButtons Tag="a" ButtonClass="btn  btn-light" ButtonSize="btn-sm">View All</SpkButtons>
+                        </div>
+                        <div class="card-body">
+                            <div id="monthly-target">
+                                <SpkApex TItem="MonthlyTargets" ApexHeight="286" ChartOptions="MonthlyTargetsChartOptions" Items="monthlytarget" Series="MonthlyTargetsSeriesConfig"></SpkApex>
+                            </div>
+                            <div class="d-flex gap-3 align-items-center justify-content-between text-center p-3 bg-light">
+                                <div>
+                                    <span class="mb-1 d-block"><i class="ri-circle-fill fs-8 align-middle lh-1 text-primary"></i> New Projects</span> 
+                                    <h6 class="mb-1">4,896</h6> 
+                                    <span class="text-success fw-medium"><i class="ri-arrow-up-s-fill"></i> 3.5%</span>
+                                </div>
+                                <div>
+                                    <span class="mb-1 d-block"><i class="ri-circle-fill fs-8 align-middle lh-1 text-primary1"></i> Completed</span> 
+                                    <h6 class="mb-1">2,475</h6> 
+                                    <span class="text-danger fw-medium"><i class="ri-arrow-down-s-fill"></i> 1.5%</span>
+                                </div>
+                                <div>
+                                    <span class="mb-1 d-block"><i class="ri-circle-fill fs-8 align-middle lh-1 text-primary2"></i> Pending</span> 
+                                    <h6 class="mb-1">456</h6> 
+                                    <span class="text-success fw-medium"><i class="ri-arrow-up-s-fill"></i> 0.1%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xxl-5 col-lg-6">
+                    <div class="card custom-card">
+                        <div class="card-header justify-content-between">
+                            <div class="card-title">
+                                Daily Tasks
+                            </div>
+                            <SpkDropdowns Tag="a" DropdownClass="btn btn-sm btn-light" DropdownToggle=false DropdownText="View All<i class='ri-arrow-down-s-line align-middle ms-1 d-inline-block'></i>">
+                                <ChildContent2>
+                                    <ul class="dropdown-menu" role="menu">
+                                        <li><a class="dropdown-item" href="javascript:void(0);">Download</a></li>
+                                        <li><a class="dropdown-item" href="javascript:void(0);">Import</a></li>
+                                        <li><a class="dropdown-item" href="javascript:void(0);">Export</a></li>
+                                    </ul>
+                                </ChildContent2>
+                            </SpkDropdowns>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush list-unstyled">
+                                @foreach(var Tasks in ProjectsService.GetTasksListData()){
+                                    <li class="list-group-item border-bottom-0 d-flex gap-3 p-0 align-items-start @(Tasks == ProjectsService.GetTasksListData().ToList().First() ? "pt-0" : "pt-1") @(Tasks == ProjectsService.GetTasksListData().ToList().Last() ? "mb-0" : "mb-1")">
+                                        <div class="flex-shrink-0 daily-tasks-time">
+                                            <span class="text-muted ms-auto fs-11 flex-shrink-0 flex-fill">@Tasks.Duedate</span>
+                                        </div>
+                                        <div class="card border border-@Tasks.Add border-opacity-25 shadow-none custom-card mb-0 bg-@Tasks.Add-transparent">
+                                            <div class="card-body">
+                                                <p class="fw-medium mb-2 lh-1 d-flex align-items-center gap-2 justify-content-between">@Tasks.Title
+                                                    <SpkTooltip Tag="a" TooltipClass="@($"text-{Tasks.Add} {"float-end fs-16"}")" TooltipTitle="View"><i class="ri-add-circle-fill"></i></SpkTooltip>
+                                                </p>
+                                                <div class="d-flex flex-wrap gap-2 align-items-center">
+                                                    @foreach (var TagsList in Tasks?.Tags ?? Enumerable.Empty<TagItem>())
+                                                    {
+                                                        <SpkBadge BadgeClass="@TagsList.TagColor">@TagsList.Tag</SpkBadge>
+                                                    }
+                                                    <div class="avatar-list-stacked ms-auto">
+                                                        @foreach (var assignedTo in Tasks?.AssignedTo ?? Enumerable.Empty<AssignedToItem>())
+                                                        {
+                                                            <span class="avatar avatar-xs avatar-rounded">
+                                                                <img src="@assignedTo.Img" alt="img">
+                                                            </span>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- End:: row-2 -->
+
+            <!-- Start:: row-3 -->
+            <div class="row">
+                <div class="col-xxl-9">
+                    <div class="card custom-card">
+                        <div class="card-header justify-content-between">
+                            <div class="card-title">
+                                Projects Summary
+                            </div>
+                            <div class="d-flex flex-wrap">
+                                <div class="me-3 my-1">
+                                    <input class="form-control form-control-sm" type="text" placeholder="Search Here" aria-label=".form-control-sm example">
+                                </div>
+                                <SpkDropdowns Tag="a" DropdownClass="btn btn-primary btn-sm " DropdownToggle=false DropdownMainClass="my-1" DropdownText="Sort By<i class='ri-arrow-down-s-line align-middle ms-1 d-inline-block'></i>">
+                                    <ChildContent2>
+                                        <ul class="dropdown-menu" role="menu">
+                                            <li><a class="dropdown-item" href="javascript:void(0);">New</a></li>
+                                            <li><a class="dropdown-item" href="javascript:void(0);">Popular</a></li>
+                                            <li><a class="dropdown-item" href="javascript:void(0);">Relevant</a></li>
+                                        </ul>
+                                    </ChildContent2>
+                                </SpkDropdowns>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <SpkTables Tableclass="table-hover text-nowrap table-bordered" Items="ProjectsService.GetProjectsHeadersData()">
+                                @foreach(var List in ProjectsService.GetProjectsListData()) {
+                                    <tr>
+                                        <td>
+                                            @List.Id
+                                        </td>
+                                        <td>
+                                            <span class="fw-medium"> @List.Title</span>
+                                        </td>
+                                        <td>@List.TasksCompleted <span class="op-7">/@List.TasksTotal</span></td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <SpkProgress ProgressClass="w-100" ProgressSize="progress-sm" ProgressValue="@List.Progress">
+                                                    <div class="progress-bar  bg-primary" style="width: @List.Progress%"></div>
+                                                </SpkProgress>
+                                                <div class="ms-2">@List.Progress%</div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="avatar-list-stacked">
+                                                @foreach (var assignedTo in List.AssignedTo?.Take(5) ?? Enumerable.Empty<AssignedToItem>())
+                                                {
+                                                    <span class="avatar avatar-xs avatar-rounded">
+                                                        <img src="@assignedTo.Img" alt="img">
+                                                    </span>
+                                                }
+                                                @if (List.AssignedTo?.Count > 5)
+                                                {
+                                                    <a class="avatar avatar-xs bg-primary avatar-rounded text-fixed-white" href="javascript:void(0);">
+                                                        +@((List.AssignedTo.Count - 5))
+                                                    </a> 
+                                                }
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <SpkBadge BadgeClass="@List.Statusclass">@List.Status</SpkBadge>
+                                        </td>
+                                        <td>
+                                            @List.Duedate
+                                        </td>
+                                        <td>
+                                            <div class="btn-list">
+                                                <SpkTooltip Tag="a" TooltipClass="btn  btn-icon rounded-pill btn-sm btn-primary-light" TooltipPlacement="top" TooltipTitle="View"><i class="ti ti-eye"></i></SpkTooltip>
+                                                <SpkTooltip Tag="a" TooltipClass="btn  btn-icon rounded-pill btn-sm btn-secondary-light" TooltipPlacement="top"TooltipTitle="Edit"><i class="ti ti-pencil"></i></SpkTooltip>
+                                                <SpkTooltip Tag="a" TooltipClass="btn  btn-icon rounded-pill btn-sm btn-danger-light" TooltipPlacement="top"TooltipTitle="Delete"  @onclick="@(() => DeleteProjectsList(List.Id))"><i class="ti ti-trash"></i></SpkTooltip>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </SpkTables>
+                        </div>
+                        <div class="card-footer">
+                            <div class="d-flex align-items-center">
+                                <div>
+                                    Showing 6 Entries <i class="bi bi-arrow-right ms-2 fw-medium"></i>
+                                </div>
+                                <div class="ms-auto">
+                                    <nav aria-label="Page navigation" class="pagination-style-4">
+                                        <ul class="pagination mb-0">
+                                            <li class="page-item disabled">
+                                                <a class="page-link" href="javascript:void(0);">
+                                                    Prev
+                                                </a>
+                                            </li>
+                                            <li class="page-item active"><a class="page-link" href="javascript:void(0);">1</a></li>
+                                            <li class="page-item"><a class="page-link" href="javascript:void(0);">2</a></li>
+                                            <li class="page-item">
+                                                <a class="page-link text-primary" href="javascript:void(0);">
+                                                    next
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </nav>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xxl-3">
+                    <div class="card custom-card overflow-hidden">
+                        <div class="card-header justify-content-between">
+                            <div class="card-title">
+                                Task Summary
+                            </div>
+                            <SpkButtons Tag="a" ButtonClass="btn  btn-light" ButtonSize="btn-sm">View All</SpkButtons>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex gap-3 align-items-center justify-content-between p-3 bg-light mb-4">
+                                <div>
+                                    <h6 class="mb-1">Tasks Completed Rate</h6>
+                                    <p class="mb-0 text-muted">Within the Deadline</p>
+                                </div>
+                                <div>
+                                    <h5 class="mb-0">85%
+                                        <SpkBadge BadgeClass="bg-success text-fixed-white fw-medium fs-8 ms-2"><i class="ri-arrow-up-s-fill"></i> 1.5%</SpkBadge>
+                                    </h5> 
+                                </div>
+                            </div>
+                            <div id="tasks-report">
+                                <SpkApex TItem="Summary" ApexHeight="335" ChartOptions="SummaryChartOptions" Items="report" Series="SummarySeriesConfig"></SpkApex>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- End:: row-3 -->
+ 
+
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Dashboards" },
+        new SpkPageHeader.PageItem { PageTitle = "Projects" },
+    };
+    // ProjectsCard Start //
+    private ApexChartOptions<ProjectsChart> GenerateDynamicChartOptions(MainCard MainCard) =>
+    MainCard.title switch
+    {
+        "New Projects" => ProjectChartOptions ,
+        "Completed" => Project1ChartOptions ,
+        "Ongoing Projects" => Project2ChartOptions ,
+        _ => Project3ChartOptions
+    };
+    private List<SeriesConfig<ProjectsChart>> GenerateDynamicSeriesConfigs() {
+        return new List<SeriesConfig<ProjectsChart>>
+        {
+            new SeriesConfig<ProjectsChart>
+            {
+                SeriesType = SeriesType.Bar,  
+                XValueSelector = e => e.Series,  
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.Value)
+            },
+        };
+    } 
+    private ApexChartOptions<ProjectsChart> ProjectChartOptions { get; set; } = new();
+    private ApexChartOptions<ProjectsChart> Project1ChartOptions { get; set; } = new();
+    private ApexChartOptions<ProjectsChart> Project2ChartOptions { get; set; } = new();
+    private ApexChartOptions<ProjectsChart> Project3ChartOptions { get; set; } = new(); 
+    //  ProjectsCard End // 
+
+    // Project Statistics Start //
+    private List<ProjectStatistics> projectstatistics { get; set; } = ProjectsService.GetProjectStatistics();
+    private ApexChartOptions<ProjectStatistics> StatisticsChartOptions { get; set; } = new();
+    private List<SeriesConfig<ProjectStatistics>>? ProjectStatisticsSeriesConfig { get; set; }
+  
+    // Project Statistics End //
+    
+    //  MonthlyTargets Start //
+    private List<MonthlyTargets> monthlytarget { get; set; } = ProjectsService.MonthlyTargets();
+    private ApexChartOptions<MonthlyTargets> MonthlyTargetsChartOptions { get; set; } = new();
+    private List<SeriesConfig<MonthlyTargets>>? MonthlyTargetsSeriesConfig { get; set; }
+   
+    //  MonthlyTargets End //
+
+    // Summary Start //
+    private List<Summary> report { get; set; } = ProjectsService.GetSummary();
+    private ApexChartOptions<Summary> SummaryChartOptions { get; set; } = new();
+    private List<SeriesConfig<Summary>>? SummarySeriesConfig { get; set; }
+   
+    // Summary End //
+
+    protected override void OnInitialized() {
+        // ProjectsCard Start //
+        List<string> color1 = new List<string> { "rgb(227, 84, 212)"};
+        List<string> color2 = new List<string> { "var(--primary-color)"};
+        List<string> color3 = new List<string> { "rgb(255, 93, 159)"};
+        List<string> color4 = new List<string> { "rgb(255, 142, 111)"};
+            
+        ProjectChartOptions   = InitializeChartOptions<ProjectsChart>(color1);
+        Project1ChartOptions   = InitializeChartOptions<ProjectsChart>(color2);
+        Project2ChartOptions   = InitializeChartOptions<ProjectsChart>(color3);
+        Project3ChartOptions   = InitializeChartOptions<ProjectsChart>(color4); 
+        //  ProjectsCard End // 
+
+        StatisticsChartOptions = new ApexChartOptions<ProjectStatistics> {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = false},
+                }, 
+                Animations= new() {
+                    Speed = 500,
+                },
+                DropShadow = new ApexCharts.DropShadow {
+                    Enabled = true,
+                    Color = ["#000"],
+                    Top = 8,
+                    Left = 0,
+                    Blur = 4,
+                    Opacity = 0.08
+                }
+            },
+            DataLabels = new DataLabels {
+                Enabled = false,
+            },
+            Colors = new Color(new List<string> {"rgb(227, 84, 212)","var(--primary-color)"}),
+            Grid = new Grid {
+                BorderColor = "#f1f1f1",
+                StrokeDashArray = 3
+            },
+            Fill = new Fill {
+                Colors = null,
+                Opacity = 1,
+                Type = new List<FillType> { FillType.Gradient,FillType.Solid},
+                Gradient = new ApexCharts.FillGradient {
+                    Shade = ApexCharts.GradientShade.Light,
+                    Type = ApexCharts.GradientType.Horizontal,
+                    GradientToColors = new Color(new List<string> {"rgb(227, 84, 212)","var(--primary-color)"}),
+                    ShadeIntensity = 0.1,
+                    OpacityFrom = [0.1,1],
+                    OpacityTo = [0.2,1],
+                }
+            },
+            Xaxis =  new XAxis {
+                AxisTicks = new () {
+                    Show = false,
+                },
+            },
+            Stroke = new Stroke { 
+                Curve = Curve.Smooth,
+                Width= [2, 1.5],
+                DashArray= [4, 5],
+            },
+            Legend = new Legend {
+                Show = true,
+                Position = LegendPosition.Bottom,
+                HorizontalAlign = Align.Center,
+                InverseOrder= true,
+                Markers=  new(){
+                    Width =  12,
+                    Height = 12,
+                    Radius = 50,
+                },
+            }, 
+            Yaxis = new List<YAxis>() {
+                new YAxis // Define the first YAxis object
+                {
+                    Min = 0,
+                    Max = 60,
+                    StepSize = 10,
+                    Labels = new YAxisLabels {
+                        Formatter= @"function (value) {
+                            return value;
+                            }",
+                        Show = true,
+                    },
+                }
+            },
+            PlotOptions = new PlotOptions {
+                Bar = new PlotOptionsBar {
+                    Horizontal = false,
+                    BorderRadius = 3,
+                    ColumnWidth = "20%",
+                    BorderRadiusApplication = BorderRadiusApplication.End,
+                    BorderRadiusWhenStacked = BorderRadiusWhenStacked.Last
+                }
+            },
+        };
+        ProjectStatisticsSeriesConfig = new List<SeriesConfig<ProjectStatistics>>
+        {
+            new SeriesConfig<ProjectStatistics>
+            {
+                Name="Projects",
+                SeriesType =SeriesType.Area,
+                XValueSelector = e => e.Statistics ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.Projects)
+            },
+            new SeriesConfig<ProjectStatistics>
+            {
+                Name="Revenue",
+                SeriesType =SeriesType.Bar,
+                XValueSelector = e => e.Statistics ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.Revenue)
+            },
+        };
+        
+        MonthlyTargetsChartOptions = new ApexChartOptions<MonthlyTargets> {
+            Colors = new Color(new List<string> { "var(--primary-color)", "rgba(227, 84, 212, 0.5)", "rgba(255, 93, 159, 0.4)" }),
+            PlotOptions = new PlotOptions {
+                RadialBar = new PlotOptionsRadialBar {
+                    DataLabels = new RadialBarDataLabels
+                    {
+                        Name = new (){
+                            Show = true,
+                            FontSize = "22px",
+                            FontFamily= "Poppins, sans-serif",
+                            OffsetY = 0,
+                        },
+                        Value = new (){
+                            Show = true,
+                            FontSize = "14px",
+                            OffsetY = 5,
+                        },
+                        Total = new RadialBarDataLabelsTotal
+                        {
+                            Show = true,
+                            Label = "Total",
+                            Formatter = @"function (w) {
+                                return 249
+                            }"
+                        }
+                    },
+                }
+            },
+            Stroke = new Stroke { 
+                LineCap = ApexCharts.LineCap.Round,
+            },
+            Grid = new Grid {
+                Padding = new() {
+                    Bottom = -10,
+                    Top = -10
+                }
+            },
+        };
+        MonthlyTargetsSeriesConfig = new List<SeriesConfig<MonthlyTargets>>
+        {
+            new SeriesConfig<MonthlyTargets>
+            {
+                Name="Source",
+                SeriesType =SeriesType.RadialBar,
+                XValueSelector = e => e.Targets ?? "unknown",
+                YAggregateSelector = e => decimal.Round(e.Average(e => e.TargetsValue))
+            },
+        };
+
+        SummaryChartOptions = new ApexChartOptions<Summary> {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = false},
+                }, 
+                DropShadow = new ApexCharts.DropShadow {
+                    Enabled = false,
+                }
+            },
+            Grid = new Grid {
+                BorderColor = "#f1f1f1",
+                StrokeDashArray = 3
+            },
+            Stroke = new Stroke { 
+                Curve = Curve.Smooth,
+                Width = [2, 2],
+                DashArray = [0, 3],
+            },
+            Colors = new Color(new List<string> {"var(--primary-color)", "rgba(227, 84, 212)"}),
+            DataLabels = new DataLabels {
+                Enabled = false,
+            }, 
+            Legend = new Legend {
+                Show = true,
+                Position = LegendPosition.Top,
+                HorizontalAlign = Align.Center,
+                Markers=  new(){
+                    Width =  13,
+                    Height = 13,
+                    Radius=50
+                },
+            },
+            Tooltip = new Tooltip { 
+                Enabled= true,
+                Theme = ApexCharts.Mode.Dark
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis {
+                    Show = true,
+                    Labels = new YAxisLabels {
+                        Formatter = @"function (y) {
+                           if (y !== undefined && y !== null && !isNaN(y)) {
+                                return y.toFixed(0) + '';
+                            }
+                            return ''; 
+                        }"
+                    },
+                    Title = new () {
+                        Style = new () {
+                            Color = "#adb5be",
+                            FontSize = "14px",
+                            FontFamily = "poppins, sans-serif",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label",
+                        },
+                    },
+                    Min = 20,
+                    Max = 90,
+                    StepSize = 10,
+                },
+            },
+            Xaxis =  new XAxis {
+                AxisBorder = new () {
+                    Show = true,
+                    Color = "#e9e9e9",
+                    OffsetX = 0,
+                    OffsetY = 0,
+                },
+                AxisTicks = new () {
+                    Show = true,
+                    Color = "#e9e9e9",
+                    OffsetX = 0,
+                    OffsetY = 0,
+                },
+                Labels = new XAxisLabels {
+                    Show = true,
+                    Rotate = -90
+                },
+            },
+        };
+        SummarySeriesConfig = new List<SeriesConfig<Summary>>
+        {
+            new SeriesConfig<Summary>
+            {
+                Name="This Week",
+                SeriesType =SeriesType.Line,
+                XValueSelector = e => e.Week ?? "unknown",
+                YAggregateSelector = e => decimal.Round(e.Average(e => e.ThisWeekValue))
+            },
+            new SeriesConfig<Summary>
+            {
+                Name="Last Week",
+                SeriesType =SeriesType.Line,
+                XValueSelector = e => e.Week ?? "unknown",
+                YAggregateSelector = e => decimal.Round(e.Average(e => e.LastWeekValue))
+            },
+        };
+    }
+     // ProjectsCard Start //
+    private ApexChartOptions<T> InitializeChartOptions<T>(List<string> colors) where T : class, ILineGraph
+    {
+        return new ApexChartOptions<T>
+        {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = false},
+                }, 
+                Height ="40px",
+                Width ="70px",
+                Sparkline = new () {
+                    Enabled = true
+                },
+            }, 
+            PlotOptions = new PlotOptions {
+                Bar = new PlotOptionsBar {
+                    Horizontal = false,
+                    BorderRadius = 2,
+                    ColumnWidth = "80%",
+                }
+            },
+            Colors = new Color(colors),
+            Stroke = new Stroke { 
+                Curve = Curve.Smooth,
+                Width = 2,
+            },
+            Tooltip = new Tooltip{
+                Enabled = true,
+                Fixed=  new() {
+                    Enabled = false,
+                },
+                X = new TooltipX
+                {
+                    Show = false
+                },
+                Y = new TooltipY
+                {
+                    Title = new TooltipYTitle
+                    {
+                        Formatter = @"function(seriesName) {
+                            return '';
+                        }"
+                    }
+                },
+            },
+        };
+    }
+    //  ProjectsCard End // 
+    
+    protected void DeleteProjectsList(decimal Id)
+    {
+        var ProjectsToRemove = ProjectsService.GetProjectsListData().FirstOrDefault(o => o.Id == Id);
+        if (ProjectsToRemove != null)
+        {
+            ProjectsService.GetProjectsListData().Remove(ProjectsToRemove);
+        }
+    }
+
+}

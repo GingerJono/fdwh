@@ -1,0 +1,893 @@
+@page "/index4"
+@using ApexCharts
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using ApexSeries
+@using CardModel
+@using Crm
+@inject CrmService CrmService
+
+    <!-- Start::page-header -->
+    <SpkPageHeader PageItems="PageItems" />
+    <!-- End::page-header -->
+
+    <!-- Start::row-1 -->
+    <div class="row">
+        @foreach (var crmcard in CrmService.GetCrmcardData()) {
+            <div class="col-md-6 col-lg-4 col-xl">
+                    <SpkCrmCard CrmMainCard="crmcard"></SpkCrmCard>
+            </div>
+        }
+
+    </div>
+    <!-- End::row-1 -->
+    
+    <!-- Start::row-2 -->
+    <div class="row">
+        <div class="col-md-12 col-xxl-3">
+            <div class="card custom-card overflow-hidden earnings-card card-bg-primary shadow-sm">
+                <div class="card-body p-0 text-fixed-white">
+                    <div class="p-3 position-absolute total-earnings-content w-100">
+                        <div class="d-flex gap-2 align-items-center">
+                            <div>
+                                <span class="mb-1 d-block">Total Revenue</span> 
+                                <h4 class="mb-1 text-fixed-white">$578,784</h4> 
+                                <div class="text-fixed-white fs-13"> 
+                                    <span class="op-7"> Increased By </span>  
+                                    <SpkBadge BadgeClass="bg-primary1 align-middle op-9">7.66%<i class="ti ti-arrow-narrow-up"></i></SpkBadge>
+                                </div>
+                            </div><div class="avatar avatar-lg bg-white-transparent svg-white ms-auto shadow-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256"><path d="M184,89.57V84c0-25.08-37.83-44-88-44S8,58.92,8,84v40c0,20.89,26.25,37.49,64,42.46V172c0,25.08,37.83,44,88,44s88-18.92,88-44V132C248,111.3,222.58,94.68,184,89.57ZM232,132c0,13.22-30.79,28-72,28-3.73,0-7.43-.13-11.08-.37C170.49,151.77,184,139,184,124V105.74C213.87,110.19,232,122.27,232,132ZM72,150.25V126.46A183.74,183.74,0,0,0,96,128a183.74,183.74,0,0,0,24-1.54v23.79A163,163,0,0,1,96,152,163,163,0,0,1,72,150.25Zm96-40.32V124c0,8.39-12.41,17.4-32,22.87V123.5C148.91,120.37,159.84,115.71,168,109.93ZM96,56c41.21,0,72,14.78,72,28s-30.79,28-72,28S24,97.22,24,84,54.79,56,96,56ZM24,124V109.93c8.16,5.78,19.09,10.44,32,13.57v23.37C36.41,141.4,24,132.39,24,124Zm64,48v-4.17c2.63.1,5.29.17,8,.17,3.88,0,7.67-.13,11.39-.35A121.92,121.92,0,0,0,120,171.41v23.46C100.41,189.4,88,180.39,88,172Zm48,26.25V174.4a179.48,179.48,0,0,0,24,1.6,183.74,183.74,0,0,0,24-1.54v23.79a165.45,165.45,0,0,1-48,0Zm64-3.38V171.5c12.91-3.13,23.84-7.79,32-13.57V172C232,180.39,219.59,189.4,200,194.87Z"></path></svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="profit-report">
+                        <SpkApex TItem="Profit" ApexHeight="130" ChartOptions="ProfitChartOptions" Items="profit" Series="ProfitSeriesConfig"></SpkApex>
+                    </div>
+                    <div id="revenue-report">
+                        <SpkApex TItem="Revenue" ApexHeight="130" ChartOptions="RevenueChartOptions" Items="revenue" Series="RevenueSeriesConfig"></SpkApex>
+                    </div>
+                </div>
+            </div>
+            <SpkCrmProfitCard crmprofit="CrmService.GetcrmprofitData()"></SpkCrmProfitCard>
+        </div>
+        <div class="col-md-12 col-xxl-6">
+            <div class="card custom-card ">
+                <div class="card-header justify-content-between">
+                    <div class="card-title">Sales Overview</div>
+                    <div class="d-flex gap-2">
+                        <SpkButtons ButtonClass="btn-outline-light" ButtonSize="btn-sm">Today</SpkButtons>
+                        <SpkButtons ButtonClass="btn-outline-light" ButtonSize="btn-sm">Weakly</SpkButtons>
+                        <SpkButtons ButtonClass="btn-light" ButtonSize="btn-sm">Yearly</SpkButtons>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="sales-overview-crm">
+                        <SpkApex TItem="CRMOverview" ApexHeight="270" ChartOptions="CRMChartOptions" Items="crmoverview" Series="CRMOverviewSeriesConfig"></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12 col-xxl-3">
+            <div class="card custom-card">
+                <div class="card-header justify-content-between">
+                    <div class="card-title">Profit By Sale</div>
+                    <SpkDropdowns Tag="a" DropdownClass="btn btn-sm btn-light text-muted" DropdownText="Sort By">
+                        <ChildContent2>
+                            <ul class="dropdown-menu" role="menu">
+                                <li><a class="dropdown-item" href="javascript:void(0);">This Week</a></li>
+                                <li><a class="dropdown-item" href="javascript:void(0);">Last Week</a></li> 
+                                <li><a class="dropdown-item" href="javascript:void(0);">This Month</a></li> 
+                            </ul>
+                        </ChildContent2>
+                    </SpkDropdowns>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        @foreach(var (List,index) in CrmService.GetCrmProfitData().Select((product, index) => (product, index))) {
+                            <li class="list-group-item border-0 p-0 @(index == CrmService.GetCrmProfitData().Count() - 1 ? "mb-2" : "mb-4")">
+                                <div class="d-flex justify-content-between align-items-top">
+                                    <div class="d-flex">
+                                        <span class="avatar avatar-rounded avatar-md bg-@List.Color-transparent">
+                                            <i class="@List.Icon fs-18"></i>
+                                        </span>
+                                        <div class="d-flex flex-column ms-2">
+                                            <p class="fw-medium mb-0">@List.Title</p>
+                                            <p class="fs-12 text-muted mb-0">@List.Desc</p>
+                                        </div>
+                                    </div>
+                                    <h6 class="fw-medium mb-0">$@List.Value</h6>
+                                </div>
+                                <SpkProgress ProgressClass="mt-2 mb-0" ProgressSize="progress-xs" ProgressValue="@List.Percentage">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-@List.Color" style="width: @List.Percentage%"></div>
+                                </SpkProgress>
+                            </li> 
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End::row-2 -->
+
+    <!-- Start::row-3 -->
+    <div class="row">
+        <div class="col-xxl-4">
+            <div class="card custom-card">
+                <div class="card-header justify-content-between">
+                    <div class="card-title">
+                        Tasks List
+                    </div>
+                    <div>
+                        <ul class="nav nav-tabs justify-content-end nav-tabs-header card-headertabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <a class="nav-link active" data-bs-toggle="tab" role="tab" aria-current="page" href="#today" aria-selected="true">Today</a>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <a class="nav-link" data-bs-toggle="tab" role="tab" aria-current="page" href="#Upcoming" aria-selected="false" tabindex="-1">Upcoming</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card-body todo-tab p-0">
+                    <div class="tab-content">
+                        <div class="tab-pane border-0 active show" id="today" role="tabpanel">
+                            <ul class="list-unstyled task-list-tab mb-0">
+                                @foreach (var Tasks in CrmService.GetCrmTasksData().Take(6)){
+                                    <li>
+                                        <div class="todolist d-flex">
+                                            <div class="mb-3 form-check  me-2">
+                                                <input type="checkbox" class="form-check-input"  @bind="@Tasks.Selected">
+                                            </div>
+                                            <div class="flex-fill w-100">
+                                                <div class="d-flex align-items-start justify-content-between gap-1">
+                                                    <div>
+                                                        <span class="d-block fw-medium">@Tasks.Title  
+
+                                                        @if (Tasks.Status == "Progress")
+                                                            {
+                                                                <SpkTooltip Tag="span" TooltipClass="" TooltipTitle="Progress">
+                                                                    <i class="ms-1 ri-hourglass-line bg-primary-transparent p-1 align-middle fs-10 lh-1 rounded-circle"></i>
+                                                                </SpkTooltip>
+                                                            }  
+                                                            else if (Tasks.Status == "Completed")
+                                                            {
+                                                                <SpkTooltip Tag="span" TooltipClass="" TooltipTitle="Completed">
+                                                                    <i class="ms-1 ri-check-fill bg-success-transparent p-1 align-middle fs-10 lh-1 rounded-circle"></i>
+                                                                </SpkTooltip>
+                                                            }
+                                                            else if (Tasks.Status == "Pending")
+                                                            {
+                                                                <SpkTooltip Tag="span" TooltipClass="" TooltipTitle="Pending">
+                                                                    <i class="ms-1 ri-error-warning-line bg-primary1-transparent p-1 align-middle fs-10 lh-1 rounded-circle"></i>
+                                                                </SpkTooltip>
+                                                            }
+                                                            else {
+                                                                <SpkTooltip Tag="span" TooltipClass="" TooltipTitle="Not Started">
+                                                                    <i class="ms-1 ri-time-line bg-primary3-transparent p-1 align-middle fs-10 lh-1 rounded-circle"></i>
+                                                                </SpkTooltip>
+                                                            }
+                                                        </span>
+                                                        <p class="text-muted mb-0 fs-12">@Tasks?.Desc</p>
+                                                    </div>
+                                                    <div class="d-flex gap-1">
+                                                        <SpkTooltip Tag="a" TooltipClass="btn btn-sm btn-info-light btn-icon" TooltipTitle="Edit">
+                                                            <i class="ti ti-edit"></i>
+                                                        </SpkTooltip>
+                                                        <SpkTooltip Tag="a" TooltipClass="btn btn-sm btn-danger-light btn-icon" TooltipTitle="Delete"  @onclick="@(() => DeleteTask(Tasks?.Id ?? 0))">
+                                                            <i class="ti ti-trash"></i>
+                                                        </SpkTooltip>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                        <div class="tab-pane border-0" id="Upcoming" role="tabpanel">
+                            <ul class="list-unstyled task-list-tab mb-0">
+                                @foreach (var Tasks in CrmService.GetCrmTasksData().Skip(6)){
+                                    <li>
+                                        <div class="todolist d-flex">
+                                            <div class="mb-3 form-check  me-2">
+                                                <input type="checkbox" class="form-check-input"  @bind="@Tasks.Selected">
+                                            </div>
+                                            <div class="flex-fill w-100">
+                                                <div class="d-flex align-items-start justify-content-between gap-1">
+                                                    <div>
+                                                        <span class="d-block fw-medium">@Tasks.Title 
+
+                                                        @if (Tasks.Status == "Progress")
+                                                            {
+                                                                <SpkTooltip Tag="span" TooltipClass="" TooltipTitle="Progress">
+                                                                    <i class="ms-1 ri-hourglass-line bg-primary-transparent p-1 align-middle fs-10 lh-1 rounded-circle"></i>
+                                                                </SpkTooltip>
+                                                            }  
+                                                            else if (Tasks.Status == "Completed")
+                                                            {
+                                                                <SpkTooltip Tag="span" TooltipClass="" TooltipTitle="Completed">
+                                                                    <i class="ms-1 ri-check-fill bg-success-transparent p-1 align-middle fs-10 lh-1 rounded-circle"></i>
+                                                                </SpkTooltip>
+                                                            }
+                                                            else if (Tasks.Status == "Pending")
+                                                            {
+                                                                <SpkTooltip Tag="span" TooltipClass="" TooltipTitle="Pending">
+                                                                    <i class="ms-1 ri-error-warning-line bg-primary1-transparent p-1 align-middle fs-10 lh-1 rounded-circle"></i>
+                                                                </SpkTooltip>
+                                                            }
+                                                            else {
+                                                                <SpkTooltip Tag="span" TooltipClass="" TooltipTitle="Not Started">
+                                                                    <i class="ms-1 ri-time-line bg-primary3-transparent p-1 align-middle fs-10 lh-1 rounded-circle"></i>
+                                                                </SpkTooltip>
+                                                            }
+                                                        </span>
+                                                        <p class="text-muted mb-0 fs-12">@Tasks?.Desc</p>
+                                                    </div>
+                                                    <div class="d-flex gap-1">
+                                                        <SpkTooltip Tag="a" TooltipClass="btn btn-sm btn-info-light btn-icon" TooltipTitle="Edit">
+                                                            <i class="ti ti-edit"></i>
+                                                        </SpkTooltip>
+                                                        <SpkTooltip Tag="a" TooltipClass="btn btn-sm btn-danger-light btn-icon" TooltipTitle="Delete"  @onclick="@(() => DeleteTask(Tasks?.Id ?? 0))">
+                                                            <i class="ti ti-trash"></i>
+                                                        </SpkTooltip>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xxl-3">
+            <div class="card custom-card overflow-hidden">
+                <div class="card-header justify-content-between">
+                    <div class="card-title">
+                        Leads Overview
+                    </div>
+                    <SpkDropdowns Tag="a" DropdownClass="btn btn-light border btn-full btn-sm " DropdownToggle=false DropdownText="Yearly<i class='ti ti-chevron-down ms-1'></i>">
+                        <ChildContent2>
+                            <ul class="dropdown-menu" role="menu">
+                                <li><a class="dropdown-item" href="javascript:void(0);">Yearly</a></li>
+                                <li><a class="dropdown-item" href="javascript:void(0);">Weekly</a></li>
+                                <li><a class="dropdown-item" href="javascript:void(0);">Monthly</a></li>
+                            </ul>
+                        </ChildContent2>
+                    </SpkDropdowns>
+                </div>
+                <div class="card-body px-0">
+                    <div id="Leads-overview">
+                        <SpkApex TItem="Leads" ApexHeight="327" ChartOptions="LeadsChartOptions" Items="lead" Series="LeadsSeriesConfig"></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12 col-xxl-5">
+            <div class="card custom-card overflow-hidden">
+                <div class="card-header justify-content-between">
+                    <div class="card-title">Sales Performance</div>
+                    <SpkDropdowns Tag="a" DropdownClass="btn btn-light border btn-full btn-sm " DropdownToggle=false DropdownText="Today<i class='ti ti-chevron-down ms-1'></i>">
+                        <ChildContent2>
+                            <ul class="dropdown-menu" role="menu">
+                                <li><a class="dropdown-item" href="javascript:void(0);">Today</a></li>
+                                <li><a class="dropdown-item" href="javascript:void(0);">Weekly</a></li>
+                                <li><a class="dropdown-item" href="javascript:void(0);">Monthly</a></li>
+                            </ul>
+                        </ChildContent2>
+                    </SpkDropdowns>
+                </div>
+                <div class="card-body p-0">
+                    <SpkTables Items="CrmService.GetSalesTableData()" ShowCheckbox="false" TableClass="text-nowrap text-center">
+                       @foreach(var Sales in CrmService.GetSalesTablesData()) {
+                            <tr>
+                                <td>@Sales.Id</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-2 lh-1">
+                                            <span class="avatar avatar-xs">
+                                                <img src="@Sales.RepresentativeImg" alt="">
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <a href="javascript:void(0)" class="fw-medium">@Sales.Representative</a>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>@Sales.Deals</td>
+                                <td>@Sales.Leads</td>
+                                <td>@Sales.Rate<i class="ms-1 align-middle fs-18 @(Sales.IsIncreased ? "ri-arrow-up-s-fill text-success" : "ri-arrow-down-s-fill text-danger")"></i>
+                                </td>
+                            </tr>
+                       }
+                    </SpkTables>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End::row-3 -->
+
+    <!-- Start::row-4 -->
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card custom-card overflow-hidden">
+                <div class="card-header justify-content-between">
+                    <div class="card-title">
+                        Leads Report
+                    </div>
+                    <SpkDropdowns Tag="a" DropdownClass="btn btn-light border btn-full btn-sm " DropdownToggle=false DropdownText="View All<i class='ti ti-chevron-down ms-1'></i>">
+                        <ChildContent2>
+                            <ul class="dropdown-menu" role="menu">
+                                <li><a class="dropdown-item" href="javascript:void(0);">Download</a></li>
+                                <li><a class="dropdown-item" href="javascript:void(0);">Import</a></li>
+                                <li><a class="dropdown-item" href="javascript:void(0);">Export</a></li>
+                            </ul>
+                        </ChildContent2>
+                    </SpkDropdowns>
+                </div>
+                <div class="card-body active-tab">
+                    <SpkTables Items="CrmService.GetLeadHeaderData()" ShowCheckbox="false" TableClass="table-bordered text-nowrap mb-0">
+                       @foreach(var CrmLeads in CrmService.GetLeadsTableData()) {
+                        <tr>
+                            <td>
+                                <span class="">@CrmLeads.Id</span>
+                            </td>
+                            <td>
+                                <div class="d-flex">
+                                    <span class="avatar avatar-sm">
+                                        <img src="@CrmLeads.LeadImg" class="" alt="">
+                                    </span>
+                                    <div class="flex-1 ms-2">
+                                        <p class="mb-0 fs-14">@CrmLeads.LeadName</p>
+                                        <a href="javascript:void(0);" class="text-muted fs-12">@CrmLeads.LeadEmail</a>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="">@CrmLeads.Phone</span>
+                            </td>
+                            <td>
+                                <span class="">@CrmLeads.Company</span>
+                            </td>
+                            <td>
+                                <SpkBadge BadgeClass="@($"bg-{CrmLeads.Statusclass}")">@CrmLeads.Status</SpkBadge>
+                            </td>
+                            <td>
+                                <span><i class="ri-map-pin-fill text-muted me-1"></i>@CrmLeads.Location</span>
+                            </td>
+                            <td>
+                                <span>@CrmLeads.Date</span>
+                            </td>
+                            <td>
+                                <span>$@CrmLeads.Amount</span>
+                            </td>
+                            <td>
+                                <div class="btn-list">
+                                    <SpkTooltip Tag="a" TooltipClass="btn  btn-icon rounded-pill  btn-primary-light" TooltipTitle="View" TooltipPlacement="top"  >
+                                        <i class="ti ti-eye"></i>
+                                    </SpkTooltip>
+                                    <SpkTooltip Tag="a" TooltipClass="btn  btn-icon rounded-pill  btn-info-light" TooltipTitle="Edit" TooltipPlacement="top"  >
+                                        <i class="ti ti-pencil"></i>
+                                    </SpkTooltip>
+                                    <SpkTooltip Tag="a" TooltipClass="btn  btn-icon rounded-pill  btn-primary2-light" TooltipTitle="Delete" TooltipPlacement="top"  @onclick="@(() => DeleteLead(CrmLeads?.Id ?? 0))">
+                                        <i class="ti ti-trash"></i>
+                                    </SpkTooltip>
+                                </div>
+                            </td>
+                        </tr>
+                       }
+                    </SpkTables>
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex align-items-center">
+                        <div>Showing 5 Entries <i class="bi bi-arrow-right ms-2 fw-semibold"></i></div>
+                        <div class="ms-auto">
+                            <nav aria-label="Page navigation" class="pagination-style-4">
+                                <ul class="pagination mb-0">
+                                    <li class="page-item disabled"><a class="page-link" href="javascript:void(0);">Prev</a></li>
+                                    <li class="page-item active"><a class="page-link" href="javascript:void(0);">1</a></li>
+                                    <li class="page-item"><a class="page-link" href="javascript:void(0);">2</a></li>
+                                    <li class="page-item"><a class="page-link text-primary" href="javascript:void(0);">Next</a></li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End::row-4 -->
+
+               
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Dashboards" },
+        new SpkPageHeader.PageItem { PageTitle = "CRM" },
+    };
+    // Profit-Report Start //
+    private List<Profit> profit { get; set; } = CrmService.GetProfitData();
+    private ApexChartOptions<Profit> ProfitChartOptions { get; set; } = new();
+    private List<SeriesConfig<Profit>>? ProfitSeriesConfig { get; set; }
+    // Profit-Report End //
+    
+    // Revenue-Report Start //
+    private List<Revenue> revenue { get; set; } = CrmService.GetRevenueData();
+    private ApexChartOptions<Revenue> RevenueChartOptions { get; set; } = new();
+    private List<SeriesConfig<Revenue>>? RevenueSeriesConfig { get; set; }
+   
+    // Revenue-Report End //
+
+    // CRM Overview Start //
+    private List<CRMOverview> crmoverview { get; set; } = CrmService.GetCRMOverviewData();
+    private ApexChartOptions<CRMOverview> CRMChartOptions { get; set; } = new();
+    private List<SeriesConfig<CRMOverview>>? CRMOverviewSeriesConfig { get; set; }
+    // CRM Overview End //
+
+    // Leads Chart Start //
+    private List<Leads> lead { get; set; } = CrmService.GetLeadsData();
+    private ApexChartOptions<Leads> LeadsChartOptions { get; set; } = new();
+    private List<SeriesConfig<Leads>>? LeadsSeriesConfig { get; set; }
+    // Leads Chart End //
+
+    protected override void OnInitialized() {
+
+        // Profit-Report Start //
+        ProfitChartOptions = new ApexChartOptions<Profit> {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = false},
+                }, 
+                Stacked = true,
+                Sparkline = new () {
+                    Enabled = true
+                },
+                DropShadow = new ApexCharts.DropShadow {
+                    Enabled = true,
+                    Color = "rgb(0, 0, 0)",
+                    Top = 7,
+                    Left = 1,
+                    Blur = 3,
+                    Opacity = 0.2
+                },
+            },
+            PlotOptions = new PlotOptions
+            {
+                Bar = new PlotOptionsBar
+                {
+                    Horizontal = false,
+                    ColumnWidth = "40%",
+                }
+            },
+            Grid = new Grid {
+                BorderColor = "#f2f6f7",
+            },
+            Colors = new Color(new List<string> { "rgba(33, 206, 158, 0.55)" }),
+            DataLabels = new DataLabels {
+                Enabled = false,
+            }, 
+            Stroke = new Stroke { 
+                Curve = Curve.Smooth,
+                Width = 2,
+                Show= true,
+            },
+            Fill = new Fill {
+                Colors = null,
+                Opacity = 0.025,
+                Type = new List<FillType> { FillType.Gradient},
+                Gradient = new ApexCharts.FillGradient {
+                    Shade = ApexCharts.GradientShade.Light,
+                    Type = ApexCharts.GradientType.Horizontal,
+                    ShadeIntensity = 1,
+                    InverseColors = true,
+                    OpacityFrom = 0.4,
+                    OpacityTo = 0.1,
+                    Stops = [0, 90, 100],
+                    ColorStops = new List<FillGradientStops> {
+                        new FillGradientStops { Offset = 0, Color = "rgba(225,255,255,0.2)", Opacity = 0.1 },
+                        new FillGradientStops { Offset = 75, Color = "rgba(225,255,255,0.2)", Opacity = 0.1 },
+                        new FillGradientStops { Offset = 100, Color = "rgba(225,255,255,0.15)", Opacity = 0.1 },
+                    }
+                }
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis
+                {
+                    Title = new AxisTitle {
+                        Style = new AxisTitleStyle {
+                            Color = "#adb5be",
+                            FontSize = "14px",
+                            FontFamily = "poppins, sans-serif",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label"
+                        }
+                    },
+                    Labels = new YAxisLabels {
+                        Formatter= @"function (y) {
+                            return y.toFixed(0) + '';
+                            }",
+                        Show = true,
+                    },
+                }
+            },
+            Xaxis =  new XAxis {
+                AxisBorder = new () {
+                    Show = true,
+                    Color = "rgba(119, 119, 142, 0.05)",
+                    OffsetX = 0,
+                    OffsetY = 0,
+                },
+                AxisTicks = new () {
+                    Show = true,
+                    Color = "rgba(119, 119, 142, 0.05)",
+                    OffsetX = 0,
+                    OffsetY = 0,
+                },
+                Labels = new XAxisLabels {
+                    Rotate = -90,
+                },
+            },
+            Tooltip = new Tooltip { 
+                Enabled= false,
+            },
+            Legend = new Legend
+            {
+                Show = false,
+            },
+        };        
+        ProfitSeriesConfig = new List<SeriesConfig<Profit>>
+        {
+            new SeriesConfig<Profit>
+            {
+                SeriesType = SeriesType.Area,
+                XValueSelector = e => e.Series,
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.Profitvalue)
+            },
+        };
+        // Profit-Report End //
+
+        // Revenue-Report Start //
+        RevenueChartOptions = new ApexChartOptions<Revenue> {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = false},
+                }, 
+                Stacked = true,
+                Sparkline = new () {
+                    Enabled = true
+                },
+                DropShadow = new ApexCharts.DropShadow {
+                    Enabled = true,
+                    Color = "rgb(0, 0, 0)",
+                    Top = 3,
+                    Left = 1,
+                    Blur = 3,
+                    Opacity = 0.1
+                },
+            },
+            PlotOptions = new PlotOptions
+            {
+                Bar = new PlotOptionsBar
+                {
+                    Horizontal = false,
+                    ColumnWidth = "50%",
+                }
+            },
+            Grid = new Grid {
+                BorderColor = "#f2f6f7",
+            },
+            Colors = new Color(new List<string> { "rgba(225,255,255,0.1)" }),
+            DataLabels = new DataLabels {
+                Enabled = false,
+            }, 
+            Stroke = new Stroke { 
+                Curve = Curve.Smooth,
+                Width = 1.5,
+                Show= true,
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis
+                {
+                    Title = new AxisTitle {
+                        Style = new AxisTitleStyle {
+                            Color = "#adb5be",
+                            FontSize = "14px",
+                            FontFamily = "poppins, sans-serif",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label"
+                        }
+                    },
+                    Labels = new YAxisLabels {
+                        Formatter= @"function (y) {
+                            return y.toFixed(0) + '';
+                            }",
+                        Show = true,
+                    },
+                }
+            },
+            Xaxis =  new XAxis {
+                AxisBorder = new () {
+                    Show = true,
+                    Color = "rgba(119, 119, 142, 0.05)",
+                    OffsetX = 0,
+                    OffsetY = 0,
+                },
+                AxisTicks = new () {
+                    Show = true,
+                    Color = "rgba(119, 119, 142, 0.05)",
+                    OffsetX = 0,
+                    OffsetY = 0,
+                },
+                Labels = new XAxisLabels {
+                    Rotate = -90,
+                },
+            },
+            Tooltip = new Tooltip { 
+                Enabled= false,
+            },
+            Legend = new Legend
+            {
+                Show = false,
+            },
+        };
+        RevenueSeriesConfig = new List<SeriesConfig<Revenue>>
+        {
+            new SeriesConfig<Revenue>
+            {
+                SeriesType = SeriesType.Bar,
+                XValueSelector = e => e.Series,
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.revenuevalue)
+            },
+        };
+        // Revenue-Report End //
+
+        // CRM Overview Start //
+        CRMChartOptions = new ApexChartOptions<CRMOverview> {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = false},
+                }, 
+                DropShadow = new ApexCharts.DropShadow {
+                    Enabled = true,
+                    Color = "#000",
+                    Top = 0,
+                    Left = 0,
+                    Blur = 4,
+                    Opacity = 0.3
+                },
+            },
+            Colors = new Color(new List<string> {"var(--primary-color)", "rgba(227, 84, 212, .4)", "rgba(255, 93, 159, .4)"}),
+            Fill = new Fill {
+                Opacity = 0.025,
+                Type = new List<FillType> { FillType.Gradient,FillType.Gradient,FillType.Gradient},
+                Gradient = new ApexCharts.FillGradient {
+                    Shade = ApexCharts.GradientShade.Light,
+                    Type = ApexCharts.GradientType.Vertical,
+                    GradientToColors = new Color(new List<string> {"var(--primary-color)", "rgba(227, 84, 212, 0.2)", "rgba(255, 93, 159, 0.1)"}),
+                    ShadeIntensity = 0.1,
+                    OpacityFrom = 0.08,
+                    OpacityTo = 0.06,
+                    Stops = [0, 90, 100],
+                }
+            },
+            Grid = new Grid {
+                BorderColor = "#f1f1f1",
+                StrokeDashArray = 3
+            },
+            DataLabels = new DataLabels {
+                Enabled = false,
+            }, 
+            Legend = new Legend {
+                Show = true,
+                Position = LegendPosition.Top,
+                HorizontalAlign = Align.Center,
+                OffsetX = 0,
+                OffsetY = 8,
+                Markers = new() {
+                    Width = 5,
+                    Height = 5,
+                    StrokeWidth = 0,
+                    StrokeColor = "#fff",
+                    FillColors = null,
+                    Radius = 12,
+                    OffsetX = 0,
+                    OffsetY = 0
+                },
+            },
+            Stroke = new Stroke { 
+                Curve = [Curve.Smooth,Curve.Smooth,Curve.Smooth],
+                Width = [2, 0, 2],
+                DashArray= [0, 0, 4],
+                LineCap = ApexCharts.LineCap.Round,
+                Show= true,
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis {
+                    AxisBorder = new () {
+                        Show = true,
+                        Color = "rgba(119, 119, 142, 0.05)",
+                        OffsetX = 0,
+                        OffsetY = 0,
+                    },
+                    AxisTicks = new () {
+                        Show = true,
+                        Color = "rgba(119, 119, 142, 0.05)",
+                        BorderType = ApexCharts.BorderType.Solid,
+                        OffsetX = 0,
+                        OffsetY = 0,
+                    },
+                    Min = 100,
+                    Max = 900,
+                    StepSize = 100,
+                },
+            },
+            Tooltip = new() {
+                Shared = true,
+                Intersect = false,
+                Y = new() {
+                    Formatter = @"function (y) {
+                    if (typeof y !== 'undefined') {
+                        return y.toFixed(0) + '%';
+                    }
+                    return y;
+                }",
+                    },
+            },
+            Xaxis =  new XAxis {
+                AxisBorder = new () {
+                    Show = true,
+                    Color = "rgba(119, 119, 142, 0.05)",
+                    OffsetX = 0,
+                    OffsetY = 0,
+                },
+                AxisTicks = new () {
+                    Show = true,
+                    Color = "rgba(119, 119, 142, 0.05)",
+                    BorderType = ApexCharts.BorderType.Solid,
+                    OffsetX = 0,
+                    OffsetY = 0,
+                },
+                Labels = new XAxisLabels {
+                    Rotate = -90,
+                },
+            },
+        };
+        CRMOverviewSeriesConfig = new List<SeriesConfig<CRMOverview>>
+        {
+            new SeriesConfig<CRMOverview>
+            {
+                SeriesType = SeriesType.Area,
+                Name = "Total Income",
+                XValueSelector = e => e.Month ?? string.Empty,
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.Income),
+            },
+            new SeriesConfig<CRMOverview>
+            {
+                SeriesType = SeriesType.Area,
+                Name = "Total Revenue",
+                XValueSelector = e => e.Month ?? string.Empty,
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.Revenue),
+            },
+            new SeriesConfig<CRMOverview>
+            {
+                SeriesType = SeriesType.Area,
+                Name = "Average Profit",
+                XValueSelector = e => e.Month ?? string.Empty,
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.Profit),
+            },
+        };
+        // CRM Overview End //
+
+        // Leads Chart Start //
+        LeadsChartOptions = new ApexChartOptions<Leads> {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = false},
+                }, 
+            },
+            Colors = new Color(new List<string> { "var(--primary09)", "rgba(227, 84, 212,0.5)", "rgba(255, 93, 159, .4)", "rgba(255, 142, 111, .5)"}),
+            Yaxis = new List<YAxis>() {
+                new YAxis
+                {
+                    AxisBorder = new () {
+                        Show = false,
+                        Color = "rgba(119, 119, 142, 0.05)",
+                        OffsetX = 0,
+                        OffsetY = 0,
+                    },
+                    Labels = new YAxisLabels {
+                        Formatter= @"function (val, i) {
+                        if (i % 5 === 0) {
+                        return val
+                        }
+                        }",
+                    }
+                },
+            },
+            Markers = new Markers {
+                Size= 0,
+            },
+            Stroke = new Stroke { 
+                Width = 1,
+            },
+            Fill = new Fill {
+                Opacity = 0.1
+            },
+            Legend = new Legend
+            {
+                Show = true,
+                FontSize = "12px",
+                OffsetX = 0,
+                OffsetY = 10,
+                Labels = new LegendLabels
+                {
+                    Colors = "#9ba5b7"
+                },
+                Markers = new LegendMarkers
+                {
+                    Width = 6,
+                    Height = 6,
+                    StrokeWidth = 0,
+                    StrokeColor = "#fff",
+                    FillColors = null,
+                    Radius = 7,
+                    OffsetX = 0,
+                    OffsetY = 0
+                },
+    
+            },
+        };
+        LeadsSeriesConfig = new List<SeriesConfig<Leads>>
+        {
+            new SeriesConfig<Leads>
+            {
+                SeriesType = SeriesType.Radar,
+                Name = "Hot Leads",
+                XValueSelector = e => e.Year ?? string.Empty,
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.Value1)
+            },
+            new SeriesConfig<Leads>
+            {
+                SeriesType = SeriesType.Radar,
+                Name = "Warm Leads",
+                XValueSelector = e => e.Year ?? string.Empty,
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.Value2)
+            },
+            new SeriesConfig<Leads>
+            {
+                SeriesType = SeriesType.Radar,
+                Name = "Cold Leads",
+                XValueSelector = e => e.Year ?? string.Empty,
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.Value3)
+            },
+            new SeriesConfig<Leads>
+            {
+                SeriesType = SeriesType.Radar,
+                Name = "Qualified",
+                XValueSelector = e => e.Year ?? string.Empty,
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.Value4)
+            },
+        };
+        // Leads Chart End //
+    }
+    protected void DeleteTask(decimal Id)
+    {
+        var TaskRemove = CrmService.GetCrmTasksData().FirstOrDefault(o => o.Id == Id);
+        if (TaskRemove != null)
+        {
+            CrmService.GetCrmTasksData().Remove(TaskRemove);
+        }
+    } 
+    protected void DeleteLead(decimal Id)
+    {
+        var TaskRemove = CrmService.GetLeadsTableData().FirstOrDefault(o => o.Id == Id);
+        if (TaskRemove != null)
+        {
+            CrmService.GetLeadsTableData().Remove(TaskRemove);
+        }
+    }
+    
+
+}

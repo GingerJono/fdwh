@@ -1,0 +1,144 @@
+@page "/crm-deals"
+@using FlatpickrBlazor
+@using FlatpickrBlazor.Components
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using CrmData
+@inject CrmDataService CrmDataService
+
+    <!-- Flatpickr Css -->
+    <link href="_content/FlatpickrBlazor/flatpickr.min.css" rel="stylesheet" />
+
+    <!-- Dragula Css -->
+    <link rel="stylesheet" href="../assets/libs/dragula/dist/dragula.min.css">
+
+    <!-- Start::page-header -->
+    <SpkPageHeader PageItems="PageItems" />
+    <!-- End::page-header -->
+
+    <!-- Start::row-1 -->
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center flex-wrap gap-2 justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <span class="fw-medium fs-16 me-2">Deals</span><SpkBadge BadgeClass="bg-primary align-middle">26</SpkBadge>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2">
+                            <SpkButtons ButtonClass="btn-primary" ButtonSize="btn-sm" data-bs-toggle="modal" data-bs-target="#create-contact"><i class="ri-add-line me-1 fw-medium align-middle"></i>New Deal</SpkButtons>
+                            <SpkButtons ButtonClass="btn-success-light" ButtonSize="btn-sm">Export As CSV</SpkButtons>
+                            <SpkDropdowns Tag="a" DropdownClass="btn btn-light btn-sm" DropdownText="Sort By<i class='ri-arrow-down-s-line align-middle ms-1 d-inline-block'></i>" DropdownToggle=false>
+                                <ChildContent2>
+                                    <ul class="dropdown-menu" role="menu">
+                                        <li><a class="dropdown-item" href="javascript:void(0);">Newest</a></li>
+                                        <li><a class="dropdown-item" href="javascript:void(0);">Date Added</a></li>
+                                        <li><a class="dropdown-item" href="javascript:void(0);">A - Z</a></li>
+                                    </ul>
+                                </ChildContent2>
+                            </SpkDropdowns>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--End::row-1 -->
+
+    <!-- Start::row-2 -->
+    <div class="row">
+        @foreach(var CrmDeal in CrmDataService.GetDealList()){
+            <div class="col-xxl-2 col-md-4">
+                <SpkDealsCard CrmDeal="CrmDeal"></SpkDealsCard>
+             </div>
+        }
+    </div>
+    <!-- End::row-2 -->
+
+    <!-- Start:: New Deal -->
+    <div class="modal fade" id="create-contact" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">New Deal</h6>
+                    <SpkButtons ButtonClass="btn-close" data-bs-dismiss="modal" aria-label="Close"></SpkButtons>
+                </div>
+                <div class="modal-body">
+                    <div class="row gy-3">
+                        <div class="col-xl-12">
+                            <div class="mb-0 text-center">
+                                <span class="avatar avatar-xxl avatar-rounded">
+                                    <img src="@imageDataUrl" alt="Selected Image" id="profile-img" />
+                                    <SpkBadge BadgeClass="bg-primary avatar-badge" IsRounded=true>
+                                        <InputFile id="profile-change" class="position-absolute w-100 h-100 op-0" OnChange="LoadFile"></InputFile> <i class="fe fe-camera"></i>
+                                    </SpkBadge>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-xl-6">
+                            <label for="deal-name" class="form-label">Contact Name</label>
+                            <input type="text" class="form-control" id="deal-name" placeholder="Contact Name">
+                        </div>
+                        <div class="col-xl-6">
+                            <label for="deal-lead-score" class="form-label">Deal Value</label>
+                            <input type="number" class="form-control" id="deal-lead-score" placeholder="Deal Value">
+                        </div>
+                        <div class="col-xl-12">
+                            <label for="company-name" class="form-label">Company Name</label>
+                            <input type="text" class="form-control" id="company-name" placeholder="Company Name">
+                        </div>
+                        <div class="col-xl-12">
+                            <label class="form-label">Last Contacted</label>
+                            <div class="input-group">
+                                <div class="input-group-text text-muted"> <i class="ri-calendar-line"></i> </div>
+                                <Flatpickr class="form-control" @ref="_datetime" Options="@_flatpickrOptions2"  placeholder="Choose date and time"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <SpkButtons ButtonClass="m-0 btn-primary1-light" data-bs-dismiss="modal">Cancel</SpkButtons>
+                    <SpkButtons ButtonClass="m-0 btn-primary">Create Deal</SpkButtons>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End:: New Deal -->
+
+    <!-- Dragula JS -->
+    <script src="../assets/libs/dragula/dist/dragula.min.js"></script>
+    <script src="../assets/js/crm-deals.js"></script>
+
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Apps" },
+        new SpkPageHeader.PageItem { PageTitle = "CRM" },
+        new SpkPageHeader.PageItem { PageTitle = "Deals" },
+    };
+    <!-- Flatpickr JS Start -->
+    public Flatpickr? _datetime;
+    private FlatpickrBlazor.FlatpickrOptions _flatpickrOptions2 = new FlatpickrBlazor.FlatpickrOptions   
+    {
+        EnableTime = true,
+        DateFormat = "Y-m-d H:i",
+    };
+}
+@code {
+    string imageDataUrl ="../assets/images/faces/9.jpg";
+    async Task LoadFile(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null && file.ContentType.Contains("image"))
+        {
+            var buffer = new byte[file.Size];
+            await file.OpenReadStream().ReadAsync(buffer);
+            var imageBase64 = Convert.ToBase64String(buffer);
+            imageDataUrl = $"data:{file.ContentType};base64,{imageBase64}";
+        }
+        else
+        {
+            imageDataUrl = "";
+            imageDataUrl = "Invalid image selected";
+        }
+    }
+}

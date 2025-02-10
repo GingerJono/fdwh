@@ -1,0 +1,28 @@
+
+@using CardModel
+
+@code {
+    [Parameter] public ProductActivity? productactivity { get; set; }    
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}
+
+<div class="d-flex align-items-top @productactivity?.Activityclass">
+    @if(!string.IsNullOrEmpty(productactivity?.Icon)){
+        <div class="avatar @productactivity?.IconSize  @productactivity?.Iconclass avatar-rounded">
+            <i class="@productactivity?.Icon"></i>
+        </div>
+    }
+    <div class="activity-content text-truncate">
+        <span class="d-block fw-medium @productactivity?.TitleClass">@((MarkupString)(productactivity?.Title  ?? string.Empty))</span>
+        <span class="d-block fs-12 text-muted w-80 text-truncate @productactivity?.DescClass @(string.IsNullOrEmpty(productactivity?.ChildContent) ? "pb-0" : "pb-2")">
+            @((MarkupString)(productactivity?.Desc ?? string.Empty))
+        </span>
+        @if (productactivity?.ChildContent != null)
+        {
+            @((MarkupString)(productactivity?.ChildContent ?? string.Empty))
+        }
+    </div>
+    <div class="flex-fill text-end text-nowrap">
+        <span class="d-block activity-duration">@productactivity?.Duration</span>
+    </div>
+</div>

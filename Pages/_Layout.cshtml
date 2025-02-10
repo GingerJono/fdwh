@@ -1,0 +1,234 @@
+﻿@using Microsoft.AspNetCore.Components.Web
+@namespace Sandbox.Pages
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@inject StateService stateService
+@using System.Text.Json;
+@inject IHttpContextAccessor HttpContextAccessor
+@{ 
+    var appState = stateService.GetAppState();
+
+}
+
+<!DOCTYPE html>
+<html lang="en"  data-toggled="close"
+    @if (!string.IsNullOrEmpty(appState?.Direction))
+    {
+        <text>dir="@appState.Direction"</text>
+    }
+    @if (!string.IsNullOrEmpty(appState?.NavigationStyles))
+    {
+        <text>data-nav-layout="@appState.NavigationStyles"</text>
+    }
+    @if (!string.IsNullOrEmpty(appState?.ColorTheme))
+    {
+        <text>data-theme-mode="@appState.ColorTheme"</text>
+    }
+    @if (!string.IsNullOrEmpty(appState?.HeaderColor))
+    {
+        <text>data-header-styles="@appState.HeaderColor"</text>
+    }
+    @if (!string.IsNullOrEmpty(appState?.MenuColor))
+    {
+        <text>data-menu-styles="@appState.MenuColor"</text>
+    }
+    @if (!string.IsNullOrEmpty(appState?.MenuStyles))
+    {
+        <text>data-nav-style="@appState.MenuStyles"</text>
+    }
+    @if (!string.IsNullOrEmpty(appState?.PageStyles))
+    {
+        <text>data-page-style="@appState.PageStyles"</text>
+    }
+    @if (!string.IsNullOrEmpty(appState?.WidthStyles))
+    {
+        <text>data-width="@appState.WidthStyles"</text>
+    }
+    @if (!string.IsNullOrEmpty(appState?.MenuPosition))
+    {
+        <text>data-menu-position="@appState.MenuPosition"</text>
+    }
+    @if (!string.IsNullOrEmpty(appState?.HeaderPosition))
+    {
+        <text>data-header-position="@appState.HeaderPosition"</text>
+    }
+    @if (!string.IsNullOrEmpty(appState?.BackgroundImage))
+    {
+        <text>data-bg-img="@appState.BackgroundImage"</text>
+    }
+    @{
+        string style = "";
+
+        if (!string.IsNullOrEmpty(appState?.ThemePrimary))
+        {
+            style += $"--primary-rgb: {appState.ThemePrimary}; ";
+        }
+        if (!string.IsNullOrEmpty(appState?.ThemeBackground))
+        {
+            style += $"--body-bg-rgb: {appState.ThemeBackground}; ";
+            style += $"--body-bg-rgb2: {appState.ThemeBackground1}; ";
+            style += $"--light-rgb: {appState.ThemeBackground1}; ";
+            style += $"--form-control-bg: rgb({appState.ThemeBackground1}); ";
+            style += $"--gray-3: rgb({appState.ThemeBackground1}); ";
+            style += $"--light-rgb: rgba(255,255,255,0.1); ";
+        }
+    }
+    style="@style">
+
+    <head>
+
+        <!-- Meta Data -->
+		<meta charset="UTF-8">
+        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="Description" content="Xintra - Blazor Server App Bootstrap5 Premium Admin & Dashboard Template">
+        <meta name="Author" content="Spruko Technologies Private Limited">
+        <meta name="keywords" content="blazor c#, blazor,blazor template,blazor server app,framework blazor,bootstrap templates,blazor dashboard,blazor ui,admin dashboard,admin panel template,blazor admin template,bootstrap framework,blazor bootstrap,blazorserver,bootstrap blazor,bootstrap dashboard">
+
+        <!-- TITLE -->
+        <title> Xintra - Blazor Server App Bootstrap5 Premium Admin & Dashboard Template </title>
+
+        <!-- FAVICON -->
+        <link rel="icon" href="@($"{NavigationManager.BaseUri}assets/images/brand-logos/favicon.ico")" type="image/x-icon">
+
+        <!-- Style Css -->
+        <link href="@($"{NavigationManager.BaseUri}assets/css/styles.css")" rel="stylesheet" >
+        
+        <!-- ICONS CSS -->
+        <link href="@($"{NavigationManager.BaseUri}assets/css/icons.css")" rel="stylesheet">
+
+        <!-- node waves CSS -->
+        <link rel="stylesheet" href="@($"{NavigationManager.BaseUri}assets/libs/node-waves/dist/waves.min.css")">
+
+        <!-- Tom Select CSS -->
+        <link rel="stylesheet" href="@($"{NavigationManager.BaseUri}assets/libs/tom-select/dist/css/tom-select.bootstrap5.min.css")">
+        
+        <!-- ColorPicker CSS -->
+        <link href="_content/BlazorColorPicker/colorpicker.css" rel="stylesheet" />
+        <link href="_content/BlazorColorPicker/BlazorColorPicker.bundle.scp.css" rel="stylesheet" />
+        
+        <!-- AUTO COMPLETE CSS -->
+        <link rel="stylesheet" href="@($"{NavigationManager.BaseUri}assets/libs/@tarekraafat/autocomplete.js/dist/css/autoComplete.css")">
+
+        <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered" />
+
+	</head>
+
+    <body>
+
+        @RenderBody()
+
+        <!-- POPPER JS -->
+        <script src="@($"{NavigationManager.BaseUri}assets/libs/@popperjs/core/dist/umd/popper.min.js")"></script>
+
+        <!-- BOOTSTRAP JS -->
+        <script src="@($"{NavigationManager.BaseUri}assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js")"></script>
+
+        <!-- AUTO COMPLETE JS -->
+        <script src="@($"{NavigationManager.BaseUri}assets/libs/@tarekraafat/autocomplete.js/dist/autoComplete.min.js")"></script>
+
+        <!-- node-waves JS -->
+        <script src="@($"{NavigationManager.BaseUri}assets/libs/node-waves/dist/waves.min.js")"></script>
+
+        <!-- TomSelect JS -->
+        <script src="@($"{NavigationManager.BaseUri}assets/libs/tom-select/dist/js/tom-select.complete.min.js")"></script>
+
+        <script async defer>
+            window.onload = function () {
+                setTimeout(() => {
+                    let javascriptLinks = [
+                        "/assets/js/custom.js"
+                    ]
+                    
+                    javascriptLinks.map((link)=>{
+                        var scriptElement = document.createElement('script');
+                        scriptElement.src = link;
+                        document.head.appendChild(scriptElement);
+                    })
+
+                }, 100);
+            };
+        </script>
+
+        <script>
+            // Load scripts after DOM content is loaded
+            document.addEventListener("DOMContentLoaded", function () {
+                var scriptUrls = [
+                
+                    "_content/FlatpickrBlazor/flatpickr.min.js",
+                    "_content/FlatpickrBlazor/flatpickr.blazor.js",
+                    "_content/FlatpickrBlazor/l10n/de.js",
+                    "_content/FlatpickrBlazor/plugins/monthSelect/index.js",
+                    "_content/FlatpickrBlazor/plugins/minMaxTimePlugin.js",
+                    
+                    "_content/Soenneker.Blazor.TomSelect/tomselectinterop.js",
+
+                    "_content/Soenneker.Blazor.FilePond/filepondinterop.js",
+
+                    "_content/Blazored.TextEditor/quill-blot-formatter.min.js",
+                    "_content/Blazored.TextEditor/Blazored-BlazorQuill.js",
+
+                    "_content/NoUiSlider.Blazor/dist/bundle.js",
+
+                    "_content/BlazorCleave/BlazorCleave.js",
+                    "_content/BlazorCleave/cleave-phone.i18n.js",
+
+                    "../assets/libs/filepond/dist/filepond.min.js",
+                    "../assets/libs/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.js",
+                    "../assets/libs/filepond-plugin-image-exif-orientation/dist/filepond-plugin-image-exif-orientation.min.js",
+                    "../assets/libs/filepond-plugin-file-validate-size/dist/filepond-plugin-file-validate-size.min.js",
+                    "../assets/libs/filepond-plugin-file-encode/dist/filepond-plugin-file-encode.min.js",
+                    "../assets/libs/filepond-plugin-image-edit/dist/filepond-plugin-image-edit.min.js",
+                    "../assets/libs/filepond-plugin-file-validate-type/dist/filepond-plugin-file-validate-type.min.js",
+                    "../assets/libs/filepond-plugin-file-validate-type/dist/filepond-plugin-file-validate-type.min.js",
+                    "../assets/libs/filepond-plugin-image-crop/dist/filepond-plugin-image-crop.min.js",
+                    "../assets/libs/filepond-plugin-image-resize/dist/filepond-plugin-image-resize.min.js",
+                    "../assets/libs/filepond-plugin-image-transform/dist/filepond-plugin-image-transform.min.js",
+                    "../assets/libs/dropzone/dist/dropzone-min.js",
+                    "../assets/libs/rater-js/index.js",
+                    "../assets/libs/glightbox/dist/js/glightbox.min.js",
+                    "../assets/libs/jsvectormap/dist/jsvectormap.min.js",
+                    "../assets/libs/jsvectormap/dist/maps/world-merc.js",
+                    "../assets/libs/gmaps/gmaps.min.js",
+                    "../assets/libs/plyr/dist/plyr.min.js",
+                    "../assets/libs/shepherd.js/dist/js/shepherd.min.js",
+                    "../assets/libs/moment/moment.js",
+                    "../assets/libs/animejs/lib/anime.min.js",
+                    "../assets/libs/fullcalendar/index.global.min.js",
+                    "../assets/libs/dragula/dist/dragula.min.js",
+                    "../assets/libs/vanilla-wizard/dist/js/wizard.min.js",
+                    "../assets/libs/intl-tel-input/build/js/intlTelInput.min.js",
+                    "../assets/libs/dual-listbox/dist/dual-listbox.js",
+                    "../assets/libs/@@yaireo/tagify/dist/tagify.js",
+                    "../assets/libs/gridjs/dist/gridjs.umd.js",
+                    "../assets/libs/chart.js/dist/chart.umd.js",
+                    "../assets/libs/fg-emoji-picker/fgEmojiPicker.js",
+                    "../assets/js/form-wizard.js", 
+                    "../assets/libs/quill/dist/quill.js",
+                ];
+                scriptUrls.forEach(function (url) {
+                    var script = document.createElement("script");
+                    script.src = url;
+                    document.body.appendChild(script);
+                });
+            });
+        </script>
+
+
+        <script src="_framework/blazor.server.js"></script>
+        <script src="js/javaScriptInterop.js"></script>
+        <script src="js/resizeInterop.js"></script>
+    
+        <script>
+
+        function CaptureElementAndCallBlazorFunction(event, menuData) {
+            var element = event.currentTarget;
+            var menuId = element.dataset.menuId;
+            window.DotNet.invokeMethodAsync("Sandbox.SubNavMenu", "TriggerFunction", element, menuData, null);
+        }
+
+    </script>
+
+    </body>
+
+</html>

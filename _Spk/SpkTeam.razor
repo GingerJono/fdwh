@@ -1,0 +1,29 @@
+@using TeamData
+@inject TeamService TeamService
+
+@code {
+    [Parameter] public Members? Team { get; set; } 
+}
+@if(Team != null){
+    <div class="card custom-card team-member text-center">
+        <div class="team-bg-shape primary"></div>
+        <div class="card-body">
+            <div class="mb-3 lh-1 d-flex gap-2 justify-content-center">
+                <span class="avatar avatar-xl avatar-rounded bg-primary">
+                    <img src="@Team.UserImg" class="card-img" alt="...">
+                </span>
+            </div>
+            <div class="">
+                <SpkBadge Tag="a" BadgeClass="@($"{Team.DesignationColor} {"mb-2 fs-11 fw-medium"}")">@Team.Designation</SpkBadge>
+                <h6 class="mb-3 fw-semibold">@Team.User</h6>
+                <p class="text-muted fs-12">@Team.Bio</p>
+                <div class="d-flex justify-content-center">
+                    <SpkButtons Tag="a" ButtonClass="btn-icon btn-primary-light" ButtonSize="btn-sm"><i class="ri-twitter-x-fill"></i></SpkButtons>
+                    <SpkButtons Tag="a" ButtonClass="btn-icon btn-primary1-light ms-2" ButtonSize="btn-sm"><i class="ri-facebook-fill"></i></SpkButtons>
+                    <SpkButtons Tag="a" ButtonClass="btn-icon btn-primary2-light ms-2" ButtonSize="btn-sm"><i class="ri-instagram-line"></i></SpkButtons>
+                    <SpkButtons Tag="a" ButtonClass="btn-icon btn-primary3-light ms-2" ButtonSize="btn-sm"><i class="ri-linkedin-fill"></i></SpkButtons>
+                </div>
+            </div>
+        </div>
+    </div>
+}

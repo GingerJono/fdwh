@@ -1,0 +1,339 @@
+@page "/job-search"
+@using PElshen.NoUiSlider.Blazor;
+@using PElshen.NoUiSlider.Blazor.Utilities;
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using Sandbox._Spk.Jobs
+@using JobData
+@inject JobService JobService
+
+    <!-- NouiSlider CSS -->
+    <link rel="stylesheet" href="_content/NoUiSlider.Blazor/dist/styles.css" />
+
+    <!-- Page Header -->
+    <SpkPageHeader PageItems="PageItems" />
+    <!-- Page Header Close -->
+
+    <!-- Start::row-1 -->
+    <div class="row">
+        <div class="col-xxl-3 col-xl-4">
+            <div class="card custom-card products-navigation-card">
+                <div class="card-body p-0">
+                    <div class="p-3 border-bottom">
+                        <h6 class="fw-medium mb-0">Categories</h6>
+                        <div class="py-3 pb-0">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" value="" id="c-1" checked>
+                                <label class="form-check-label" for="c-1">
+                                    R & D
+                                </label>
+                                <SpkBadge BadgeClass="bg-light text-default fw-500 float-end">2,712</SpkBadge>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" value="" id="c-2">
+                                <label class="form-check-label" for="c-2">
+                                    Accounting 
+                                </label>
+                                <SpkBadge BadgeClass="bg-light text-default fw-500 float-end">536</SpkBadge>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" value="" id="c-3" checked>
+                                <label class="form-check-label" for="c-3">
+                                    Business Process
+                                </label>
+                                <SpkBadge BadgeClass="bg-light text-default fw-500 float-end">18,289</SpkBadge>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" value="" id="c-4" checked>
+                                <label class="form-check-label" for="c-4">
+                                    Consulting
+                                </label>
+                                <SpkBadge BadgeClass="bg-light text-default fw-500 float-end">3,453</SpkBadge>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" value="" id="c-5">
+                                <label class="form-check-label" for="c-5">
+                                    Administrative Support
+                                </label>
+                                <SpkBadge BadgeClass="bg-light text-default fw-500 float-end">7,165</SpkBadge>
+                            </div>
+                            <div class="collapse" id="category-more">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" value="" id="c-6">
+                                    <label class="form-check-label" for="c-6">
+                                        Human Resources
+                                    </label>
+                                    <SpkBadge BadgeClass="bg-light text-default fw-500 float-end">5,964</SpkBadge>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" value="" id="c-7">
+                                    <label class="form-check-label" for="c-7">
+                                        Marketing
+                                    </label>
+                                    <SpkBadge BadgeClass="bg-light text-default fw-500 float-end">2,123</SpkBadge>
+                                </div>
+                            </div>
+                            <a class="ecommerce-more-link mt-3" data-bs-toggle="collapse" href="#category-more" role="button" aria-expanded="false" aria-controls="category-more">MORE</a>
+                        </div>
+                    </div>
+                    <div class="p-3 border-bottom">
+                        <h6 class="fw-medium mb-0">Job Type</h6>
+                        <div class="py-3 pb-0">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" value="" id="j-1" checked>
+                                <label class="form-check-label" for="j-1">
+                                    Full Time
+                                </label>
+                                <SpkBadge BadgeClass="bg-light text-default fw-500 float-end">512</SpkBadge>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" value="" id="j-2" checked>
+                                <label class="form-check-label" for="j-2">
+                                    Part Time
+                                </label>
+                                <SpkBadge BadgeClass="bg-light text-default fw-500 float-end">2,186</SpkBadge>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" value="" id="j-3" checked>
+                                <label class="form-check-label" for="j-3">
+                                    Internship
+                                </label>
+                                <SpkBadge BadgeClass="bg-light text-default fw-500 float-end">734</SpkBadge>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" value="" id="j-4">
+                                <label class="form-check-label" for="j-4">
+                                    Freelancer
+                                </label>
+                                <SpkBadge BadgeClass="bg-light text-default fw-500 float-end">16</SpkBadge>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="j-5">
+                                <label class="form-check-label" for="j-5">
+                                    Remote Job
+                                </label>
+                                <SpkBadge BadgeClass="bg-light text-default fw-500 float-end">1,432</SpkBadge>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-3 border-bottom">
+                        <h6 class="fw-medium mb-0">Qualification</h6>
+                        <div class="py-3 pb-0">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" value="" id="q-1">
+                                <label class="form-check-label" for="q-1">
+                                    All Education Levels
+                                </label>
+                                <SpkBadge BadgeClass="bg-light text-default fw-500 float-end">22,457</SpkBadge>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" value="" id="q-2" checked>
+                                <label class="form-check-label" for="q-2">
+                                    10th Pass and Above
+                                </label>
+                                <SpkBadge BadgeClass="bg-light text-default fw-500 float-end">12,562</SpkBadge>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" value="" id="q-3">
+                                <label class="form-check-label" for="q-3">
+                                    12th Pass and Above
+                                </label>
+                                <SpkBadge BadgeClass="bg-light text-default fw-500 float-end">7,155</SpkBadge>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" value="" id="q-4" checked>
+                                <label class="form-check-label" for="q-4">
+                                    Diploma and Graduate
+                                </label>
+                                <SpkBadge BadgeClass="bg-light text-default fw-500 float-end">5,767</SpkBadge>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="q-5">
+                                <label class="form-check-label" for="q-5">
+                                    Post Graduate
+                                </label>
+                                <SpkBadge BadgeClass="bg-light text-default fw-500 float-end">3,651</SpkBadge>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-3 border-bottom">
+                        <h6 class="fw-medium mb-0">Experience</h6>
+                        <div class="py-3 pb-0">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" value="" id="e-1" checked>
+                                <label class="form-check-label" for="e-1">
+                                    Fresher
+                                </label>
+                                <SpkBadge BadgeClass="bg-light text-default fw-500 float-end">23,156</SpkBadge>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" value="" id="e-2">
+                                <label class="form-check-label" for="e-2">
+                                    Less than 1 year
+                                </label>
+                                <SpkBadge BadgeClass="bg-light text-default fw-500 float-end">15,632</SpkBadge>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" value="" id="e-3" checked>
+                                <label class="form-check-label" for="e-3">
+                                    Less than 2 year
+                                </label>
+                                <SpkBadge BadgeClass="bg-light text-default fw-500 float-end">15,032</SpkBadge>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="e-4" checked>
+                                <label class="form-check-label" for="e-4">
+                                    More than 3 years
+                                </label>
+                                <SpkBadge BadgeClass="bg-light text-default fw-500 float-end">7,154</SpkBadge>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-3 border-bottom">
+                        <h6 class="fw-medium mb-0">Salary Range</h6>
+                        <div class="py-3 pb-0">
+                            <div id="nonlinear"></div>
+                            <div class="d-flex mt-4">
+                                <div class="fw-medium h6 mb-0">$<span id="lower-value"></span></div>
+                                &nbsp; -- &nbsp; 
+                                <div class="fw-medium h6 mb-0">$<span id="upper-value"></span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <h6 class="fw-medium mb-0">Skills</h6>
+                        <div class="py-3 pb-0">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" value="" id="s-1" checked>
+                                <label class="form-check-label" for="s-1">
+                                    HTML5
+                                </label>
+                                <SpkBadge BadgeClass="bg-light text-default fw-500 float-end">23,156</SpkBadge>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" value="" id="s-2" checked>
+                                <label class="form-check-label" for="s-2">
+                                    Javascript
+                                </label>
+                                <SpkBadge BadgeClass="bg-light text-default fw-500 float-end">15,632</SpkBadge>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" value="" id="s-3">
+                                <label class="form-check-label" for="s-3">
+                                    PHP
+                                </label>
+                                <SpkBadge BadgeClass="bg-light text-default fw-500 float-end">15,032</SpkBadge>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" value="" id="s-4" checked>
+                                <label class="form-check-label" for="s-4">
+                                    CSS3
+                                </label>
+                                <SpkBadge BadgeClass="bg-light text-default fw-500 float-end">7,154</SpkBadge>
+                            </div>
+                            <div class="collapse" id="sizes-more">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" value="" id="s-5">
+                                    <label class="form-check-label" for="s-5">
+                                        Bootstrap
+                                    </label>
+                                    <SpkBadge BadgeClass="bg-light text-default fw-500 float-end">5,946</SpkBadge>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" value="" id="s-6">
+                                    <label class="form-check-label" for="s-6">
+                                        Angular
+                                    </label>
+                                    <SpkBadge BadgeClass="bg-light text-default fw-500 float-end">3,267</SpkBadge>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" value="" id="s-7">
+                                    <label class="form-check-label" for="s-7">
+                                        React
+                                    </label>
+                                    <SpkBadge BadgeClass="bg-light text-default fw-500 float-end">578</SpkBadge>
+                                </div>
+                            </div>
+                            <a class="ecommerce-more-link mt-3" data-bs-toggle="collapse" href="#sizes-more" role="button" aria-expanded="false" aria-controls="sizes-more">MORE</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xxl-9 col-xl-8">
+            <div class="card custom-card p-3">
+                <div class="row align-items-center p-3 bg-primary-transparent rounded mx-0 mb-3">
+                    <div class="col-sm-7">
+                        <div class="d-flex">
+                            <h5 class="fw-medium mb-0"><span class="fw-normal">Showing</span> 6678 Jobs</h5>
+                        </div>
+                    </div>
+                    <div class="col-sm-5 text-sm-end mt-3 mt-sm-0">
+                        <div class="btn-group">
+                            <SpkDropdowns DropdownClass="btn-primary border" DropdownText=" Sort By">
+                                <ChildContent2>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="javascript:void(0);">Featured</a></li>
+                                        <li><a class="dropdown-item" href="javascript:void(0);">Newest</a></li>
+                                        <li><a class="dropdown-item" href="javascript:void(0);">Most Relevant</a></li>
+                                        <li><a class="dropdown-item" href="javascript:void(0);">Best Rated</a></li>
+                                    </ul>
+                                </ChildContent2>
+                            </SpkDropdowns>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    @foreach(var job in JobService.GetJobsearchData()){
+                        <div class="col-xl-6">
+                           <SpkJobsSearch Jobs="job"></SpkJobsSearch>
+                        </div>
+                    }
+                    <div class="col-xl-12">
+                        <div class="card custom-card shadow-none bg-primary-transparent mb-0">
+                            <div class="card-body">
+                                <div class="">
+                                    <h5 class="fw-medium mb-3">Subscribe to Latest Job Alerts</h5>
+                                    <div class="input-group mb-3">
+                                        <input type="text" class="form-control" placeholder="Enter your email" aria-label="job-email" aria-describedby="job-subscribe">
+                                        <SpkButtons ButtonClass="btn-primary" id="job-subscribe">Subscribe</SpkButtons>
+                                    </div>
+                                    <label class="form-check-label">
+                                        By subscribing, you accept our <a href="javascript:void(0);" class="text-success"><u>privacy policy</u></a>.
+                                    </label>
+                                </div>
+                            </div>                                        
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <ul class="pagination mb-4 justify-content-end">
+                <li class="page-item disabled">
+                    <a class="page-link" href="javascript:void(0);">
+                        Prev
+                    </a>
+                </li>
+                <li class="page-item active"><a class="page-link" href="javascript:void(0);">1</a></li>
+                <li class="page-item"><a class="page-link" href="javascript:void(0);">2</a></li>
+                <li class="page-item"><a class="page-link" href="javascript:void(0);">3</a></li>
+                <li class="page-item">
+                    <a class="page-link text-primary" href="javascript:void(0);">
+                        next
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <!-- End::row-1 -->
+
+    <!-- NouiSlider Js -->
+    <script src="_content/NoUiSlider.Blazor/dist/bundle.js"></script>
+    <script src="@($"{NavigationManager.BaseUri}assets/js/product.js")"></script>
+
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Apps" },
+        new SpkPageHeader.PageItem { PageTitle = "Jobs" },
+        new SpkPageHeader.PageItem { PageTitle = "Job Search" },
+    };
+}

@@ -1,0 +1,36 @@
+@typeparam TItem where TItem : class
+@using Sandbox._Spk
+@using ApexCharts
+@using ApexSeries
+@using CardModel
+
+@code {
+    [Parameter] public AnalyticMainChart? MainCard { get; set; }
+    [Parameter] public List<TItem>? ChartItems { get; set; }
+    [Parameter] public ApexChartOptions<TItem>? ChartOptions { get; set; }
+    [Parameter] public List<SeriesConfig<TItem>>? SeriesConfigs { get; set; }
+}
+
+<div class="card custom-card overflow-hidden">
+    <div class="card-body pb-0 pe-0">
+        <div class="">
+            <div class="d-flex justify-content-between gap-1">
+                <span class="avatar avatar-rounded @MainCard?.IconClass svg-white mb-3 flex-shrink-0">
+                    <i class="@MainCard?.Icon fs-22"></i>
+                </span>
+                <span class="fw-medium fs-13 text-muted pe-3">@MainCard?.Title</span>
+            </div>
+        </div>
+        <div class="d-flex align-items-end justify-content-between">
+            <div class="pb-3">
+                <span class="fs-20 fw-medium mb-0 d-flex align-items-center">@MainCard?.TotalValue</span>
+                <div class="text-muted fs-13">@(MainCard?.IsIncreased == true ? "Increased By" : "Decreased By")</div>
+                @((MarkupString)(MainCard?.Percentage ?? string.Empty))
+            </div>
+            <div id="chart-21">
+                <SpkApex TItem="TItem"  ChartOptions="ChartOptions" Items="ChartItems"  Series="SeriesConfigs" />
+            </div>
+        </div>
+    </div>
+</div>
+

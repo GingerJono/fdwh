@@ -1,0 +1,668 @@
+@page "/crypto-buy-sell"
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using ApexSeries
+@using CryptoData
+@inject CryptoDataService CryptoDataService
+
+    <!-- Page Header -->
+    <SpkPageHeader PageItems="PageItems" />
+    <!-- Page Header Close -->
+
+    <!-- Start::row-1 -->
+    <div class="row">
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        Buy Crypto
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div>
+                        <div class="row">
+                            <div class="col-xl-6">
+                                <div class="input-group mb-3 flex-nowrap buy-crypto" id="buy-crypto">
+                                    <input type="text" class="form-control" aria-label="crypto buy select" placeholder="Select Currency">
+                                    <select class="form-control tomselect">
+                                        <option value="">BTC</option>
+                                        <option value="Choice 1">ETH</option>
+                                        <option value="Choice 2">XRP</option>
+                                        <option value="Choice 3">DASH</option>
+                                        <option value="Choice 4">NEO</option>
+                                        <option value="Choice 5">LTC</option>
+                                        <option value="Choice 6">BSD</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-xl-6">
+                                <div class="input-group mb-3 flex-nowrap buy-crypto">
+                                    <input type="text" class="form-control" aria-label="crypto buy select">
+                                    <select class="form-control tomselect">
+                                        <option value="">USD</option>
+                                        <option value="Choice 1">AED</option>
+                                        <option value="Choice 2">AUD</option>
+                                        <option value="Choice 3">ARS</option>
+                                        <option value="Choice 4">AZN</option>
+                                        <option value="Choice 5">BGN</option>
+                                        <option value="Choice 6">BRL</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-light pt-2 p-3 rounded">
+                            <div class="fs-14 py-2"><span class="fw-medium text-dark">Price:</span><span class="text-muted ms-2 fs-14 d-inline-block">6.003435</span><span class="text-dark fw-medium float-end">BTC</span></div>
+                            <div class="fs-14 py-2"><span class="fw-medium text-dark">Amount:</span><span class="text-muted ms-2 fs-14 d-inline-block">2,34,4543.00</span><span class="text-dark fw-medium float-end">LTC</span></div>
+                            <div class="fw-medium fs-14 py-2">Total: <span class="fs-14 d-inline-block">22.00 BTC</span></div>
+                            <div class="fs-12 text-success">Additional Charges: 0.32%(0.0001231 BTC)</div>
+                        </div>
+                        <label class="fw-medium fs-12 mt-4 mb-3">SELECT PAYMENT METHOD :</label>
+                        <div class="row g-2">
+                            <div class="col-xl-4">
+                                <div class="p-2 border rounded">
+                                    <div class="form-check mb-0">
+                                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1" checked>
+                                        <label class="form-check-label fs-12" for="flexRadioDefault1">
+                                            Credit / Debit Cards
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xl-4">
+                                <div class="p-2 border rounded">
+                                    <div class="form-check mb-0">
+                                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2">
+                                        <label class="form-check-label fs-12" for="flexRadioDefault2">
+                                            Paypal
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xl-4">
+                                <div class="p-2 border rounded">
+                                    <div class="form-check mb-0">
+                                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault3">
+                                        <label class="form-check-label fs-12" for="flexRadioDefault3">
+                                            Wallet
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-grid mt-4 pt-1">
+                            <SpkButtons ButtonClass="btn-primary">BUY</SpkButtons>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        Sell Crypto
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-xl-6">
+                            <div class="input-group mb-3 flex-nowrap buy-crypto">
+                                <input type="text" class="form-control" aria-label="crypto buy select" placeholder="Select Currency">
+                                <select class="form-control tomselect">
+                                    <option value="">BTC</option>
+                                    <option value="Choice 1">ETH</option>
+                                    <option value="Choice 2">XRP</option>
+                                    <option value="Choice 3">DASH</option>
+                                    <option value="Choice 4">NEO</option>
+                                    <option value="Choice 5">LTC</option>
+                                    <option value="Choice 6">BSD</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-xl-6">
+                            <div class="input-group mb-3 flex-nowrap buy-crypto">
+                                <input type="text" class="form-control" aria-label="crypto buy select">
+                                <select class="form-control tomselect">
+                                    <option value="">USD</option>
+                                    <option value="Choice 1">AED</option>
+                                    <option value="Choice 2">AUD</option>
+                                    <option value="Choice 3">ARS</option>
+                                    <option value="Choice 4">AZN</option>
+                                    <option value="Choice 5">BGN</option>
+                                    <option value="Choice 6">BRL</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xl-6">
+                            <div class="mb-3">
+                                <span class="form-label">Crypto Value :</span>
+                                <div class="position-relative">
+                                    <div class="p-2 border rounded d-flex align-items-center justify-content-between gap-3 mt-1 flex-wrap">
+                                        <div class="gap-2 d-flex align-items-center">
+                                            <div class="lh-1">
+                                                <span class="avatar bg-light p-2">
+                                                    <img src="../assets/images/crypto-currencies/regular/Bitcoin.svg" alt="">
+                                                </span>
+                                            </div>
+                                            <div class="fw-medium">Bitcoin - BTC</div>
+                                        </div>
+                                        <div class="text-end ms-auto">
+                                            <span class="fw-medium d-block">0.374638535 BTC</span>
+                                            <span class="text-muted">$5,364.65</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-6">
+                            <div class="mb-3">
+                                <span class="form-label">Deposit To :</span>
+                                <div class="position-relative">
+                                    <div class="p-2 border rounded d-flex align-items-center gap-2 mt-1">
+                                        <div class="lh-1">
+                                            <span class="avatar bg-light p-2">
+                                                <i class="ri-bank-line text-info fs-20"></i>
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <span class="fw-medium d-block">Banking</span>
+                                            <span class="text-muted">Checking ...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-light pt-2 p-3 rounded">
+                        <div class="fs-14 py-2">
+                            <div class="d-inline-flex">
+                                <span class="fw-medium text-dark">Price:</span><span class="text-muted ms-2 fs-14">6.003435</span>
+                            </div>
+                            <span class="text-dark fw-medium float-end">BTC</span>
+                        </div>
+                        <div class="fs-14 py-2">
+                            <div class="d-inline-flex">
+                                <span class="fw-medium text-dark">Amount:</span><span class="text-muted ms-2 fs-14">2,34,4543.00</span>
+                            </div>
+                            <span class="text-dark fw-medium float-end">LTC</span>
+                        </div>
+                        <div class="fw-medium fs-14 py-2">Total: <span class="fs-14 d-inline-block">22.00 BTC</span></div>
+                        <div class="fs-12 text-success">Additional Charges: 0.32%(0.0001231 BTC)</div>
+                    </div>
+                    <div class="d-grid mt-4">
+                        <SpkButtons ButtonClass="btn-secondary">SELL</SpkButtons>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--End::row-1 -->
+
+    <!-- Start:: row-2 -->
+    <div class="row">
+        <div class="col-xxl-3">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        Quick Secure Transfer
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="tab-pane border-0 p-0" id="sell-crypto" role="tabpanel">
+                        <div class="mb-3">
+                            <span class="form-label">Crypto Value :</span>
+                            <div class="position-relative">
+                                <a href="javascript:void(0);" class="stretched-link"></a>
+                                <div class="p-2 border rounded d-flex align-items-center justify-content-between gap-3 mt-1 flex-wrap">
+                                    <div class="gap-2 d-flex align-items-center">
+                                        <div class="lh-1">
+                                            <span class="avatar bg-light p-2 avatar-md">
+                                                <img src="../assets/images/crypto-currencies/regular/Bitcoin.svg" alt="">
+                                            </span>
+                                        </div>
+                                        <div class="fw-medium">Bitcoin - BTC</div>
+                                    </div>
+                                    <div class="text-end ms-auto">
+                                        <span class="fw-medium d-block">0.374638535 BTC</span>
+                                        <span class="text-muted">$5,364.65</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <span class="form-label">Deposit To :</span>
+                            <div class="position-relative">
+                                <a href="javascript:void(0);" class="stretched-link"></a>
+                                <div class="p-2 border rounded d-flex align-items-center gap-2 mt-1">
+                                    <div class="lh-1">
+                                        <span class="avatar bg-light avatar-md p-2">
+                                            <i class="ri-bank-line text-info fs-20"></i>
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <span class="fw-medium d-block">Banking</span>
+                                        <span class="text-muted">Checking ...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-1">
+                            <span class="form-label">Amount :</span> 
+                        </div>
+                        <div class="input-group mb-3 flex-nowrap buy-crypto">
+                            <input type="text" class="form-control" aria-label="crypto buy select">
+                            <select class="form-control tomselect">
+                                <option value="">BTC</option>
+                                <option value="Choice 1">ETH</option>
+                                <option value="Choice 2">XRP</option>
+                                <option value="Choice 3">DASH</option>
+                                <option value="Choice 4">NEO</option>
+                                <option value="Choice 5">LTC</option>
+                                <option value="Choice 6">BSD</option>
+                            </select>
+                        </div>
+                        <div class="p-3 bg-light rounded">
+                            <div class="fs-14 pb-1">
+                                <div class="d-inline-flex">
+                                    <span class="fw-medium text-dark">Price:</span><span class="text-muted ms-2 fs-14">6.003435</span>
+                                </div>
+                                <span class="text-dark fw-medium float-end">BTC</span>
+                            </div>
+                            <div class="fs-14 pt-2">
+                                <div class="d-inline-flex">
+                                    <span class="fw-medium text-dark">Amount:</span><span class="text-muted ms-2 fs-14">2,34,4543.00</span>
+                                </div>
+                                <span class="text-dark fw-medium float-end">LTC</span>
+                            </div>
+                        </div>
+                        <div class="d-grid mt-3">
+                            <SpkButtons ButtonClass="btn-primary2">Transfer</SpkButtons>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xxl-9">
+            <div class="card custom-card">
+                <div class="card-header justify-content-between">
+                    <div class="card-title">
+                        Buy & Sell Statistics
+                    </div>
+                    <div class="btn-group flex-wrap" role="group" aria-label="Basic example"> 
+                        <SpkButtons ButtonClass="btn-primary" ButtonSize="btn-sm">1D</SpkButtons>
+                        <SpkButtons ButtonClass="btn-primary-light" ButtonSize="btn-sm">1W</SpkButtons>
+                        <SpkButtons ButtonClass="btn-primary-light" ButtonSize="btn-sm">1M</SpkButtons>
+                        <SpkButtons ButtonClass="btn-primary-light" ButtonSize="btn-sm">3M</SpkButtons>
+                        <SpkButtons ButtonClass="btn-primary-light" ButtonSize="btn-sm">6M</SpkButtons>
+                        <SpkButtons ButtonClass="btn-primary-light" ButtonSize="btn-sm">1Y</SpkButtons>
+                    </div>
+                </div>
+                <div class="card-body p-xl-0">
+                    <div class="row align-items-center">
+                        <div class="col-xl-8 pe-0 border-end border-inline-end-dashed">
+                            <div class="d-flex flex-wrap align-items-center border-bottom border-block-end-dashed mb-3 p-3 gap-4 justify-content-between">
+                                <div>
+                                    <span class="d-block mb-1">Total Buy</span>
+                                    <span class="d-block fw-medium fs-16 text-success">$324.25 USD</span>
+                                </div>
+                                <div>
+                                    <span class="d-block mb-1">Total Sell</span>
+                                    <span class="d-block fw-medium fs-16 text-danger">$4,235.25 USD</span>
+                                </div>
+                                <div>
+                                    <span class="d-block mb-1">Available Balance</span>
+                                    <span class="d-block fw-medium fs-16 text-primary">$22,803.92 USD</span>
+                                </div>
+                                <div>
+                                    <span class="d-block mb-1">Total Crypto Asset Value</span>
+                                    <span class="d-block fw-medium fs-16 text-warning">$4,56,683.00 USD</span>
+                                </div>
+                                <div></div>
+                            </div>
+                            <div id="buy_sell-statistics" class="px-3">
+                                <SpkApex TItem="AudienceMetric" ApexHeight="315" ChartOptions="AudienceMetricOptions" Items="audienceMetric" Series="AudienceMetricSeriesConfig"></SpkApex>
+                            </div>
+                        </div>
+                        <div class="col-xl-4 ps-xl-0">
+                            <div class="p-3">
+                                <div class="card custom-card bg-light shadow-none">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div>
+                                                <span class="d-block text-muted mb-2">BTC/USD</span>
+                                                <h5 class="fw-medium mb-1">27.53612</h5>
+                                                <span class="text-danger d-block fs-12 mt-1">-0.06%</span>
+                                            </div>
+                                            <div>
+                                                <span class="avatar avatar-xl avatar-rounded">
+                                                    <img src="../assets/images/crypto-currencies/square-color/Bitcoin.svg" alt="">
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card custom-card bg-light shadow-none">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div>
+                                                <span class="d-block text-muted mb-2">ETH/USD</span>
+                                                <h5 class="fw-medium mb-1">20.6782</h5>
+                                                <span class="text-success d-block fs-12 mt-1">+2.86%</span>
+                                            </div>
+                                            <div>
+                                                <span class="avatar avatar-xl avatar-rounded">
+                                                    <img src="../assets/images/crypto-currencies/square-color/Ethereum.svg" alt="">
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card custom-card bg-light shadow-none mb-0">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div>
+                                                <span class="d-block text-muted mb-2">LTC/USD</span>
+                                                <h5 class="fw-medium mb-1">54.2912</h5>
+                                                <span class="text-success d-block fs-12 mt-1">+15.93%</span>
+                                            </div>
+                                            <div>
+                                                <span class="avatar avatar-xl avatar-rounded">
+                                                    <img src="../assets/images/crypto-currencies/square-color/Litecoin.svg" alt="">
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End:: row-2 -->
+
+    <!-- TomSelect JS -->
+    <script src="@($"{NavigationManager.BaseUri}assets/libs/tom-select/dist/js/tom-select.complete.min.js")"></script>
+    <script src="@($"{NavigationManager.BaseUri}assets/js/tomselect.js")"></script>
+
+
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Apps" },
+        new SpkPageHeader.PageItem { PageTitle = "Crypto" },
+        new SpkPageHeader.PageItem { PageTitle = "Buy & Sell" },
+    };
+     // AudienceMetric Start //
+    private List<AudienceMetric> audienceMetric { get; set; } = CryptoDataService.GetAudienceMetric();
+    private ApexChartOptions<AudienceMetric> AudienceMetricOptions { get; set; } = new();
+    private List<SeriesConfig<AudienceMetric>>? AudienceMetricSeriesConfig { get; set; }
+
+    // AudienceMetric End //
+
+    protected override void OnInitialized() {
+        AudienceMetricOptions = new ApexChartOptions<AudienceMetric> {
+            Chart = new () {
+                RedrawOnWindowResize= true,
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = false},
+                }, 
+                Stacked = true,
+                Animations= new ApexCharts.Animations {  
+                    Enabled = true,
+                    Speed = 500,
+                },
+                DropShadow = new ApexCharts.DropShadow {
+                    Enabled = true,
+                    Color = ["#000", "#000"],
+                    Top = 8,
+                    Left = 0,
+                    Blur = 3,
+                    Opacity = 0.1
+                },
+            },
+            DataLabels = new DataLabels {
+                Enabled = false,
+            }, 
+            Grid = new Grid {
+                BorderColor = "#f1f1f1",
+                StrokeDashArray = 3
+            },
+            Markers = new Markers {
+                Size = 6,
+                Hover = new () {
+                    Size = 6,
+                    SizeOffset = 6
+                },
+               Discrete = new List<MarkersDiscrete> {
+                    new MarkersDiscrete   {
+                        SeriesIndex = 0,
+                        DataPointIndex = 1,
+                        FillColor= "#fff",
+                        StrokeColor= "rgb(227, 84, 212)",
+                        Size = 3,
+                        Shape = ShapeEnum.Circle,
+                    },       
+                    new MarkersDiscrete   {
+                        SeriesIndex = 0,
+                        DataPointIndex = 2,
+                        FillColor= "#fff",
+                        StrokeColor= "rgb(227, 84, 212)",
+                        Size = 3,
+                        Shape = ShapeEnum.Circle,
+                    },     
+                    new MarkersDiscrete   {
+                        SeriesIndex = 0,
+                        DataPointIndex = 3,
+                        FillColor= "#fff",
+                        StrokeColor= "rgb(227, 84, 212)",
+                        Size = 3,
+                        Shape = ShapeEnum.Circle,
+                    },     
+                    new MarkersDiscrete   {
+                        SeriesIndex = 0,
+                        DataPointIndex = 4,
+                        FillColor= "#fff",
+                        StrokeColor= "rgb(227, 84, 212)",
+                        Size = 3,
+                        Shape = ShapeEnum.Circle,
+                    },     
+                    new MarkersDiscrete   {
+                        SeriesIndex = 0,
+                        DataPointIndex = 5,
+                        FillColor= "#fff",
+                        StrokeColor= "rgb(227, 84, 212)",
+                        Size = 3,
+                        Shape = ShapeEnum.Circle,
+                    },     
+                    new MarkersDiscrete   {
+                        SeriesIndex = 0,
+                        DataPointIndex =6,
+                        FillColor= "#fff",
+                        StrokeColor= "rgb(227, 84, 212)",
+                        Size = 3,
+                        Shape = ShapeEnum.Circle,
+                    },     
+                    new MarkersDiscrete   {
+                        SeriesIndex = 0,
+                        DataPointIndex = 7,
+                        FillColor= "#fff",
+                        StrokeColor= "rgb(227, 84, 212)",
+                        Size = 3,
+                        Shape = ShapeEnum.Circle,
+                    },     
+                    new MarkersDiscrete   {
+                        SeriesIndex = 0,
+                        DataPointIndex = 8,
+                        FillColor= "#fff",
+                        StrokeColor= "rgb(227, 84, 212)",
+                        Size = 3,
+                        Shape = ShapeEnum.Circle,
+                    },     
+                    new MarkersDiscrete   {
+                        SeriesIndex = 0,
+                        DataPointIndex = 9,
+                        FillColor= "#fff",
+                        StrokeColor= "rgb(227, 84, 212)",
+                        Size = 3,
+                        Shape = ShapeEnum.Circle,
+                    },     
+                    new MarkersDiscrete   {
+                        SeriesIndex = 0,
+                        DataPointIndex = 10,
+                        FillColor= "#fff",
+                        StrokeColor= "rgb(227, 84, 212)",
+                        Size = 3,
+                        Shape = ShapeEnum.Circle,
+                    },
+                    new MarkersDiscrete   {
+                        SeriesIndex = 1,
+                        DataPointIndex = 1,
+                        FillColor= "#fff",
+                        StrokeColor= "rgb(255, 93, 159)",
+                        Size = 3,
+                        Shape = ShapeEnum.Circle,
+                    },       
+                    new MarkersDiscrete   {
+                        SeriesIndex = 1,
+                        DataPointIndex = 2,
+                        FillColor= "#fff",
+                        StrokeColor= "rgb(255, 93, 159)",
+                        Size = 3,
+                        Shape = ShapeEnum.Circle,
+                    },     
+                    new MarkersDiscrete   {
+                        SeriesIndex = 1,
+                        DataPointIndex = 3,
+                        FillColor= "#fff",
+                        StrokeColor= "rgb(255, 93, 159)",
+                        Size = 3,
+                        Shape = ShapeEnum.Circle,
+                    },     
+                    new MarkersDiscrete   {
+                        SeriesIndex = 1,
+                        DataPointIndex = 4,
+                        FillColor= "#fff",
+                        StrokeColor= "rgb(255, 93, 159)",
+                        Size = 3,
+                        Shape = ShapeEnum.Circle,
+                    },     
+                    new MarkersDiscrete   {
+                        SeriesIndex = 1,
+                        DataPointIndex = 5,
+                        FillColor= "#fff",
+                        StrokeColor= "rgb(255, 93, 159)",
+                        Size = 3,
+                        Shape = ShapeEnum.Circle,
+                    },     
+                    new MarkersDiscrete   {
+                        SeriesIndex = 1,
+                        DataPointIndex =6,
+                        FillColor= "#fff",
+                        StrokeColor= "rgb(255, 93, 159)",
+                        Size = 3,
+                        Shape = ShapeEnum.Circle,
+                    },     
+                    new MarkersDiscrete   {
+                        SeriesIndex = 1,
+                        DataPointIndex = 7,
+                        FillColor= "#fff",
+                        StrokeColor= "rgb(255, 93, 159)",
+                        Size = 3,
+                        Shape = ShapeEnum.Circle,
+                    },     
+                    new MarkersDiscrete   {
+                        SeriesIndex = 1,
+                        DataPointIndex = 8,
+                        FillColor= "#fff",
+                        StrokeColor= "rgb(255, 93, 159)",
+                        Size = 3,
+                        Shape = ShapeEnum.Circle,
+                    },     
+                    new MarkersDiscrete   {
+                        SeriesIndex = 1,
+                        DataPointIndex = 9,
+                        FillColor= "#fff",
+                        StrokeColor= "rgb(255, 93, 159)",
+                        Size = 3,
+                        Shape = ShapeEnum.Circle,
+                    },     
+                    new MarkersDiscrete   {
+                        SeriesIndex = 1,
+                        DataPointIndex = 10,
+                        FillColor= "#fff",
+                        StrokeColor= "rgb(255, 93, 159)",
+                        Size = 3,
+                        Shape = ShapeEnum.Circle,
+                    },
+                },
+            },
+            Fill = new Fill {
+                Type = new List<FillType> { FillType.Solid,FillType.Gradient,FillType.Solid},
+                Gradient = new ApexCharts.FillGradient {
+                    ShadeIntensity = 0.1,
+                    Shade = ApexCharts.GradientShade.Light,
+                    Type = ApexCharts.GradientType.Vertical,
+                    OpacityFrom = 0.1,
+                    OpacityTo = 0.1,
+                }
+            },
+            Stroke = new Stroke { 
+                Curve = [Curve.Smooth,Curve.Stepline,Curve.Smooth],
+                Width = [1, 2],
+                Show= true,
+            },
+            Colors = new Color(new List<string> {"rgba(227, 84, 212, 1)", "var(--primary-color)"}),
+            Xaxis =  new XAxis {
+                AxisTicks = new () {
+                    Show = false,
+                },
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis {
+                    Min = 0,
+                    Max = 100,
+                    StepSize = 10,
+                   
+                },
+            },
+            PlotOptions = new PlotOptions {
+                Bar = new PlotOptionsBar {
+                    Horizontal = false,
+                    BorderRadius = 2,
+                    ColumnWidth = "20%",
+                }
+            },
+            Tooltip = new() {
+                Y = new () {
+                    Formatter = @"function (e) {return void 0 !== e ? e.toFixed(0) : e;}",
+                },
+            },
+            Legend = new Legend {
+                Show = true,
+                Position = LegendPosition.Top,
+                InverseOrder = true,
+            },
+        };
+        
+        AudienceMetricSeriesConfig = new List<SeriesConfig<AudienceMetric>>
+        {
+            new SeriesConfig<AudienceMetric>
+            {
+                SeriesType = SeriesType.Line,
+                Name="Sell",
+                XValueSelector = e => e.Month ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.Viewers),
+            },
+            new SeriesConfig<AudienceMetric>
+            {
+                SeriesType = SeriesType.Bar,
+                Name="Buy",
+                XValueSelector = e => e.Month ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.Sessions),
+            },
+        };
+    }
+}

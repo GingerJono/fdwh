@@ -1,0 +1,26 @@
+
+@using CardModel
+
+@code {
+    [Parameter] public Reviews? Review { get; set; }    
+}
+@if(Review != null) {
+    <div class="card custom-card overflow-hidden">
+        <div class="p-3 text-center align-items-center justify-content-start gap-2 border-bottom border-block-end-dashed bg-secondary-transparent">
+            <img src="@Review.UserImg" alt="img" class="mb-2 mx-auto text-center avatar avatar-xl rounded-circle shadow-sm">
+            <div class="flex-grow-1">
+                <p class="mb-0 fw-semibold h6">@Review.User</p>
+                <span class="fw-normal text-muted fs-12">@Review.Designation</span>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="mb-0">
+                "@Review.Review".<i class="op-4 fs-11 fw-medium">--- @Review.User</i>
+            </div>
+            <SpkBadge BadgeClass="@($"{Review.RateColor} float-end")">@Review.Rate
+                <i class="ri-star-fill text-warning"></i>
+            </SpkBadge>
+            <i class="bx bxs-quote-alt-right review-quote secondary"></i>
+        </div>
+    </div>
+}

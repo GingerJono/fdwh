@@ -1,0 +1,26 @@
+@page "/team"
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using TeamData
+@inject TeamService TeamService
+
+    <!-- Page Header -->
+    <SpkPageHeader PageItems="PageItems" />
+    <!-- Page Header Close -->
+
+    <!-- Start:: row-1 -->
+    <div class="row">
+        @foreach(var list in TeamService.GetTeamMembersData()){
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12">
+                <SpkTeam Team="list"></SpkTeam>
+            </div>
+        }
+    </div>
+    <!-- End:: row-1 -->
+
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Pages" },
+        new SpkPageHeader.PageItem { PageTitle = "Team" },
+    }; 
+}

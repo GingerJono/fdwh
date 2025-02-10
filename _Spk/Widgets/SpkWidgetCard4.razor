@@ -1,0 +1,37 @@
+@typeparam TItem where TItem : class
+@using Sandbox._Spk
+@using ApexCharts
+@using ApexSeries
+@using CardModel 
+@using WidgetData 
+@inject WidgetService WidgetService
+
+@code {
+    [Parameter] public WidgetElements? MainCard { get; set; }
+    [Parameter] public List<TItem>? ChartItems { get; set; }
+    [Parameter] public ApexChartOptions<TItem>? ChartOptions { get; set; }
+    [Parameter] public List<SeriesConfig<TItem>>? SeriesConfigs { get; set; }
+}
+
+@if(MainCard != null){
+    <div class="card custom-card">
+        <div class="card-body">
+            <div class="d-flex align-items-end flex-wrap justify-content-between text-end gap-2">
+                <div>
+                    <div id="chart-5">
+                    <SpkApex TItem="TItem"  ChartOptions="ChartOptions" Items="ChartItems"  Series="SeriesConfigs" />
+                    </div>
+                </div>
+                <div class="text-end ms-auto">
+                    <span class="avatar avatar-sm bg-@MainCard?.IconClass mb-2">
+                        <i class="@((MarkupString)(MainCard?.Icon ?? string.Empty)) fs-16"></i>
+                    </span>
+                    <div class="flex-fill text-muted fs-14 mb-1">@MainCard?.Title</div>
+                    <div class="h4 fw-medium mb-0 d-flex align-items-center flex-wrap gap-2">@MainCard?.Value
+                        <SpkBadge BadgeClass="@(MainCard?.IsIncreased == true ? "bg-success-transparent fs-10" : "bg-danger-transparent fs-10")"><i class="@(MainCard?.IsIncreased == true ? "ri-arrow-left-up-line" : "ri-arrow-left-down-line")"></i>@MainCard?.Percentage</SpkBadge>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+} 

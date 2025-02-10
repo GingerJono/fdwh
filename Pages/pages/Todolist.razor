@@ -1,0 +1,388 @@
+@page "/todo-list"
+@using FlatpickrBlazor
+@using FlatpickrBlazor.Components
+@inject IJSRuntime JSRuntime
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using TodoData
+@inject TodoService TodoService
+
+    <!-- Flatpickr Css -->
+    <link href="_content/FlatpickrBlazor/flatpickr.min.css" rel="stylesheet" />
+
+    <!-- Dragula CSS -->
+    <link rel="stylesheet" href="@($"{NavigationManager.BaseUri}assets/libs/dragula/dist/dragula.min.css")">
+
+    <!-- Page Header -->
+    <SpkPageHeader PageItems="PageItems" />
+    <!-- Page Header Close -->
+
+    <!-- Start::row-1 -->
+    <div class="row">
+        <div class="col-xl-3">
+            <div class="card custom-card">
+                <div class="card-header gap-3 align-items-center pb-3 border-bottom border-block-end-dashed">
+                    <span class="avatar avatar-md bg-primary avatar-rounded"><i class="ri-file-list-3-line fs-16"></i></span>
+                    <div class="card-title">
+                        To Do List
+                        <span class="text-muted d-block fs-12"> Create new list</span>
+                    </div>
+                    <SpkButtons ButtonClass="btn-primary1-light ms-auto" IsRounded=true ButtonSize=" btn-sm"><i class="ri-add-line me-1"></i>Add New List</SpkButtons>
+                </div>
+                <div class="card-body p-0">
+                    <div class="p-3 task-navigation border-bottom border-block-end-dashed">
+                        <ul class="list-unstyled task-main-nav mb-0">
+                            <li class="px-0 pt-0">
+                                <span class="fs-11 text-muted op-7 fw-medium">General</span>
+                            </li>
+                            <li class="active">
+                                <a href="javascript:void(0);">
+                                    <div class="d-flex align-items-center">
+                                        <span class="me-2 lh-1">
+                                            <i class="ri-checkbox-multiple-line align-middle fs-14"></i>
+                                        </span>
+                                        <span class="flex-fill text-nowrap">
+                                            All Tasks
+                                        </span>
+                                        <SpkBadge BadgeClass="bg-info-transparent" IsRounded=true>167</SpkBadge>
+                                    </div>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="javascript:void(0);">
+                                    <div class="d-flex align-items-center">
+                                        <span class="me-2 lh-1">
+                                            <i class="ri-checkbox-circle-line align-middle fs-14 text-primary"></i>
+                                        </span>
+                                        <span class="flex-fill text-nowrap">
+                                            Completed
+                                        </span>
+                                        <SpkBadge BadgeClass="bg-primary1-transparent" IsRounded=true>12</SpkBadge>
+                                    </div>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="javascript:void(0);">
+                                    <div class="d-flex align-items-center">
+                                        <span class="me-2 lh-1">
+                                            <i class="ri-calendar-line align-middle fs-14 text-primary"></i>
+                                        </span>
+                                        <span class="flex-fill text-nowrap">
+                                            Today
+                                        </span>
+                                    </div>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="javascript:void(0);">
+                                    <div class="d-flex align-items-center">
+                                        <span class="me-2 lh-1">
+                                            <i class="ri-star-line text-primary align-middle fs-14"></i>
+                                        </span>
+                                        <span class="flex-fill text-nowrap">
+                                            Starred
+                                        </span>
+                                        <SpkBadge BadgeClass="bg-primary3-transparent" IsRounded=true>04</SpkBadge>
+                                    </div>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="javascript:void(0);">
+                                    <div class="d-flex align-items-center">
+                                        <span class="me-2 lh-1">
+                                            <i class="ri-user-line text-primary align-middle fs-14"></i>
+                                        </span>
+                                        <span class="flex-fill text-nowrap">
+                                            Personal
+                                        </span>
+                                    </div>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="javascript:void(0);">
+                                    <div class="d-flex align-items-center">
+                                        <span class="me-2 lh-1">
+                                            <i class="ri-briefcase-line text-primary align-middle fs-14"></i>
+                                        </span>
+                                        <span class="flex-fill text-nowrap">
+                                            Work
+                                        </span>
+                                        <SpkBadge BadgeClass="bg-primary3-transparent" IsRounded=true>03</SpkBadge>
+                                    </div>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="javascript:void(0);">
+                                    <div class="d-flex align-items-center">
+                                        <span class="me-2 lh-1">
+                                            <i class="ri-delete-bin-5-line text-primary align-middle fs-14"></i>
+                                        </span>
+                                        <span class="flex-fill text-nowrap">
+                                            Trash
+                                        </span>
+                                    </div>
+                                </a>
+                            </li>
+                        </ul>
+                        <ul class="list-unstyled task-main-nav mb-0">
+                            <li class="px-0 pt-2 d-flex justify-content-between gap-2 align-items-center">
+                                <span class="fs-11 text-muted op-7 fw-medium">Work Space</span>
+                            </li>
+                            <li>
+                                <div class="d-flex align-items-center flex-wrap gap-2">
+                                    <div><input class="form-check-input" type="checkbox" value="" aria-label="..."></div>
+                                    <div>
+                                        <a href="javascript:void(0);">
+                                            <span class="fw-medium"> Project testing ...</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="d-flex align-items-center flex-wrap gap-2">
+                                    <div><input class="form-check-input" type="checkbox" value="" aria-label="..."></div>
+                                    <div>
+                                        <a href="javascript:void(0);">
+                                            <span class="fw-medium">Bug Fixes and Issue Tracking..</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="d-flex align-items-center flex-wrap gap-2">
+                                    <div><input class="form-check-input" type="checkbox" value="" aria-label="..."></div>
+                                    <div>
+                                        <a href="javascript:void(0);">
+                                            <span class="fw-medium">New Feature Development...</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="d-flex align-items-center flex-wrap gap-2">
+                                    <div><input class="form-check-input" type="checkbox" value="" aria-label="..."></div>
+                                    <div>
+                                        <a href="javascript:void(0);">
+                                            <span class="fw-medium">Admin Template review...</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between m-3 p-3 bg-primary-transparent rounded border overflow-hidden todo-list-card">
+                        <div>
+                            <div class="fs-15 fw-medium">Today Completed</div>
+                            <div class="mb-4 fs-15 fw-medium">Tasks</div>
+                            <h4 class="mb-0">3/28 Tasks</h4>
+                        </div>
+                        <div class="">
+                            <img src="../assets/images/media/media-66.png" alt="" class="img-fluid">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-9">
+            <div class="card custom-card">
+                <div class="card-header justify-content-between pb-3 border-bottom border-block-end-dashed">
+                    <div class="flex-grow-1"> 
+                        <input class="form-control w-100" type="text" placeholder="Search Here" aria-label=".form-control-sm example"> 
+                    </div> 
+                    <div class="d-flex flex-wrap gap-2"> 
+                        <SpkDropdowns DropdownClass="btn btn-light btn-wave" Tag="a" DropdownToggle=false DropdownText="Sort By<i class='ri-arrow-down-s-line align-middle ms-1 d-inline-block'></i>">
+                            <ChildContent2>
+                                <ul class="dropdown-menu" role="menu"> 
+                                    <li><a class="dropdown-item" href="javascript:void(0);">New</a></li> 
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Popular</a></li> 
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Relevant</a></li> 
+                                </ul> 
+                            </ChildContent2>
+                        </SpkDropdowns>
+                    </div>
+                    <SpkButtons ButtonClass="btn-primary ms-auto" ButtonSize="btn-sm" data-bs-toggle="modal" data-bs-target="#addtask"><i class="ri-add-circle-line"></i> Add New Task</SpkButtons>
+                </div>
+                <div class="card-body p-0 position-relative" id="todo-content">
+                            
+                    <SpkTables Items="TodoService.GetTodoHeadersData()" Tableclass="text-nowrap" ShowCheckbox=true SelectAllClick="ToggleSelectAll" id="todo-drag">
+                        @foreach (var TodoList in TodoService.GetTodoLists())
+                        {
+                            <tr class="todo-box">
+                                <td class="task-checkbox">
+                                    <input class="form-check-input" type="checkbox" value="" @bind="@TodoList.Selected" aria-label="...">
+                                </td>
+                                <td>
+                                    <SpkButtons ButtonClass="btn-light btn-icon todo-handle" ButtonSize="btn-sm">: :</SpkButtons>
+                                </td>
+                                <td>
+                                    <span class="fw-medium">@TodoList.Title</span>
+                                </td>
+                                <td>
+                                    <span class="fw-medium @(TodoList.Status == "In Progress"?"text-primary":TodoList.Status == "Not Started"?"text-primary2":TodoList.Status == "Pending"?"text-warning":"text-success")"><i class="ri-circle-line fw-semibold fs-7 me-2 lh-1 align-middle"></i>@TodoList.Status</span>
+                                </td>
+                                <td>
+                                    @TodoList.DueDate
+                                </td>
+                                <td>
+                                    <SpkBadge BadgeClass="@(TodoList.Priority == "Medium"?"bg-primary2-transparent":TodoList.Priority == "High"?"bg-primary3-transparent":"bg-primary1-transparent")">@TodoList.Priority</SpkBadge>
+                                </td>
+                                <td class="text-center d-flex gap-2 flex-wrap align-items-center fw-medium">
+                                    <span class="avatar avatar-sm avatar-rounded">
+                                        <img src="@TodoList.AssignerImg" alt="">
+                                    </span>
+                                    @TodoList.Assigner
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <SpkProgress ProgressClass="progress-animate  w-100" ProgressSize="progress-xs" ProgressValue="@TodoList.Value">
+                                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-@TodoList.ProgressColor" style="width: @TodoList.Value%"></div>
+                                        </SpkProgress>
+                                        <div class="ms-2">@TodoList.Value%</div>
+                                    </div>
+                                </td>
+                                <td class="text-end">
+                                    <div class="d-flex gap-2">
+                                        <SpkButtons Tag="a" ButtonClass="btn-icon btn-info-light" ButtonSize="btn-sm"> <i class="ri-edit-line"></i></SpkButtons>
+                                        <SpkButtons Tag="a" ButtonClass="btn-icon btn-danger-light todo-btn" ButtonSize="btn-sm" @onclick="@(() => DeleteTodo(TodoList.Id))"> <i class="ri-delete-bin-line"></i></SpkButtons>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </SpkTables>
+                </div>
+                <div class="card-footer border-top-0"> 
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2"> 
+                        <div> Showing 10 Entries <i class="bi bi-arrow-right ms-2 fw-semibold"></i> </div>
+                        <div> 
+                            <nav aria-label="Page navigation" class="pagination-style-4"> 
+                                <ul class="pagination mb-0"> 
+                                    <li class="page-item disabled"> <a class="page-link" href="javascript:void(0);"> Prev </a> </li>
+                                    <li class="page-item active"><a class="page-link" href="javascript:void(0);">1</a></li> 
+                                    <li class="page-item"><a class="page-link" href="javascript:void(0);">2</a></li> 
+                                    <li class="page-item"> <a class="page-link text-primary" href="javascript:void(0);"> next </a> </li> 
+                                </ul> 
+                            </nav> 
+                        </div> 
+                    </div> 
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--End::row-1 -->
+
+    <!-- Start::add tasks -->
+    <div class="modal fade" id="addtask" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="mail-ComposeLabel">Create Task</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row gy-2">
+                        <div class="col-xl-12">
+                            <label for="task-name" class="form-label">Task Name</label>
+                            <input type="text" class="form-control" id="task-name" placeholder="Task Name">
+                        </div>
+                        <div class="col-xl-12">
+                            <label class="form-label">Assigned To</label>
+                            <select class="form-control tomselect-multiple" name="choices-multiple-remove-button" id="choices-multiple-remove-button" multiple>
+                                <option value="Choice 1" selected>Angelina May</option>
+                                <option value="Choice 2">Sarah Ruth</option>
+                                <option value="Choice 3">Hercules Jhon</option>
+                                <option value="Choice 4">Mayor Kim</option>
+                            </select>
+                        </div>
+                        <div class="col-xl-6">
+                            <label class="form-label">Assigned Date</label>
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-text text-muted"> <i class="ri-calendar-line"></i> </div>
+                                    <Flatpickr class="form-control" @ref="_datetime" Options="@_flatpickrOptions2"  placeholder="Choose date and time"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-6">
+                            <label class="form-label">Target Date</label>
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-text text-muted"> <i class="ri-calendar-line"></i> </div>
+                                    <Flatpickr class="form-control" @ref="_datetime" Options="@_flatpickrOptions2"  placeholder="Choose date and time"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-6">
+                            <label class="form-label">Status</label>
+                            <select class="form-control tomselect">
+                                <option value="">Select</option>
+                                <option value="one">In Progress</option>
+                                <option value="two">Not Started</option>
+                                <option value="three">Completed</option>
+                                <option value="four">Pending</option>
+                            </select>
+                        </div>
+                        <div class="col-xl-6">
+                            <label class="form-label">Priority</label>
+                            <select class="form-control tomselect">
+                                <option value="">Select</option>
+                                <option value="Critical">Critical</option>
+                                <option value="High">High</option>
+                                <option value="Medium">Medium</option>
+                                <option value="Low">Low</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <SpkButtons ButtonClass="m-0 me-2 btn-light" data-bs-dismiss="modal">Cancel</SpkButtons>
+                    <SpkButtons ButtonClass="m-0 btn-primary">Create</SpkButtons>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End::add tasks -->
+
+    <!-- TomSelect JS -->
+    <script src="@($"{NavigationManager.BaseUri}assets/libs/tom-select/dist/js/tom-select.complete.min.js")"></script>
+    <script src="@($"{NavigationManager.BaseUri}assets/js/tomselect.js")"></script>
+
+    <!-- Dragula JS -->
+    <script src="@($"{NavigationManager.BaseUri}assets/libs/dragula/dist/dragula.min.js")"></script>
+
+    <script>
+        setTimeout(() => {
+            dragula([document.querySelector('#todo-drag')]);
+        }, 100);
+    </script>
+
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Pages" },
+        new SpkPageHeader.PageItem { PageTitle = "To Do List" },
+    }; 
+    public Flatpickr? _datetime;
+    private FlatpickrBlazor.FlatpickrOptions _flatpickrOptions2 = new FlatpickrBlazor.FlatpickrOptions   
+    {
+        EnableTime = true,
+        DateFormat = "Y-m-d H:i",
+    };
+
+    private bool selectAll;
+    private void ToggleSelectAll()
+    {
+        selectAll = !selectAll;
+        foreach (var Todo in TodoService.GetTodoLists())
+        {
+            Todo.Selected = selectAll;
+        }
+    }
+    protected void DeleteTodo(decimal Id)
+    {
+        var TodoToRemove = TodoService.GetTodoLists().FirstOrDefault(o => o.Id == Id);
+        if (TodoToRemove != null)
+        {
+            TodoService.GetTodoLists().Remove(TodoToRemove);
+        }
+    }
+}

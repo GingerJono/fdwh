@@ -1,0 +1,36 @@
+@typeparam TItem where TItem : class
+@using Sandbox._Spk
+@using ApexCharts
+@using ApexSeries
+@using CardModel
+
+@code {
+    [Parameter] public HrmMainCard? MainCard { get; set; }
+    [Parameter] public List<TItem>? ChartItems { get; set; }
+    [Parameter] public ApexChartOptions<TItem>? ChartOptions { get; set; }
+    [Parameter] public List<SeriesConfig<TItem>>? SeriesConfigs { get; set; }
+}
+
+
+<div class="card custom-card overflow-hidden">
+    <div class="m-3 bg-light rounded-1 border">
+        <div class="card-body pb-4 mb-2">
+            <div class="d-flex align-items-center w-100 justify-content-between gap-1">
+                <div>
+                    <p class="mb-1 text-muted fw-medium">@MainCard?.Title</p>
+                    <h4 class="mb-0 fw-medium">@MainCard?.TotalValue</h4>
+                </div>
+                <div class="ms-auto text-end">
+                    <SpkBadge BadgeClass="@($"{(MainCard?.IsIncreased == true ? "bg-success" : "bg-danger")} {"align-items-center fs-11"}")" IsRounded=true>
+                        <i class="@(MainCard?.IsIncreased == true ? "ri-arrow-left-up-line" : "ri-arrow-left-down-line") fs-11"></i>
+                        @((MarkupString)(MainCard?.Percentage ?? string.Empty))
+                    </SpkBadge>
+                    <div class="text-muted fs-12 mt-1">@(MainCard?.IsIncreased == true ? "Increased" : "Decreased") from last year</div>
+                </div>
+            </div>
+        </div>
+        <div>
+            <SpkApex TItem="TItem"  ChartOptions="ChartOptions" Items="ChartItems"  Series="SeriesConfigs" />
+        </div>
+    </div>
+</div>

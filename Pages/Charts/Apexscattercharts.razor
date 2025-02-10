@@ -1,0 +1,313 @@
+@page "/apex-scatter-charts"
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using ApexSeries
+@using ApexCharts
+@using ScatterData
+@inject ScatterService ScatterService
+
+    <!-- Page Header -->
+    <SpkPageHeader PageItems="PageItems" />
+    <!-- Page Header Close -->
+
+    <!-- Start::row-1 -->
+    <div class="row">
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Basic Scatter Chart</div>
+                </div>
+                <div class="card-body">
+                    <SpkApex TItem="Scatterbasicchart" ApexHeight="320" ChartOptions="Scatterbasicoptions" Items="Scatterbasiccharts" Series="ScatterbasicchartSeriesConfigs"></SpkApex>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Datetime Scatter Chart</div>
+                </div>
+                <div class="card-body">
+                    <SpkApex TItem="TimeSeries" ApexHeight="320" ChartOptions="ScatterDatetimeoptions" Items="generator.TimeSeries" Series="TimeSeriesSeriesConfigs" XAxisType="XAxisType.Datetime" ></SpkApex>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Image Fill Scatter Chart</div>
+                </div>
+                <div class="card-body">
+                    <SpkApex TItem="ScatterImagechart" ApexHeight="320" ChartOptions="ScatterImageoptions" Items="ScatterImagecharts" Series="ScatterImagechartSeriesConfigs" ></SpkApex>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--End::row-1 -->
+
+
+@code { 
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Charts" },
+        new SpkPageHeader.PageItem { PageTitle = "Apex Charts" },
+        new SpkPageHeader.PageItem { PageTitle = "Apex Scatter Charts" },
+    };
+    //  Scatter Basic Chart Start //
+    private List<Scatterbasicchart> Scatterbasiccharts { get; set; } = ScatterService.GetScatterbasiccharts();
+    private ApexChartOptions<Scatterbasicchart> Scatterbasicoptions = new();
+    private List<SeriesConfig<Scatterbasicchart>>? ScatterbasicchartSeriesConfigs { get; set; }
+    //  Scatter Basic Chart End //
+
+    // Scatter Datetime Chart Start //
+    public class TimeSeriesGenerator
+    {
+        public List<TimeSeries> TimeSeries { get; set; } = new();
+        public long Range { get; private set; }
+        public TimeSeriesGenerator(int points)
+        {
+            SetRange(points);
+            var date = DateTimeOffset.Now.AddDays(-100);
+            for (int i = 0; i < points; i++)
+            {
+                TimeSeries.Add(GenerateNewPoint(date));
+                date = date.AddDays(1);
+            }
+        }
+        private void SetRange(int points)
+        {
+            Range = DateTimeOffset.Now.ToUnixTimeMilliseconds() - DateTimeOffset.Now.AddDays(-points).ToUnixTimeMilliseconds();
+        }
+        public TimeSeries GenerateNewPoint(DateTimeOffset newDate)
+        {
+            var rnd = new Random();
+            var value = rnd.Next(100, 300);
+            var value2 = rnd.Next(100, 300);
+            var value3 = rnd.Next(100, 300);
+            var value4 = rnd.Next(100, 300);
+            var value5 = rnd.Next(100, 300);
+            return new TimeSeries { Date = newDate,Value = rnd.Next(100, 200),Value2 = rnd.Next(100, 200),Value3 = rnd.Next(100, 200),Value4 = rnd.Next(100, 200),Value5 = rnd.Next(100, 200)};
+        }
+    }
+    private ApexChartOptions<TimeSeries>? ScatterDatetimeoptions;
+    private TimeSeriesGenerator generator = new TimeSeriesGenerator(20);
+    private List<SeriesConfig<TimeSeries>>? TimeSeriesSeriesConfigs { get; set; }
+
+    //  Scatter Datetime Chart End //
+
+    //  Scatter Image Chart Start //
+    private List<ScatterImagechart> ScatterImagecharts { get; set; } = ScatterService.GetScatterImagecharts();
+    private ApexChartOptions<ScatterImagechart> ScatterImageoptions = new();
+    private List<SeriesConfig<ScatterImagechart>>? ScatterImagechartSeriesConfigs { get; set; }
+    //  Scatter Image Chart End //
+
+    protected override void OnInitialized() {
+
+        Scatterbasicoptions = new ApexChartOptions<Scatterbasicchart> {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = true, Zoomin = true, Zoomout = true,Pan = true, Reset = true,  Download = true},
+                }, 
+            },
+            Grid = new Grid {
+                BorderColor = "#f2f5f7",
+            },
+            Colors = new Color(new List<string> { "#5c67f7", "#e354d4", "#ff8e6f" }),
+            Xaxis =  new XAxis {  
+                TickAmount = 10,
+                Labels = new XAxisLabels {
+                    Show = true,
+                    Formatter = @"function (val) {
+                        return parseFloat(val).toFixed(1)
+                    }",
+                    Style = new() {
+                        Colors = "#8c9097",
+                        FontSize = "11px",
+                        FontWeight = 600,
+                        CssClass = "apexcharts-xaxis-label",
+                    },
+                },
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis
+                {
+                    TickAmount = 7,
+                    Labels = new YAxisLabels
+                    {
+                        Show = true,
+                        Style = new() {
+                            Colors = "#8c9097",
+                            FontSize = "11px",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label",
+                        },
+                    }, 
+                    Min = 0,
+                    Max = 21,
+                    StepSize = 3,
+                }
+            },
+        };
+        ScatterbasicchartSeriesConfigs = new List<SeriesConfig<Scatterbasicchart>>
+        {
+            new SeriesConfig<Scatterbasicchart>
+            {
+                SeriesType = SeriesType.Scatter,
+                Name = "SAMPLE A",
+                XValueSelector = e => e.SAMPLEDATA,
+                YValueSelector = e => e.SAMPLEA
+            },
+            new SeriesConfig<Scatterbasicchart>
+            {
+                SeriesType = SeriesType.Scatter,
+                Name = "SAMPLE B",
+                XValueSelector = e => e.SAMPLEDATA,
+                YValueSelector = e => e.SAMPLEB
+            },
+            new SeriesConfig<Scatterbasicchart>
+            {
+                SeriesType = SeriesType.Scatter,
+                Name = "SAMPLE C",
+                XValueSelector = e => e.SAMPLEDATA,
+                YValueSelector = e => e.SAMPLEC
+            },
+        };
+        
+        ScatterDatetimeoptions = new ApexChartOptions<TimeSeries> {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = true, Zoomin = true, Zoomout = true,Pan = true, Reset = true,  Download = true},
+                }, 
+            },
+            Grid = new Grid {
+                BorderColor = "#f2f5f7",
+            },
+            Colors = new Color(new List<string> { "#5c67f7", "#e354d4", "#ff8e6f", "#fe5454", "#0ca3e7" }),
+            Yaxis = new List<YAxis>() {
+                new YAxis
+                {
+                    Labels = new YAxisLabels
+                    {
+                        Show = true,
+                        Style = new() {
+                            Colors = "#8c9097",
+                            FontSize = "11px",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label",
+                        },
+                    }, 
+                }
+            },
+        };
+        TimeSeriesSeriesConfigs = new List<SeriesConfig<TimeSeries>>
+        {
+            new SeriesConfig<TimeSeries>
+            {
+                SeriesType = SeriesType.Scatter,
+                Name = "TEAM 1",
+                XValueSelector = e => e.Date,
+                YValueSelector = e => e.Value
+            },
+            new SeriesConfig<TimeSeries>
+            {
+                SeriesType = SeriesType.Scatter,
+                Name = "TEAM 2",
+                XValueSelector = e => e.Date,
+                YValueSelector = e => e.Value2
+            },
+            new SeriesConfig<TimeSeries>
+            {
+                SeriesType = SeriesType.Scatter,
+                Name = "TEAM 3",
+                XValueSelector = e => e.Date,
+                YValueSelector = e => e.Value3
+            },
+            new SeriesConfig<TimeSeries>
+            {
+                SeriesType = SeriesType.Scatter,
+                Name = "TEAM 4",
+                XValueSelector = e => e.Date,
+                YValueSelector = e => e.Value4
+            },
+            new SeriesConfig<TimeSeries>
+            {
+                SeriesType = SeriesType.Scatter,
+                Name = "TEAM 5",
+                XValueSelector = e => e.Date,
+                YValueSelector = e => e.Value5
+            },
+        };
+
+        ScatterImageoptions = new ApexChartOptions<ScatterImagechart> {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false, Pan = false, Reset = false,  Download = false},
+                }, 
+            },
+            Grid = new Grid {
+                BorderColor = "#f2f5f7",
+            },
+            Fill = new Fill {
+                Type = new List<FillType> { FillType.Image},
+                Opacity = 1,
+                Image = new ApexCharts.FillImage {
+                    Src= ["../assets/images/faces/10.jpg","../assets/images/faces/2.jpg"],
+                    Height = 40,
+                    Width = 40,
+                }
+            },
+            Colors = new Color(new List<string> { "#056BF6", "#D2376A" }),
+            Markers = new Markers { Size = 20 },
+            Xaxis =  new XAxis {  
+                TickAmount = 10,
+                Min = 0,
+                Max = 40,
+                StepSize = 4,
+                Labels = new XAxisLabels {
+                    Show = true,
+                    Formatter = @"function (val) {
+                        return parseFloat(val).toFixed(1)
+                    }",
+                    Style = new() {
+                        Colors = "#8c9097",
+                        FontSize = "11px",
+                        FontWeight = 600,
+                        CssClass = "apexcharts-xaxis-label",
+                    },
+                },
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis
+                {
+                    TickAmount = 7,
+                    Labels = new YAxisLabels
+                    {
+                        Show = true,
+                        Style = new() {
+                            Colors = "#8c9097",
+                            FontSize = "11px",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label",
+                        },
+                    }, 
+                }
+            },
+        };
+        ScatterImagechartSeriesConfigs = new List<SeriesConfig<ScatterImagechart>>
+        {
+            new SeriesConfig<ScatterImagechart>
+            {
+                SeriesType = SeriesType.Scatter,
+                Name = "Messenger",
+                XValueSelector = e => e.SocailData,
+                YValueSelector = e => e.Messenger
+            },
+            new SeriesConfig<ScatterImagechart>
+            {
+                SeriesType = SeriesType.Scatter,
+                Name = "Instagram",
+                XValueSelector = e => e.SocailData,
+                YValueSelector = e => e.Instagram
+            },
+        };
+    }
+}

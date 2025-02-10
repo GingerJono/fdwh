@@ -1,0 +1,99 @@
+@page "/under-maintenance"
+@layout CustomLayout
+@using Sandbox._Spk
+@using System.Timers
+
+    <div class="coming-soon-main">
+        <div class="row authentication coming-soon justify-content-center g-0 my-auto">
+            <div class="col-xxl-5 col-xl-5 col-lg-5 col-md-6 col-sm-7 col-11 my-auto">
+                <div class="authentication-cover rounded-3 overflow-hidden card custom-card border my-3">
+                    <div class="aunthentication-cover-content text-center">
+                        <div class="row justify-content-center align-items-center mx-0 g-0">
+                            <div class="col-xxl-11 col-xl-10 col-lg-10 col-md-12 col-sm-12 col-12">
+                                <div>
+                                    <div class="mb-4"> <a href="/index"> 
+                                        <img src="../assets/images/brand-logos/toggle-logo.png" alt="" class="authentication-brand"> </a> 
+                                    </div>
+                                    <h4 class="mb-2">Under Maintenance</h4>
+                                    <p class="mb-5 text-muted">Excuse our digital dust - we're sprucing up our site to bring you an even better browsing adventure soon!</p>
+                                    <div class="input-group mb-5">
+                                        <input type="email" class="form-control form-control-lg bg-light" placeholder="info@gmail.com" aria-label="info@gmail.com" aria-describedby="button-addon2">
+                                    <SpkButtons ButtonClass="btn-primary" ButtonSize="btn-lg" id="button-addon2">Subscribe</SpkButtons>
+                                    </div>
+                                    <div class="d-flex gap-3 flex-wrap mt-4 mb-0 gy-xxl-0 gy-3 justify-content-center" id="timer">
+                                        <div>
+                                            <p class="mb-1 fw-medium">DAYS</p>
+                                            <h4 class="mb-0 avatar d-block bg-primary-transparent avatar-rounded shadow-sm avatar-xl mt-2 backdrop-blur">@Days</h4>
+                                        </div>
+                                        <div>
+                                            <p class="mb-1 fw-medium">HOURS</p>
+                                            <h4 class="mb-0 avatar d-block bg-primary1-transparent avatar-rounded shadow-sm avatar-xl mt-2 backdrop-blur">@Hours</h4>
+                                        </div>
+                                        <div>
+                                            <p class="mb-1 fw-medium">MINUTES</p>
+                                            <h4 class="mb-0 avatar d-block bg-primary2-transparent avatar-rounded shadow-sm avatar-xl mt-2 backdrop-blur">@Minutes</h4>
+                                        </div>
+                                        <div>
+                                            <p class="mb-1 fw-medium">SECONDS</p>
+                                            <h4 class="mb-0 avatar d-block bg-primary3-transparent avatar-rounded shadow-sm avatar-xl mt-2 backdrop-blur">@Seconds</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+@code {
+    private DateTime FutureDateTime = new DateTime(2026, 12, 19, 11, 30, 0);
+    private int Days { get; set; }
+    private int Hours { get; set; }
+    private int Minutes { get; set; }
+    private int Seconds { get; set; }
+
+    private Timer? timer;
+
+    protected override void OnInitialized()
+    {
+        // Initialize the timer to tick every second (1000 ms)
+        timer = new Timer(1000);
+        timer.Elapsed += UpdateTimer!;
+        timer.Start();
+        UpdateTimer(this, null); // Initial calculation
+    }
+
+    private void UpdateTimer(object? sender, ElapsedEventArgs? e)
+    {
+        var now = DateTime.Now;
+        var diff = FutureDateTime - now;
+
+        if (diff.TotalSeconds > 0)
+        {
+            Days = (int)diff.TotalDays;
+            Hours = (int)diff.TotalHours % 24;
+            Minutes = (int)diff.TotalMinutes % 60;
+            Seconds = (int)diff.TotalSeconds % 60;
+
+            InvokeAsync(StateHasChanged); // Update the UI
+        }
+        else
+        {
+            // Stop the timer when the countdown is complete
+            timer?.Stop();
+        }
+    }
+
+    public void Dispose()
+    {
+        // Clean up the timer
+        if (timer != null)
+        {
+            timer.Dispose();
+        }
+    }
+}

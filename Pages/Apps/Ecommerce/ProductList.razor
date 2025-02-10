@@ -1,0 +1,117 @@
+@page "/products-list"
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager
+@using Sandbox._Spk
+@using ProductsData
+@inject ProductsService ProductsService
+@inject IJSRuntime JSRuntime
+
+    <!-- Page Header -->
+    <SpkPageHeader PageItems="PageItems" />
+    <!-- Page Header Close -->
+    
+    <!-- Start::row-1 -->
+    <div class="row">   
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        Products List
+                    </div>
+                </div>
+                <div class="card-body">
+                    <SpkTables Items="ProductsService.GetProductListHeadersData()" Tableclass="text-nowrap table-bordered" ShowCheckbox=true SelectAllClick="ToggleSelectAll">
+                        @foreach (var ProductList in ProductsService.GetProductLists()){
+                            <tr class="product-list">
+                                <td class="product-checkbox">
+                                    <input class="form-check-input" type="checkbox" id="@ProductList.ProductId" value="" @bind="@ProductList.Selected" aria-label="...">
+                                </td>
+                                <td>
+                                    <div class="d-flex">
+                                        <span class="avatar avatar-md avatar-square bg-light"><img src="@ProductList.Product" class="w-100 h-100" alt="..."></span>
+                                        <div class="ms-2">
+                                            <p class="fw-semibold mb-0 d-flex align-items-center"><a href="javascript:void(0);"> @ProductList.ProductTitle</a></p>
+                                            <p class="fs-12 text-muted mb-0">@ProductList.Description</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span>@ProductList.Category</span></td>
+                                <td>@ProductList.Price</td>
+                                <td>@ProductList.Stock</td>
+                                <td><SpkBadge BadgeClass="@ProductList.Statusbadge">@ProductList.Status</SpkBadge></td>
+                                <td>
+                                    <div class="d-flex align-items-center fw-semibold">
+                                        <span class="avatar avatar-sm p-1 bg-light me-2 avatar-rounded">
+                                            <img src="@ProductList.SellerImg" alt="">
+                                        </span>
+                                        <a href="javascript:void(0);">@ProductList.Seller</a>
+                                    </div>
+                                </td>
+                                <td>@ProductList.Published</td>
+                                <td>
+                                    <div class="hstack gap-2 fs-15">
+                                        <SpkButtons Tag="a" href="/edit-products" ButtonClass="btn-icon btn-primary-light" ButtonSize="btn-sm"><i class="ri-edit-line"></i></SpkButtons>
+                                        <SpkButtons Tag="a" ButtonClass="btn-icon btn-danger-light product-btn" ButtonSize="btn-sm" @onclick="@(() => DeleteOrder(ProductList.ProductId))"><i class="ri-delete-bin-line"></i></SpkButtons>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </SpkTables>
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex align-items-center flex-wrap overflow-auto">
+                        <div class="mb-2 mb-sm-0">
+                            Showing <b>1</b> to <b>5</b> of <b>10</b> entries <i class="bi bi-arrow-right ms-2 fw-semibold"></i>
+                        </div>
+                        <div class="ms-auto">
+                            <ul class="pagination mb-0 overflow-auto">
+                                <li class="page-item disabled">
+                                    <a class="page-link">Previous</a>
+                                </li>
+                                <li class="page-item active" aria-current="page"><a class="page-link" href="javascript:void(0)">1</a></li>
+                                <li class="page-item">
+                                    <a class="page-link" href="javascript:void(0)">2</a>
+                                </li>
+                                <li class="page-item"><a class="page-link" href="javascript:void(0)">3</a></li>
+                                <li class="page-item"><a class="page-link" href="javascript:void(0)">4</a></li>
+                                <li class="page-item"><a class="page-link" href="javascript:void(0)">5</a></li>
+                                <li class="page-item">
+                                    <a class="page-link" href="javascript:void(0)">Next</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--End::row-1 -->
+
+ 
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Apps" },
+        new SpkPageHeader.PageItem { PageTitle = "Ecommerce" },
+        new SpkPageHeader.PageItem { PageTitle = "Products List" },
+    };
+    
+    private bool selectAll;
+    private void ToggleSelectAll()
+    {
+        selectAll = !selectAll;
+        foreach (var product in ProductsService.GetProductLists())
+        {
+            product.Selected = selectAll;
+        }
+    }
+    
+    protected void DeleteOrder(decimal ProductId)
+    {
+        var productToRemove = ProductsService.GetProductLists().FirstOrDefault(o => o.ProductId == ProductId);
+        if (productToRemove != null)
+        {
+            ProductsService.GetProductLists().Remove(productToRemove);
+        }
+    }
+    
+
+}

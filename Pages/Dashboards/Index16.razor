@@ -1,0 +1,437 @@
+@page "/index16"
+@using ApexCharts
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using ApexSeries
+@using CardModel
+@using Social
+@inject SocialService SocialService
+
+        <!-- Start::page-header -->
+        <SpkPageHeader PageItems="PageItems" />
+        <!-- End::page-header -->
+        
+        <!-- Start::Row-1 -->
+        <div class="row">
+            <div class="col-xxl-8">
+                <div class="row">
+                        @foreach(var social in SocialService.GetSocialcardData()){
+                        <div class="col-xl-4">
+                            <SpkSocialCard Socialcard="social"></SpkSocialCard>
+                        </div>
+                        }
+                </div>
+            </div>
+            <div class="col-xxl-4">
+                <div class="card custom-card overflow-hidden">
+                    <div class="card-header justify-content-between">
+                        <div class="card-title"> 
+                            Follow On Device
+                        </div>
+                        <SpkButtons Tag="a" ButtonClass="btn-light text-muted" ButtonSize="btn-sm"> View All</SpkButtons>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="row p-3 gx-3 align-items-center">
+                            <div class="col-xl-6 px-0">
+                                <div id="follow-on-device">
+                                    <SpkApex TItem="FollowOnDevice" ApexHeight="197" Items="followondevice" ChartOptions="FollowOnDeviceChartOptions" Series="FollowOnDeviceSeriesConfig"></SpkApex>
+                                </div>
+                            </div>
+                            <div class="col-xl-6">
+                                <ul class="list-group list-group-flush border border-top mt-3">
+                                    <li class="list-group-item">
+                                        <div class="d-flex align-items-start justify-content-between">
+                                            <div class="session-type lh-1 mobile">
+                                                <div class="fw-medium mb-1">Mobile</div>
+                                                <span class="fs-12 text-muted">Increased By<span class="text-success fs-12 ms-1 fw-medium d-inline-block">1.67%</span></span>
+                                            </div>
+                                            <div class="lh-1 text-end">
+                                                <span class="d-block fs-12 text-muted mb-1">Total</span>
+                                                <span class="d-block fw-semibold mb-0">1,754</span>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="list-group-item">
+                                        <div class="d-flex align-items-start justify-content-between">
+                                            <div class="session-type lh-1 tablet">
+                                                <div class="fw-medium mb-1">Tablet</div>
+                                                <span class="fs-12 text-muted">Increased By<span class="text-success fs-12 ms-1 fw-medium d-inline-block">0.46%</span></span>
+                                            </div>
+                                            <div class="lh-1 text-end">
+                                                <span class="d-block fs-12 text-muted mb-1">Total</span>
+                                                <span class="d-block fw-semibold mb-0">1,234</span>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="list-group-item">
+                                        <div class="d-flex align-items-start justify-content-between">
+                                            <div class="session-type desktop lh-1">
+                                                <div class="fw-medium mb-1">Desktop</div>
+                                                <span class="fs-12 text-muted">Decresed By<span class="text-danger fs-12 ms-1 fw-medium d-inline-block">3.43%</span></span>
+                                            </div>
+                                            <div class="lh-1 text-end">
+                                                <span class="d-block fs-12 text-muted mb-1">Total</span>
+                                                <span class="d-block fw-semibold mb-0">878</span>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End::Row-1 -->
+
+        <!-- Start::Row-2 -->
+        <div class="row">
+            <div class="col-xxl-3">
+                <div class="card custom-card">
+                    <div class="card-header justify-content-between">
+                        <div class="card-title">
+                            Suggestions
+                        </div>
+                        <SpkButtons Tag="a" ButtonClass="btn-light text-muted" ButtonSize="btn-sm"> View All</SpkButtons>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled personal-favourite mb-0">
+                            @foreach(var list in SocialService.GetSuggestionsData()){
+                                <li>
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-2">
+                                            <span class="avatar avatar-sm">
+                                                <img src="@list.UserImg" alt="">
+                                            </span>
+                                        </div>
+                                        <div class="flex-fill">
+                                            <span class="fw-medium d-block mb-0">@list.User</span>
+                                            <span class="text-muted d-block fs-12">3 Mutual Friends</span>
+                                        </div>
+                                        <div>
+                                            <SpkButtons ButtonClass="btn-icon btn-primary" ButtonSize="btn-sm"><i class="ri-user-add-line"></i></SpkButtons>
+                                        </div>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xxl-6">
+                <div class="card custom-card">
+                    <div class="card-header justify-content-between flex-wrap">
+                        <div class="card-title">
+                            Audience Statistics
+                        </div>
+                        <div class="d-flex gap-2">
+                            <SpkButtons ButtonSize="btn-sm" ButtonClass="btn-outline-light border btn-full">Today</SpkButtons>
+                            <SpkButtons ButtonSize="btn-sm" ButtonClass="btn-outline-light border btn-full">Weakly</SpkButtons>
+                            <SpkButtons ButtonSize="btn-sm" ButtonClass="btn-light border btn-full">Yearly</SpkButtons>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="audience" class="">
+                            <SpkApex TItem="Audience" ApexHeight="330" ChartOptions="AudienceChartOptions" Items="audience" Series="AudienceSeriesConfig"></SpkApex>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xxl-3">
+                <div class="card custom-card">
+                    <div class="card-header justify-content-between">
+                        <div class="card-title">
+                            Requests
+                        </div>
+                        <SpkButtons ButtonSize="btn-sm" ButtonClass="btn-light text-muted">View All</SpkButtons>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled personal-favourite mb-0">
+                            @foreach(var list in SocialService.GetSuggestionsData()){
+                                <li>
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-2">
+                                            <span class="avatar avatar-sm">
+                                                <img src="@list.UserImg" alt="">
+                                            </span>
+                                        </div>
+                                        <div class="flex-fill text-truncate">
+                                            <span class="fw-medium d-block mb-0">@list.User</span>
+                                            <span class="text-muted d-block fs-12 w-75 text-truncate">want's to add you as a friend </span>
+                                        </div>
+                                        <div class="btn-list text-nowrap">
+                                            <SpkButtons ButtonSize="btn-sm" ButtonClass="btn-icon btn-success-light"><i class="ri-check-line"></i></SpkButtons>
+                                            <SpkButtons ButtonSize="btn-sm" ButtonClass="btn-icon btn-danger-light"><i class="ri-close-line"></i></SpkButtons>
+                                        </div>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End::Row-2 -->
+
+        <!-- Start::Row-3 -->
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="card custom-card">
+                    <div class="card-header justify-content-between">
+                        <div class="card-title">
+                            Social Media Performance
+                        </div>
+                        <div class="d-flex flex-wrap gap-2">
+                            <div>
+                                <input class="form-control form-control-sm" type="text" placeholder="Search Here">
+                            </div>
+                            <SpkDropdowns Tag="a" DropdownClass="btn btn-primary btn-sm " DropdownText="Sort By<i class='ri-arrow-down-s-line align-middle ms-1 d-inline-block'></i>" DropdownToggle=false>
+                                <ChildContent2>
+                                    <ul class="dropdown-menu" role="menu">
+                                        <li><a class="dropdown-item" href="javascript:void(0);">New</a></li>
+                                        <li><a class="dropdown-item" href="javascript:void(0);">Popular</a></li>
+                                        <li><a class="dropdown-item" href="javascript:void(0);">Relevant</a></li>
+                                    </ul>
+                                </ChildContent2>
+                            </SpkDropdowns>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <SpkTables Items="SocialService.GetSocialTableHeadersData()" Tableclass="text-nowrap table-bordered">
+                            @foreach(var media in SocialService.GetSocialTableData()){
+                                <tr>
+                                    <td>@media.Date</td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="avatar avatar-sm @media.PlatformClass">
+                                                <i class="@media.PlatformImg fs-16"></i>
+                                            </span>
+                                            <span class="fw-medium">@media.Platform</span>
+                                        </div>
+                                    </td>
+                                    <td>@media.Likes</td>
+                                    <td>@media.Comments</td>
+                                    <td>@media.Shares</td>
+                                    <td><SpkBadge BadgeClass="@media.ImpressionsClass">@media.Impressions</SpkBadge></td>
+                                    <td>@media.Engaged</td>
+                                    <td>@media.Followers</td>
+                                    <td>@media.Following</td>
+                                </tr>
+                            }
+                        </SpkTables>
+                    </div>
+                    <div class="card-footer border-top-0"> 
+                        <div class="d-flex align-items-center"> 
+                            <div> Showing 5 Entries <i class="bi bi-arrow-right ms-2 fw-semibold"></i> </div>
+                            <div class="ms-auto"> 
+                            <nav aria-label="Page navigation" class="pagination-style-4"> 
+                                <ul class="pagination mb-0"> 
+                                    <li class="page-item disabled"> <a class="page-link" href="javascript:void(0);"> Prev </a> </li>
+                                        <li class="page-item active"><a class="page-link" href="javascript:void(0);">1</a></li> 
+                                        <li class="page-item"><a class="page-link" href="javascript:void(0);">2</a></li> 
+                                        <li class="page-item"> <a class="page-link text-primary" href="javascript:void(0);"> next </a> </li> 
+                                    </ul> 
+                                </nav> 
+                            </div> 
+                        </div> 
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End::Row-3 -->
+
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Dashboards" },
+        new SpkPageHeader.PageItem { PageTitle = "Social Media" },
+    };
+
+    //  Follow On Device Start //
+    private List<FollowOnDevice> followondevice { get; set; } = SocialService.GetFollowOnDevices();    
+    private ApexChartOptions<FollowOnDevice> FollowOnDeviceChartOptions { get; set; } = new();
+    private List<SeriesConfig<FollowOnDevice>>? FollowOnDeviceSeriesConfig { get; set; } 
+    //  Follow On Device End //
+
+    // Audience Start //
+    private List<Audience> audience { get; set; } = SocialService.GetAudience();
+    private ApexChartOptions<Audience> AudienceChartOptions { get; set; } = new();
+    private List<SeriesConfig<Audience>>? AudienceSeriesConfig { get; set; } 
+    
+    // Audience End //
+    protected override void OnInitialized() {
+
+        FollowOnDeviceChartOptions = new ApexChartOptions<FollowOnDevice> {
+            Chart = new () {
+                Height ="10rem",
+            }, 
+            Stroke = new Stroke { 
+                Show = true,
+                Curve = [Curve.Smooth],
+                LineCap = ApexCharts.LineCap.Round,
+            Colors = new Color(new List<string> {"#fff"}),
+                Width = 0
+            },
+            Legend = new Legend  { 
+                Show= false,
+            }, 
+            Colors = new Color(new List<string> {"var(--primary-color)", "rgb(227, 84, 212)", "rgba(14, 165, 232, 1)"}),
+            PlotOptions = new PlotOptions {
+                Pie = new PlotOptionsPie { 
+                    ExpandOnClick = false,
+                    Donut= new PlotOptionsDonut{
+                        Size = "80%",
+                        Background = "transparent",
+                        Labels = new(){
+                            Show = true,
+                            Name = new(){
+                                Show = true,
+                                FontSize = "20px",
+                                Color = "#495057",
+                                OffsetY = -4
+                            },
+                            Value = new(){
+                                Show = true,
+                                FontSize = "18px",
+                                Color = null,
+                                OffsetY = 8,
+                                Formatter = @"function (val) {return val + '%'}"
+                            },
+                            Total = new(){
+                                Show = true,
+                                ShowAlways = true,
+                                Label = "Total",
+                                FontSize = "22px",
+                                FontWeight = 600,
+                                Color = "#495057",
+                            }
+
+                        }
+                    }
+                }
+            },
+        };
+        FollowOnDeviceSeriesConfig = new List<SeriesConfig<FollowOnDevice>>
+        {
+            new SeriesConfig<FollowOnDevice>
+            {
+                SeriesType = SeriesType.Donut,
+                XValueSelector = e => e.Device ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.DeviceValue),
+            },
+        };
+
+        AudienceChartOptions = new ApexChartOptions<Audience> {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = false},
+                }, 
+                DropShadow = new ApexCharts.DropShadow {
+                    Enabled = true,
+                    Color = ["rgb(227, 84, 212)", "rgb(227, 84, 212)", "transparent", "transparent"],
+                    Top = 7,
+                    Left = 0,
+                    Blur = 1,
+                    Opacity = 0.05
+                },
+            },
+            PlotOptions = new PlotOptions
+            {
+                Bar = new PlotOptionsBar
+                {
+                    Horizontal = false,
+                    BorderRadius = 6,
+                    ColumnWidth = "20%",
+                }
+            },
+            Grid = new Grid {
+                BorderColor = "rgba(167, 180, 201 ,0.2)",
+            },
+            Stroke = new Stroke { 
+                Curve = [Curve.Smooth , Curve.Straight],
+                Width= [0, 2],
+                DashArray= [0, 4],
+            },
+            DataLabels = new DataLabels {
+                Enabled = false,
+            }, 
+            Legend = new Legend {
+                Show = true,
+                Position = LegendPosition.Top,
+                Labels= new() {
+                    Colors = new Color("#74767c"),
+                },
+                Markers=  new(){
+                    Width =  5,
+                    Height = 5,
+                },
+            },
+            Xaxis =  new XAxis {
+                AxisBorder = new () {
+                    Show = true,
+                    Color = "rgba(167, 180, 201 ,0.2)",
+                    OffsetX = 0,
+                    OffsetY = 0,
+                },
+                AxisTicks = new () {
+                    Show = true,
+                    Color = "rgba(167, 180, 201 ,0.2)",
+                    BorderType = ApexCharts.BorderType.Solid,
+                    OffsetX = 0,
+                    OffsetY = 0,
+                },
+                Labels = new XAxisLabels {
+                    Rotate = -90,
+                    Show = true,
+                    Style = new AxisLabelStyle {
+                        Colors= "#8c9097",
+                        FontSize = "11px",
+                        FontWeight = 600,
+                        CssClass = "apexcharts-xaxis-label"
+                    }
+                },
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis // Define the first YAxis object
+                {
+                    Min = 0,
+                    Max = 80,
+                    StepSize = 10,
+                    Labels= new () {
+                        Formatter = @"function (y) {
+                            if (y !== undefined && y !== null && !isNaN(y)) {
+                                return y.toFixed(0) + '';
+                            }
+                            return ''; 
+                        }",
+                        Style = new () {
+                            Colors = "#8c9097",
+                            FontSize = "11px",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-xaxis-label",
+                        },
+                    },
+                }
+            },
+            Colors = new Color(new List<string> {"var(--primary-color)", "rgb(227, 84, 212)"}),
+        };
+        AudienceSeriesConfig = new List<SeriesConfig<Audience>>
+        {
+            new SeriesConfig<Audience>
+            {
+                SeriesType = SeriesType.Bar,
+                Name="Followers",
+                XValueSelector = e => e.Month ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.Followers),
+            },
+            new SeriesConfig<Audience>
+            {
+                SeriesType = SeriesType.Line,
+                Name="Total Views",
+                XValueSelector = e => e.Month ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.Views),
+            },
+        };
+        
+    }
+
+}

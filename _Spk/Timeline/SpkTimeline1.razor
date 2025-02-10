@@ -1,0 +1,47 @@
+
+@using TimelineData
+@inject TimelineService TimelineService
+
+@code {
+    [Parameter] public Activity? activity { get; set; }    
+}
+
+@if(activity != null){
+    <div class="timeline-end mb-5">
+        <span class="p-1 fs-11 bg-@activity.Mainclass text-fixed-white backdrop-blur text-center border border-@activity.Mainclass border-opacity-10 rounded-1 lh-1 fw-medium">
+            @activity.Date
+        </span>
+    </div> 
+    @if (activity.Activitylist != null)
+    {
+        @foreach (var list in activity.Activitylist)
+        {
+            <div class="timeline-right">
+                <div class="timeline-content">
+                    <p class="timeline-date text-muted mb-2">
+                        @list.Time
+                    </p>
+                    <div class="timeline-box">
+                        <p class="mb-2">
+                            @((MarkupString)(list.Title ?? string.Empty))
+                        </p>
+                        <p class="text-muted @(list.MediaList?.Any() == true ? "":"mb-0 ")">
+                             @((MarkupString)(list.Description ?? string.Empty))
+                        </p>
+                        <p class="profile-activity-media mb-0">
+                            @if (list.MediaList != null)
+                            {
+                                @foreach (var media in list.MediaList)
+                                {
+                                    <a href="javascript:void(0);">
+                                        <img src="@media.Img" alt="" class="mb-0">
+                                    </a>    
+                                }
+                            }
+                        </p>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+}

@@ -1,0 +1,38 @@
+@typeparam TItem where TItem : class
+@using Sandbox._Spk
+@using ApexCharts
+@using ApexSeries
+@using CardModel
+
+@code {
+    [Parameter] public CryptoMainChart? MainCard { get; set; }
+    [Parameter] public List<TItem>? ChartItems { get; set; }
+    [Parameter] public ApexChartOptions<TItem>? ChartOptions { get; set; }
+    [Parameter] public List<SeriesConfig<TItem>>? SeriesConfigs { get; set; }
+}
+
+<div class="card custom-card">
+    <div class="card-body">
+        <div class="d-flex align-items-center gap-2 justify-content-between">
+            <div class="d-flex align-items-start gap-2">
+                <div class="lh-1 avatar avatar-sm p-1 bg-light avatar-rounded">
+                    <img src="@MainCard?.CryptoImg" alt="" class="w-auto">
+                </div>
+                <div>
+                    <h5 class="mb-0">@MainCard?.CryptoValue<span class="text-muted fw-medium fs-13"> @MainCard?.CryptoSubTitle</span></h5>
+                    <p class="mb-0 text-muted fs-12">@MainCard?.CryptoTitle</p>
+                </div>
+            </div>
+            <div id="btc-marketcap">
+                <SpkApex TItem="TItem" ChartOptions="ChartOptions" Items="ChartItems"  Series="SeriesConfigs" />
+            </div>
+        </div>
+        <div class="d-flex align-items-center gap-2 justify-content-between mt-3 bg-light px-2 p-1 rounded-2">
+            <p class="mb-0 fw-medium text-muted py-1">$@MainCard?.CryptoUsd USD</p>
+            <div class="@(MainCard?.IsIncreased == true ? "text-success" : "text-danger")">
+                <i class="@(MainCard?.IsIncreased == true ? "ti-trending-up" : "ti-trending-down") ti me-1 d-inline-block"></i>
+                @MainCard?.Percentage
+            </div>
+        </div>
+    </div>
+</div>

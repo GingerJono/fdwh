@@ -1,0 +1,84 @@
+@page "/quill-editor"
+@using Blazored.TextEditor
+@inject IJSRuntime JSRuntime
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+
+        <!-- Quill CSS -->
+        <link rel="stylesheet" href="@($"{NavigationManager.BaseUri}assets/libs/quill/dist/quill.snow.css")">
+        <link rel="stylesheet" href="@($"{NavigationManager.BaseUri}assets/libs/quill/dist/quill.bubble.css")">
+
+        <!-- Page Header -->
+        <SpkPageHeader PageItems="PageItems" />
+        <!-- Page Header Close -->
+
+        <!-- Start:: row-1 -->
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="card custom-card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            Quill Snow Editor
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <SpkEditor @ref="QuillHtml" ShowMainHeader=true ShowFont=true ShowTextFormatting=true ShowBlockFormatting=true ShowHeader=true ShowLists=true ShowColor=true ShowAlignment=true ShowClean=true ShowScript=true ShowIndent=true ShowDirection=true ShowImage=true Body="@Quilbody" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End:: row-1 -->
+
+        <!-- Start:: row-2 -->
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="card custom-card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            Quill Bubble Editor
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <SpkEditor @ref="QuillbubbleHtml" ShowMainHeader=false ShowFont=false ShowTextFormatting=false ShowBlockFormatting=false ShowHeader=false ShowLists=false ShowColor=false ShowAlignment=false ShowClean=false Bubble=true Body="@Quillbubblebody" Theme="bubble" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End:: row-2 -->
+
+        <!-- Quill Editor JS -->
+        <script src="@($"{NavigationManager.BaseUri}assets/libs/quill/dist/quill.js")"></script>
+        <script src="_content/Blazored.TextEditor/quill-blot-formatter.min.js"></script>
+        <script src="_content/Blazored.TextEditor/Blazored-BlazorQuill.js"></script>
+
+
+@code {    
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Forms" },
+        new SpkPageHeader.PageItem { PageTitle = "Quill Editor" },
+    };
+
+    <!-- QuilEditor JS Start -->
+     private SpkEditor ? QuillHtml;
+      private string Quilbody = @"<h4><b class='ql-size-large'>Quill Snow</b> is a free, open source <a href='https://github.com/quilljs/quill/' target='_blank'>Quill Editor</a> built for the modern web. With its <a href='https://quilljs.com/docs/modules/' target='_blank'>modular architecture</a> and expressive API, it is completely customizable to fit any need.</h4>
+    <p><br></p>
+    <ol>
+        <li class='ql-size-normal'>Write text select and edit with multiple options.</li>
+        <li class=''>This is quill snow editor.</li>
+        <li class=''>Easy to customize and flexible.</li>
+    </ol>
+    <p><br></p>
+    <h4>Quill officially supports a standard toolbar theme <a href='https://github.com/quilljs/quill/' target='_blank'>'Snow'</a> and a floating tooltip theme <a href='https://github.com/quilljs/quill/' target='_blank'>'Bubble'</a></h4>";
+    <!-- QuilEditor JS Start -->
+     private SpkEditor ? QuillbubbleHtml; 
+     private string Quillbubblebody = @"<h4><b class='ql-size-large'>Quill Bubble</b> is a free, open source <a href='https://github.com/quilljs/quill/' target='_blank'>Quill Editor</a> built for the modern web. With its <a href='https://quilljs.com/docs/modules/' target='_blank'>modular architecture</a> and expressive API, it is completely customizable to fit any need.</h4>
+                                <p><br></p>
+                                <ol>
+                                    <li class='ql-size-normal'>Write text select and edit with multiple options.</li>
+                                    <li class=''>This is quill bubble editor.</li>
+                                    <li class=''>Easy to customize and flexible.</li>
+                                </ol>
+                                <p><br></p>
+                                <h4>Quill officially supports a standard toolbar theme <a href='https://github.com/quilljs/quill/' target='_blank'>'Snow'</a> and a floating tooltip theme <a href='https://github.com/quilljs/quill/' target='_blank'>'Bubble'</a></h4>";
+
+}

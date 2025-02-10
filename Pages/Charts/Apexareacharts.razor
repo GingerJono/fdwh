@@ -1,0 +1,967 @@
+@page "/apex-area-charts"
+@using System.Collections.Generic
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using ApexSeries
+@using ApexCharts
+@using AreaData
+@inject AreaService AreaService
+
+    <!-- Page Header -->
+        <SpkPageHeader PageItems="PageItems" />
+    <!-- Page Header Close -->
+
+    <!-- Start::row-1 -->   
+    <div class="row">
+        <div class="col-xl-6">  
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Basic Area Chart</div>
+                </div>
+                <div class="card-body">
+                    <SpkApex TItem="Areabasicchart" Items="Areabasiccharts" Title="Fundamental Analysis of Stocks" ApexHeight="320" XAxisType="XAxisType.Datetime" ChartOptions="BasicAreaChartOptions" Series="AreabasicchartSeriesConfigs"></SpkApex>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Spline Area Chart</div>
+                </div>
+                <div class="card-body">
+                    <SpkApex TItem="AreaSplinechart" Items="AreaSplinecharts" ApexHeight="320" XAxisType="XAxisType.Datetime" ChartOptions="SplineAreaChartOptions" Series="AreaSplinechartSeriesConfigs"></SpkApex>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Area Chart With Negative Values</div>
+                </div>
+                <div class="card-body">
+                    <SpkApex TItem="AreaNegativechart" Items="AreaNegativecharts" Title="Area with Negative Values" ApexHeight="355" XAxisType="XAxisType.Datetime" ChartOptions="NegativeAreaChartOptions" Series="AreaNegativechartSeriesConfigs"></SpkApex>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Selection-Github Style Chart</div>
+                </div>
+                <div class="card-body">
+                    <div id="chart-months">
+                    <SpkApex TItem="TimeSeries" Items="Brushdata" ApexHeight="140" XAxisType="XAxisType.Datetime" ChartOptions="BrushAreaChartOptions" Series="TimeSeriesSeriesConfigs1"></SpkApex>
+                    </div>
+                    <div class="github-style d-flex align-items-center">
+                        <div class="me-2">
+                            <img class="userimg rounded" src="@($"{NavigationManager.BaseUri}assets/images/faces/1.jpg")"
+                                data-hovercard-user-id="634573" alt="" width="38" height="38">
+                        </div>
+                        <div class="userdetails lh-1">
+                            <a class="username fw-semibold fs-14">coder</a>
+                            <span class="cmeta d-block mt-1">
+                                <span class="commits"></span>388 commits
+                            </span>
+                        </div>
+                    </div>
+                    <div id="chart-years">
+                    <SpkApex TItem="TimeSeries" Items="Brushdata" ApexHeight="160" XAxisType="XAxisType.Datetime" ChartOptions="Brush2AreaChartOptions" Series="TimeSeriesSeriesConfigs2"></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Stacked Area Chart</div>
+                </div>
+                <div class="card-body">
+                    <div id="area-stacked">
+                        <SpkApex TItem="AreaStackedchart" Items="AreaStackedcharts" ApexHeight="350" XAxisType="XAxisType.Datetime" ChartOptions="StackedAreaChartOptions" Series="AreaStackedchartSeriesConfigs"></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Irregular Time Series Chart</div>
+                </div>
+                <div class="card-body">
+                    <div id="area-irregular">
+                        <SpkApex TItem="AreaIrregularchart" Items="AreaIrregularcharts" ApexHeight="350" ChartOptions="IrregularAreaChartOptions" Series="AreaIrregularchartSeriesConfigs"></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Area Chart With Null Values</div>
+                </div>
+                <div class="card-body">
+                    <SpkApex TItem="AreaNullValueschart" Items="AreaNullValuescharts" ApexHeight="320" ChartOptions="NullValuesAreaChartOptions" XAxisType="XAxisType.Datetime" Series="AreaNullValueschartSeriesConfigs"></SpkApex>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Area Chart-Datetime X-Axis Chart</div>
+                    <div class="btn-group ms-auto">
+                        <SpkButtons ButtonClass="btn-primary" ButtonSize="btn-sm" id="one_month">1M</SpkButtons>
+                        <SpkButtons ButtonClass="btn-primary" ButtonSize="btn-sm" id="six_months">6M</SpkButtons>
+                        <SpkButtons ButtonClass="btn-primary" ButtonSize="btn-sm" id="one_year">1Y</SpkButtons>
+                        <SpkButtons ButtonClass="btn-primary" ButtonSize="btn-sm" id="all">ALL</SpkButtons>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <SpkApex TItem="AreaDatetimechart" Items="AreaDatetimecharts" ApexHeight="320" ChartOptions="DatetimeAreaChartOptions" XAxisType="XAxisType.Datetime" Series="AreaDatetimechartSeriesConfigs"></SpkApex>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End::row-1 -->
+
+    
+@code {    
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Charts" },
+        new SpkPageHeader.PageItem { PageTitle = "Apex Charts" },
+        new SpkPageHeader.PageItem { PageTitle = "Apex Area Charts" },
+    };
+
+    // Basic Area Chart Start //
+    private List<Areabasicchart> Areabasiccharts { get; set; } = AreaService.GetAreabasiccharts();
+    private ApexChartOptions<Areabasicchart> BasicAreaChartOptions { get; set; } = new();
+    private List<SeriesConfig<Areabasicchart>>? AreabasicchartSeriesConfigs { get; set; }
+    //  Basic Area Chart End //
+
+    // Spline Area Chart Start //
+    private List<AreaSplinechart> AreaSplinecharts { get; set; } = AreaService.GetAreaSplinecharts();
+    private ApexChartOptions<AreaSplinechart> SplineAreaChartOptions { get; set; } = new();
+    private List<SeriesConfig<AreaSplinechart>>? AreaSplinechartSeriesConfigs { get; set; }
+    //  Spline Area Chart End //
+
+    // Negative Area Chart Start //
+    private List<AreaNegativechart> AreaNegativecharts { get; set; } = AreaService.GetAreaNegativecharts();
+    private ApexChartOptions<AreaNegativechart> NegativeAreaChartOptions { get; set; } = new();
+    private List<SeriesConfig<AreaNegativechart>>? AreaNegativechartSeriesConfigs { get; set; }
+    //  Negative Area Chart End //
+
+    // Brush Data Chart Start // 
+    public class TimeSeriesGenerator
+    {
+        public List<TimeSeries> TimeSeries { get; set; } = new();
+        public long Range { get; private set; }
+        public TimeSeriesGenerator(int points)
+        {
+            SetRange(points);
+            var date = DateTimeOffset.Now.AddDays(-100);
+            for (int i = 0; i < points; i++)
+            {
+                TimeSeries.Add(GenerateNewPoint(date));
+                date = date.AddDays(1);
+            }
+        }
+        private void SetRange(int points)
+        {
+            Range = DateTimeOffset.Now.ToUnixTimeMilliseconds() - DateTimeOffset.Now.AddDays(-points).ToUnixTimeMilliseconds();
+        }
+        public TimeSeries GenerateNewPoint(DateTimeOffset newDate)
+        {
+            var rnd = new Random();
+            var value = rnd.Next(100, 300);
+            return new TimeSeries { Date = newDate, Value = value, Quantity = rnd.Next(100, 200) };
+        }
+    }
+
+    private List<TimeSeries> Brushdata { get; set; } = new TimeSeriesGenerator(100).TimeSeries;
+    private ApexChartOptions<TimeSeries> BrushAreaChartOptions { get; set; } = new();
+    private List<SeriesConfig<TimeSeries>>? TimeSeriesSeriesConfigs1 { get; set; }
+    private ApexChartOptions<TimeSeries> Brush2AreaChartOptions { get; set; } = new();
+    private List<SeriesConfig<TimeSeries>>? TimeSeriesSeriesConfigs2 { get; set; }
+    //  Brush Data Chart End //    
+
+    // Stacked Area Chart Start //
+    private List<AreaStackedchart> AreaStackedcharts { get; set; } = AreaService.GetAreaStackedcharts();
+    private ApexChartOptions<AreaStackedchart> StackedAreaChartOptions { get; set; } = new();
+    private List<SeriesConfig<AreaStackedchart>>? AreaStackedchartSeriesConfigs { get; set; }
+    //  Stacked Area Chart End //
+
+    // Irregular Area Chart Start //
+    private List<AreaIrregularchart> AreaIrregularcharts { get; set; } = AreaService.GetAreaIrregularcharts();
+    private ApexChartOptions<AreaIrregularchart> IrregularAreaChartOptions { get; set; } = new();
+    private List<SeriesConfig<AreaIrregularchart>>? AreaIrregularchartSeriesConfigs { get; set; }
+    //  Irregular Area Chart End //
+
+    // NullValues Area Chart Start //
+    private List<AreaNullValueschart> AreaNullValuescharts { get; set; } = AreaService.GetAreaNullValuescharts();
+    private ApexChartOptions<AreaNullValueschart> NullValuesAreaChartOptions { get; set; } = new();
+    private List<SeriesConfig<AreaNullValueschart>>? AreaNullValueschartSeriesConfigs { get; set; }
+    //  NullValues Area Chart End //
+
+    // Datetime Area Chart Start //
+    private List<AreaDatetimechart> AreaDatetimecharts { get; set; } = AreaService.GetAreaDatetimecharts();
+    private ApexChartOptions<AreaDatetimechart> DatetimeAreaChartOptions { get; set; } = new();
+    private List<SeriesConfig<AreaDatetimechart>>? AreaDatetimechartSeriesConfigs { get; set; }
+    //  Datetime Area Chart End //
+ 
+    protected override void OnInitialized() {
+
+        BasicAreaChartOptions = new ApexChartOptions<Areabasicchart> {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false, Pan = false, Reset = false,  Download = true},
+                }, 
+            }, 
+            DataLabels = new DataLabels {
+                Enabled=false,
+            }, 
+            Title = new Title{
+                Align = ApexCharts.Align.Left,
+                Style = new TitleStyle {
+                    FontSize= "13px",
+                    FontWeight= "bold",
+                    Color= "#8c9097"
+                },
+            },
+            Subtitle = new() {
+                Text = "Price Movements",
+                Align = ApexCharts.Align.Left,
+            },
+            Stroke = new Stroke { 
+                Curve = Curve.Straight,
+            },
+            Grid = new Grid {
+                BorderColor = "#f2f5f7",
+            },
+            Colors = new Color(new List<string> { "#5c67f7" }),
+            Xaxis =  new XAxis {  
+                Labels = new XAxisLabels {
+                    Show = true,
+                    Style = new() {
+                        Colors = "#8c9097",
+                        FontSize = "11px",
+                        FontWeight = 600,
+                        CssClass = "apexcharts-xaxis-label",
+                    },
+                }
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis // Define the first YAxis object
+                {
+                    Opposite = true,
+                    Labels = new YAxisLabels
+                    {
+                        Show = true,
+                        Style = new() {
+                            Colors = "#8c9097",
+                            FontSize = "11px",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label",
+                        },
+                    },
+                    Min = 7800,
+                    Max = 9600,
+                    StepSize = 300,
+                }
+            },
+            Legend = new Legend  { 
+                Show=true,
+                HorizontalAlign = Align.Left,
+            }, 
+        };
+        AreabasicchartSeriesConfigs = new List<SeriesConfig<Areabasicchart>>
+        {
+            new SeriesConfig<Areabasicchart>
+            {
+                SeriesType = SeriesType.Area,
+                Name = "STOCK ABC",
+                XValueSelector = e => e.StockValue ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.prices)
+            },
+        };
+
+        SplineAreaChartOptions = new ApexChartOptions<AreaSplinechart> {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = true, Zoomin = true, Zoomout = true, Pan = true, Reset = true,  Download = true},
+                },
+            }, 
+            DataLabels = new DataLabels {
+                Enabled=false,
+            }, 
+            Stroke = new Stroke { 
+                Curve = Curve.Smooth,
+            },
+            Grid = new Grid {
+                BorderColor = "#f2f5f7",
+            },
+            Colors = new Color(new List<string> { "#5c67f7", "#e354d4" }),
+            Xaxis =  new XAxis {  
+                Labels = new XAxisLabels {
+                    Show = true,
+                    Style = new() {
+                        Colors = "#8c9097",
+                        FontSize = "11px",
+                        FontWeight = 600,
+                        CssClass = "apexcharts-xaxis-label",
+                    },
+                }
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis // Define the first YAxis object
+                {
+                    Labels = new YAxisLabels
+                    {
+                        Show = true,
+                        Style = new() {
+                            Colors = "#8c9097",
+                            FontSize = "11px",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label",
+                        },
+                    },
+                    Min = 0,
+                    Max = 120,
+                    StepSize = 30,
+                }
+            },
+            Tooltip = new() {
+                X = new(){
+                    Format = "dd/MM/yy HH-mm"
+                },
+            },
+        };
+        AreaSplinechartSeriesConfigs = new List<SeriesConfig<AreaSplinechart>>
+        {
+            new SeriesConfig<AreaSplinechart>
+            {
+                SeriesType = SeriesType.Area,
+                Name = "Series-1",
+                XValueSelector = e => e.SeriesValue ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.Series1Value)
+            },
+            new SeriesConfig<AreaSplinechart>
+            {
+                SeriesType = SeriesType.Area,
+                Name = "Series-2",
+                XValueSelector = e => e.SeriesValue ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.Series2Value)
+            },
+        };
+
+        NegativeAreaChartOptions = new ApexChartOptions<AreaNegativechart> {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = true, Zoomin = true, Zoomout = true,Pan = true, Reset = true,  Download = true},
+                }, 
+            }, 
+            DataLabels = new DataLabels {
+                Enabled=false,
+            }, 
+            Stroke = new Stroke { 
+                Curve = Curve.Straight,
+            },
+            Title = new Title{
+                Text = "Area with Negative Values",
+                Align = ApexCharts.Align.Left,
+                Style = new TitleStyle {
+                    FontSize= "13px",
+                    FontWeight= "bold",
+                    Color= "#8c9097"
+                },
+            },
+            Grid = new Grid {
+                BorderColor = "#f2f5f7",
+            },
+            Colors = new Color(new List<string> { "#5c67f7", "#e354d4" }),
+            Xaxis =  new XAxis {  
+                Labels = new XAxisLabels {
+                    Show = true,
+                    Style = new() {
+                        Colors = "#8c9097",
+                        FontSize = "11px",
+                        FontWeight = 600,
+                        CssClass = "apexcharts-xaxis-label",
+                    },
+                }
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis // Define the first YAxis object
+                {
+                    Labels = new YAxisLabels
+                    {
+                        Show = true,
+                        Style = new() {
+                            Colors = "#8c9097",
+                            FontSize = "11px",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label",
+                        },
+                    },
+                    Min = -200,
+                    Max = 400,
+                    StepSize = 200,
+                }
+            },
+            Tooltip = new() {
+                X = new(){
+                    Format = "dd/MM/yy HH-mm"
+                },
+            },
+        };
+        
+        AreaNegativechartSeriesConfigs = new List<SeriesConfig<AreaNegativechart>>
+        {
+            new SeriesConfig<AreaNegativechart>
+            {
+                SeriesType = SeriesType.Area,
+                Name = "North",
+                XValueSelector = e => e.Year ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.North)
+            },
+            new SeriesConfig<AreaNegativechart>
+            {
+                SeriesType = SeriesType.Area,
+                Name = "South",
+                XValueSelector = e => e.Year ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.South)
+            },
+        };
+
+        BrushAreaChartOptions = new ApexChartOptions<TimeSeries> {
+            Chart = new () {
+                Id ="chartyear",
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = false},
+                }, 
+            }, 
+            DataLabels = new DataLabels {
+                Enabled=false,
+            }, 
+            Stroke = new Stroke { 
+                Width = 0,
+                Curve = Curve.Smooth,
+            },
+            Grid = new Grid {
+                BorderColor = "#f2f5f7",
+            },
+            Colors = new Color(new List<string> { "#5c67f7" }),
+            Fill = new Fill {
+                Type = new List<FillType> { FillType.Solid},
+                Opacity = 1,
+            },
+            Xaxis =  new XAxis {  
+                Labels = new XAxisLabels {
+                    Show = true,
+                    Style = new() {
+                        Colors = "#8c9097",
+                        FontSize = "11px",
+                        FontWeight = 600,
+                        CssClass = "apexcharts-xaxis-label",
+                    },
+                }
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis // Define the first YAxis object
+                {
+                    TickAmount = 3,
+                    Labels = new YAxisLabels
+                    {
+                        Show = false,
+                        Style = new() {
+                            Colors = "#8c9097",
+                            FontSize = "11px",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label",
+                        },
+                    },
+                }
+            },
+        }; 
+        
+        TimeSeriesSeriesConfigs1 = new List<SeriesConfig<TimeSeries>>
+        {
+            new SeriesConfig<TimeSeries>
+            {
+                SeriesType = SeriesType.Area,
+                Name = "Value",
+                XValueSelector = e => e.Date,
+                YAggregateSelector = e => e.Sum(e => e.Value)
+            },
+        }; 
+        
+        Brush2AreaChartOptions = new ApexChartOptions<TimeSeries> {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = false},
+                },
+                Brush = new() {
+                    Enabled = true,
+                    Target = "chartyear"
+                },
+                Selection = new Selection
+                {
+                    Enabled = true,
+                    Xaxis = new SelectionXaxis
+                    {
+                        Min = 1708281000000,
+                        Max = 1710786600000
+                    }
+                }
+            }, 
+            DataLabels = new DataLabels {
+                Enabled=false,
+            }, 
+            Stroke = new Stroke { 
+                Width = 0,
+                Curve = Curve.Straight,
+            },
+            Title = new Title{
+                Text = "Area with Negative Values",
+                Align = ApexCharts.Align.Left,
+                Style = new TitleStyle {
+                    FontSize= "13px",
+                    FontWeight= "bold",
+                    Color= "#8c9097"
+                },
+            },
+            Grid = new Grid {
+                BorderColor = "#f2f5f7",
+            },
+            Colors = new Color(new List<string> { "#e354d4" }),
+            Fill = new Fill {
+                Type = new List<FillType> { FillType.Solid},
+                Opacity = 1,
+            },
+            Xaxis =  new XAxis {  
+                Labels = new XAxisLabels {
+                    Show = true,
+                    Style = new() {
+                        Colors = "#8c9097",
+                        FontSize = "11px",
+                        FontWeight = 600,
+                        CssClass = "apexcharts-xaxis-label",
+                    },
+                }
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis // Define the first YAxis object
+                {
+                    Labels = new YAxisLabels
+                    {
+                        Show = true,
+                        Style = new() {
+                            Colors = "#8c9097",
+                            FontSize = "11px",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label",
+                        },
+                    },
+                }
+            },
+        };
+        
+        TimeSeriesSeriesConfigs2 = new List<SeriesConfig<TimeSeries>>
+        {
+            new SeriesConfig<TimeSeries>
+            {
+                SeriesType = SeriesType.Area,
+                Name = "Quantity",
+                XValueSelector = e => e.Date,
+                YAggregateSelector = e => e.Sum(e => e.Quantity)
+            },
+        }; 
+
+        StackedAreaChartOptions = new ApexChartOptions<AreaStackedchart> {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = true, Zoomin = true, Zoomout = true,Pan = true, Reset = true,  Download = true},
+                }, 
+                Stacked = true,
+            }, 
+            DataLabels = new DataLabels {
+                Enabled=false,
+            }, 
+            Stroke = new Stroke { 
+                Curve = Curve.Smooth,
+            },
+            Grid = new Grid {
+                BorderColor = "#f2f5f7",
+            },
+            Colors = new Color(new List<string> { "#5c67f7","#e354d4", "#e6eaeb" }),
+            Fill = new Fill {
+                Type = new List<FillType> { FillType.Gradient },
+                Gradient = new ApexCharts.FillGradient {
+                    OpacityFrom = 0.4,
+                    OpacityTo = 0.6,
+                }
+            },
+            Xaxis =  new XAxis {  
+                Labels = new XAxisLabels {
+                    Show = true,
+                    Style = new() {
+                        Colors = "#8c9097",
+                        FontSize = "11px",
+                        FontWeight = 600,
+                        CssClass = "apexcharts-xaxis-label",
+                    },
+                }
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis // Define the first YAxis object
+                {
+                    Labels = new YAxisLabels
+                    {
+                        Show = true,
+                        Style = new() {
+                            Colors = "#8c9097",
+                            FontSize = "11px",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label",
+                        },
+                    },
+                    Min = 0,
+                    Max = 100,
+                    StepSize = 20,
+                }
+            },
+            Legend = new Legend  { 
+                Show=true,
+                Position = LegendPosition.Top,
+                HorizontalAlign = Align.Left,
+                OffsetX = -10
+            }, 
+        };
+        
+        AreaStackedchartSeriesConfigs = new List<SeriesConfig<AreaStackedchart>>
+        {
+            new SeriesConfig<AreaStackedchart>
+            {
+                SeriesType = SeriesType.Area,
+                Name = "South",
+                XValueSelector = e => e.StackedDate ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.South)
+            },
+            new SeriesConfig<AreaStackedchart>
+            {
+                SeriesType = SeriesType.Area,
+                Name = "North",
+                XValueSelector = e => e.StackedDate ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.North)
+            },
+            new SeriesConfig<AreaStackedchart>
+            {
+                SeriesType = SeriesType.Area,
+                Name = "Central",
+                XValueSelector = e => e.StackedDate ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.Central)
+            },
+        }; 
+
+        IrregularAreaChartOptions = new ApexChartOptions<AreaIrregularchart> {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = true},
+                }, 
+                Stacked = false,
+            }, 
+            Title = new Title{
+                Text = "Irregular Data in Time Series",
+                Style = new TitleStyle {
+                    FontSize= "13px",
+                    FontWeight= "bold",
+                    Color= "#8c9097"
+                },
+            },
+            Markers = new Markers { Size = 0 },
+            DataLabels = new DataLabels {
+                Enabled=false,
+            }, 
+            Stroke = new Stroke { 
+                Curve = Curve.Smooth,
+            },
+            Grid = new Grid {
+                BorderColor = "#f2f5f7",
+            },
+            Tooltip = new Tooltip { 
+                Shared = true,
+            },
+            Colors = new Color(new List<string> { "#5c67f7","#e354d4", "#ff8e6f" }),
+            Fill = new Fill {
+                Type = new List<FillType> { FillType.Gradient },
+                Gradient = new ApexCharts.FillGradient {
+                    Shade = ApexCharts.GradientShade.Light,
+                    Type = ApexCharts.GradientType.Vertical,
+                    ShadeIntensity = 1,
+                    InverseColors = false,
+                    OpacityFrom = 0.45,
+                    OpacityTo = 0.05,
+                    Stops = [20, 100, 100, 100]
+                }
+            },
+            Xaxis =  new XAxis {  
+                TickAmount = 8,
+                Labels = new XAxisLabels {
+                    Rotate = -15,
+                    RotateAlways = true,
+                    Show = true,
+                    Style = new() {
+                        Colors = "#8c9097",
+                        FontSize = "11px",
+                        FontWeight = 600,
+                        CssClass = "apexcharts-xaxis-label",
+                    },
+                }
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis // Define the first YAxis object
+                {
+                    Labels = new YAxisLabels
+                    {
+                        Show = true,
+                        Style = new() {
+                            Colors = "#8c9097",
+                            FontSize = "11px",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label",
+                        },
+                        OffsetX = 0,
+                    },
+                    AxisBorder = new() {
+                        Show = false,
+                    },
+                    AxisTicks = new() {
+                        Show = false
+                    },
+                    Min = 0,
+                    Max = 250,
+                    StepSize = 50,
+                }
+            },
+            Legend = new Legend  { 
+                Show=true,
+                Position = LegendPosition.Top,
+                HorizontalAlign = Align.Right,
+                OffsetX = -10
+            }, 
+        };
+        
+        AreaIrregularchartSeriesConfigs = new List<SeriesConfig<AreaIrregularchart>>
+        {
+            new SeriesConfig<AreaIrregularchart>
+            {
+                SeriesType = SeriesType.Area,
+                Name = "Product A",
+                XValueSelector = e => e.IrregularDate ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.ProductA)
+            },
+            new SeriesConfig<AreaIrregularchart>
+            {
+                SeriesType = SeriesType.Area,
+                Name = "Product B",
+                XValueSelector = e => e.IrregularDate ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.ProductB)
+            },
+            new SeriesConfig<AreaIrregularchart>
+            {
+                SeriesType = SeriesType.Area,
+                Name = "Product C",
+                XValueSelector = e => e.IrregularDate ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.ProductC)
+            },
+        }; 
+        
+        NullValuesAreaChartOptions = new ApexChartOptions<AreaNullValueschart> {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = true},
+                }, 
+                Stacked = false,
+            }, 
+            Title = new Title{
+                Style = new TitleStyle {
+                    FontSize= "13px",
+                    FontWeight= "bold",
+                    Color= "#8c9097"
+                },
+            },
+            Markers = new Markers { 
+                Size = 5,
+                Hover = new(){
+                    Size = 9
+                }
+            },
+            DataLabels = new DataLabels {
+                Enabled=false,
+            }, 
+            Stroke = new Stroke { 
+                Curve = Curve.Straight,
+            },
+            Grid = new Grid {
+                BorderColor = "#f2f5f7",
+            },
+            Colors = new Color(new List<string> { "#5c67f7"}),
+            Fill = new Fill {
+                Opacity = 0.8,
+                Type = new List<FillType> { FillType.Pattern },
+                 Pattern = new FillPattern
+                {
+                    Style = [ApexCharts.FillPatternStyle.VerticalLines,ApexCharts.FillPatternStyle.HorizontalLines],
+                    Width = 5,
+                    Height = 6
+                },
+            },
+            Xaxis =  new XAxis {  
+                Labels = new XAxisLabels {
+                    Show = true,
+                    Style = new() {
+                        Colors = "#8c9097",
+                        FontSize = "11px",
+                        FontWeight = 600,
+                        CssClass = "apexcharts-xaxis-label",
+                    },
+                }
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis // Define the first YAxis object
+                {
+                    Title = new() {
+                        Text = "Bytes Received",
+                        Style = new() {
+                            Color = "#8c9097",
+                        }
+                    },
+                    Labels = new YAxisLabels
+                    {
+                        Show = true,
+                        Style = new() {
+                            Colors = "#8c9097",
+                            FontSize = "11px",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label",
+                        },
+                    },
+                    Min = 0,
+                    Max = 80,
+                    StepSize = 20,
+                }
+            },
+            Tooltip = new ApexCharts.Tooltip {
+                Intersect= true,
+                Shared= false
+            },
+        };
+        
+        AreaNullValueschartSeriesConfigs = new List<SeriesConfig<AreaNullValueschart>>
+        {
+            new SeriesConfig<AreaNullValueschart>
+            {
+                SeriesType = SeriesType.Area,
+                Name = "Network",
+                XValueSelector = e => e.NetworkDate ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.Network)
+            },
+        }; 
+
+        DatetimeAreaChartOptions = new ApexChartOptions<AreaDatetimechart> {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = true, Zoomin = true, Zoomout = true,Pan = true, Reset = true,  Download = true},
+                }, 
+            }, 
+            DataLabels = new DataLabels {
+                Enabled=false,
+            }, 
+            Annotations = new Annotations
+            {
+                Xaxis = new List<AnnotationsXAxis> {
+                    new AnnotationsXAxis
+                    {
+                        Label = new ApexCharts.Label {
+                            Text = "Rally",
+                            BorderColor = "775DD0",
+                            Style = new Style{ Background="#775DD0" , Color="#fff"}
+                        },
+                        X = 1360191600000, 
+                        StrokeDashArray = 0,
+                        BorderColor = "#999",
+                    },
+                },
+                Yaxis = new List<AnnotationsYAxis> { 
+                    new AnnotationsYAxis
+                    {
+                        Y = 30,
+                        BorderColor = "#999",
+                        Label = new ApexCharts.Label
+                        {
+                            Text = "Support",
+                            BorderColor = "#00E396",
+                            Style = new Style { Background = "#00E396", Color="#fff"}
+                        },
+                    },
+                }
+            },
+            Title = new Title{
+                Align = ApexCharts.Align.Left,
+                Style = new TitleStyle {
+                    FontSize= "13px",
+                    FontWeight= "bold",
+                    Color= "#8c9097"
+                },
+            },
+            Stroke = new Stroke { 
+                Curve = Curve.Straight,
+            },
+            Grid = new Grid {
+                BorderColor = "#f2f5f7",
+            },
+            Colors = new Color(new List<string> { "#5c67f7" }),
+            Xaxis =  new XAxis {  
+                Labels = new XAxisLabels {
+                    Show = true,
+                    Style = new() {
+                        Colors = "#8c9097",
+                        FontSize = "11px",
+                        FontWeight = 600,
+                        CssClass = "apexcharts-xaxis-label",
+                    },
+                }
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis // Define the first YAxis object
+                {
+                    Labels = new YAxisLabels
+                    {
+                        Show = true,
+                        Style = new() {
+                            Colors = "#8c9097",
+                            FontSize = "11px",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label",
+                        },
+                    },
+                    Min = 27,
+                    Max = 42,
+                    StepSize = 3,
+                }
+            },
+            Legend = new Legend  { 
+                Show = true,
+                HorizontalAlign = Align.Left,
+            }, 
+        };
+        AreaDatetimechartSeriesConfigs = new List<SeriesConfig<AreaDatetimechart>>
+        {
+            new SeriesConfig<AreaDatetimechart>
+            {
+                SeriesType = SeriesType.Area,
+                Name = "Series-1",
+                XValueSelector = e => e.DatetimeSeries,
+                YAggregateSelector = e => e.Sum(e => e.DatetimeValue)
+            },
+        }; 
+    }
+}

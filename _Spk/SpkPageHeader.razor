@@ -1,0 +1,66 @@
+
+@using FlatpickrBlazor
+@using FlatpickrBlazor.Components
+
+@code {
+    [Parameter] public List<PageItem>? PageItems { get; set; }
+
+    public class PageItem
+    {
+        public string? PageTitle { get; set; }
+    }
+
+    <!-- Flatpickr JS Start -->
+    public Flatpickr? _flatpickr;
+    
+    private FlatpickrBlazor.FlatpickrOptions _daterangeOptions = new FlatpickrBlazor.FlatpickrOptions
+    {
+        EnableTime = false, // Disable time selection
+        DateFormat = "Y-m-d", // Format for submitting the date (e.g., "2024-01-15"),
+        Mode = FlatpickrOptionsMode.Range,
+        DefaultDate = ["2024-05-01", "2024-05-30"]
+    };
+    <!-- Flatpickr JS End -->
+}
+
+    <!-- Page Header -->
+    <div class="d-flex align-items-center justify-content-between page-header-breadcrumb flex-wrap gap-2">
+        <div>
+            <ol class="breadcrumb mb-1">
+                @if (PageItems != null)
+                {
+                    for (int i = 0; i < PageItems.Count; i++)
+                    {
+                        if (PageItems[i] != null) // Ensure PageItems[i] is not null
+                        {
+                            if (i == PageItems.Count - 1)
+                            {
+                                <li class="breadcrumb-item active" aria-current="page">@PageItems[i]?.PageTitle</li>
+                            }
+                            else
+                            {
+                                <li class="breadcrumb-item"><a href="javascript:void(0);">@PageItems[i]?.PageTitle</a></li>
+                            }
+                        }
+                    }
+                }
+            </ol>
+            <h1 class="page-title fw-medium fs-18 mb-0">@PageItems?.LastOrDefault()?.PageTitle</h1>
+        </div>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            @if (PageItems != null && PageItems.Any(item => item?.PageTitle?.Contains("Sales") == true))
+            {
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-text bg-white border"> <i class="ri-calendar-line"></i> </div>
+                        <Flatpickr class="form-control breadcrumb-input" @ref="_flatpickr" Options="@_daterangeOptions" placeholder="2024-07-01 to 2024-07-30"/>
+                    </div>
+                </div>
+            }
+            <div class="btn-list">
+                <SpkButtons ButtonClass="btn-white"><i class="ri-filter-3-line align-middle me-1 lh-1"></i> Filter</SpkButtons>
+                <SpkButtons ButtonClass="btn-primary me-0"><i class="ri-share-forward-line me-1"></i> Share</SpkButtons>
+            </div>
+        </div>
+    </div>
+    <!-- Page Header Close -->

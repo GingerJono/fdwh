@@ -1,0 +1,420 @@
+@page "/crm-companies"
+@using Microsoft.AspNetCore.Components.Forms
+@inject IJSRuntime JSRuntime
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using CrmData
+@inject CrmDataService CrmDataService
+
+    <!-- Start::page-header -->
+    <SpkPageHeader PageItems="PageItems" />
+    <!-- End::page-header -->
+
+    <!-- Start::row-1 -->
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-header justify-content-between">
+                    <div class="card-title">
+                        Companies <SpkBadge BadgeClass="bg-primary ms-2 fs-12 align-middle">23</SpkBadge> 
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <SpkButtons ButtonClass="btn-primary" ButtonSize="btn-sm" data-bs-toggle="modal" data-bs-target="#create-contact"><i class="ri-add-line me-1 fw-medium align-middle"></i>Add Company</SpkButtons>
+                        <SpkButtons ButtonClass="btn-success-light" ButtonSize="btn-sm">Export As CSV</SpkButtons>
+                        <SpkDropdowns Tag="a" DropdownClass="btn btn-light btn-sm" DropdownText="Sort By<i class='ri-arrow-down-s-line align-middle ms-1 d-inline-block'></i>" DropdownToggle=false>
+                            <ChildContent2>
+                                <ul class="dropdown-menu" role="menu">
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Newest</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Date Added</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">A - Z</a></li>
+                                </ul>
+                            </ChildContent2>
+                        </SpkDropdowns>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <SpkTables Tableclass="text-nowrap table-hover" Items="CrmDataService.GetCompaniesHeadersData()"  ShowCheckbox=true SelectAllClick="ToggleSelectAll">
+                        @foreach (var CrmCompanies in CrmDataService.GetCrmCompanies()){
+                            <tr class="crm-contact companies-list">
+                                <td class="companies-checkbox">
+                                    <input class="form-check-input" type="checkbox" value="" @bind="@CrmCompanies.Selected" aria-label="...">
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="lh-1">
+                                            <span class="avatar avatar-sm p-1 bg-light avatar-rounded">
+                                                <img src="@CrmCompanies.CompaniesImg" alt="">
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <a data-bs-toggle="offcanvas" href="#offcanvasExample" role="button" aria-controls="offcanvasExample">@CrmCompanies.CompaniesName</a>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>
+                                        <span class="d-block mb-1"><i class="ri-mail-line me-2 align-middle fs-14 text-muted d-inline-block"></i>@CrmCompanies.Email</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>
+                                        <span class="d-block"><i class="ri-phone-line me-2 align-middle fs-14 text-muted d-inline-block"></i>@CrmCompanies.Phone</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center flex-wrap gap-1">
+                                        <SpkBadge BadgeClass="@(CrmCompanies.CompaniesSize == "Enterprise"? "bg-primary1-transparent":"bg-primary-transparent")">@CrmCompanies.CompaniesSize</SpkBadge>
+                                    </div>
+                                </td>
+                                <td>
+                                    @CrmCompanies.Industry
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="lh-1">
+                                            <span class="avatar avatar-rounded avatar-sm">
+                                                <img src="@CrmCompanies.ContactImg" alt="">
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <span class="d-block fw-medium">@CrmCompanies.Contact</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    @CrmCompanies.DealsId
+                                </td>
+                                <td>
+                                    <div class="btn-list">
+                                        <SpkButtons ButtonClass="btn-primary-light btn-icon" Tag="a" ButtonSize="btn-sm" data-bs-toggle="offcanvas" href="#offcanvasExample" aria-controls="offcanvasExample"><i class="ri-eye-line"></i></SpkButtons>
+                                        <SpkButtons ButtonClass="btn-info-light btn-icon" ButtonSize="btn-sm"><i class="ri-pencil-line"></i></SpkButtons>
+                                        <SpkButtons ButtonClass="btn-primary2-light btn-icon contact-delete" ButtonSize="btn-sm"  @onclick="@(() => DeleteCrmCompanies(CrmCompanies.DealsId))"><i class="ri-delete-bin-line"></i></SpkButtons>
+                                    </div>
+                                </td>
+                            </tr>                                                                                 
+                        }
+                    </SpkTables>
+                </div>
+                <div class="card-footer border-top-0">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            Showing 9 Entries <i class="bi bi-arrow-right ms-2 fw-medium"></i>
+                        </div>
+                        <div class="ms-auto">
+                            <nav aria-label="Page navigation" class="pagination-style-4">
+                                <ul class="pagination mb-0">
+                                    <li class="page-item disabled">
+                                        <a class="page-link" href="javascript:void(0);">
+                                            Prev
+                                        </a>
+                                    </li>
+                                    <li class="page-item active"><a class="page-link" href="javascript:void(0);">1</a></li>
+                                    <li class="page-item"><a class="page-link" href="javascript:void(0);">2</a></li>
+                                    <li class="page-item">
+                                        <a class="page-link text-primary" href="javascript:void(0);">
+                                            next
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--End::row-1 -->
+
+    <!-- Start:: Company Details Offcanvas -->
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExample">
+        <div class="offcanvas-body p-0">
+            <div class="d-flex align-items-top p-3 border-bottom border-block-end-dashed main-profile-cover">
+                <span class="avatar avatar-xxl avatar-rounded me-3 p-2 bg-primary-transparent flex-shrink-0">
+                    <img src="../assets/images/company-logos/1.png" alt="">
+                </span>
+                <div class="flex-fill main-profile-info">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <h6 class="fw-medium mb-1">Ethan Thompson
+                            <SpkBadge BadgeClass="bg-success-transparent fs-10"><i class="ri-circle-fill fs-8 text-success me-1 "></i> New Lead</SpkBadge>
+                        </h6>
+                        <SpkButtons ButtonClass="btn-close crm-contact-close-btn" data-bs-dismiss="offcanvas" aria-label="Close"></SpkButtons>
+                    </div>
+                    <p class="mb-2 text-muted fs-12">Chief Financial Officer (CFO)</p>
+                    <div class="d-flex gap-2 fs-15 mt-1">
+                        <SpkButtons Tag="a" ButtonClass="btn-icon btn-primary1-light" ButtonSize="btn-sm" IsRounded=true><i class="ri-phone-line"></i></SpkButtons>
+                        <SpkButtons Tag="a" ButtonClass="btn-icon btn-primary2-light" ButtonSize="btn-sm" IsRounded=true><i class="ri-mail-line"></i></SpkButtons>
+                        <SpkButtons Tag="a" ButtonClass="btn-icon btn-primary3-light" ButtonSize="btn-sm" IsRounded=true><i class="ri-message-line"></i></SpkButtons>
+                        <SpkDropdowns Tag="a" DropdownClass="btn btn-icon btn-sm rounded-pill btn-secondary-light" DropdownText="<i class='ri-more-fill'></i>" DropdownToggle=false>
+                            <ChildContent2>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Size </a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Deals</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Status</a></li>
+                                </ul>
+                            </ChildContent2>
+                        </SpkDropdowns>
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex mt-3 gap-3 p-1 py-0 border-bottom border-block-end-dashed">
+                <div class="p-2 text-center flex-fill">
+                    <i class="ri-shake-hands-line p-2 fs-5 rounded-circle lh-1 text-fixed-white shadow-sm bg-primary"></i>
+                    <p class="fw-semibold fs-20 text-shadow mb-0 mt-2">253</p>
+                    <p class="mb-0 text-muted">Deals</p>
+                </div>
+                <div class="p-2 text-center flex-fill">
+                    <i class="ri-money-dollar-circle-line p-2 fs-5 rounded-circle lh-1 text-fixed-white shadow-sm bg-primary"></i>
+                    <p class="fw-semibold fs-20 text-shadow mb-0 mt-2">$12k</p>
+                    <p class="mb-0 text-muted">Contributions</p>
+                </div>
+                <div class="p-2 text-center flex-fill">
+                    <i class="ri-thumb-up-line p-2 fs-5 rounded-circle lh-1 text-fixed-white shadow-sm bg-primary"></i>
+                    <p class="fw-semibold fs-20 text-shadow mb-0 mt-2">$17k</p>
+                    <p class="mb-0 text-muted">Comitted</p>
+                </div>
+            </div>  
+            <div class="p-3 border-bottom border-block-end-dashed">
+                <div class="mb-0">
+                    <p class="fs-15 mb-2 fw-medium">Professional Bio :</p>
+                    <p class="text-muted mb-0">
+                        I am <b class="text-default">Ethan Thompson,</b> hereby declaring that I am the founder and managing director of the prestigious company named Thompson Enterprises, and I serve as the Chief Financial Officer (CFO) of the company.
+                    </p>                                
+                </div>   
+            </div>  
+            <div class="p-3 border-bottom border-block-end-dashed">
+                <p class="fs-14 mb-2 fw-medium">Contact Information :</p>
+                <div class="">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="me-2">
+                            <span class="avatar avatar-sm avatar-rounded bg-primary1-transparent">
+                                <i class="ri-mail-line align-middle fs-14"></i>
+                            </span>
+                        </div>
+                        <div>
+                            ethanthompson@example.com 
+                            <SpkTooltip Tag="span" TooltipClass="text-muted lh-1 rounded-circle ms-1" TooltipPlacement="top" TooltipTitle="Copy">
+                                <i class="ri-file-copy-fill"></i>
+                            </SpkTooltip>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="me-2">
+                            <span class="avatar avatar-sm avatar-rounded bg-primary2-transparent">
+                                <i class="ri-phone-line align-middle fs-14"></i>
+                            </span>
+                        </div>
+                        <div>
+                            +(333) 555-1234
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center mb-0">
+                        <div class="me-2">
+                            <span class="avatar avatar-sm avatar-rounded bg-primary3-transparent">
+                                <i class="ri-map-pin-line align-middle fs-14"></i>
+                            </span>
+                        </div>
+                        <div>
+                            1234 Elm Street, Apt 101, Springfield, IL, 62701, USA
+                        </div>
+                    </div>                                
+                </div>
+            </div>
+            <div class="p-3 border-bottom border-block-end-dashed d-flex align-items-center flex-wrap gap-4">
+                <p class="fs-14 mb-0 fw-medium">Priority:</p>
+                <SpkBadge BadgeClass="bg-success-transparent"><i class="ri-circle-fill lh-1 align-middle fs-9 me-1"></i> Low Priority</SpkBadge>
+            </div>
+            <div class="p-3 border-bottom border-block-end-dashed d-flex align-items-center gap-3">
+                <div class="fs-14 fw-medium">Company Size:</div>
+                <div>
+                    <SpkBadge BadgeClass="bg-primary-transparent">Corporate</SpkBadge>- 250+ Employees
+                </div>
+            </div>
+            <div class="p-3 border-bottom border-block-end-dashed d-flex align-items-center flex-wrap gap-4">
+                <p class="fs-14 mb-0 fw-medium">Created Date:</p>
+                <div>25-May-2024</div>
+            </div>
+            <div class="p-3 border-bottom border-block-end-dashed d-flex align-items-center flex-wrap gap-4">
+                <p class="fs-14 mb-0 fw-medium">Lead Source:</p>
+                <div><SpkBadge BadgeClass="bg-danger-transparent p-1 lh-1 align-middle fs-15 me-1 rounded"><i class="ri-instagram-line"></i></SpkBadge>Instagram</div>
+            </div>
+            <div class="p-3 border-bottom border-block-end-dashed d-flex align-items-center flex-wrap gap-4">
+                <p class="fs-14 mb-0 fw-medium">Social Networks :</p>
+                <div class="btn-list mb-0">
+                    <SpkButtons ButtonSize="btn-sm" ButtonClass="btn-icon btn-primary-light mb-0">
+                        <i class="ri-facebook-line fw-medium"></i>
+                    </SpkButtons>
+                    <SpkButtons ButtonSize="btn-sm" ButtonClass="btn-icon btn-secondary-light mb-0">
+                        <i class="ri-twitter-x-line fw-medium"></i>
+                    </SpkButtons>
+                    <SpkButtons ButtonSize="btn-sm" ButtonClass="btn-icon btn-primary2-light mb-0">
+                        <i class="ri-instagram-line fw-medium"></i>
+                    </SpkButtons>
+                    <SpkButtons ButtonSize="btn-sm" ButtonClass="btn-icon btn-success-light mb-0">
+                        <i class="ri-github-line fw-medium"></i>
+                    </SpkButtons>
+                    <SpkButtons ButtonSize="btn-sm" ButtonClass="btn-icon btn-danger-light mb-0">
+                        <i class="ri-youtube-line fw-medium"></i>
+                    </SpkButtons>
+                </div>
+            </div>
+            <div class="p-3 border-bottom border-block-end-dashed d-flex align-items-center flex-wrap gap-4">
+                <p class="fs-14 mb-0 fw-medium">Tags :</p>
+                <div>
+                    <SpkBadge BadgeClass="bg-primary-transparent">New Lead</SpkBadge>
+                    <SpkBadge BadgeClass="bg-primary-transparent">Others</SpkBadge>
+                </div>
+            </div>
+            <div class="p-3 d-flex align-items-center gap-3">
+                <div class="fs-14 fw-medium">
+                    Key Contact :
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <div class="lh-1">
+                        <span class="avatar avatar-rounded avatar-sm">
+                            <img src="../assets/images/faces/2.jpg" alt="img">
+                        </span>
+                    </div>    
+                    <div class="fw-medium">Linda Klusty</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End:: Company Details Offcanvas -->
+
+    <!-- Start:: Add Company -->
+    <div class="modal fade" id="create-contact" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">Add Company</h6>
+                    <SpkButtons ButtonClass="btn-close" data-bs-dismiss="modal" aria-label="Close"></SpkButtons>
+                </div>
+                <div class="modal-body">
+                    <div class="row gy-3">
+                        <div class="col-xl-12">
+                            <div class="mb-0 text-center">
+                                <span class="avatar avatar-xxl avatar-rounded p-2 bg-light">
+                                    <img src="@imageDataUrl" alt="Selected Image" id="profile-img" />
+                                    <SpkBadge BadgeClass="bg-primary avatar-badge" IsRounded=true>
+                                        <InputFile id="profile-change" class="position-absolute w-100 h-100 op-0" OnChange="LoadFile"></InputFile> <i class="fe fe-camera"></i>
+                                    </SpkBadge>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-xl-6">
+                            <label for="company-name" class="form-label">Company Name</label>
+                            <input type="text" class="form-control" id="company-name" placeholder="Contact Name">
+                        </div>
+                        <div class="col-xl-6">
+                            <label for="company-lead-score" class="form-label">Total Deals</label>
+                            <input type="number" class="form-control" id="company-lead-score" placeholder="Total Deals">
+                        </div>
+                        <div class="col-xl-12">
+                            <label for="company-mail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="company-mail" placeholder="Enter Email">
+                        </div>
+                        <div class="col-xl-12">
+                            <label for="company-phone" class="form-label">Phone No</label>
+                            <input type="tel" class="form-control" id="company-phone" placeholder="Enter Phone Number">
+                        </div>
+                        <div class="col-xl-12">
+                            <label for="key-contact" class="form-label">Key Contact</label>
+                            <input type="text" class="form-control" id="key-contact" placeholder="Contact Name">
+                        </div>
+                        <div class="col-xl-12">
+                            <label class="form-label">Industry</label>
+                            <select class="form-control tomselect">
+                                <option value="">Select Insustry</option>
+                                <option value="Choice 1">Information Technology</option>
+                                <option value="Choice 2">Telecommunications</option>
+                                <option value="Choice 3">Logistics</option>
+                                <option value="Choice 4">Professional Services</option>
+                                <option value="Choice 5">Education</option>
+                                <option value="Choice 6">Education</option>
+                                <option value="Choice 7">Manufacturing</option>
+                                <option value="Choice 8">Healthcare</option>
+                            </select>
+                        </div>
+                        <div class="col-xl-12">
+                            <label class="form-label">Company Size</label>
+                            <select class="form-control tomselect">
+                                <option value="">Company Size</option>
+                                <option value="Choice 1">Corporate</option>
+                                <option value="Choice 2">Small Business</option>
+                                <option value="Choice 3">Micro Business</option>
+                                <option value="Choice 4">Startup</option>
+                                <option value="Choice 5">Large Enterprise</option>
+                                <option value="Choice 6">Medium Size</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <SpkButtons ButtonClass="m-0 btn-primary1-light me-2" data-bs-dismiss="modal">Cancel</SpkButtons>
+                    <SpkButtons ButtonClass="m-0 btn-primary">Create Company</SpkButtons>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End:: Add Company -->
+
+
+    <!-- TomSelect JS -->
+    <script src="@($"{NavigationManager.BaseUri}assets/libs/tom-select/dist/js/tom-select.complete.min.js")"></script>
+    <script src="@($"{NavigationManager.BaseUri}assets/js/tomselect.js")"></script>
+
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Apps" },
+        new SpkPageHeader.PageItem { PageTitle = "CRM" },
+        new SpkPageHeader.PageItem { PageTitle = "Companies" },
+    };
+    protected void DeleteCrmCompanies(string? DealsId)
+    {
+        var ContactsToRemove = CrmDataService.GetCrmCompanies().FirstOrDefault(o => o.DealsId == DealsId);
+        if (ContactsToRemove != null)
+        {
+            CrmDataService.GetCrmCompanies().Remove(ContactsToRemove);
+        }
+    }
+
+    private bool selectAll;
+    private void ToggleSelectAll()
+    {
+        selectAll = !selectAll;
+        foreach (var ContactsList in CrmDataService.GetCrmCompanies())
+        {
+            ContactsList.Selected = selectAll;
+        }
+    }
+}
+@code {
+    string imageDataUrl ="../assets/images/company-logos/11.png";
+
+    async Task LoadFile(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null && file.ContentType.Contains("image"))
+        {
+            var buffer = new byte[file.Size];
+            await file.OpenReadStream().ReadAsync(buffer);
+            var imageBase64 = Convert.ToBase64String(buffer);
+            imageDataUrl = $"data:{file.ContentType};base64,{imageBase64}";
+        }
+        else
+        {
+            imageDataUrl = "";
+            imageDataUrl = "Invalid image selected";
+        }
+    }
+}
+
+@code {    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("window.interop.initializeTooltips");
+        }
+    }
+}

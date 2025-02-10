@@ -1,0 +1,98 @@
+@page "/index17"
+@using ApexCharts
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using ApexSeries
+@using CardModel
+@using JonoTest
+@inject JonoTestService JonoTestService
+@inject IJSRuntime JSRuntime
+@using Sandbox.Models.ORI  // Add the namespace for your model
+@using Sandbox.Services // Add the namespace for your service
+@inject ORIService ORIService // Inject the service
+
+<!-- Start::page-header -->
+<SpkPageHeader PageItems="PageItems" />
+<!-- End::page-header -->
+<!-- Start: row-1 -->
+<div class="row">
+	<!-- End:: row-1 -->
+
+	<h3>ORI Policies</h3>
+
+	@if (policies == null)
+	{
+		<p><em>Loading...</em></p>
+	}
+	else
+	{
+		<table class="table">
+			<thead>
+				<tr>
+					<th>ORI Policy Reference</th>
+					<th>Inception Date</th>
+					<th>Expiry Date</th>
+					<th>Limit</th>
+					<th>Retention</th>
+					<th>Description</th>
+					<th>Policy Type</th>
+					<th>Broker</th>
+					<th>Status</th>
+					<th>Meta Data Status</th>
+				</tr>
+			</thead>
+			<tbody>
+				@foreach (var policy in policies)
+				{
+					<tr>
+						<td>
+							<a href="@NavigationManager.ToAbsoluteUri($"/ori-policy-details/{policy.ORIPolicyReference}")">
+								@* Use NavigationManager *@
+								@policy.ORIPolicyReference
+							</a>
+						</td>
+						<td>@policy.InceptionDate?.ToString("yyyy-MM-dd")</td>
+						<td>@policy.ExpiryDate?.ToString("yyyy-MM-dd")</td>
+						<td>@(policy.Limit?.ToString("N0") ?? "N/A")</td>
+						<td>@(policy.Retention?.ToString("N0") ?? "N/A")</td>
+						<td>@policy.Description</td>
+						<td>@policy.PolicyType</td>
+						<td>@policy.Broker</td>
+						<td>@policy.Status</td>
+						<td>@policy.MetaDataStatus</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	}
+</div>
+
+@code {
+	private IEnumerable<ORIPolicyListModel> policies;
+
+	protected override async Task OnInitializedAsync()
+	{
+		policies = await ORIService.GetORIPolicies();
+	}
+}
+
+
+@code {
+	private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+		new SpkPageHeader.PageItem { PageTitle = "Dashboards" },
+		new SpkPageHeader.PageItem { PageTitle = "JonoTest" },
+	};
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			await JSRuntime.InvokeVoidAsync("window.interop.initializeTooltips");
+		}
+	}
+
+	protected override void OnInitialized()
+	{
+
+		// WebsiteDesign End //
+	}
+}

@@ -1,0 +1,53 @@
+@using JobData
+
+@code {
+    [Parameter] public Jobs? Jobs { get; set; }    
+}
+
+@if(Jobs != null){
+    <div class="card custom-card">
+        <div class="card-body">
+            <div class="float-end">
+                <SpkTooltip Tag="a" TooltipClass="avatar avatar-rounded bg-primary-transparent avatar-sm" TooltipTitle="Add to Wishlist" TooltipPlacement="top"><span><i class="bi bi-heart"></i></span></SpkTooltip>
+            </div>
+            <div class="d-flex align-items-center flex-wrap gap-2">
+                <span class="avatar avatar-xl bg-light shadow-sm border border-primary border-opacity-10 p-3 avatar-rounded">
+                    <img src="@Jobs.Img" alt="">
+                </span>
+                <div class="ms-2">
+                    <h6 class="fw-medium mb-0 d-flex align-items-center">
+                        <a href="javascript:void(0);">@Jobs.Title 
+                            <SpkTooltip Tag="span" TooltipClass="text-secondary" TooltipTitle="Verified company"><i class="ri-verified-badge-fill text-secondary fs-13" ></i></SpkTooltip>
+                        </a>
+                    </h6>
+                    <div class="d-flex gap-2 mb-2">
+                        <a href="javascript:void(0);"><i class="ri-map-pin-2-line text-info"></i> @Jobs.Location , </a>
+                        <p class="mb-0 text-muted">Establishment year - @Jobs.EstablishmentYear </p>
+                    </div> 
+                    <div class="d-flex align-items-center fs-12 text-muted">
+                        <p class="fs-12 mb-0">Ratings : </p>
+                        <div class="min-w-fit-content ms-2">
+                            @foreach (var rating in Jobs.Ratings ?? Enumerable.Empty<Ratings>())
+                            {
+                                <span class="text-warning me-1"><i class="@rating.Rate"></i></span>
+                            }
+                        </div>
+                        <a href="javascript:void(0);" class="ms-1 min-w-fit-content text-muted">
+                            <span>(@Jobs.RatingCount)</span>
+                            <span>Ratings</span>
+                        </a>
+                    </div>
+                </div>                                            
+            </div>
+        </div>
+        <div class="card-footer">
+            <div class="d-flex align-items-center flex-wrap gap-2">
+                <div class="flex-grow-1">
+                    <SpkTooltip Tag="a" TooltipClass="bg-transparent" TooltipTitle="No of employees"><SpkBadge BadgeClass="badge-md fs-11 bg-primary1-transparent me-1" IsRounded=true><i class="bi bi-people me-1"></i>No. of Emp : @Jobs.Employees</SpkBadge></SpkTooltip>
+                    <SpkBadge Tag="a" BadgeClass="badge-md fs-11 bg-info-transparent me-1" IsRounded=true><i class="bi bi-briefcase me-1"></i>Vacancies : @Jobs.Vacancies</SpkBadge>
+                </div>
+                <SpkButtons Tag="a" ButtonClass="btn-primary" ButtonSize="btn-sm"> View Profile <i class="ri-arrow-right-line align-middle"></i></SpkButtons>
+            </div>
+        </div>
+    </div>
+}

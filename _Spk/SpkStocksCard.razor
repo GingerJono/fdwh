@@ -1,0 +1,45 @@
+@typeparam TItem where TItem : class
+@using Sandbox._Spk
+@using ApexCharts
+@using ApexSeries
+@using CardModel
+
+@code {
+    [Parameter] public CryptoMainChart? MainCard { get; set; }
+    [Parameter] public List<TItem>? ChartItems { get; set; }
+    [Parameter] public ApexChartOptions<TItem>? ChartOptions { get; set; }
+    [Parameter] public List<SeriesConfig<TItem>>? SeriesConfigs { get; set; }
+}
+
+@if(MainCard != null){
+
+<div class="card custom-card overflow-hidden">
+    <div class="card-body">
+        <div class="d-flex gap-2 flex-wrap align-items-start justify-content-between">
+            <div class="d-flex flex-fill align-items-center">
+                <div class="me-2">
+                    <span class="avatar avatar-rounded bg-@MainCard.CryptoIconClass-transparent p-2 avatar-sm">
+                        <i class="@MainCard.CryptoIcon text-@MainCard.CryptoIconClass"></i>
+                    </span>
+                </div>
+                <div class="">
+                    <span class="d-block text-default fs-14">@MainCard.CryptoTitle</span>
+                </div>
+            </div>
+            <div class="fs-12 text-end">
+                <span class="d-block @(MainCard.IsIncreased ? "text-success" :"text-danger")">@MainCard.Percentage</span>
+                <span class="d-block fw-medium fs-14">@MainCard.CryptoSubTitle</span>
+            </div>
+        </div>
+        <div class="d-flex flex-fill align-items-end gap-2 justify-content-between">
+            <div>
+                <span class="d-block text-muted">Current Value:</span>
+                <span class="d-block ms-auto fs-15 fw-medium">@MainCard.CryptoValue<i class="@(MainCard.IsIncreased ? "ri-arrow-up-s-fill text-success" :"ri-arrow-down-s-fill text-danger") lh-1 align-middle fs-20 ms-1"></i></span>
+            </div>
+            <div id="stock-1" class="stock-sparkline-charts">
+                <SpkApex TItem="TItem" ChartOptions="ChartOptions" Items="ChartItems"  Series="SeriesConfigs" />
+            </div>
+        </div>
+    </div>
+</div>
+}

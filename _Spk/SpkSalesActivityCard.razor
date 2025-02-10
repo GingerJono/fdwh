@@ -1,0 +1,19 @@
+@using CardModel
+
+@code {
+    [Parameter] public ActivityCard? ActivityCard { get; set; }
+}
+
+<li>
+    <div>
+        <div>
+            <div class="fw-medium fs-14">@ActivityCard?.ActivityUser</div>
+            <span class="fs-12 activity-time">
+                @ActivityCard?.ActivityTime
+            </span>
+        </div>
+        <span class="d-block text-muted">
+            @((MarkupString)(ActivityCard?.ActivityDesc ?? string.Empty))
+        </span>
+    </div>
+</li>

@@ -1,0 +1,234 @@
+@page "/invoice-list"
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using ApexSeries
+@using InvoiceData
+@inject InvoiceService InvoiceService
+
+    <!-- Start::page-header -->
+    <SpkPageHeader PageItems="PageItems" />
+    <!-- End::page-header -->
+
+    <!-- Start::row-1 -->
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="row">
+                <div class="col-xxl-7">
+                    <div class="card custom-card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                Invoice Statistics
+                            </div>
+                        </div>
+                        <div class="card-body p-0">
+                            <div id="invoice-list-stats">
+                                <SpkApex TItem="Invoicechart" Items="Invoicecharts" ApexHeight="265" ChartOptions="InvoiceChartOptions" Series="InvoicechartSeriesConfigs"></SpkApex>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xxl-5">
+                    <div class="row invoice-main-card">
+                        @foreach(var card in InvoiceService.GetInvoiceCardData()){
+                            <div class="col-lg-6">
+                                <SpkSalesCard MainCard="card"></SpkSalesCard>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-header justify-content-between">
+                    <div class="card-title">
+                        Manage Invoices
+                    </div>
+                    <div class="d-flex">
+                        <SpkButtons Tag="a" ButtonClass="btn-primary" ButtonSize="btn-sm"><i class="ri-add-line fw-medium align-middle me-1"></i> Create Invoice</SpkButtons>
+                        <SpkDropdowns DropdownMainClass="ms-2" DropdownClass="btn btn-icon btn-secondary-light" DropdownText="<i class='ti ti-dots-vertical'></i>" DropdownToggle=false>
+                            <ChildContent2>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="javascript:void(0);">All Invoices</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Paid Invoices</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Pending Invoices</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Overdue Invoices</a></li>
+                                </ul>
+                            </ChildContent2>
+                        </SpkDropdowns>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <SpkTables Tableclass="text-nowrap" Items="InvoiceService.GetInvoiceHeadersData()" >
+                        @foreach (var Invoice in InvoiceService.GetInvoices()){
+                            <tr class="invoice-list">
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-2 lh-1">
+                                            <span class="avatar avatar-sm avatar-rounded">
+                                                <img src="@Invoice.ClientImg" alt="">
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <p class="mb-0 fw-medium">@Invoice.ClientName</p>
+                                            <p class="mb-0 fs-11 text-muted">@Invoice.ClientEmail</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <a href="javascript:void(0);" class="fw-medium text-primary">
+                                        @Invoice.InvoiceId
+                                    </a>
+                                </td>
+                                <td>
+                                    @Invoice.IssuedDate
+                                </td>
+                                <td>
+                                    @Invoice.Amount
+                                </td>
+                                <td>
+                                    <SpkBadge BadgeClass="@(Invoice.Status == "Paid"? "bg-success-transparent" : Invoice.Status == "Pending"? "bg-warning-transparent": Invoice.Status == "Overdue"? "bg-danger-transparent" : "bg-primary-transparent")">@Invoice.Status</SpkBadge>
+                                </td>
+                                <td>
+                                        @Invoice.DueDate
+                                </td>
+                                <td>
+                                    <SpkButtons ButtonClass="btn-primary-light btn-icon" ButtonSize="btn-sm"><i class="ri-printer-line"></i></SpkButtons>
+                                    <SpkButtons ButtonClass="btn-danger-light btn-icon ms-1 invoice-btn" ButtonSize="btn-sm"  @onclick="@(() => DeleteInvoice(Invoice.Id))"><i class="ri-delete-bin-5-line"></i></SpkButtons>
+                                </td>
+                            </tr>
+                        }
+                    </SpkTables>
+                </div>
+                <div class="card-footer border-top-0">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination mb-0 float-end">
+                            <li class="page-item disabled">
+                                <a class="page-link">Previous</a>
+                            </li>
+                            <li class="page-item"><a class="page-link" href="javascript:void(0);">1</a></li>
+                            <li class="page-item active" aria-current="page">
+                                <a class="page-link" href="javascript:void(0);">2</a>
+                            </li>
+                            <li class="page-item"><a class="page-link" href="javascript:void(0);">3</a></li>
+                            <li class="page-item">
+                                <a class="page-link" href="javascript:void(0);">Next</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--End::row-1 -->
+
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Pages" },
+        new SpkPageHeader.PageItem { PageTitle = "Invoice" },
+        new SpkPageHeader.PageItem { PageTitle = "Invoice List" },
+    };
+    // Stacked Bar Chart Start //
+    private List<Invoicechart> Invoicecharts { get; set; } = InvoiceService.GetInvoicecharts();
+    private ApexChartOptions<Invoicechart> InvoiceChartOptions { get; set; } = new();
+    private List<SeriesConfig<Invoicechart>>? InvoicechartSeriesConfigs { get; set; }
+
+    //  Stacked Bar Chart End // 
+    protected override void OnInitialized() {
+        InvoiceChartOptions = new ApexChartOptions<Invoicechart> {
+            Chart = new () {
+                Stacked = true,
+                Toolbar = new ApexCharts.Toolbar {
+                    Show = false,
+                    Tools = new Tools { Zoom = true, Zoomin = true, Zoomout = true,Pan = true, Reset = true,  Download = true},
+                }, 
+            }, 
+            PlotOptions = new PlotOptions
+            {
+                Bar = new PlotOptionsBar
+                {
+                    Horizontal = false, 
+                    ColumnWidth= "25%",
+                }
+            },
+            Title = new Title{
+                Style = new TitleStyle {
+                    FontSize= "13px",
+                    FontWeight= "bold",
+                    Color= "#8c9097"
+                },
+            },
+            Grid = new Grid {
+                BorderColor = "#f2f5f7",
+            },
+            Colors = new Color(new List<string> { "rgba(255, 142, 111, 1)", "rgba(255, 93, 159, 1)", "rgba(227, 84, 212, 1)", "var(--primary-color)" }),
+            Stroke = new Stroke { 
+                Width = 1,
+            },
+            Fill = new Fill {
+                Opacity = 1,
+            },
+            Legend = new Legend  { 
+                Show=true,
+                Position = LegendPosition.Top,
+            }, 
+            Xaxis =  new XAxis {  
+                Labels = new XAxisLabels {
+                    Show = true, 
+                    Style = new() {
+                        Colors = "#8c9097",
+                        FontSize = "11px",
+                        FontWeight = 600,
+                        CssClass = "apexcharts-xaxis-label",
+                    },
+                }
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis // Define the first YAxis object
+                {
+                    Labels = new YAxisLabels
+                    {
+                        Show = true,
+                        Style = new() {
+                            Colors = "#8c9097",
+                            FontSize = "11px",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label",
+                        },
+                    },
+                    Min = 0,
+                    Max = 300,
+                    StepSize = 50,
+                }
+            },
+        };
+        
+        InvoicechartSeriesConfigs = new List<SeriesConfig<Invoicechart>>
+        {
+            new SeriesConfig<Invoicechart>
+            {
+                SeriesType = SeriesType.Bar,Name="Total Invoices",XValueSelector = e => e.InvoiceValue  ?? "unknown",YAggregateSelector = e => e.Sum(e => e.InvoiceTotal)
+            },
+            new SeriesConfig<Invoicechart>
+            {
+                SeriesType = SeriesType.Bar,Name="Paid Invoices",XValueSelector = e => e.InvoiceValue  ?? "unknown",YAggregateSelector = e => e.Sum(e => e.InvoicePaid)
+            },
+            new SeriesConfig<Invoicechart>
+            {
+                SeriesType = SeriesType.Bar,Name="Pending Invoices",XValueSelector = e => e.InvoiceValue  ?? "unknown",YAggregateSelector = e => e.Sum(e => e.InvoicePending)
+            },
+            new SeriesConfig<Invoicechart>
+            {
+                SeriesType = SeriesType.Bar,Name="Overdue Invoices",XValueSelector = e => e.InvoiceValue  ?? "unknown",YAggregateSelector = e => e.Sum(e => e.InvoiceOverdue)
+            },
+        };
+    }
+    protected void DeleteInvoice(decimal Id)
+    {
+        var ContactsToRemove = InvoiceService.GetInvoices().FirstOrDefault(o => o.Id == Id);
+        if (ContactsToRemove != null)
+        {
+            InvoiceService.GetInvoices().Remove(ContactsToRemove);
+        }
+    }
+}

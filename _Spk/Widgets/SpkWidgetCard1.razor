@@ -1,0 +1,36 @@
+@typeparam TItem where TItem : class
+@using Sandbox._Spk
+@using ApexCharts
+@using ApexSeries
+@using CardModel 
+@using WidgetData 
+@inject WidgetService WidgetService
+
+@code {
+    [Parameter] public WidgetElements? MainCard { get; set; }
+    [Parameter] public List<TItem>? ChartItems { get; set; }
+    [Parameter] public ApexChartOptions<TItem>? ChartOptions { get; set; }
+    [Parameter] public List<SeriesConfig<TItem>>? SeriesConfigs { get; set; }
+}
+
+@if(MainCard != null){
+    <div class="card custom-card overflow-hidden">
+        <div class="card-body">
+            <div class="d-flex gap-3 align-items-center">
+                <div class="avatar avatar-lg bg-@MainCard?.IconClass svg-white">
+                    @((MarkupString)(MainCard?.Icon ?? string.Empty))
+                </div>
+                <div>
+                    <div class="flex-fill fs-13 text-muted">@MainCard?.Title</div>
+                    <div class="fs-21 fw-medium">@MainCard?.Value<SpkBadge BadgeClass="@((MainCard?.IsIncreased  == true) ? "bg-success-transparent text-success fs-10 ms-2" :"bg-danger-transparent text-danger fs-10 ms-2")"><i class="@((MainCard?.IsIncreased  == true) ? "ri-arrow-right-up-line" :"ri-arrow-left-down-line") fs-11"></i>@MainCard?.Percentage</SpkBadge>
+                    </div>
+                </div>
+                <div class="ms-auto">
+                    <div id="chart-01">
+                        <SpkApex TItem="TItem"  ChartOptions="ChartOptions" Items="ChartItems"  Series="SeriesConfigs" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+} 

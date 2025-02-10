@@ -1,0 +1,13 @@
+@code {
+    [Parameter] public string? ribbonClass { get; set; }
+    [Parameter] public string? ribbonPosition { get; set; }
+    [Parameter] public string? ribbonColor { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}
+
+<div class="@ribbonClass @ribbonColor @ribbonPosition">
+    @if (ChildContent != null)
+    {
+        @ChildContent
+    }
+</div>

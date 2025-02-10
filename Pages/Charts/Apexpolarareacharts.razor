@@ -1,0 +1,128 @@
+@page "/apex-polararea-charts"
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using ApexSeries
+@using ApexCharts
+@using PolarChartData
+@inject PolarChartService PolarChartService
+
+    <!-- Page Header -->
+    <SpkPageHeader PageItems="PageItems" />
+    <!-- Page Header Close -->
+
+    <!-- Start::row-1 -->
+    <div class="row">
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Basic Polar Area Chart</div>
+                </div>
+                <div class="card-body">
+                    <div id="polararea-basic">
+                        <SpkApex ApexHeight="300" TItem="PolarAreachart" Items="PolarAreaItems" ChartOptions="PolarAreaChartOptions" Series="PolarAreachartSeriesConfigs"></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Polar Area Monochrome Chart</div>
+                </div>
+                <div class="card-body">
+                    <div id="polararea-monochrome">
+                        <SpkApex ApexHeight="300" TItem="MonochromePolarAreachart" Items="MonochromePolarAreaItems" ChartOptions="MonochromePolarAreaChartOptions" Series="MonochromePolarAreachartSeriesConfigs"></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--End::row-1 -->
+
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Charts" },
+        new SpkPageHeader.PageItem { PageTitle = "Apex Charts" },
+        new SpkPageHeader.PageItem { PageTitle = "Apex Polar Area Charts" },
+    };
+    // PolarAreaItems Start //
+    private List<PolarAreachart> PolarAreaItems { get; set; } = PolarChartService.PolarAreaItems();
+    private ApexChartOptions<PolarAreachart> PolarAreaChartOptions { get; set; } = new();
+    private List<SeriesConfig<PolarAreachart>>? PolarAreachartSeriesConfigs { get; set; }
+    // PolarAreaItems End //
+
+    // MonochromePolarAreaItems Start //
+    private List<MonochromePolarAreachart> MonochromePolarAreaItems { get; set; } = PolarChartService.MonochromePolarAreaItems();
+    private ApexChartOptions<MonochromePolarAreachart> MonochromePolarAreaChartOptions { get; set; } = new();
+    private List<SeriesConfig<MonochromePolarAreachart>>? MonochromePolarAreachartSeriesConfigs { get; set; }
+    // MonochromePolarAreaItems End //
+    
+    protected override void OnInitialized() {
+        PolarAreaChartOptions = new ApexChartOptions<PolarAreachart>
+        {
+            Stroke = new() {
+                Width = 2,
+                Colors = new Color(new List<string> { "#fff"})
+            },
+            Colors = new Color(new List<string> { "#5c67f7", "#e354d4", "#ff8e6f", "#0ca3e7", "#fe5454", "#0cd7b1", "#fe7c58", "#0ca3e7", "#7b76fe" }),
+            Legend = new Legend
+            {
+                Position = LegendPosition.Bottom
+            }
+        };
+        PolarAreachartSeriesConfigs = new List<SeriesConfig<PolarAreachart>>
+        {
+            new SeriesConfig<PolarAreachart>
+            {
+                SeriesType = SeriesType.PolarArea,
+                XValueSelector = e => e.Source ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.SeriesValue)
+            },
+        };
+
+        MonochromePolarAreaChartOptions = new ApexChartOptions<MonochromePolarAreachart>
+        {
+            Stroke = new() {
+                Width = 1,
+            },
+            Legend = new Legend
+            {
+                Position = LegendPosition.Bottom
+            },
+            Fill = new Fill {
+                Opacity = 1
+            },
+            PlotOptions = new PlotOptions 
+            {
+                PolarArea = new PlotOptionsPolarArea 
+                { 
+                    Rings = new ()
+                    {
+                        StrokeWidth = 0
+                    },
+                    Spokes = new ()
+                    {
+                        StrokeWidth = 0
+                    }
+                }
+            },
+            Theme = new Theme {
+                Mode = Mode.Light,
+                Monochrome = new ThemeMonochrome  {
+                    Enabled= true,
+                    ShadeIntensity = 0.6,
+                    Color= "#5c67f7",
+                }
+            }
+        };
+        MonochromePolarAreachartSeriesConfigs = new List<SeriesConfig<MonochromePolarAreachart>>
+        {
+            new SeriesConfig<MonochromePolarAreachart>
+            {
+                SeriesType = SeriesType.PolarArea,
+                XValueSelector = e => e.MonochromeSeriesData ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.MonochromeSeriesValue),
+            },
+        };
+    }
+}

@@ -1,0 +1,28 @@
+@using WidgetData 
+@inject WidgetService WidgetService
+
+@code {
+    [Parameter] public WidgetElements? MainCard { get; set; }
+}
+
+@if(MainCard != null){
+    
+    <div class="card custom-card  border-@MainCard?.MainClass border border-opacity-50 overflow-hidden main-content-card">
+        <div class="card-body">
+            <div class="d-flex align-items-start justify-content-between">
+                <div class="flex-grow-1">
+                    <SpkBadge BadgeClass="text-secondary fw-semibold me-1 d-inline-block bg-secondary-transparent">
+                        <i class="fe fe-arrow-up"></i>@MainCard?.Percentage
+                    </SpkBadge>
+                    <h4 class="mt-2 mb-2 fw-medium">@MainCard?.Value</h4>
+                    <p class="mb-0 fs-12 fw-medium">@MainCard?.Title </p>
+                </div>
+                <div>
+                    <span class="avatar avatar-md bg-@MainCard?.IconClass svg-white text-fixed-white">
+                       @((MarkupString)(MainCard?.Icon ?? string.Empty))
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+} 

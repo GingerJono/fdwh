@@ -1,0 +1,1445 @@
+@page "/widgets"
+@inject IJSRuntime JSRuntime
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using Sandbox._Spk.Widgets
+@using WidgetData
+@inject WidgetService WidgetService
+@using ApexSeries
+@using CardModel
+
+    <!-- Page Header -->
+    <SpkPageHeader PageItems="PageItems" />
+    <!-- Page Header Close -->
+
+    <!-- Start:: row-1 -->
+    <div class="row">
+        @foreach(var Mainchart in WidgetService.GetWidgetsCard1()) {
+            <div class="col-xxl-3 col-xl-6">
+                <SpkWidgetCard1 MainCard="Mainchart" ChartOptions="GenerateDynamicChartOptions(Mainchart)" ChartItems="@WidgetService.GetWidgetsChart1(Mainchart)"  SeriesConfigs="GenerateDynamicSeriesConfigs()"></SpkWidgetCard1>
+            </div>
+        }
+    </div>
+    <!-- End:: row-1 -->
+
+    <!-- Start::row-2 -->
+    <div class="row">
+        @foreach(var card in WidgetService.GetWidgetsCard2()) {
+            <div class="col-xl-3">
+                <SpkWidgetCard2 MainCard="card"></SpkWidgetCard2>
+            </div>
+        }
+    </div>
+    <!-- End::row-2 -->
+
+    <!-- Start:: row-3 -->
+    <div class="row">
+        <div class="col-xxl-6 col-xl-12">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        Sales Revenue
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="salerevenue">
+                        <SpkApex TItem="SalesStatistics" Items="jobsstatistics" ApexHeight="322" ChartOptions="SalesStatisticsChartOptions" Series="SalesStatisticsSeriesConfigs"></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xxl-3 col-xl-6 col-lg-6 col-md-6 col-12">
+            <div class="card custom-card">
+                <div class="card-header pb-0">
+                    <div class="card-title">
+                        Total Sales
+                    </div>
+                </div>
+                <div class="card-body p-0 widget-circle-chart">
+                    <div id="circlechart">
+                        <SpkApex TItem="CircleChart" Items="circlechart" ApexHeight="275" ChartOptions="CircleChartOptions" Series="CircleChartSeriesConfigs"></SpkApex>
+                    </div>
+                </div>
+                <div class="card-footer p-0 border-top border-block-start-dashed">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="p-3 ps-5 d-flex gap-2 pb-0">
+                                <div>
+                                    <span class="fs-14 visit-gender male ms-1">Average Sales</span>
+                                    <div class="mt-1">
+                                        <span class="fs-5 fw-medium">8,777</span>
+                                    </div>
+                                </div>
+                                <div class="text-muted fs-13 text-end ms-auto">Increased By 
+                                    <span class="text-success">1.5%<i class="ti ti-arrow-narrow-up fs-16"></i></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="p-3 ps-5 d-flex gap-2">
+                                <div>
+                                    <span class="fs-14 visit-gender female">Average Profit</span>
+                                    <div class="mt-1">
+                                        <span class="fs-5 fw-medium">$12,234</span>
+                                    </div>
+                                </div>
+                                <div class="text-muted fs-13 text-end ms-auto">Decreased By 
+                                    <span class="text-danger">0.6%<i class="ti ti-arrow-narrow-down fs-16"></i></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xxl-3 col-xl-6 col-lg-6 col-md-6 col-12">
+            <div class="card custom-card overflow-hidden">
+                <div class="card-header">
+                    <div class="card-title">
+                        Total Revenue
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3 gap-2">
+                        <h3 class="fw-medium mb-0">$5,874.28</h3>
+                        <div class="text-muted fs-13 text-end ms-auto">Increased By 
+                            <span class="text-success">0.5%<i class="ti ti-arrow-narrow-up fs-16"></i></span>
+                        </div>
+                    </div>
+                    <SpkProgress ProgressClass="progress-stacked mb-1">
+                        <div class="progress-bar progress-bar-striped" role="progressbar" style="width: 30%" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="progress-bar progress-bar-striped bg-primary1" role="progressbar" style="width: 20%" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="progress-bar progress-bar-striped bg-primary2" role="progressbar" style="width: 23%" aria-valuenow="23" aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="progress-bar progress-bar-striped bg-primary3" role="progressbar" style="width: 27%" aria-valuenow="27" aria-valuemin="0" aria-valuemax="100"></div>
+                    </SpkProgress>
+                </div>
+                <div class="card-footer p-0">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-fill align-items-center">
+                                    <div class="d-flex align-items-top justify-content-between">
+                                        <div>
+                                            <p class="mb-1 text-muted d-flex align-items-center"><i class="ti ti-point-filled fs-20 text-primary me-2 bg-primary-transparent rounded-circle"></i>Today Revenue</p>
+                                            <h6 class="mb-0 lh-1 fw-medium ms-4 ps-1">$789</h6>
+                                        </div>
+                                        <div class="text-muted fs-13 text-end ms-auto">Increased By 
+                                            <span class="text-success">0.5%<i class="ti ti-arrow-narrow-up fs-16"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="list-group-item success">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-fill align-items-center">
+                                    <div class="d-flex align-items-top justify-content-between">
+                                        <div>
+                                            <p class="mb-1 text-muted d-flex align-items-center"><i class="ti ti-point-filled fs-20 text-primary1 me-2 bg-primary1-transparent rounded-circle"></i>This Week Revenue</p>
+                                            <h6 class="mb-0 lh-1 fw-medium ms-4 ps-1">$1,887</h6>
+                                        </div>
+                                        <div class="text-muted fs-13 text-end ms-auto">Decreased By 
+                                            <span class="text-danger">2.8%<i class="ti ti-arrow-narrow-down fs-16"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="list-group-item warning">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-fill align-items-center">
+                                    <div class="d-flex align-items-top justify-content-between">
+                                        <div>
+                                            <p class="mb-1 text-muted d-flex align-items-center"><i class="ti ti-point-filled fs-20 text-primary2 me-2 bg-primary2-transparent rounded-circle"></i>This Month Revenue</p>
+                                            <h6 class="mb-0 lh-1 fw-medium ms-4 ps-1">$55,666</h6>
+                                        </div>
+                                        <div class="text-muted fs-13 text-end ms-auto">Increased By <span class="text-success">0.5%<i class="ti ti-arrow-narrow-up fs-16"></i>
+                                        </span></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="list-group-item success">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-fill align-items-center">
+                                    <div class="d-flex align-items-top justify-content-between">
+                                        <div>
+                                            <p class="mb-1 text-muted d-flex align-items-center"><i class="ti ti-point-filled fs-20 text-primary3 me-2 bg-primary3-transparent rounded-circle"></i>This Month Revenue</p>
+                                            <h6 class="mb-0 lh-1 fw-medium ms-4 ps-1">$3,41,173</h6>
+                                        </div>
+                                        <div class="text-muted fs-13 text-end ms-auto">Decreased By <span class="text-danger">1.2%<i class="ti ti-arrow-narrow-down fs-16"></i>
+                                        </span></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End:: row-3 -->
+
+    <!-- Start:: row-4 -->
+    <div class="row">
+        @foreach(var Mainchart in WidgetService.GetWidgetsCard3()) {
+            <div class="col-xxl-3 col-xl-6">
+                <SpkWidgetCard3 MainCard="Mainchart" ChartOptions="GenerateDynamicChartOptions2(Mainchart)" ChartItems="@WidgetService.GetWidgetsChart2(Mainchart)"  SeriesConfigs="GenerateDynamicSeriesConfigs2()"></SpkWidgetCard3>
+            </div>
+        }
+    </div>
+    <!-- End:: row-4 -->
+
+    <!-- Start:: row-5 -->
+    <div class="row">
+        <div class="col-xxl-4 col-12">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        Sales Revenue
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="salerevenue1">
+                        <SpkApex TItem="Learning" Items="learning" ApexHeight="320" ChartOptions="LearningChartOptions" Series="LearningSeriesConfigs"></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6 col-12">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        Recent Activity
+                    </div>
+                </div>
+                <div class="card-body">
+                    <ul class="widgets-task-list mb-0">
+                        @foreach(var list in WidgetService.GetActivityData()) {
+                            <SpkWidgetActivity activity="list"></SpkWidgetActivity>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6 col-12">
+            <div class="card custom-card overflow-hidden">
+                <div class="card-body bg-primary m-3 rounded-3">
+                    <div class="d-flex text-fixed-white gap-3 align-items-center flex-wrap">
+                        <div class="avatar avatar-rounded avatar-lg bg-white-transparent svg-white">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256">
+                                <path d="M224,200h-8V40a8,8,0,0,0-8-8H152a8,8,0,0,0-8,8V80H96a8,8,0,0,0-8,8v40H48a8,8,0,0,0-8,8v64H32a8,8,0,0,0,0,16H224a8,8,0,0,0,0-16ZM160,48h40V200H160ZM104,96h40V200H104ZM56,144H88v56H56Z">
+                                </path>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="fs-15 mb-0 op-8">Today Budget</p>
+                            <p class="fs-18 fw-semibold mb-0">$2,78,411</p>
+                        </div>
+                        <div class="text-fixed-white fs-13 align-self-end ms-auto"><span class="op-7">Increased By</span> 
+                            <SpkBadge BadgeClass="align-self-end bg-success text-fixed-white fs-10"><i class="ri-arrow-right-up-line fs-11"></i>0.5</SpkBadge>
+                        </div>
+                        
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item p-3 border-top">
+                            <div class="d-flex align-items-start gap-3">
+                                <div>
+                                    <span class="avatar avatar-rounded bg-primary1-transparent text-primary1"><i class="ti ti-hourglass fs-22"></i></span>
+                                </div>
+                                <div class="flex-fill">
+                                    <span class="mb-0 fw-medium d-block">Total-Income</span>
+                                    <span class="text-muted fs-12">Average Income Per Hour</span>
+
+                                </div>
+                                <div class="text-end">
+                                    <span class="text-primary1 fs-medium fs-5">$17.03</span>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="list-group-item p-3">
+                            <div class="d-flex align-items-start gap-3">
+                                <div>
+                                    <span class="avatar avatar-rounded bg-primary2-transparent text-primary2"><i class="ti ti-clock fs-22"></i></span>
+                                </div>
+                                <div class="flex-fill">
+                                    <span class="mb-0 fw-medium d-block">Total-Income</span>
+                                    <span class="text-muted fs-12">Average Income Per Hour</span>
+
+                                </div>
+                                <div class="text-end">
+                                    <span class="text-primary2 fs-medium fs-5">$17.03</span>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="list-group-item p-3">
+                            <div class="d-flex align-items-start gap-3">
+                                <div>
+                                    <span class="avatar avatar-rounded bg-primary3-transparent text-primary3"><i class="ti ti-bolt fs-22"></i></span>
+                                </div>
+                                <div class="flex-fill">
+                                    <span class="mb-0 fw-medium d-block">Total-Income</span>
+                                    <span class="text-muted fs-12">Average Income Per Hour</span>
+
+                                </div>
+                                <div class="text-end">
+                                    <span class="text-primary3 fs-medium fs-5">$77.93</span>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="list-group-item p-3">
+                            <div class="d-flex align-items-start gap-3">
+                                <div>
+                                    <span class="avatar avatar-rounded bg-secondary-transparent"><i class="ti ti-activity-heartbeat fs-22"></i></span>
+                                </div>
+                                <div class="flex-fill">
+                                    <span class="mb-0 fw-medium d-block">Total-Income</span>
+                                    <span class="text-muted fs-12">Average Income Per Hour</span>
+
+                                </div>
+                                <div class="text-end">
+                                    <span class="text-secondary fs-medium fs-5">$970.63</span>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End:: row-5 -->
+
+    <!-- Start:: row-6 -->
+    <div class="row">
+        @foreach(var Mainchart in WidgetService.GetWidgetsCard4()) {
+            <div class="col-xxl-3 col-xl-6">
+                <SpkWidgetCard4 MainCard="Mainchart" ChartOptions="GenerateDynamicChartOptions3(Mainchart)" ChartItems="@WidgetService.GetWidgetsChart4(Mainchart)"  SeriesConfigs="GenerateDynamicSeriesConfigs3()"></SpkWidgetCard4>
+            </div>
+        }
+    </div>
+    <!-- End:: row-6 -->
+
+    <!-- End:: row-7 -->
+    <div class="row">
+        <div class="col-xxl-3 col-12">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        Total Visitors
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="activecustomers">
+                        <SpkApex TItem="Radialbarmultiple" Items="Radialbarmultiples" ApexHeight="280" ChartOptions="RadarmultipleChartOptions" Series="RadialbarmultipleSeriesConfigs"></SpkApex>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="row mt-0">
+                        <div class="col-4">
+                            <h6 class="text-primary mb-1 fw-medium">45K</h6>
+                            <p class="text-muted mb-0 fs-12">Apps</p>
+                        </div>
+                        <div class="col-4">
+                            <h6 class="text-primary1 mb-1 fw-medium">35K</h6>
+                            <p class="text-muted mb-0 fs-12">Offline</p>
+                        </div>
+                        <div class="col-4">
+                            <h6 class="text-primary2 mb-1 fw-medium">10K</h6>
+                            <p class="text-muted mb-0 fs-12">Website</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xxl-6 col-xl-12">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        Sales Revenue
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="salerevenue2">
+                        <SpkApex TItem="SaleRevenue2" Items="salerevenue2" ApexHeight="295" ChartOptions="SaleRevenue2ChartOptions" Series="SaleRevenue2SeriesConfigs"></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xxl-3 col-12">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        Top Sales
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="top-sales">
+                        <SpkApex TItem="MixedAll" Items="MixedAlls" ApexHeight="295" ChartOptions="MixedAllOptions" Series="MixedAllSeriesConfigs" XAxisType="XAxisType.Datetime"></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End:: row-7 -->
+
+    <!-- End:: row-8 -->
+    <div class="row">
+        <div class="col-xxl-3 col-lg-6">
+            <div class="card custom-card">
+                <div class="card-body">
+                    <div class="text-center">
+                        <div class="mb-2">
+                            <span class="avatar avatar-xl avatar-rounded online">
+                                <img src="../assets/images/faces/9.jpg" alt="">
+                            </span>
+                        </div>
+                        <div class="main-profile-info">
+                            <h6 class="fw-semibold mb-1">Daniel David <SpkTooltip Tag="span" TooltipClass="bg-transparent" TooltipPlacement="top" TooltipTitle="Verified "><i class="bi bi-check-circle-fill text-primary2 fs-14"></i></SpkTooltip></h6>
+                            <p class="text-muted mb-2">Web Designer</p>
+                            <p class="">Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudan accusant. </p>
+                        </div>
+                        <div class="d-flex gap-1 justify-content-center mb-4 align-items-center">
+                            <i class="ri-facebook-line text-primary border rounded-circle align-middle lh-1 border-opacity-25 p-2 border-primary me-1 d-inline-block fs-17 bg-primary-transparent"></i>
+                            <i class="ri-twitter-x-line text-primary1 border rounded-circle align-middle lh-1 border-opacity-25 p-2 border-primary1 me-1 d-inline-block fs-17 bg-primary1-transparent"></i>
+                            <i class="ri-linkedin-line text-primary2 border rounded-circle align-middle lh-1 border-opacity-25 p-2 border-primary2 me-1 d-inline-block fs-17 bg-primary2-transparent"></i>
+                            <i class="ri-github-line text-primary3 border rounded-circle align-middle lh-1 border-opacity-25 p-2 border-primary3 me-1 d-inline-block fs-17 bg-primary3-transparent"></i>
+                        </div>
+                        <div class="d-flex gap-2 mb-0 flex-wrap flex-xxl-nowrap">
+                            <SpkButtons ButtonClass="btn-primary mb-0 flex-fill" ButtonSize="btn-sm">Message</SpkButtons>
+                            <SpkButtons ButtonClass="btn-secondary mb-0 flex-fill" ButtonSize="btn-sm">Follow</SpkButtons>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xxl-3 col-lg-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        Recent Transactions
+                    </div>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-3">
+                        <li class="mb-3">
+                            <div class="d-flex align-items-center flex-wrap gap-2">
+                                <div class="lh-1">
+                                    <span class="avatar  avatar-md avatar-rounded p-1 bg-primary border">
+                                        <i class="fe fe-shopping-bag"></i>
+                                    </span>
+                                </div>
+                                <div class="flex-fill lh-1">
+                                    <span class="fw-medium mb-2 d-block fs-14">Shopping</span>
+                                    <span class="d-block text-muted fs-12">22 August 2024</span>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <span class="fs-11 text-success"><i class="ti ti-arrow-narrow-up"></i>0.27%</span>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="mb-3">
+                            <div class="d-flex align-items-center flex-wrap gap-2">
+                                <div class="lh-1">
+                                    <span class="avatar  avatar-md avatar-rounded p-1 bg-primary1 border">
+                                        <i class="fe fe-shopping-bag"></i>
+                                    </span>
+                                </div>
+                                <div class="flex-fill lh-1">
+                                    <span class="fw-medium mb-2 d-block fs-14">Traveling</span>
+                                    <span class="d-block text-muted fs-12">05 September 2024</span>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <span class="fs-11 text-danger"><i class="ti ti-arrow-narrow-down"></i>0.3%</span>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="mb-3">
+                            <div class="d-flex align-items-center flex-wrap gap-2">
+                                <div class="lh-1">
+                                    <span class="avatar  avatar-md avatar-rounded p-1 bg-primary2 border">
+                                        <i class="fe fe-shopping-bag"></i>
+                                    </span>
+                                </div>
+                                <div class="flex-fill lh-1">
+                                    <span class="fw-medium mb-2 d-block fs-14">Credit card Bill</span>
+                                    <span class="d-block text-muted fs-12">18 September 2024</span>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <span class="fs-11 text-danger"><i class="ti ti-arrow-narrow-down"></i>1.2%</span>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="mb-0">
+                            <div class="d-flex align-items-center flex-wrap gap-2">
+                                <div class="lh-1">
+                                    <span class="avatar  avatar-md avatar-rounded p-1 bg-primary3 border">
+                                        <i class="fe fe-shopping-bag"></i>
+                                    </span>
+                                </div>
+                                <div class="flex-fill lh-1">
+                                    <span class="fw-medium mb-2 d-block fs-14">Shop Rent</span>
+                                    <span class="d-block text-muted fs-12">13 October 2024</span>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <span class="fs-11 text-success"><i class="ti ti-arrow-narrow-up"></i>1.7%</span>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                    <div class="text-center">
+                        <a href="javascript:void(0);" class="text-secondary fw-medium text-decoration-underline"> View All Transactions</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xxl-3 col-lg-6">
+            <div class="card custom-card">
+                <div class="card-header pb-0">
+                    <div class="card-title">
+                        Orders Overview
+                    </div>
+                </div>
+                <div class="card-body px-0">
+                    <div id="recent-orders">
+                        <SpkApex TItem="Ordersoverview" Items="Ordersoverviews" ApexHeight="245" ChartOptions="OrdersoverviewChartOptions" Series="OrdersoverviewSeriesConfigs"></SpkApex>
+                    </div>
+                    <div class="p-3 pt-0 pb-1">
+                        <div class="flex-fill d-flex gap-1 flex-wrap align-items-start justify-content-between">
+                            <div>
+                                <span class="fs-12 mb-1 d-block fw-medium">TOTAL ORDERS</span> 
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <h5 class="mb-0 d-flex align-items-end">3,736<span class="text-success fs-12 ms-2 op-1"><i class="ti ti-trending-up align-middle me-1"></i>0.57%</span></h5>
+                                </div>
+                            </div>
+                            <div class="ms-auto">
+                                <div class="avatar avatar-md bg-primary-transparent">
+                                    <i class="ti ti-box fs-5"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xxl-3 col-lg-6">
+            <div class="card custom-card overflow-hidden">
+                <div class="widget-card">
+                    <div class="d-flex align-items-start text-fixed-white flex-wrap px-2">
+                        <div class="flex-grow-1 text-center">
+                            <div class="mt-2 align-items-center justify-conent-between fs-21 mb-1">
+                                <span>Monthly Budget</span>
+                                <span class="min-w-fit-content fs-10 ms-1 "></span>
+                            </div> 
+                            <div class="d-flex align-items-center justify-conent-between">
+                                <span class="flex-grow-1 fs-30 fw-semibold sale-font counter">$78,985<span>
+                            </span></span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="flex-grow-1">
+                            <div class="fs-21 fw-medium mb-1">$35,800</div>
+                            <div class="flex-grow-1 fs-13 mb-2">Increased By</div>
+                            <span class="fs-12 text-success"><i class="ti ti-arrow-narrow-up"></i>0.27%</span>
+                        </div>
+                        <span class="avatar rounded-circle bg-primary-transparent ms-auto">
+                            <i class="bx bx-up-arrow-alt fs-20"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End:: row-8 -->
+
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Widgets" },
+        new SpkPageHeader.PageItem { PageTitle = "Widgets" },
+    };
+    
+    // Widgets Card1 Start //
+    private ApexChartOptions<WidgetsChart1> GenerateDynamicChartOptions(WidgetElements mainChart) =>
+    mainChart.Title switch
+    {
+        "Total Sales" => TotalSalesChartOptions,
+        "Total profit" => TotalProfitChartOptions,
+        "Total Revenue" => TotalRevenueChartOptions,
+        _ => TotalIncomeChartOptions
+    };
+    private List<SeriesConfig<WidgetsChart1>> GenerateDynamicSeriesConfigs()
+    {
+        return new List<SeriesConfig<WidgetsChart1>>
+        {
+            new SeriesConfig<WidgetsChart1>
+            {
+                SeriesType = SeriesType.Area,  
+                XValueSelector = e => e.Series,  
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.Value)
+            },
+        };
+    }
+    private ApexChartOptions<WidgetsChart1> TotalSalesChartOptions { get; set; } = new();
+    private ApexChartOptions<WidgetsChart1> TotalProfitChartOptions { get; set; } = new();
+    private ApexChartOptions<WidgetsChart1> TotalRevenueChartOptions { get; set; } = new();
+    private ApexChartOptions<WidgetsChart1> TotalIncomeChartOptions { get; set; } = new();
+    //  Widgets Card1 End // 
+
+    // Job Statistics Start //
+    private List<SalesStatistics> jobsstatistics { get; set; } = WidgetService.GetSalesStatisticss();
+    private ApexChartOptions<SalesStatistics> SalesStatisticsChartOptions { get; set; } = new();
+    private List<SeriesConfig<SalesStatistics>>? SalesStatisticsSeriesConfigs { get; set; }
+    // Job Statistics End //
+
+    //  Circle Chart Start //
+    private List<CircleChart> circlechart { get; set; } = WidgetService.GetCircleCharts();    
+    private ApexChartOptions<CircleChart> CircleChartOptions { get; set; } = new();
+    private List<SeriesConfig<CircleChart>>? CircleChartSeriesConfigs { get; set; }
+    //  CircleChart End //
+    
+    // Widgets Card2 Start //
+    private ApexChartOptions<WidgetsChart2> GenerateDynamicChartOptions2(WidgetElements mainChart) =>
+    mainChart.Title switch
+    {
+        "Total Sales" => ConversionRatioChartOptions,
+        "Total Revenue" => ConversionRatio1ChartOptions,
+        "Total Customers" => ConversionRatio2ChartOptions,
+        _ => ConversionRatio3ChartOptions
+    };
+    private List<SeriesConfig<WidgetsChart2>> GenerateDynamicSeriesConfigs2()
+    {
+        return new List<SeriesConfig<WidgetsChart2>>
+        {
+            new SeriesConfig<WidgetsChart2>
+            {
+                SeriesType = SeriesType.Bar,
+                 Name="This Week",
+                XValueSelector = e => e.Series,  
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.ThisWeek)
+            },
+            new SeriesConfig<WidgetsChart2>
+            {
+                SeriesType = SeriesType.Bar,  
+                Name="Last Week",
+                XValueSelector = e => e.Series,  
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.LastWeek)
+            },
+        };
+    }
+    private ApexChartOptions<WidgetsChart2> ConversionRatioChartOptions { get; set; } = new();
+    private ApexChartOptions<WidgetsChart2> ConversionRatio1ChartOptions { get; set; } = new();
+    private ApexChartOptions<WidgetsChart2> ConversionRatio2ChartOptions { get; set; } = new();
+    private ApexChartOptions<WidgetsChart2> ConversionRatio3ChartOptions { get; set; } = new();
+    //  Widgets Card2 End // 
+
+     // Learning Start //
+    private List<Learning> learning { get; set; } = WidgetService.GetLearnings();
+    private ApexChartOptions<Learning> LearningChartOptions { get; set; } = new();
+    private List<SeriesConfig<Learning>>? LearningSeriesConfigs { get; set; }
+    // Learning End //
+
+    // Widgets Card4 Start //
+    private ApexChartOptions<WidgetsChart1> GenerateDynamicChartOptions3(WidgetElements mainChart) =>
+    mainChart.Title switch
+    {
+        "Total Sales" => ProjectChartOptions,
+        "Total Revenue" => ProjectChart1Options,
+        "Total Users" => ProjectChart2Options,
+        _ => ProjectChart3Options
+    };
+    private List<SeriesConfig<WidgetsChart1>> GenerateDynamicSeriesConfigs3()
+    {
+        return new List<SeriesConfig<WidgetsChart1>>
+        {
+            new SeriesConfig<WidgetsChart1>
+            {
+                SeriesType = SeriesType.Bar,  
+                XValueSelector = e => e.Series,  
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.Value)
+            },
+        };
+    }
+    private ApexChartOptions<WidgetsChart1> ProjectChartOptions { get; set; } = new();
+    private ApexChartOptions<WidgetsChart1> ProjectChart1Options { get; set; } = new();
+    private ApexChartOptions<WidgetsChart1> ProjectChart2Options { get; set; } = new();
+    private ApexChartOptions<WidgetsChart1> ProjectChart3Options { get; set; } = new();
+    //  Widgets Card4 End //
+
+    // Multiple Radialbar Chart Start //
+    private List<Radialbarmultiple> Radialbarmultiples { get; set; } = WidgetService.Radialbarmultiple();
+    private ApexChartOptions<Radialbarmultiple> RadarmultipleChartOptions { get; set; } = new();
+    private List<SeriesConfig<Radialbarmultiple>>? RadialbarmultipleSeriesConfigs { get; set; }
+   
+    // Multiple Radialbar Chart End //
+
+    // Sale Revenue2 Start //
+    private List<SaleRevenue2> salerevenue2 { get; set; } = WidgetService.GetSaleRevenue2();
+    private ApexChartOptions<SaleRevenue2> SaleRevenue2ChartOptions { get; set; } = new();
+    private List<SeriesConfig<SaleRevenue2>>? SaleRevenue2SeriesConfigs { get; set; }
+    // Sale Revenue2 End //
+
+     // All Mixed Chart Start //
+    private List<MixedAll> MixedAlls { get; set; } = WidgetService.GetMixedAlls();
+    private ApexChartOptions<MixedAll> MixedAllOptions { get; set; } = new();
+    private List<SeriesConfig<MixedAll>>? MixedAllSeriesConfigs { get; set; }
+    //  All Mixed Chart End //
+
+    // Ordersoverview Chart Start //
+    private List<Ordersoverview> Ordersoverviews { get; set; } = WidgetService.Ordersoverview();
+    private ApexChartOptions<Ordersoverview> OrdersoverviewChartOptions { get; set; } = new();
+    private List<SeriesConfig<Ordersoverview>>? OrdersoverviewSeriesConfigs { get; set; }
+    
+    // Ordersoverview Chart End //
+
+    protected override void OnInitialized() {
+        // Widgets Card1 Start //
+        List<string> color1 = new List<string> { "var(--primary-color)","var(--primary01)","var(--primary01)"};
+        List<string> color2 = new List<string> { "rgb(227, 84, 212)","rgba(227, 84, 212, 0.1)","rgba(227, 84, 212, 0.1)"};
+        List<string> color3 = new List<string> { "rgb(255, 93, 159)","rgba(255, 93, 159, 0.1)","rgba(255, 93, 159, 0.1)"};
+        List<string> color4 = new List<string> { "rgb(255, 142, 111)","rgba(255, 142, 111, 0.1)","rgba(255, 142, 111, 0.1)"};
+        TotalSalesChartOptions = InitializeChartOptions<WidgetsChart1>(color1);
+        TotalProfitChartOptions = InitializeChartOptions<WidgetsChart1>(color2);
+        TotalRevenueChartOptions = InitializeChartOptions<WidgetsChart1>(color3);
+        TotalIncomeChartOptions = InitializeChartOptions<WidgetsChart1>(color4);
+        //  Widgets Card1 End // 
+        
+        // Widgets Card2 Start //
+        List<string> ConversionRatiocolor1 = new List<string> {"rgb(158, 92, 247)", "var(--primary-color)"};
+        List<string> ConversionRatiocolor2 = new List<string> {"#AB54E3", "rgb(227, 84, 212)"};
+        List<string> ConversionRatiocolor3 = new List<string> {"#FF6C5D", "rgb(255, 93, 159)"};
+        List<string> ConversionRatiocolor4 = new List<string> {"#FF663C", "rgb(255, 142, 111)"};
+        ConversionRatioChartOptions = ConversionChartOptions<WidgetsChart2>(ConversionRatiocolor1);
+        ConversionRatio1ChartOptions = ConversionChartOptions<WidgetsChart2>(ConversionRatiocolor2);
+        ConversionRatio2ChartOptions = ConversionChartOptions<WidgetsChart2>(ConversionRatiocolor3);
+        ConversionRatio3ChartOptions = ConversionChartOptions<WidgetsChart2>(ConversionRatiocolor4);
+        //  Widgets Card2 End // 
+        
+        // Widgets Card2 Start //
+        List<string>ProjectRatiocolor1 = new List<string> {"var(--primary-color)"};
+        List<string>ProjectRatiocolor2 = new List<string> {"rgb(227, 84, 212)"};
+        List<string>ProjectRatiocolor3 = new List<string> {"rgb(255, 93, 159)"};
+        List<string>ProjectRatiocolor4 = new List<string> {"rgb(255, 142, 111)"};
+       ProjectChartOptions = ProjectMainChartOptions<WidgetsChart1>(ProjectRatiocolor1);
+       ProjectChart1Options =ProjectMainChartOptions<WidgetsChart1>(ProjectRatiocolor2);
+       ProjectChart2Options =ProjectMainChartOptions<WidgetsChart1>(ProjectRatiocolor3);
+       ProjectChart3Options =ProjectMainChartOptions<WidgetsChart1>(ProjectRatiocolor4);
+        //  Widgets Card2 End // 
+
+        SalesStatisticsChartOptions = new ApexChartOptions<SalesStatistics> {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false, Pan = false, Reset = false,  Download = false},
+                }, 
+                FontFamily = "Montserrat, sans-serif",
+                ForeColor= "#d4d7d9",
+                Stacked = true,
+            },
+            Grid = new Grid {
+                Show = true,
+                BorderColor = "#f1f1f1",
+                StrokeDashArray = 3
+            },
+            Colors = new Color(new List<string> {"var(--primary-color)", "rgb(227, 84, 212)", "rgb(255, 142, 111)", "rgb(255, 93, 159)"}),
+            DataLabels = new DataLabels {
+                Enabled = false,
+            }, 
+            Legend = new Legend {
+                Show = true,
+                Position = LegendPosition.Top,
+                HorizontalAlign = Align.Center,
+                Markers=  new(){
+                    Width =  6,
+                    Height = 6,
+                    Radius=50,
+                    StrokeWidth= 0
+                },
+            },
+            Tooltip = new Tooltip { 
+                Enabled= true,
+                Theme = ApexCharts.Mode.Dark,
+                Shared= true,
+                Intersect= false,
+            },
+            PlotOptions = new PlotOptions {
+                Bar = new PlotOptionsBar {
+                    Horizontal = false,
+                    BorderRadius = 0,
+                    ColumnWidth = "20%",
+                }
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis {
+                    Show = true,
+                    Min = 0,
+                    Max = 800,
+                    StepSize = 200,
+                },
+            },
+            Xaxis =  new XAxis {
+                AxisBorder = new () {
+                    Show = false,
+                },
+                AxisTicks = new () {
+                    Show = false,
+                },
+            },
+        };
+        SalesStatisticsSeriesConfigs = new List<SeriesConfig<SalesStatistics>>
+        {
+            new SeriesConfig<SalesStatistics>
+            {
+                SeriesType = SeriesType.Bar,
+                Name = "Revenue",
+                XValueSelector = e => e.Month ?? "Month",
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.ApplicationsValue)
+            },
+            new SeriesConfig<SalesStatistics>
+            {
+                SeriesType = SeriesType.Bar,
+                Name = "Profit",
+                XValueSelector = e => e.Month ?? "Month",
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.ShortlistedValue)
+            },
+            new SeriesConfig<SalesStatistics>
+            {
+                SeriesType = SeriesType.Bar,
+                Name = "Income",
+                XValueSelector = e => e.Month ?? "Month",
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.RejectedValue)
+            },
+            new SeriesConfig<SalesStatistics>
+            {
+                SeriesType = SeriesType.Bar,
+                Name = "Revenue",
+                XValueSelector = e => e.Month ?? "Month",
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.OnHoldValue)
+            },
+        };
+
+        CircleChartOptions = new ApexChartOptions<CircleChart> {
+            Chart = new () {
+                Height ="275px",
+            }, 
+            Stroke = new Stroke { 
+                Show = true,
+                Curve = Curve.Smooth,
+                LineCap = ApexCharts.LineCap.Round,
+                Width = 0,
+                DashArray = 0,
+            },
+            Legend = new Legend  { 
+                Show = false,
+            }, 
+            Colors = new Color(new List<string> {"rgb(215, 124, 247)", "var(--primary-color)"}),
+            PlotOptions = new PlotOptions 
+            {
+                RadialBar  = new PlotOptionsRadialBar
+                {    
+                    StartAngle = -135,
+                    EndAngle = 135,
+                    DataLabels = new RadialBarDataLabels
+                    {
+                        Show = true,
+                        Name = new (){
+                            Show = true,
+                            OffsetY = -10,
+                            Color = "var(--text-muted)",
+                            FontSize = "14px"
+                        },
+                        Value = new (){
+                           Show = true,
+                            Formatter = @"function (val) {
+                                return parseInt(val);
+                            }",
+                            Color = "#111",
+                            FontSize = "36px"
+                        },
+                    },
+                    Hollow= new() {
+                        Size ="60%",
+                        Margin = 0,
+                    },
+                }
+            },
+            Fill = new Fill {
+                Type = new List<FillType> { FillType.Gradient, FillType.Gradient },
+                Gradient = new FillGradient
+                {
+                    ShadeIntensity = 0.5,
+                    OpacityFrom = 1,
+                    GradientToColors = new Color(new List<string> {"var(--primary-color)"}),
+                    InverseColors = true,
+                    OpacityTo = 1,
+                    Stops= [0, 100],
+                }
+            },
+        };
+        CircleChartSeriesConfigs = new List<SeriesConfig<CircleChart>>
+        {
+            new SeriesConfig<CircleChart>
+            {
+                SeriesType = SeriesType.RadialBar,
+                XValueSelector = e => e.Source ?? "Month",
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.SourceValue)
+            },
+        };
+
+        LearningChartOptions = new ApexChartOptions<Learning> {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = false},
+                }, 
+                DropShadow = new ApexCharts.DropShadow {
+                    Enabled = true,
+                    Color = ["transparent", "rgba(215, 124, 247, 0.2)","var(--primary02)"],
+                    Top = 5,
+                    Left = 0,
+                    Blur = 3,
+                    Opacity = 0.5
+                }
+            },
+            Grid = new Grid {
+                Show = false,
+                BorderColor = "rgba(119, 119, 142, 0.1)",
+                StrokeDashArray = 4
+            },
+            Tooltip = new ApexCharts.Tooltip {
+                X = new TooltipX
+                {
+                    Formatter = @"function(value, opts) {
+                    if (value === undefined) {return '';}
+                    return  opts.w.globals.categoryLabels[value-1] + ':' + value}"
+                }
+            },
+            Colors = new Color(new List<string> {"rgb(227, 84, 212)", "var(--primary-color)"}),
+            Stroke = new Stroke { 
+                Curve = Curve.Smooth,
+                    Width= [2, 2],
+                    DashArray= 2,
+                    Colors =["rgb(227, 84, 212)", "var(--primary-color)"],
+                 },
+            DataLabels = new DataLabels {
+                Formatter = @"function(value, opts) {
+                return  Number(value).toLocaleString();}"
+            }, 
+            Yaxis = new List<YAxis>() {
+                new YAxis // Define the first YAxis object
+                {
+                    Title = new AxisTitle {
+                        Text = "Growth",
+                        Style = new AxisTitleStyle 
+                        {
+                            Color = "#adb5be",
+                            FontSize = "14px",
+                            FontFamily = "Montserrat, sans-serif",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label"
+                        }
+                    },
+                    Min = 10,
+                    Max = 90,
+                    StepSize = 10,
+                },
+            },
+            Legend = new Legend
+            {
+                Show = true,
+                FontSize = "12px",
+                Position = LegendPosition.Top,
+                HorizontalAlign = Align.Center,
+                FontFamily = "Montserrat",
+                FontWeight = 500,
+                Height = 50,
+                Markers = new LegendMarkers
+                {
+                    Width = 13,
+                    Height = 13,
+                    Radius = 7,
+                },
+    
+            },
+        };
+        LearningSeriesConfigs = new List<SeriesConfig<Learning>>
+        {
+            new SeriesConfig<Learning>
+            {
+                SeriesType = SeriesType.Line,Name="Revenue",
+                XValueSelector = e => e.Activity ?? "Month",
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.LastWeek)
+            },
+            new SeriesConfig<Learning>
+            {
+                SeriesType = SeriesType.Line,Name="Profit",
+                XValueSelector = e => e.Activity ?? "Month",
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.Average)
+            },
+        };
+        
+        RadarmultipleChartOptions = new ApexChartOptions<Radialbarmultiple>
+        {
+            Colors = new Color(new List<string> { "var(--primary-color)", "rgb(227, 84, 212)", "rgb(255, 93, 159)" }),
+            PlotOptions = new PlotOptions
+            {
+                RadialBar = new PlotOptionsRadialBar
+                {
+                    StartAngle = -180,
+                    EndAngle = 180,
+                    Hollow = new Hollow
+                    {
+                        Margin = 10,
+                        Size = "60%"
+                    },
+                    DataLabels = new RadialBarDataLabels
+                    {
+                        Name = new (){
+                            FontSize = "24px",
+                        },
+                        Value = new (){
+                            FontSize = "16px",
+                        },
+                        Total = new RadialBarDataLabelsTotal
+                        {
+                            Show = true,
+                            Label = "Total",
+                            Formatter = @"function (w) {
+                                return 358
+                            }"
+                        }
+                    }
+                }
+            },
+            Stroke = new Stroke { 
+                DashArray= [0, 3, 1]
+            },
+        };
+        RadialbarmultipleSeriesConfigs = new List<SeriesConfig<Radialbarmultiple>>
+        {
+            new SeriesConfig<Radialbarmultiple>
+            {
+                SeriesType = SeriesType.RadialBar ,Name="Fruits",
+                XValueSelector = e => e.Fruits ?? "Month",
+                YAggregateSelector = e => decimal.Round(e.Average(e => e.Value))
+            },
+        };
+
+        SaleRevenue2ChartOptions = new ApexChartOptions<SaleRevenue2> {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = false},
+                }, 
+            },
+            Stroke = new Stroke { 
+                Curve = [Curve.Stepline],
+                Width = [2, 2, 2],
+                LineCap = ApexCharts.LineCap.Round,
+            },
+            DataLabels = new DataLabels {
+                Enabled = false,
+            }, 
+            Grid = new Grid {
+                BorderColor = "edeef1",
+                StrokeDashArray = 2,
+            },
+            Markers = new Markers { Size = 3 },
+            Legend = new Legend {
+                Show = true,
+                Position = LegendPosition.Top,
+                HorizontalAlign = Align.Center,
+                OffsetX = 0,
+                OffsetY = 8,
+                Labels= new() {
+                    Colors = new Color("#acb1b1"),
+                },
+                Markers =  new(){
+                    Width =  5,
+                    Height = 5,
+                    Radius = 12,
+                },
+            },
+            Colors = new Color(new List<string> { "var(--primary-color)", "rgb(227, 84, 212)", "rgb(255, 93, 159)" }),
+            Yaxis = new List<YAxis>() {
+                new YAxis {
+                    Min = -80,
+                    Max = 100,
+                    StepSize = 20,
+                }
+            },
+            Xaxis =  new XAxis {
+                AxisBorder = new () {
+                    Show = false,
+                },
+                AxisTicks = new () {    
+                    Show = false,
+                },
+                Labels = new XAxisLabels {
+                    Rotate = -90,
+                },
+            },
+        };
+        SaleRevenue2SeriesConfigs = new List<SeriesConfig<SaleRevenue2>>
+        {
+            new SeriesConfig<SaleRevenue2>
+            {
+                SeriesType = SeriesType.Line ,Name="Orders",
+                XValueSelector = e => e.Month ?? "Month",
+                YAggregateSelector = e => e.Sum(e => e.Sale2Value)
+            },
+            new SeriesConfig<SaleRevenue2>
+            {
+                SeriesType = SeriesType.Line ,Name="Delivered",
+                XValueSelector = e => e.Month ?? "Month",
+                YAggregateSelector = e => e.Sum(e => e.Refunds2Value)
+            },
+            new SeriesConfig<SaleRevenue2>
+            {
+                SeriesType = SeriesType.Line ,Name="Cancelled",
+                XValueSelector = e => e.Month ?? "Month",
+                YAggregateSelector = e => e.Sum(e => e.Cancelled2Value)
+            },
+        };
+
+        MixedAllOptions = new ApexChartOptions<MixedAll> { 
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = false},
+                }, 
+            },
+            Grid = new Grid {
+                BorderColor = "#f2f5f7",
+                Show = false,
+            },
+            Stroke = new Stroke { 
+                Width =[1.5, 1.5],
+                Curve = Curve.Smooth,
+            },
+            PlotOptions = new PlotOptions
+            {
+                Bar = new PlotOptionsBar
+                {
+                    ColumnWidth = "35%",
+                    BorderRadius = 5,
+                }
+            },
+            Colors = new Color(new List<string> { "#5c67f7","#e354d4" }),
+            Fill = new Fill {
+                Type = new List<FillType> { FillType.Solid,FillType.Gradient}, 
+                Opacity= [0.85, 0.25, 1],
+                Gradient = new ApexCharts.FillGradient {
+                    InverseColors = false,
+                    Shade = ApexCharts.GradientShade.Light,
+                    Type = ApexCharts.GradientType.Vertical,
+                    OpacityFrom = 0.55,
+                    OpacityTo = 0.55,
+                    Stops = [0, 100, 100, 100],
+                }
+            },
+            Markers = new Markers {
+                Size = 0,
+            },
+            Xaxis =  new XAxis {  
+                Labels = new XAxisLabels {
+                    Show = true,
+                    Style = new() {
+                        Colors = "#8c9097",
+                        FontSize = "11px",
+                        FontWeight = 600,
+                        CssClass = "apexcharts-xaxis-label",
+                    },
+                }
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis // Define the first YAxis object
+                {
+                    Title = new () {
+                        Text ="",
+                        Style = new() {
+                            Color = "#8c9097",
+                        },
+                    },
+                    Labels = new YAxisLabels
+                    {
+                        Show = true,
+                        Style = new() {
+                            Colors = "#8c9097",
+                            FontSize = "11px",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label",
+                        },
+                    },
+                    Min = 0,
+                    Max = 100,
+                    StepSize = 10,
+                },
+            },
+            Tooltip = new Tooltip
+            {
+                Shared = true,
+                Intersect = false,
+                Y = new TooltipY
+                {
+                    Formatter = @"function (y) {
+                        if (typeof y !== 'undefined') {
+                            return y.toFixed(0) + ' points';
+                        }
+                        return y;
+                    }"
+                }
+            },
+            Legend = new Legend  { 
+                Show=true,
+                OffsetX = 40,
+                HorizontalAlign = Align.Center,
+            }, 
+        };
+        MixedAllSeriesConfigs = new List<SeriesConfig<MixedAll>>
+        {
+            new SeriesConfig<MixedAll>
+            {
+                SeriesType = SeriesType.Bar ,Name="TEAM A",
+                XValueSelector = e => e.TEAMMixedValue ?? "Month",
+                YAggregateSelector = e => e.Sum(e => e.TEAMAMixedValue)
+            },
+            new SeriesConfig<MixedAll>
+            {
+                SeriesType = SeriesType.Area ,Name="TEAM B",
+                XValueSelector = e => e.TEAMMixedValue ?? "Month",
+                YAggregateSelector = e => e.Sum(e => e.TEAMBMixedValue)
+            },
+        };
+
+        OrdersoverviewChartOptions = new ApexChartOptions<Ordersoverview>
+        {
+            Colors = new Color(new List<string> { "var(--primary08)", "rgba(227, 84, 212, 0.8)", "rgba(255, 93, 159, 0.8)", "rgba(255, 142, 111, 0.8)" }),
+            PlotOptions = new PlotOptions
+            {
+                RadialBar = new PlotOptionsRadialBar
+                {
+                    DataLabels = new RadialBarDataLabels
+                    {
+                        Name = new (){
+                            FontSize = "24px",
+                        },
+                        Value = new (){
+                            FontSize = "16px",
+                            OffsetY = 5
+                        },
+                        Total = new RadialBarDataLabelsTotal
+                        {
+                            Show = true,
+                            Label = "Total",
+                            Formatter = @"function (w) {
+                                return 380
+                            }"
+                        }
+                    }
+                }
+            }
+        };
+        OrdersoverviewSeriesConfigs = new List<SeriesConfig<Ordersoverview>>
+        {
+            new SeriesConfig<Ordersoverview>
+            {
+                SeriesType = SeriesType.RadialBar  ,Name="Fruits",
+                XValueSelector = e => e.Fruits ?? "Month",
+                YAggregateSelector = e => decimal.Round(e.Average(e => e.Value))
+            },
+        };
+    }
+}
+
+@code {
+    // Widgets Card1 Start //
+    private ApexChartOptions<T> InitializeChartOptions<T>(List<string> colors) where T : class, ILineGraph
+    {
+        return new ApexChartOptions<T>
+        {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = false},
+                }, 
+                Height ="50px",
+                Width ="120px",
+                Sparkline = new () {
+                    Enabled = true
+                },
+            }, 
+            Grid = new Grid {
+                BorderColor = "transparent",
+            },
+            Xaxis =  new XAxis {
+                Crosshairs= new() {
+                    Show= false,
+                }
+            },
+            Colors = new Color(colors),  // Use the passed color list here
+            Stroke = new Stroke { 
+                Curve = Curve.Smooth,
+                LineCap = ApexCharts.LineCap.Butt,
+                Width = 2,
+            },
+            Tooltip = new Tooltip
+            {
+                Enabled = true,
+                X = new TooltipX
+                {
+                    Show = false
+                },
+                Y = new TooltipY
+                {
+                    Title = new TooltipYTitle
+                    {
+                        Formatter = @"function(seriesName) {
+                            return '';
+                        }"
+                    }
+                },
+                Marker = new TooltipMarker
+                {
+                    Show = false
+                },
+                Theme = ApexCharts.Mode.Dark
+            },
+            Fill = new Fill {
+                Type = new List<FillType> { FillType.Gradient, FillType.Gradient },
+                Gradient = new FillGradient {
+                    OpacityFrom = 0.5,
+                    OpacityTo = 0.2,
+                    Stops= [0, 60],
+                    ColorStops = new List<FillGradientStops> {
+                        new FillGradientStops { Offset = 0, Color = colors.Count > 1 ? colors[1] : colors[0], Opacity = 1 },
+                        new FillGradientStops { Offset = 60, Color = colors.Count > 2 ? colors[2] : colors[0], Opacity =1 },
+                    }
+                }
+            },
+        };
+    }
+    //  Widgets Card1 End // 
+
+    // Widgets Card2 Start //
+    private ApexChartOptions<T> ConversionChartOptions<T>(List<string> colors) where T : class, ILineGraph2
+    {
+        return new ApexChartOptions<T>
+        {
+           Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = false},
+                },
+                Width ="100px",
+                Height ="100px", 
+                Stacked = true,
+            }, 
+            Colors = new Color(colors),
+            PlotOptions = new PlotOptions
+            {
+                Bar = new PlotOptionsBar
+                {
+                    Horizontal = false,
+                    ColumnWidth = "35%",
+                }
+            },
+            DataLabels = new DataLabels {
+                Enabled = false,
+            }, 
+            Legend = new Legend
+            {
+                Show = false,
+            },
+            Grid = new Grid {
+                Show = false,
+                BorderColor = "rgba(0,0,0,0.1)",
+                StrokeDashArray = 2,
+            },
+            Tooltip= new () {
+                Enabled = true,
+            },
+            Xaxis =  new XAxis {
+                AxisBorder = new () {
+                    Show = false,
+                },
+                Labels = new XAxisLabels {
+                    Show = false,
+                },
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis {
+                    TickAmount = 4,
+                    Labels = new YAxisLabels {
+                        Show = false,
+                    },
+                },
+            },
+        };
+    }
+    //  Widgets Card2 End // 
+
+    // Widgets Card2 Start //
+    private ApexChartOptions<T> ProjectMainChartOptions<T>(List<string> colors) where T : class, ILineGraph
+    {
+        return new ApexChartOptions<T>
+        {
+           Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = false},
+                }, 
+                Height ="80px",
+                Width ="100px",
+                Sparkline = new () {
+                    Enabled = true
+                },
+                DropShadow = new ApexCharts.DropShadow {
+                    Enabled = true,
+                    Color = new Color(colors),
+                    Top= 3,
+                    Left= 0,
+                    Blur= 3,
+                    Opacity= 0.3
+                },
+            }, 
+            PlotOptions = new PlotOptions {
+                Bar = new PlotOptionsBar {
+                    Horizontal = false,
+                    ColumnWidth = "45%",
+                }
+            },
+            Colors = new Color(colors),
+            Stroke = new Stroke { 
+                Curve = Curve.Smooth,
+                Width = 2,
+            },
+            Tooltip = new Tooltip{
+                Enabled = true,
+                Fixed=  new() {
+                    Enabled = false,
+                },
+                X = new TooltipX
+                {
+                    Show = false
+                },
+                Y = new TooltipY
+                {
+                    Title = new TooltipYTitle
+                    {
+                        Formatter = @"function(seriesName) {
+                            return '';
+                        }"
+                    }
+                },
+            },
+        };
+    }
+    //  Widgets Card2 End // 
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("window.interop.initializeTooltips");
+        }
+    }
+
+}

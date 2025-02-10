@@ -1,0 +1,656 @@
+@page "/index10"
+@using ApexCharts
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using ApexSeries
+@using CardModel
+@using Courses
+@inject CoursesService CoursesService
+ 
+            <!-- Start::page-header -->
+            <SpkPageHeader PageItems="PageItems" />
+            <!-- End::page-header -->
+
+            <!-- Start::Row-1 -->
+            <div class="row">
+                <div class="col-xxl-7">
+                    <div class="row">
+                        @foreach(var Course in CoursesService.GetCoursesMainCards()){
+                            <div class="col-sm-6 col-xl-3">
+                                <SpkCoursesCard CoursesMainCard="Course"></SpkCoursesCard>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="col-xxl-5">
+                    <div class="card custom-card course-main overflow-hidden cover-image bg-cover bg-primary">
+                        <div class="card-body p-4">
+                            <div class="row justify-content-between">
+                                <div class="col-xl-7 col-md-8">
+                                    <h5 class="fw-medium mb-2 text-fixed-white">Welcome Back, Henry &#128075; </h5>
+                                    <span class="text-fixed-white d-block mb-2 op-7 me-1">You've reached 90% of your goal this month! Keep going and boost your skills with courses.</span>
+                                    <SpkButtons ButtonClass="btn-primary1 mt-2" ButtonWidth="btn-w-md">View Courses</SpkButtons>
+                                </div>
+                                <div class="col-xl-4 col-md-4 text-end">
+                                    <img src="../assets/images/media/media-81.png" alt="" class="img-fluid banner10-img">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- End::Row-1 -->
+
+            <!-- Start::Row-2 -->
+            <div class="row">
+                <div class="col-xxl-3">
+                    <div class="card custom-card">
+                        <div class="card-header justify-content-between">
+                            <div class="card-title">
+                                Upcoming Tasks
+                            </div>
+                            <div>
+                                <SpkButtons ButtonClass="btn-light" ButtonSize="btn-sm">View All</SpkButtons>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled mb-0 Upcoming-courses-schedule">
+                                @foreach(var Tasks in CoursesService.GetUpcomingTasksData()) {
+                                    <li class="list-item">
+                                        <div class="d-sm-flex align-items-center justify-content-between flex-wrap gap-1">
+                                            <div class="ms-3 mb-1 mb-sm-0 ps-1 course-schedule">
+                                                <p class="fw-medium mb-sm-1 mb-0">@Tasks.CourseTitle</p>
+                                                <span class="text-muted">@Tasks.Date</span>
+                                            </div>
+                                            <div class="min-w-fit-content d-flex align-items-center text-muted fs-12">
+                                                <span><i class="fe fe-clock me-1 fs-12"></i></span>
+                                                <span>@Tasks.Durationstart</span>
+                                                <span class="mx-2 text-muted">-</span>
+                                                <span>@Tasks.Durationend</span>
+                                            </div>
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xxl-6">
+                    <div class="card custom-card">
+                        <div class="card-header justify-content-between">
+                            <div class="card-title">Revenue Statistics</div>
+                            <div class="d-flex gap-2">
+                                <SpkButtons ButtonClass="btn-outline-light border btn-full" ButtonSize="btn-sm">Today</SpkButtons>
+                                <SpkButtons ButtonClass="btn-outline-light border btn-full" ButtonSize="btn-sm">Weakly</SpkButtons>
+                                <SpkButtons ButtonClass="btn-light border btn-full" ButtonSize="btn-sm">Yearly</SpkButtons>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div id="earning">
+                                <SpkApex TItem="Earning" ApexHeight="344" ChartOptions="EarningChartOptions" Items="earning" Series="EarningSeriesConfig"></SpkApex>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xxl-3">
+                    <div class="card custom-card">
+                        <div class="card-header justify-content-between">
+                            <div class="card-title">
+                                Top Categories
+                            </div>
+                            <div>
+                                <SpkButtons ButtonClass="btn-light" ButtonSize="btn-sm">View All</SpkButtons>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <ul class="d-flex flex-column list-group">
+                                @foreach(var Category in CoursesService.GetCategoriesListData()){
+                                <li class="p-0 list-group-item border-0 text-default @(Category == CoursesService.GetCategoriesListData().ToList().Last() ? "mb-0":"mb-4")">
+                                    <a href="javascript:void(0);" class="w-100">
+                                        <div class="d-flex align-items-center">
+                                            <span class="avatar rounded-sm avatar-md @Category.CategorieColor p-3"><i class="@Category.CategorieIcon fs-20 leading-none"></i></span>
+                                            <div class="flex-auto ms-3">
+                                                <p class="fs-14 fw-medium mb-0">@Category.CategorieTitle</p>
+                                                <p class="fs-12 text-muted mb-0">@Category.Courses + Courses</p>
+                                            </div>
+                                            <div class="ms-auto">
+                                                <span class="fs-14 text-default fw-medium">@Category.Price</span>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- End::Row-2 -->
+
+            <!-- Start::Row-3 -->
+            <div class="row">
+                <div class="col-xxl-5">
+                    <div class="card custom-card">
+                        <div class="card-header justify-content-between">
+                            <div class="card-title">
+                                Top Courses
+                            </div>
+                            <SpkDropdowns Tag="a" DropdownClass="btn btn-light btn-icons btn-sm text-muted" DropdownToggle=false DropdownText=" <i class='fe fe-more-vertical'></i>">
+                                <ChildContent2>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li class="border-bottom"><a class="dropdown-item" href="javascript:void(0);">Today</a></li>
+                                    <li class="border-bottom"><a class="dropdown-item" href="javascript:void(0);">This Week</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Last Week</a></li>
+                                </ul>
+                                </ChildContent2>
+                            </SpkDropdowns>
+                        </div>
+                        <div class="card-body">
+                            <ul class="d-flex flex-column list-unstyled mb-0 popular-course">
+                                <li class="text-muted mb-3">
+                                    <div class="d-sm-flex align-items-start w-100">
+                                        <a href="javascript:void(0);" class="pe-4 inline-block">
+                                        <img src="../assets/images/media/media-13.jpg" alt="img" class="avatar avatar-xl rounded-2">
+                                        </a>
+                                        <div class="flex-grow-1 fw-medium">
+                                            <div class="d-flex align-items-center" title="Instructor">
+                                                <a href="javascript:void(0);" class="pe-2">
+                                                <img src="../assets/images/faces/1.jpg" alt="img" class="avatar avatar-xs rounded-pill">
+                                                </a>
+                                                <a href="javascript:void(0);" class="flex-grow-1 text-default op-8">Natasha
+                                                Sil</a>
+                                                <SpkBadge Tag="a" BadgeClass="d-block mb-1 fw-normal bg-primary3-transparent" title="Category"><i class="ri-price-tag-3-line "></i> UI/UX</SpkBadge>
+                                            </div>
+                                            <a href="javascript:void(0);" class=" d-block mb-2 fw-medium">
+                                            Mastering CSS Pseudo-classes: From Basics to Advanced Techniques.</a>
+                                            <div class="d-md-flex justify-content-between align-items-center">
+                                            <div class="min-w-fit fs-12 text-muted op-8 d-inline-flex">
+                                                <span class="me-2 my-auto">
+                                                <i class="ri-eye-line"></i> 
+                                                    2,189 Views
+                                                </span> 
+                                            </div>
+                                            <div class="min-w-fit fs-11 text-default d-inline-flex">
+                                                <span>
+                                                    <i class="ri-star-fill text-warning"></i>
+                                                    <i class="ri-star-fill text-warning"></i>
+                                                    <i class="ri-star-fill text-warning"></i>
+                                                    <i class="ri-star-fill text-warning"></i>
+                                                    <i class="ri-star-half-fill text-warning"></i>(4.2)
+                                                </span>
+                                            </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class=" text-muted mb-3">
+                                    <div class="d-sm-flex align-items-start w-100">
+                                        <a href="javascript:void(0);" class="pe-4 inline-block">
+                                        <img src="../assets/images/media/media-14.jpg" alt="img" class="avatar avatar-xl rounded-2">
+                                        </a>
+                                        <div class="flex-grow-1 fw-medium">
+                                            <div class="d-flex align-items-center" title="Instructor">
+                                                <a href="javascript:void(0);" class="pe-2">
+                                                <img src="../assets/images/faces/6.jpg" alt="img" class="avatar avatar-xs rounded-pill">
+                                                </a>
+                                                <a href="javascript:void(0);" class="flex-grow-1 text-default op-8">Catalina Keira
+                                                </a>
+                                                <SpkBadge Tag="a" BadgeClass="d-block mb-1 fw-normal bg-primary2-transparent" title="Category"><i class="ri-price-tag-3-line "></i> Marketing</SpkBadge>
+                                            </div>
+                                            <a href="javascript:void(0);" class=" d-block mb-2 fw-medium">
+                                                Marketing Essentials: Understanding its Role in Business Success.</a>
+                                            <div class="d-md-flex justify-content-between align-items-center">
+                                            <div class="min-w-fit fs-12 text-muted op-8 d-inline-flex">
+                                                <span class="me-2 my-auto">
+                                                <i class="ri-eye-line"></i> 
+                                                1,116 Views
+                                                </span> 
+                                            </div>
+                                            <div class="min-w-fit fs-11 text-default d-inline-flex">
+                                                <span>
+                                                    <i class="ri-star-fill text-warning"></i>
+                                                    <i class="ri-star-fill text-warning"></i>
+                                                    <i class="ri-star-fill text-warning"></i>
+                                                    <i class="ri-star-fill text-warning"></i>
+                                                    <i class="ri-star-half-fill text-warning"></i>(4.3)
+                                                </span>
+                                            </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class=" text-muted mb-1">
+                                    <div class="d-sm-flex align-items-start w-100">
+                                    <a href="javascript:void(0);" class="pe-4 inline-block">
+                                        <img src="../assets/images/media/media-12.jpg" alt="img" class="avatar avatar-xl rounded-2">
+                                    </a>
+                                    <div class="flex-grow-1 fw-medium">
+                                        <div class="d-flex align-items-center" title="Instructor">
+                                            <a href="javascript:void(0);" class="pe-2">
+                                            <img src="../assets/images/faces/11.jpg" alt="img" class="avatar avatar-xs rounded-pill">
+                                            </a>
+                                            <a href="javascript:void(0);" class="flex-grow-1 text-default op-8">Telsko 
+                                                William</a>
+                                                <SpkBadge Tag="a" BadgeClass="d-block mb-1 fw-normal bg-primary1-transparent" title="Category"><i class="ri-price-tag-3-line "></i> Python</SpkBadge>
+                                        </div>
+                                        <a href="javascript:void(0);" class=" d-block mb-2 fw-medium">
+                                            Python Mastery: Shallow Copy vs. Deep Copy and Practical Techniques.</a>
+                                        <div class="d-md-flex justify-content-between align-items-center">
+                                        <div class="min-w-fit fs-12 text-muted op-8 d-inline-flex">
+                                            <span class="me-2 my-auto">
+                                            <i class="ri-eye-line"></i> 
+                                            2,245 Views
+                                            </span> 
+                                        </div>
+                                        <div class="min-w-fit fs-11 text-default d-inline-flex">
+                                            <span>
+                                                <i class="ri-star-fill text-warning"></i>
+                                                <i class="ri-star-fill text-warning"></i>
+                                                <i class="ri-star-fill text-warning"></i>
+                                                <i class="ri-star-fill text-warning"></i>
+                                                <i class="ri-star-half-fill text-warning"></i>(4.2)
+                                            </span>
+                                        </div>
+                                        </div>
+                                    </div>
+                                    </div>
+                                </li>
+                            </ul>
+                            <SpkButtons ButtonClass="btn-primary-light mt-3 d-grid w-100">View All Courses</SpkButtons>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xxl-7">
+                    <div class="card custom-card overflow-hidden">
+                        <div class="card-header justify-content-between">
+                            <div class="card-title">
+                                Latest Courses
+                            </div>
+                            <div>
+                                <SpkButtons ButtonClass="btn-light" ButtonSize="btn-sm">View All</SpkButtons>
+                            </div>
+                        </div>
+                        <div class="card-body pt-1">
+                            <div class="crypto-swiper">
+                                <BlazorSlickCarousel Configurations="CryptoConfigurations" @ref="theCarousel">
+                                    <BlazorSlickCarouselContent>
+                                        @foreach(var course in CoursesService.GetCourseListData()) {
+                                            <div class="Carousel-slide">
+                                                <div class="card custom-card mb-0 border shadow-none">
+                                                    <div class="card-body p-0">
+                                                        <div class="position-relative">
+                                                            <img src="@course.CourseImg" alt="" class="img-fluid card-img-top">
+                                                            <div class="p-3">
+                                                                <div class="min-w-fit fs-11 text-default d-inline-flex">
+                                                                    <span>
+                                                                        <i class="ri-star-fill text-warning"></i> 4.2</span>
+                                                                </div>
+                                                                <div class="d-flex gap-1 justify-content-between align-items-center flex-wrap">
+                                                                    <div>
+                                                                        <h6 class="fw-medium fs-14 mb-0">@course.CourseTitle</h6>
+                                                                        <a href="javascript:void(0)" class="text-primary fs-12">Read More</a>
+                                                                    </div>
+                                                                    <h6 class="fw-semibold mb-0">@course.Price</h6>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                    </BlazorSlickCarouselContent>
+                                </BlazorSlickCarousel>
+                            </div> 
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- End::Row-3 -->
+
+            <!-- Start::Row-4 -->
+            <div class="row">
+                <div class="col-xxl-9">
+                    <div class="card custom-card">
+                        <div class="card-header justify-content-between">
+                            <div class="card-title">
+                                Course List
+                            </div>
+                            <div class="d-flex flex-wrap">
+                                <SpkDropdowns Tag="a" DropdownClass="btn btn-light btn-sm " DropdownMainClass="m-1" DropdownToggle=false DropdownText="View All<i class='ri-arrow-down-s-line align-middle ms-1 d-inline-block'></i>">
+                                    <ChildContent2>
+                                        <ul class="dropdown-menu" role="menu">
+                                            <li><a class="dropdown-item" href="javascript:void(0);">New</a></li>
+                                            <li><a class="dropdown-item" href="javascript:void(0);">Popular</a></li>
+                                            <li><a class="dropdown-item" href="javascript:void(0);">Relevant</a></li>
+                                        </ul>
+                                    </ChildContent2>
+                                </SpkDropdowns>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <SpkTables Tableclass="text-nowrap table-bordered" Items="CoursesService.GetCourseListHeaderData()">
+                                @foreach(var courses in CoursesService.GetCoursesListData()){
+                                    <tr>
+                                        <td>
+                                            @courses.CourseId
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center lh-1">
+                                                <div class="me-2">
+                                                    <span class="avatar avatar-md">
+                                                        <img src="@courses.CourseImg" alt="">
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <p class="fs-14 fw-medium mb-1">@courses.CourseTitle</p>
+                                                    <p class="fs-12 text-muted mb-0">@courses.Category</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @courses.Classes
+                                        </td>
+                                        <td>
+                                            @courses.Updated
+                                        </td>
+                                        <td>
+                                            @courses.Instructor
+                                        </td>
+                                        <td>
+                                            @courses.Students
+                                        </td>
+                                        <td>
+                                            <div class="btn-list mb-0">
+                                                <SpkTooltip Tag="a" TooltipClass="btn btn-sm rounded-pill btn-primary-light mb-0" TooltipPlacement="top" TooltipTitle="View">
+                                                    <i class="ti ti-eye"></i>
+                                                </SpkTooltip>
+                                                <SpkTooltip Tag="a" TooltipClass="btn btn-sm rounded-pill btn-secondary-light mb-0" TooltipPlacement="top" TooltipTitle="Edit">
+                                                    <i class="ti ti-pencil"></i>
+                                                </SpkTooltip>
+                                                <SpkTooltip Tag="a" TooltipClass="btn btn-sm rounded-pill btn-danger-light mb-0" TooltipPlacement="top" TooltipTitle="Delete"  @onclick="@(() => DeleteCourseList(courses.CourseId))">
+                                                    <i class="ti ti-trash"></i>
+                                                </SpkTooltip>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </SpkTables>
+                            <div class="d-flex flex-wrap align-items-center mt-3">
+                                <div>
+                                    Showing 6 Entries <i class="bi bi-arrow-right ms-2 fw-semibold"></i>
+                                </div>
+                                <div class="ms-auto">
+                                    <nav aria-label="Page navigation" class="pagination-style-4">
+                                        <ul class="pagination mb-0">
+                                            <li class="page-item disabled">
+                                                <a class="page-link" href="javascript:void(0);">
+                                                    Prev
+                                                </a>
+                                            </li>
+                                            <li class="page-item active"><a class="page-link" href="javascript:void(0);">1</a></li>
+                                            <li class="page-item"><a class="page-link" href="javascript:void(0);">2</a></li>
+                                            <li class="page-item">
+                                                <a class="page-link text-primary" href="javascript:void(0);">
+                                                    next
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </nav>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xxl-3">
+                    <div class="card custom-card">
+                        <div class="card-header justify-content-between">
+                            <div class="card-title">
+                                Top Professors
+                            </div>
+                            <div>
+                                <SpkButtons ButtonClass="btn-light" ButtonSize="btn-sm">View All</SpkButtons>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled courses-instructors mb-0">
+                                @foreach(var List in CoursesService.GetProfessorssList()) {
+                                    <li class=""><SpkProductCard product="List"></SpkProductCard></li> 
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- End::Row-4 -->
+
+
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Dashboards" },
+        new SpkPageHeader.PageItem { PageTitle = "Courses" },
+    };
+
+    // Earning Start //
+    private List<Earning> earning { get; set; } = CoursesService.GetEarning();
+    private ApexChartOptions<Earning> EarningChartOptions { get; set; } = new();
+    private List<SeriesConfig<Earning>>? EarningSeriesConfig { get; set; }
+    // Earning End //
+    public BlazorSlickCarousel? theCarousel;
+    public WMBSCInitialSettings? CryptoConfigurations;
+    protected override void OnInitialized() { 
+        
+        WMBSCSettings breakpoint1600Settings = new WMBSCSettings
+        {
+            slidesToShow = 4,
+            arrows = false,
+            dots = false,
+            slidesToScroll = 1,
+            infinite = true,
+            autoplay = true,
+            autoplaySpeed = 1500,
+        };
+        WMBSCResponsiveSettings breakpoint1600Responsive = new WMBSCResponsiveSettings
+        {
+            breakpoint = 1600,
+            settings = breakpoint1600Settings
+        };
+        WMBSCSettings breakpoint1200Settings = new WMBSCSettings
+        {
+            slidesToShow = 3,
+            arrows = false,
+            dots = false,
+            slidesToScroll = 1,
+            infinite = true,
+            autoplay = true,
+            autoplaySpeed = 1500,
+        };
+        WMBSCResponsiveSettings breakpoint1200Responsive = new WMBSCResponsiveSettings
+        {
+            breakpoint = 1200,
+            settings = breakpoint1200Settings
+        };
+        WMBSCSettings breakpoint768Settings = new WMBSCSettings
+        {
+            slidesToShow = 2,
+            arrows = false,
+            dots = false,
+            slidesToScroll = 1,
+            infinite = true,
+            autoplay = true,
+            autoplaySpeed = 1500,
+        };
+        WMBSCResponsiveSettings breakpoint768Responsive = new WMBSCResponsiveSettings
+        {
+            breakpoint = 768,
+            settings = breakpoint768Settings
+        };
+        WMBSCSettings breakpoint500Settings = new WMBSCSettings
+        {
+            slidesToShow = 1,
+            arrows = false,
+            dots = false,
+            slidesToScroll = 1,
+            infinite = true,
+            autoplay = true,
+            autoplaySpeed = 1500,
+        };
+        WMBSCResponsiveSettings breakpoint500Responsive = new WMBSCResponsiveSettings
+        {
+            breakpoint = 500,
+            settings = breakpoint500Settings
+        };
+        List<WMBSCResponsiveSettings> responsiveSettingsList = new List<WMBSCResponsiveSettings>();
+        responsiveSettingsList.Add(breakpoint1600Responsive);
+        responsiveSettingsList.Add(breakpoint1200Responsive);
+        responsiveSettingsList.Add(breakpoint768Responsive);
+        responsiveSettingsList.Add(breakpoint500Responsive);
+        CryptoConfigurations = new WMBSCInitialSettings
+        {
+            arrows = false,
+            dots = false,
+            slidesToShow = 4,
+            slidesToScroll = 1,
+            infinite = true,
+            autoplay = true,
+            autoplaySpeed = 1500,
+            responsive = responsiveSettingsList,
+        };
+
+        EarningChartOptions = new ApexChartOptions<Earning> {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = false},
+                }, 
+                DropShadow = new ApexCharts.DropShadow {
+                    Enabled = true,
+                    Color = "#000",
+                    Top = 1,
+                    Left = 0,
+                    Blur = 3,
+                    Opacity = 0.1
+                },
+            },
+            Grid = new Grid {
+                BorderColor = "rgba(119, 119, 142, 0.1)",
+                StrokeDashArray = 4
+            },
+            Stroke = new Stroke { 
+                Curve = Curve.Straight,
+                Width = [1.5, 2],
+                DashArray = [0, 5],
+                Colors = new Color(new List<string> {"var(--primary-color)", "rgba(227, 84, 212, 0.5)"}),
+            },
+            Legend = new Legend {
+                Show = true,
+                Position = LegendPosition.Top,
+                HorizontalAlign = Align.Center,
+                FontWeight = 600,
+                FontSize = "11px",
+                TooltipHoverFormatter = @"function (val, opts) { return (val +' - ' + opts.w.globals.series[opts.seriesIndex][opts.dataPointIndex] +''); }",
+                Labels = new() {
+                    Colors = "#74767c",
+                },
+                Markers=  new(){
+                    Width =  8,
+                    Height = 8,
+                    Radius = 50,
+                    OffsetX = 0,
+                    OffsetY = 0
+                },
+            },
+            Fill = new Fill {
+                Opacity = 1,
+                Type = new List<FillType> { FillType.Gradient,FillType.Solid},
+                Gradient = new ApexCharts.FillGradient {
+                    Shade = ApexCharts.GradientShade.Light,
+                    Type = ApexCharts.GradientType.Vertical,
+                    GradientToColors = new Color(new List<string> {"var(--primary-color)", "rgba(227, 84, 212, 0.5)"}),
+                    ShadeIntensity = 0.01,
+                    OpacityFrom =  [0.02,1],
+                    OpacityTo = [0.02,1],
+                }
+            },
+            Colors = new Color(new List<string> {"var(--primary-color)", "rgba(227, 84, 212, 0.5)"}),
+            DataLabels = new DataLabels {
+                Enabled = false,
+            }, 
+            Yaxis = new List<YAxis>() {
+                new YAxis {
+                    Show = true,
+                    Title = new () {
+                        Style = new () {
+                            Color = "#adb5be",
+                            FontSize = "14px",
+                            FontFamily = "poppins, sans-serif",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label",
+                        },
+                    },
+                    Labels = new YAxisLabels {
+                        Show = true,
+                        Style = new() {
+                            Colors = "#8c9097",
+                            FontSize = "11px",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-xaxis-label",
+                        },
+                    },
+                    Min = 10,
+                    Max = 70,
+                    StepSize = 10,
+                },
+            },
+            Xaxis =  new XAxis {
+                AxisBorder = new () {
+                    Show = true,
+                    Color = "rgba(119, 119, 142, 0.05)",
+                    OffsetX = 0,
+                    OffsetY = 0,
+                },
+                AxisTicks = new () {
+                    Show = true,
+                    Color = "rgba(119, 119, 142, 0.05)",
+                    BorderType = ApexCharts.BorderType.Solid,
+                    OffsetX = 0,
+                    OffsetY = 0,
+                },
+                Labels = new XAxisLabels {
+                    Show = true,
+                    Rotate = -90,
+                    Style = new() {
+                        Colors = "#8c9097",
+                        FontSize = "11px",
+                        FontWeight = 600,
+                        CssClass = "apexcharts-xaxis-label",
+                    },
+                },
+            },
+        };
+        EarningSeriesConfig = new List<SeriesConfig<Earning>>
+        {
+            new SeriesConfig<Earning>
+            {
+                Name="This Year",
+                SeriesType =SeriesType.Area,
+                XValueSelector = e => e.Year ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.ThisYearValue)
+            },
+            new SeriesConfig<Earning>
+            {
+                Name="Last Year",
+                SeriesType =SeriesType.Line,
+                XValueSelector = e => e.Year ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.LastYearValue)
+            },
+        };
+    }
+    
+    protected void DeleteCourseList(decimal CourseId)
+    {
+        var CourseToRemove = CoursesService.GetCoursesListData().FirstOrDefault(o => o.CourseId == CourseId);
+        if (CourseToRemove != null)
+        {
+            CoursesService.GetCoursesListData().Remove(CourseToRemove);
+        }
+    }
+}

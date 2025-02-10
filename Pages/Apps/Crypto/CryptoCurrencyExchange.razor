@@ -1,0 +1,220 @@
+@page "/crypto-currency-exchange"
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using ApexSeries
+@using CryptoData
+@inject CryptoDataService CryptoDataService
+@using CardModel
+
+    <!-- Page Header -->
+    <SpkPageHeader PageItems="PageItems" />
+    <!-- Page Header Close -->
+
+    <!-- Start::row-1 -->
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card custom-card currency-exchange-card">
+                <div class="card-body p-5 d-flex align-items-center justify-content-center z-1">
+                    <div class="container">
+                        <h3 class="text-fixed-white text-center">Buy and Sell Coins without additional fees</h3>
+                        <span class="d-block fs-16 text-fixed-white text-center op-8 mb-4">
+                            Buy now and get +50% extra bonus Minimum pre-sale amount 100 Crypto Coin. We accept BTC crypto-currency..
+                        </span>
+                        <div class="p-3 mb-4 rounded currency-exchange-area">
+                            <div class="row gy-3">
+                                <div class="col-xxl-3 col-12">
+                                    <input type="text" class="form-control" value="0.0453" placeholder="Enter Amount">
+                                </div>
+                                <div class="col-xxl-2 col-12">
+                                    <div>
+                                        <select class="form-control tomselect">
+                                            <option value="Choice 1">Bitcoin</option> 
+                                            <option value="Choice 2">Etherium</option> 
+                                            <option value="Choice 3">Litecoin</option>
+                                            <option value="Choice 4">Ripple</option>
+                                            <option value="Choice 5">Cardano</option>
+                                            <option value="Choice 6">Neo</option>
+                                            <option value="Choice 7">Stellar</option>
+                                            <option value="Choice 8">EOS</option>
+                                            <option value="Choice 9">NEM</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-xxl-2 col-12 text-center">
+                                    <SpkButtons Tag="a" ButtonClass="btn-primary1 btn-icon my-2" IsRounded=true><i class="ti ti-arrows-exchange fs-19 align-middle"></i></SpkButtons>
+                                </div>
+                                <div class="col-xxl-3 col-12">
+                                    <input type="text" class="form-control" value="1350.93" placeholder="Exchange Amount">
+                                </div>
+                                <div class="col-xxl-2 col-12">
+                                    <select class="form-control tomselect">
+                                        <option value="Choice 1">USD</option> 
+                                        <option value="Choice 2">Pound</option> 
+                                        <option value="Choice 3">Rupee</option>
+                                        <option value="Choice 4">Euro</option>
+                                        <option value="Choice 5">Won</option>
+                                        <option value="Choice 6">Dinar</option>
+                                        <option value="Choice 7">Rial</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <SpkButtons ButtonClass="btn-success">Exchange Now</SpkButtons>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--End::row-1 -->
+
+    <!-- Start:: row-2 -->
+    <div class="row justify-content-center">
+         @foreach(var MainCard in CryptoDataService.GetExchangeData()) {
+            <div class="col-xl-4">
+                <SpkMarketcapCard MainCard="MainCard" ChartOptions="GenerateDynamicChartOptions(MainCard)" ChartItems="@CryptoDataService.GetExchangeChart(MainCard)" SeriesConfigs="GenerateDynamicSeriesConfigs()"/>
+            </div>
+        
+        }
+        <div class="col-xl-12">
+            <div class="text-center my-4">
+                <SpkButtons ButtonClass="btn-primary-light" disabled>
+                    <span class="spinner-border spinner-border-sm align-middle" role="status" aria-hidden="true"></span>Loading...
+                </SpkButtons>
+            </div>
+        </div>
+    </div>
+    <!-- End:: row-2 -->
+
+    <!-- TomSelect JS -->
+    <script src="@($"{NavigationManager.BaseUri}assets/libs/tom-select/dist/js/tom-select.complete.min.js")"></script>
+    <script src="@($"{NavigationManager.BaseUri}assets/js/tomselect.js")"></script>
+
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Apps" },
+        new SpkPageHeader.PageItem { PageTitle = "Crypto" },
+        new SpkPageHeader.PageItem { PageTitle = "Currency Exchange" },
+    };
+    
+    // CryptoCard Start //
+    private ApexChartOptions<ExchangeChart> GenerateDynamicChartOptions(MarketCap MainCard) =>
+    MainCard.CryptoTitle switch
+    {
+        "Bitcoin" => Exchange1ChartOptions ,
+        "Ethereum" => Exchange2ChartOptions ,
+        "Dash" => Exchange3ChartOptions ,
+        "Litecoin" => Exchange4ChartOptions ,
+        "Ripple" => Exchange5ChartOptions ,
+        "Golem" => Exchange6ChartOptions ,
+        "Monero" => Exchange7ChartOptions ,
+        "EOS" => Exchange8ChartOptions ,
+        _ => Exchange9ChartOptions 
+    };
+    private List<SeriesConfig<ExchangeChart>> GenerateDynamicSeriesConfigs() {
+        return new List<SeriesConfig<ExchangeChart>>
+        {
+            new SeriesConfig<ExchangeChart>
+            {
+                SeriesType = SeriesType.Area,  
+                XValueSelector = e => e.Series,  
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.Value)
+            },
+        };
+    } 
+    private ApexChartOptions<ExchangeChart> Exchange1ChartOptions  { get; set; } = new();
+    private ApexChartOptions<ExchangeChart> Exchange2ChartOptions { get; set; } = new();
+    private ApexChartOptions<ExchangeChart> Exchange3ChartOptions { get; set; } = new();
+    private ApexChartOptions<ExchangeChart> Exchange4ChartOptions { get; set; } = new(); 
+    private ApexChartOptions<ExchangeChart> Exchange5ChartOptions { get; set; } = new();
+    private ApexChartOptions<ExchangeChart> Exchange6ChartOptions { get; set; } = new(); 
+    private ApexChartOptions<ExchangeChart> Exchange7ChartOptions { get; set; } = new();
+    private ApexChartOptions<ExchangeChart> Exchange8ChartOptions { get; set; } = new();
+    private ApexChartOptions<ExchangeChart> Exchange9ChartOptions { get; set; } = new();
+    //  CryptoCard End // 
+    
+    protected override void OnInitialized() {
+
+        // CryptoCard Start //
+        List<string> color1 = new List<string> { "rgb(227, 84, 212)","rgba(227, 84, 212, 0.1)","rgba(227, 84, 212, 0.1)"};
+        List<string> color2 = new List<string> { "rgba(106, 78, 237,0.5)","rgba(106, 78, 237, 0.1)","rgba(106, 78, 237, 0.1)"};
+        List<string> color3 = new List<string> { "rgb(124, 196, 162)","rgba(124, 196, 162, 0.1)","rgba(124, 196, 162, 0.1)"};
+        List<string> color4 = new List<string> { "rgb(239, 221, 124)","rgba(239, 221, 124, 0.1)","rgba(239, 221, 124, 0.1)"};
+        List<string> color5 = new List<string> { "rgb(251, 179, 192)","rgba(251, 179, 192, 0.1)","rgba(251, 179, 192, 0.1)"};
+        List<string> color6 = new List<string> { "rgb(239, 166, 231)","rgba(239, 166, 231, 0.1)","rgba(239, 166, 231, 0.1)"};
+        List<string> color7 = new List<string> { "rgb(244, 164, 191)","rgba(244, 164, 191, 0.1)","rgba(244, 164, 191, 0.1)"};
+        List<string> color8 = new List<string> { "rgb(159, 213, 226)","rgba(159, 213, 226, 0.1)","rgba(159, 213, 226, 0.1)"};
+        List<string> color9 = new List<string> { "rgb(159, 213, 226)","rgba(159, 213, 226, 0.1)","rgba(159, 213, 226, 0.1)"};
+            
+        Exchange1ChartOptions   = InitializeChartOptions<ExchangeChart>(color1);
+        Exchange2ChartOptions   = InitializeChartOptions<ExchangeChart>(color2);
+        Exchange3ChartOptions   = InitializeChartOptions<ExchangeChart>(color3);
+        Exchange4ChartOptions   = InitializeChartOptions<ExchangeChart>(color4); 
+        Exchange5ChartOptions   = InitializeChartOptions<ExchangeChart>(color5);
+        Exchange6ChartOptions   = InitializeChartOptions<ExchangeChart>(color6); 
+        Exchange7ChartOptions   = InitializeChartOptions<ExchangeChart>(color7);
+        Exchange8ChartOptions   = InitializeChartOptions<ExchangeChart>(color8);
+        Exchange9ChartOptions   = InitializeChartOptions<ExchangeChart>(color9);
+        //  CryptoCard End //
+    }
+    
+    // CryptoCard Start //
+    private ApexChartOptions<T> InitializeChartOptions<T>(List<string> colors) where T : class, ILineGraph
+    {
+        return new ApexChartOptions<T>
+        {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = false},
+                }, 
+                Height ="50px",
+                Width = "250px",
+                Sparkline = new () {
+                    Enabled = true
+                },
+            },
+            Grid = new Grid {
+                BorderColor = "transparent",
+            },
+            Colors = new Color(colors),
+            Stroke = new Stroke { 
+                Curve = Curve.Smooth,
+                LineCap = ApexCharts.LineCap.Butt,
+                Width = 1.5,
+                DashArray= [4]
+            },
+            Tooltip = new Tooltip
+            {
+                Enabled = true,
+                X = new TooltipX
+                {
+                    Show = false
+                },
+                Y = new TooltipY
+                {
+                    Title = new TooltipYTitle
+                    {
+                        Formatter = @"function(seriesName) {
+                            return '';
+                        }"
+                    }
+                },
+                Marker = new TooltipMarker
+                {
+                    Show = false
+                },
+                Theme = ApexCharts.Mode.Dark
+            },
+            Xaxis =  new XAxis {
+                Crosshairs= new() {
+                    Show= false,
+                }
+            },
+            Fill = new Fill {
+                Type = new List<FillType> { FillType.Gradient},
+            },
+        };
+    }
+    //  CryptoCard End // 
+}

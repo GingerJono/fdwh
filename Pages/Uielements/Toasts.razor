@@ -1,0 +1,1289 @@
+@page "/toasts"
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using ToastData
+@inject ToastService ToastService
+
+    <!-- Prism CSS -->
+    <link rel="stylesheet" href="@($"{NavigationManager.BaseUri}assets/libs/prismjs/themes/prism-coy.min.css")">
+
+    <!-- Page Header -->
+    <SpkPageHeader PageItems="PageItems"/>
+    <!-- Page Header Close -->
+
+    <!-- Start:: row-1 -->
+    <div class="row">
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header justify-content-between">
+                    <div class="card-title">
+                        Basic example
+                    </div>
+                    <div class="prism-toggle">
+                        <SpkButtons ButtonClass="btn-primary-light" ButtonSize="btn-sm">Show Code<i class="ri-code-line ms-2 d-inline-block align-middle"></i></SpkButtons>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <SpkToast Show=true ToastTime="11 mins ago" ToastHeader=true>Hello, world! This is a toast message.</SpkToast>
+                </div>
+                <div class="card-footer d-none border-top-0">
+<!-- Prism Code -->
+<pre class="language-html"><code class="language-html">&lt;div class="toast fade show" role="alert" aria-live="assertive" aria-atomic="true"&gt;
+&lt;div class="toast-header text-default"&gt;
+&lt;img class="bd-placeholder-img rounded me-2" src="@($"{NavigationManager.BaseUri}assets/images/brand-logos/favicon.ico")" alt="..."&gt;
+
+&lt;strong class="me-auto"&gt;Xintra&lt;/strong&gt;
+&lt;small&gt;11 mins ago&lt;/small&gt;
+&lt;button type="button" class="btn-close" data-bs-dismiss="toast"
+aria-label="Close"&gt;&lt;/button&gt;
+&lt;/div&gt;
+&lt;div class="toast-body"&gt;
+Hello, world! This is a toast message.
+&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+<!-- Prism Code -->
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header justify-content-between">
+                    <div class="card-title">
+                        Live example
+                    </div>
+                    <div class="prism-toggle">
+                        <SpkButtons ButtonClass="btn-primary-light" ButtonSize="btn-sm">Show Code<i class="ri-code-line ms-2 d-inline-block align-middle"></i></SpkButtons>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <SpkButtons ButtonClass="btn-primary" @onclick="liveToastBtn">Show live toast</SpkButtons>
+                    <div class="toast-container position-fixed top-0 end-0 p-3">
+                        <SpkToast ToastClass="@($"{currentClass} {"fade"}")" ToastTime="11 mins ago" ToastHeader=true>Hello, world! This is a toast message.</SpkToast>
+                    </div>
+                </div>
+                <div class="card-footer d-none border-top-0">
+<!-- Prism Code -->
+<pre class="language-html"><code class="language-html">&lt;button type="button" class="btn btn-primary btn-wave" &#64;onclick="liveToastBtn"&gt;Show live
+toast&lt;/button&gt;
+&lt;div class="toast-container position-fixed top-0 end-0 p-3"&gt;
+&lt;div class="toast  @currentClass" role="alert" aria-live="assertive"
+aria-atomic="true"&gt;
+&lt;div class="toast-header text-default"&gt;
+&lt;img class="bd-placeholder-img rounded me-2" src="@($"{NavigationManager.BaseUri}assets/images/brand-logos/favicon.ico")" alt="..."&gt;
+&lt;strong class="me-auto"&gt;Xintra&lt;/strong&gt;
+&lt;small&gt;11 mins ago&lt;/small&gt;
+&lt;button type="button" class="btn-close" data-bs-dismiss="toast"
+aria-label="Close"&gt;&lt;/button&gt;
+&lt;/div&gt;
+&lt;div class="toast-body"&gt;
+Hello, world! This is a toast message.
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+<!-- Prism Code -->
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header justify-content-between">
+                    <div class="card-title">
+                        Stacking
+                    </div>
+                    <div class="prism-toggle">
+                        <SpkButtons ButtonClass="btn-primary-light" ButtonSize="btn-sm">Show Code<i class="ri-code-line ms-2 d-inline-block align-middle"></i></SpkButtons>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="toast-container position-static">
+                        <SpkToast Show=true ToastTime="just now" ToastHeader=true> See? Just like this.</SpkToast>
+                        <SpkToast Show=true ToastTime="2 seconds ago" ToastHeader=true> Heads up, toasts will stack automatically</SpkToast>
+                    </div>
+                </div>
+                <div class="card-footer d-none border-top-0">
+<!-- Prism Code -->
+<pre class="language-html"><code class="language-html">&lt;div class="toast-container position-static"&gt;
+&lt;div class="toast fade show" role="alert" aria-live="assertive"
+aria-atomic="true"&gt;
+&lt;div class="toast-header text-default"&gt;
+&lt;img class="bd-placeholder-img rounded me-2" src="@($"{NavigationManager.BaseUri}assets/images/brand-logos/favicon.ico")" alt="..."&gt;
+
+&lt;strong class="me-auto"&gt;Xintra&lt;/strong&gt;
+&lt;small class="text-muted"&gt;just now&lt;/small&gt;
+&lt;button type="button" class="btn-close" data-bs-dismiss="toast"
+aria-label="Close"&gt;&lt;/button&gt;
+&lt;/div&gt;
+&lt;div class="toast-body"&gt;
+See? Just like this.
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="toast fade show" role="alert" aria-live="assertive"
+aria-atomic="true"&gt;
+&lt;div class="toast-header text-default"&gt;
+&lt;img class="bd-placeholder-img rounded me-2" src="@($"{NavigationManager.BaseUri}assets/images/brand-logos/favicon.ico")" alt="..."&gt;
+
+&lt;strong class="me-auto"&gt;Xintra&lt;/strong&gt;
+&lt;small class="text-muted"&gt;2 seconds ago&lt;/small&gt;
+&lt;button type="button" class="btn-close" data-bs-dismiss="toast"
+aria-label="Close"&gt;&lt;/button&gt;
+&lt;/div&gt;
+&lt;div class="toast-body"&gt;
+Heads up, toasts will stack automatically
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+<!-- Prism Code -->
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header justify-content-between">
+                    <div class="card-title">
+                        Color schemes
+                    </div>
+                    <div class="prism-toggle">
+                        <SpkButtons ButtonClass="btn-primary-light" ButtonSize="btn-sm">Show Code<i class="ri-code-line ms-2 d-inline-block align-middle"></i></SpkButtons>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @foreach(var Toast in ToastService.GetToast()) {
+                        <SpkToast Show=true ToastBtn=true ToastClass="@($"{Toast.ToastColor} align-items-center  border-0 mb-4")" ToastHeader=false>@Toast.ToastMessage</SpkToast>
+                    }
+                </div>
+                <div class="card-footer d-none border-top-0">
+<!-- Prism Code -->
+<pre class="language-html"><code class="language-html">&lt;div class="toast align-items-center text-bg-primary border-0 fade show mb-4"
+role="alert" aria-live="assertive" aria-atomic="true"&gt;
+&lt;div class="d-flex"&gt;
+&lt;div class="toast-body"&gt;
+Hello, world! This is the Primary toast message.
+&lt;/div&gt;
+&lt;button type="button" class="btn-close btn-close-white me-2 m-auto"
+data-bs-dismiss="toast" aria-label="Close"&gt;&lt;/button&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="toast align-items-center text-bg-secondary border-0 fade show mb-4"
+role="alert" aria-live="assertive" aria-atomic="true"&gt;
+&lt;div class="d-flex"&gt;
+&lt;div class="toast-body"&gt;
+Hello, world! This is the Secondary toast.
+&lt;/div&gt;
+&lt;button type="button" class="btn-close btn-close-white me-2 m-auto"
+data-bs-dismiss="toast" aria-label="Close"&gt;&lt;/button&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="toast align-items-center text-bg-success border-0 fade show mb-4"
+role="alert" aria-live="assertive" aria-atomic="true"&gt;
+&lt;div class="d-flex"&gt;
+&lt;div class="toast-body"&gt;
+Hello, world! This is the Success toast message.
+&lt;/div&gt;
+&lt;button type="button" class="btn-close btn-close-white me-2 m-auto"
+data-bs-dismiss="toast" aria-label="Close"&gt;&lt;/button&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="toast align-items-center text-bg-info border-0 fade show"
+role="alert" aria-live="assertive" aria-atomic="true"&gt;
+&lt;div class="d-flex"&gt;
+&lt;div class="toast-body"&gt;
+Hello, world! This is the info toast message.
+&lt;/div&gt;
+&lt;button type="button" class="btn-close btn-close-white me-2 m-auto"
+data-bs-dismiss="toast" aria-label="Close"&gt;&lt;/button&gt;
+&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+<!-- Prism Code -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End:: row-1 -->
+
+    <!-- Start:: row-2 -->
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-header justify-content-between">
+                    <div class="card-title">
+                        Solid Background Toasts
+                    </div>
+                    <div class="prism-toggle">
+                        <SpkButtons ButtonClass="btn-primary-light" ButtonSize="btn-sm">Show Code<i class="ri-code-line ms-2 d-inline-block align-middle"></i></SpkButtons>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="btn-list">
+                        <SpkButtons ButtonClass="btn-primary me-2"  @onclick="solidprimaryToastBtn">Primary</SpkButtons>
+                        <SpkButtons ButtonClass="btn-primary1 me-2" @onclick="solidprimary1ToastBtn">Primary1</SpkButtons>
+                        <SpkButtons ButtonClass="btn-primary2 me-2" @onclick="solidprimary2ToastBtn">Primary2</SpkButtons>
+                        <SpkButtons ButtonClass="btn-primary3 me-2" @onclick="solidprimary3ToastBtn">Primary3</SpkButtons>
+                        <SpkButtons ButtonClass="btn-secondary me-2" @onclick="solidsecondaryToastBtn">Secondary</SpkButtons>
+                        <SpkButtons ButtonClass="btn-warning me-2" @onclick="solidwarningToastBtn">Warning</SpkButtons>
+                        <SpkButtons ButtonClass="btn-info me-2" @onclick="solidinfoToastBtn">Info</SpkButtons>
+                        <SpkButtons ButtonClass="btn-success me-2" @onclick="solidsuccessToastBtn">Success</SpkButtons>
+                        <SpkButtons ButtonClass="btn-danger me-2" @onclick="soliddangerToastBtn">Danger</SpkButtons>
+                    </div>
+                    <div class="toast-container position-fixed top-0 end-0 p-3">
+                        <SpkToast Show=false ToastClass="@($"{PrimarycurrentClass} bg-primary text-fixed-white colored-toast")" ToastHeader=true ToastHeaderclass="bg-primary text-fixed-white">Your,toast message here.</SpkToast>
+                        <SpkToast Show=false ToastClass="@($"{Primary1currentClass} bg-primary1  text-fixed-white colored-toast")" ToastHeader=true ToastHeaderclass="bg-primary1  text-fixed-white">Your,toast message here.</SpkToast>
+                        <SpkToast Show=false ToastClass="@($"{Primary2currentClass} bg-primary2  text-fixed-white colored-toast")" ToastHeader=true ToastHeaderclass="bg-primary2  text-fixed-white">Your,toast message here.</SpkToast>
+                        <SpkToast Show=false ToastClass="@($"{SecondarycurrentClass} bg-secondary  text-fixed-white colored-toast")" ToastHeader=true ToastHeaderclass="bg-secondary  text-fixed-white">Your,toast message here.</SpkToast>
+                        <SpkToast Show=false ToastClass="@($"{WarningcurrentClass} bg-warning  text-fixed-white colored-toast")" ToastHeader=true ToastHeaderclass="bg-warning  text-fixed-white">Your,toast message here.</SpkToast>
+                        <SpkToast Show=false ToastClass="@($"{InfocurrentClass} bg-info text-fixed-white colored-toast")" ToastHeader=true ToastHeaderclass="bg-info  text-fixed-white">Your,toast message here.</SpkToast>
+                        <SpkToast Show=false ToastClass="@($"{SuccesscurrentClass} bg-success text-fixed-white colored-toast")" ToastHeader=true ToastHeaderclass="bg-success  text-fixed-white">Your,toast message here.</SpkToast>
+                        <SpkToast Show=false ToastClass="@($"{DangercurrentClass} bg-danger text-fixed-white colored-toast")" ToastHeader=true ToastHeaderclass="bg-danger text-fixed-white">Your,toast message here.</SpkToast>
+                    </div>
+                </div>
+                <div class="card-footer d-none border-top-0">
+<!-- Prism Code -->
+<pre class="language-html"><code class="language-html">&lt;div class="btn-list"&gt;
+&lt;button type="button" class="btn btn-primary me-2 btn-wave" &#64;onclick="solidprimaryToastBtn"&gt;Primary&lt;/button&gt;
+&lt;button type="button" class="btn btn-secondary me-2 btn-wave" &#64;onclick="solidsecondaryToastBtn"&gt;Secondary&lt;/button&gt;
+&lt;button type="button" class="btn btn-warning me-2 btn-wave" &#64;onclick="solidwarningToastBtn"&gt;Warning&lt;/button&gt;
+&lt;button type="button" class="btn btn-info me-2 btn-wave" &#64;onclick="solidinfoToastBtn"&gt;Info&lt;/button&gt;
+&lt;button type="button" class="btn btn-success me-2 btn-wave" &#64;onclick="solidsuccessToastBtn"&gt;Success&lt;/button&gt;
+&lt;button type="button" class="btn btn-danger me-2 btn-wave" &#64;onclick="soliddangerToastBtn"&gt;Danger&lt;/button&gt;
+&lt;/div&gt;
+&lt;div class="toast-container position-fixed top-0 end-0 p-3"&gt;
+&lt;div class="&#64;PrimarycurrentClasstoast colored-toast bg-primary text-fixed-white" role="alert" aria-live="assertive"
+aria-atomic="true"&gt;
+&lt;div class="toast-header bg-primary text-fixed-white"&gt;
+&lt;img class="bd-placeholder-img rounded me-2" src="@($"{NavigationManager.BaseUri}assets/images/brand-logos/toggle-dark.png")" alt="..."&gt;
+&lt;strong class="me-auto"&gt;Xintra&lt;/strong&gt;
+&lt;button type="button" class="btn-close" data-bs-dismiss="toast"
+aria-label="Close"&gt;&lt;/button&gt;
+&lt;/div&gt;
+&lt;div class="toast-body"&gt;
+Your,toast message here.
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="&#64;SecondaryentClass toast colored-toast bg-secondary text-fixed-white" role="alert" aria-live="assertive"
+aria-atomic="true"&gt;
+&lt;div class="toast-header bg-secondary text-fixed-white"&gt;
+&lt;img class="bd-placeholder-img rounded me-2" src="@($"{NavigationManager.BaseUri}assets/images/brand-logos/toggle-dark.png")" alt="..."&gt;
+&lt;strong class="me-auto"&gt;Xintra&lt;/strong&gt;
+&lt;button type="button" class="btn-close" data-bs-dismiss="toast"
+aria-label="Close"&gt;&lt;/button&gt;
+&lt;/div&gt;
+&lt;div class="toast-body"&gt;
+Your,toast message here.
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="&#64;WarningcurrentClass toast colored-toast bg-warning text-fixed-white" role="alert" aria-live="assertive"
+aria-atomic="true"&gt;
+&lt;div class="toast-header bg-warning text-fixed-white"&gt;
+&lt;img class="bd-placeholder-img rounded me-2" src="@($"{NavigationManager.BaseUri}assets/images/brand-logos/toggle-dark.png")" alt="..."&gt;
+&lt;strong class="me-auto"&gt;Xintra&lt;/strong&gt;
+&lt;button type="button" class="btn-close" data-bs-dismiss="toast"
+aria-label="Close"&gt;&lt;/button&gt;
+&lt;/div&gt;
+&lt;div class="toast-body"&gt;
+Your,toast message here.
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="&#64;InfocurrentClass toast colored-toast bg-info text-fixed-white" role="alert" aria-live="assertive"
+aria-atomic="true"&gt;
+&lt;div class="toast-header bg-info text-fixed-white"&gt;
+&lt;img class="bd-placeholder-img rounded me-2" src="@($"{NavigationManager.BaseUri}assets/images/brand-logos/toggle-dark.png")" alt="..."&gt;
+&lt;strong class="me-auto"&gt;Xintra&lt;/strong&gt;
+&lt;button type="button" class="btn-close" data-bs-dismiss="toast"
+aria-label="Close"&gt;&lt;/button&gt;
+&lt;/div&gt;
+&lt;div class="toast-body"&gt;
+Your,toast message here.
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="&#64;SuccesscurrentClass toast colored-toast bg-success text-fixed-white" role="alert" aria-live="assertive"
+aria-atomic="true"&gt;
+&lt;div class="toast-header bg-success text-fixed-white"&gt;
+&lt;img class="bd-placeholder-img rounded me-2" src="@($"{NavigationManager.BaseUri}assets/images/brand-logos/toggle-dark.png")" alt="..."&gt;
+&lt;strong class="me-auto"&gt;Xintra&lt;/strong&gt;
+&lt;button type="button" class="btn-close" data-bs-dismiss="toast"
+aria-label="Close"&gt;&lt;/button&gt;
+&lt;/div&gt;
+&lt;div class="toast-body"&gt;
+Your,toast message here.
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="&#64;DangercurrentClass toast colored-toast bg-danger text-fixed-white" role="alert" aria-live="assertive"
+aria-atomic="true"&gt;
+&lt;div class="toast-header bg-danger text-fixed-white"&gt;
+&lt;img class="bd-placeholder-img rounded me-2" src="@($"{NavigationManager.BaseUri}assets/images/brand-logos/toggle-dark.png")" alt="..."&gt;
+&lt;strong class="me-auto"&gt;Xintra&lt;/strong&gt;
+&lt;button type="button" class="btn-close" data-bs-dismiss="toast"
+aria-label="Close"&gt;&lt;/button&gt;
+&lt;/div&gt;
+&lt;div class="toast-body"&gt;
+Your,toast message here.
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+<!-- Prism Code -->
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-header justify-content-between">
+                    <div class="card-title">
+                        Color Variants Live
+                    </div>
+                    <div class="prism-toggle">
+                        <SpkButtons ButtonClass="btn-primary-light" ButtonSize="btn-sm">Show Code<i class="ri-code-line ms-2 d-inline-block align-middle"></i></SpkButtons>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="btn-list">
+                        <SpkButtons ButtonClass="btn-primary-light me-2" @onclick="primaryToastBtn">Primary</SpkButtons>
+                        <SpkButtons ButtonClass="btn-primary1-light me-2" @onclick="primary1ToastBtn">Primary1</SpkButtons>
+                        <SpkButtons ButtonClass="btn-primary2-light me-2" @onclick="primary2ToastBtn">Primary2</SpkButtons>
+                        <SpkButtons ButtonClass="btn-primary3-light me-2" @onclick="primary3ToastBtn">Primary3</SpkButtons>
+                        <SpkButtons ButtonClass="btn-secondary-light me-2" @onclick="secondaryToastBtn">Secondary</SpkButtons>
+                        <SpkButtons ButtonClass="btn-warning-light me-2" @onclick="warningToastBtn">Warning</SpkButtons>
+                        <SpkButtons ButtonClass="btn-info-light me-2" @onclick="infoToastBtn">Info</SpkButtons>
+                        <SpkButtons ButtonClass="btn-success-light me-2" @onclick="successToastBtn">Success</SpkButtons>
+                        <SpkButtons ButtonClass="btn-danger-light me-2" @onclick="dangerToastBtn">Danger</SpkButtons>
+                    </div>
+                    <div class="toast-container position-fixed top-0 end-0 p-3">
+                        <SpkToast Show=false ToastClass="@($"{PrimaryLightcurrentClass} bg-primary-transparent colored-toast")" ToastHeader=true ToastHeaderclass="bg-primary text-fixed-white">Your,toast message here.</SpkToast>
+                        <SpkToast Show=false ToastClass="@($"{Primary1LightcurrentClass} bg-primary1-transparent colored-toast")" ToastHeader=true ToastHeaderclass="bg-primary1  text-fixed-white">Your,toast message here.</SpkToast>
+                        <SpkToast Show=false ToastClass="@($"{Primary2LightcurrentClass} bg-primary2-transparent colored-toast")" ToastHeader=true ToastHeaderclass="bg-primary2  text-fixed-white">Your,toast message here.</SpkToast>
+                        <SpkToast Show=false ToastClass="@($"{SecondaryLightcurrentClass} bg-secondary-transparent colored-toast")" ToastHeader=true ToastHeaderclass="bg-secondary  text-fixed-white">Your,toast message here.</SpkToast>
+                        <SpkToast Show=false ToastClass="@($"{WarningLightcurrentClass} bg-warning-transparent colored-toast")" ToastHeader=true ToastHeaderclass="bg-warning  text-fixed-white">Your,toast message here.</SpkToast>
+                        <SpkToast Show=false ToastClass="@($"{InfoLightcurrentClass} bg-info-transparent colored-toast")" ToastHeader=true ToastHeaderclass="bg-info  text-fixed-white">Your,toast message here.</SpkToast>
+                        <SpkToast Show=false ToastClass="@($"{SuccessLightcurrentClass} bg-success-transparent colored-toast")" ToastHeader=true ToastHeaderclass="bg-success  text-fixed-white">Your,toast message here.</SpkToast>
+                        <SpkToast Show=false ToastClass="@($"{DangerLightcurrentClass} bg-danger-transparent colored-toast")" ToastHeader=true ToastHeaderclass="bg-danger text-fixed-white">Your,toast message here.</SpkToast>
+                    </div>
+                </div>
+                <div class="card-footer d-none border-top-0">
+<!-- Prism Code -->
+<pre class="language-html"><code class="language-html">&lt;div class="btn-list"&gt;
+&lt;button type="button" class="btn btn-primary-light me-2 btn-wave" &#64;onclick="primaryToastBtn"&gt;Primary&lt;/button&gt;
+&lt;button type="button" class="btn btn-secondary-light me-2 btn-wave" &#64;onclick="secondaryToastBtn"&gt;Secondary&lt;/button&gt;
+&lt;button type="button" class="btn btn-warning-light me-2 btn-wave" &#64;onclick="warningToastBtn"&gt;Warning&lt;/button&gt;
+&lt;button type="button" class="btn btn-info-light me-2 btn-wave" &#64;onclick="infoToastBtn"&gt;Info&lt;/button&gt;
+&lt;button type="button" class="btn btn-success-light me-2 btn-wave" &#64;onclick="successToastBtn"&gt;Success&lt;/button&gt;
+&lt;button type="button" class="btn btn-danger-light me-2 btn-wave" &#64;onclick="dangerToastBtn"&gt;Danger&lt;/button&gt;
+&lt;/div&gt;
+&lt;div class="toast-container position-fixed top-0 end-0 p-3"&gt;
+&lt;div class="&#64;PrimaryLightcurrentClass toast colored-toast bg-primary-transparent" role="alert" aria-live="assertive"
+aria-atomic="true"&gt;
+&lt;div class="toast-header bg-primary text-fixed-white"&gt;
+&lt;img class="bd-placeholder-img rounded me-2" src="@($"{NavigationManager.BaseUri}assets/images/brand-logos/toggle-dark.png")" alt="..."&gt;
+&lt;strong class="me-auto"&gt;Xintra&lt;/strong&gt;
+&lt;button type="button" class="btn-close" data-bs-dismiss="toast"
+aria-label="Close"&gt;&lt;/button&gt;
+&lt;/div&gt;
+&lt;div class="toast-body"&gt;
+Your,toast message here.
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="&#64;SecondaryLightcurrentClass toast colored-toast bg-secondary-transparent" role="alert" aria-live="assertive"
+aria-atomic="true"&gt;
+&lt;div class="toast-header bg-secondary text-fixed-white"&gt;
+&lt;img class="bd-placeholder-img rounded me-2" src="@($"{NavigationManager.BaseUri}assets/images/brand-logos/toggle-dark.png")" alt="..."&gt;
+&lt;strong class="me-auto"&gt;Xintra&lt;/strong&gt;
+&lt;button type="button" class="btn-close" data-bs-dismiss="toast"
+aria-label="Close"&gt;&lt;/button&gt;
+&lt;/div&gt;
+&lt;div class="toast-body"&gt;
+Your,toast message here.
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="&#64;WarningLightcurrentClass toast colored-toast bg-warning-transparent" role="alert" aria-live="assertive"
+aria-atomic="true"&gt;
+&lt;div class="toast-header bg-warning text-fixed-white"&gt;
+&lt;img class="bd-placeholder-img rounded me-2" src="@($"{NavigationManager.BaseUri}assets/images/brand-logos/toggle-dark.png")" alt="..."&gt;
+&lt;strong class="me-auto"&gt;Xintra&lt;/strong&gt;
+&lt;button type="button" class="btn-close" data-bs-dismiss="toast"
+aria-label="Close"&gt;&lt;/button&gt;
+&lt;/div&gt;
+&lt;div class="toast-body"&gt;
+Your,toast message here.
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="&#64;InfoLightcurrentClass toast colored-toast bg-info-transparent" role="alert" aria-live="assertive"
+aria-atomic="true"&gt;
+&lt;div class="toast-header bg-info text-fixed-white"&gt;
+&lt;img class="bd-placeholder-img rounded me-2" src="@($"{NavigationManager.BaseUri}assets/images/brand-logos/toggle-dark.png")" alt="..."&gt;
+&lt;strong class="me-auto"&gt;Xintra&lt;/strong&gt;
+&lt;button type="button" class="btn-close" data-bs-dismiss="toast"
+aria-label="Close"&gt;&lt;/button&gt;
+&lt;/div&gt;
+&lt;div class="toast-body"&gt;
+Your,toast message here.
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="&#64;SuccessLightcurrentClass toast colored-toast bg-success-transparent" role="alert" aria-live="assertive"
+aria-atomic="true"&gt;
+&lt;div class="toast-header bg-success text-fixed-white"&gt;
+&lt;img class="bd-placeholder-img rounded me-2" src="@($"{NavigationManager.BaseUri}assets/images/brand-logos/toggle-dark.png")" alt="..."&gt;
+&lt;strong class="me-auto"&gt;Xintra&lt;/strong&gt;
+&lt;button type="button" class="btn-close" data-bs-dismiss="toast"
+aria-label="Close"&gt;&lt;/button&gt;
+&lt;/div&gt;
+&lt;div class="toast-body"&gt;
+Your,toast message here.
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="&#64;DangerLightcurrentClass toast colored-toast bg-danger-transparent" role="alert" aria-live="assertive"
+aria-atomic="true"&gt;
+&lt;div class="toast-header bg-danger text-fixed-white"&gt;
+&lt;img class="bd-placeholder-img rounded me-2" src="@($"{NavigationManager.BaseUri}assets/images/brand-logos/toggle-dark.png")" alt="..."&gt;
+&lt;strong class="me-auto"&gt;Xintra&lt;/strong&gt;
+&lt;button type="button" class="btn-close" data-bs-dismiss="toast"
+aria-label="Close"&gt;&lt;/button&gt;
+&lt;/div&gt;
+&lt;div class="toast-body"&gt;
+Your,toast message here.
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+<!-- Prism Code -->
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-header justify-content-between">
+                    <div class="card-title">
+                        Translucent
+                    </div>
+                    <div class="prism-toggle">
+                        <SpkButtons ButtonClass="btn-primary-light" ButtonSize="btn-sm">Show Code<i class="ri-code-line ms-2 d-inline-block align-middle"></i></SpkButtons>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <SpkToast Show=true ToastHeader=true > Hello, world! This is a toast message..</SpkToast>
+                </div>
+                <div class="card-footer d-none border-top-0">
+<!-- Prism Code -->
+<pre class="language-html"><code class="language-html">&lt;div class="toast fade show" role="alert" aria-live="assertive" aria-atomic="true"&gt;
+&lt;div class="toast-header text-default"&gt;
+&lt;img class="bd-placeholder-img rounded me-2" src="@($"{NavigationManager.BaseUri}assets/images/brand-logos/favicon.ico")" alt="..."&gt;
+
+&lt;strong class="me-auto"&gt;Xintra&lt;/strong&gt;
+&lt;small class="text-muted"&gt;11 mins ago&lt;/small&gt;
+&lt;button type="button" class="btn-close" data-bs-dismiss="toast"
+aria-label="Close"&gt;&lt;/button&gt;
+&lt;/div&gt;
+&lt;div class="toast-body"&gt;
+Hello, world! This is a toast message.
+&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+<!-- Prism Code -->
+                </div>
+            </div>
+            <div class="card custom-card">
+                <div class="card-header justify-content-between">
+                    <div class="card-title">
+                        Custom content
+                    </div>
+                    <div class="prism-toggle">
+                        <SpkButtons ButtonClass="btn-primary-light" ButtonSize="btn-sm">Show Code<i class="ri-code-line ms-2 d-inline-block align-middle"></i></SpkButtons>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <SpkToast Show=true ToastClass="align-items-center mb-3" ToastHeader=false > Hello, world! This is a toast message..</SpkToast>
+                    <div>
+                        <span class="my-4 text-muted">
+                            Alternatively, you can also add additional controls and components to
+                            toasts.
+                        </span>
+                    </div>
+                    <SpkToast Show=true ToastClass="align-items-center mt-2" ToastHeader=false >   
+                        Hello, world! This is a toast message.
+                        <div class="mt-2 pt-2 border-top">
+                            <SpkButtons ButtonClass="btn-primary" ButtonSize="btn-sm">Take action</SpkButtons>
+                            <SpkButtons ButtonClass="btn-secondary" ButtonSize="btn-sm" data-bs-dismiss="toast">Close</SpkButtons>
+                        </div>
+                    </SpkToast>
+                </div>
+                <div class="card-footer d-none border-top-0">
+<!-- Prism Code -->
+<pre class="language-html"><code class="language-html">&lt;div class="toast align-items-center fade show mb-3" role="alert"
+aria-live="assertive" aria-atomic="true"&gt;
+&lt;div class="d-flex"&gt;
+&lt;div class="toast-body"&gt;
+Hello, world! This is a toast message.
+&lt;/div&gt;
+&lt;button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"
+aria-label="Close"&gt;
+&lt;/button&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div&gt;
+&lt;span class="my-4 text-muted"&gt;
+Alternatively, you can also add additional controls and components to
+toasts.
+&lt;/span&gt;
+&lt;/div&gt;
+&lt;div class="toast fade show mt-2" role="alert" aria-live="assertive"
+aria-atomic="true"&gt;
+&lt;div class="toast-body"&gt;
+Hello, world! This is a toast message.
+&lt;div class="mt-2 pt-2 border-top"&gt;
+&lt;button type="button" class="btn btn-primary btn-sm btn-wave"&gt;Take
+action&lt;/button&gt;
+&lt;button type="button" class="btn btn-secondary btn-sm btn-wave"
+data-bs-dismiss="toast"&gt;Close&lt;/button&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+<!-- Prism Code -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End:: row-2 -->
+
+    <!-- Start:: row-3 -->
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-header justify-content-between">
+                    <div class="card-title">
+                        Aligning Toast Using Flexbox
+                    </div>
+                    <div class="prism-toggle">
+                        <SpkButtons ButtonClass="btn-primary-light" ButtonSize="btn-sm">Show Code<i class="ri-code-line ms-2 d-inline-block align-middle"></i></SpkButtons>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="bd-example bg-light bd-example-toasts d-flex p-0">
+                        <div aria-live="polite" aria-atomic="true" class="d-flex justify-content-center align-items-center w-100">
+                            <SpkToast Show=true ToastHeader=true ToastTime="11 mins ago"> Hello, world! This is a toast message..</SpkToast>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-none border-top-0">
+<!-- Prism Code -->
+<pre class="language-html"><code class="language-html">&lt;div class="bd-example bg-light bd-example-toasts d-flex p-0"&gt;
+&lt;div aria-live="polite" aria-atomic="true"
+class="d-flex justify-content-center align-items-center w-100"&gt;
+&lt;div class="toast fade show shadow-lg" role="alert" aria-live="assertive"
+aria-atomic="true"&gt;
+&lt;div class="toast-header text-default"&gt;
+&lt;img class="bd-placeholder-img rounded me-2" src="@($"{NavigationManager.BaseUri}assets/images/brand-logos/favicon.ico")" alt="..."&gt;
+&lt;strong class="me-auto"&gt;Xintra&lt;/strong&gt;
+&lt;small&gt;11 mins ago&lt;/small&gt;
+&lt;button type="button" class="btn-close" data-bs-dismiss="toast"
+    aria-label="Close"&gt;&lt;/button&gt;
+&lt;/div&gt;
+&lt;div class="toast-body"&gt;
+Hello, world! This is a toast message.
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+<!-- Prism Code -->
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        TOASTIFY JS
+                    </div>
+                </div>
+                <div class="card-body">
+                    <SpkButtons ButtonClass="btn-primary-gradient" @onclick="toastbuttonBtn">Click For Live Toast</SpkButtons>
+
+                        <div class="toast-container position-fixed toastify-container top-0 end-0 p-3">
+                            @foreach (var toast in toastQueue)
+                            {
+                                <SpkToast Show=true ToastHeader=false ToastClass="w-auto text-fixed-white" ToastBtn="true" ToastTime="11 mins ago" id="@toast.Id" style="background: linear-gradient(to right, var(--primary-color), rgb(227, 84, 212));"> @toast.Message</SpkToast>
+                            }
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End:: row-3 -->
+
+    <!-- Start:: row-4 -->
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-header justify-content-between">
+                    <div class="card-title">
+                        Toast Placements
+                    </div>
+                    <div class="prism-toggle">
+                        <SpkButtons ButtonClass="btn-primary-light" ButtonSize="btn-sm">Show Code<i class="ri-code-line ms-2 d-inline-block align-middle"></i></SpkButtons>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="btn-list">
+                        <SpkButtons ButtonClass="btn-outline-primary me-2" @onclick="topleftToastBtn">Top Left</SpkButtons>
+                        <SpkButtons ButtonClass="btn-outline-primary me-2" @onclick="topcenterToastBtn">Top Center</SpkButtons>
+                        <SpkButtons ButtonClass="btn-outline-primary me-2" @onclick="toprightToastBtn">Top Right</SpkButtons>
+                        <SpkButtons ButtonClass="btn-outline-primary me-2" @onclick="middleleftToastBtn">Middle Left</SpkButtons>
+                        <SpkButtons ButtonClass="btn-outline-primary me-2" @onclick="middlecenterToastBtn">Middle Center</SpkButtons>
+                        <SpkButtons ButtonClass="btn-outline-primary me-2" @onclick="middlerightToastBtn">Middle Right</SpkButtons>
+                        <SpkButtons ButtonClass="btn-outline-primary me-2" @onclick="bottomleftToastBtn">Bottom Left</SpkButtons>
+                        <SpkButtons ButtonClass="btn-outline-primary me-2" @onclick="bottomcenterToastBtn">Bottom Center</SpkButtons>
+                        <SpkButtons ButtonClass="btn-outline-primary me-2" @onclick="bottomrightToastBtn">Bottom Right</SpkButtons>
+                    </div>
+                    <div class="toast-container position-fixed top-0 start-0 p-3">
+                        <SpkToast ToastClass="@($"{TopLeftClass} {"colored-toast bg-primary-transparent text-primary"}")" ToastHeader=true ToastHeaderclass="bg-primary text-fixed-white"> Your,toast message here.</SpkToast>
+                    </div>
+                    <div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3">
+                        <SpkToast ToastClass="@($"{TopCenterClass} {"colored-toast bg-primary-transparent text-primary"}")" ToastHeader=true ToastHeaderclass="bg-primary text-fixed-white"> Your,toast message here.</SpkToast>
+                    </div>
+                    <div class="toast-container position-fixed top-0 end-0 p-3">
+                        <SpkToast ToastClass="@($"{TopRightClass} {"colored-toast bg-primary-transparent text-primary"}")" ToastHeader=true ToastHeaderclass="bg-primary text-fixed-white"> Your,toast message here.</SpkToast>
+                    </div>
+                    <div class="toast-container position-fixed top-50 start-0 translate-middle-y p-3">
+                        <SpkToast ToastClass="@($"{MiddleLeftClass} {"colored-toast bg-primary-transparent text-primary"}")" ToastHeader=true ToastHeaderclass="bg-primary text-fixed-white"> Your,toast message here.</SpkToast>
+                    </div>
+                    <div class="toast-container position-fixed top-50 start-50 translate-middle">
+                        <SpkToast ToastClass="@($"{MiddleCenterClass} {"colored-toast bg-primary-transparent text-primary"}")" ToastHeader=true ToastHeaderclass="bg-primary text-fixed-white"> Your,toast message here.</SpkToast>
+                    </div>
+                    <div class="toast-container position-fixed top-50 end-0 translate-middle-y p-3">
+                        <SpkToast ToastClass="@($"{MiddleRightClass} {"colored-toast bg-primary-transparent text-primary"}")" ToastHeader=true ToastHeaderclass="bg-primary text-fixed-white"> Your,toast message here.</SpkToast>
+                    </div>
+                    <div class="toast-container position-fixed bottom-0 start-0 p-3">
+                        <SpkToast ToastClass="@($"{BottomLeftClass} {"colored-toast bg-primary-transparent text-primary"}")" ToastHeader=true ToastHeaderclass="bg-primary text-fixed-white"> Your,toast message here.</SpkToast>
+                    </div>
+                    <div class="toast-container position-fixed bottom-0 start-50 translate-middle-x p-3">
+                        <SpkToast ToastClass="@($"{BottomCenterClass} {"colored-toast bg-primary-transparent text-primary"}")" ToastHeader=true ToastHeaderclass="bg-primary text-fixed-white"> Your,toast message here.</SpkToast>
+                    </div>
+                    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+                        <SpkToast ToastClass="@($"{BottomRightClass} {"colored-toast bg-primary-transparent text-primary"}")" ToastHeader=true ToastHeaderclass="bg-primary text-fixed-white"> Your,toast message here.</SpkToast>
+                    </div>
+                </div>
+                <div class="card-footer d-none border-top-0">
+    <!-- Prism Code -->
+    <pre class="language-html"><code class="language-html">&lt;div class="btn-list"&gt;
+    &lt;button type="button" class="btn btn-outline-primary me-2 btn-wave" &#64;onclick="topleftToastBtn"&gt;Top Left&lt;/button&gt;
+    &lt;button type="button" class="btn btn-outline-primary me-2 btn-wave" &#64;onclick="topcenterToastBtn"&gt;Top Center&lt;/button&gt;
+    &lt;button type="button" class="btn btn-outline-primary me-2 btn-wave" &#64;onclick="toprightToastBtn"&gt;Top Right&lt;/button&gt;
+    &lt;button type="button" class="btn btn-outline-primary me-2 btn-wave" &#64;onclick="middleleftToastBtn"&gt;Middle Left&lt;/button&gt;
+    &lt;button type="button" class="btn btn-outline-primary me-2 btn-wave" &#64;onclick="middlecenterToastBtn"&gt;Middle Center&lt;/button&gt;
+    &lt;button type="button" class="btn btn-outline-primary me-2 btn-wave" &#64;onclick="middlerightToastBtn"&gt;Middle Right&lt;/button&gt;
+    &lt;button type="button" class="btn btn-outline-primary me-2 btn-wave" &#64;onclick="bottomleftToastBtn"&gt;Bottom Left&lt;/button&gt;
+    &lt;button type="button" class="btn btn-outline-primary me-2 btn-wave" &#64;onclick="bottomcenterToastBtn"&gt;Bottom Center&lt;/button&gt;
+    &lt;button type="button" class="btn btn-outline-primary me-2 btn-wave" &#64;onclick="bottomrightToastBtn"&gt;Bottom Right&lt;/button&gt;
+    &lt;/div&gt;
+    &lt;div class="toast-container position-fixed top-0 start-0 p-3"&gt;
+    &lt;div class="&#64;TopLeftClass toast colored-toast bg-primary-transparent text-primary" role="alert" aria-live="assertive"
+    aria-atomic="true"&gt;
+    &lt;div class="toast-header bg-primary text-fixed-white"&gt;
+    &lt;img class="bd-placeholder-img rounded me-2" src="@($"{NavigationManager.BaseUri}assets/images/brand-logos/toggle-dark.png")" alt="..."&gt;
+    &lt;strong class="me-auto"&gt;Xintra&lt;/strong&gt;
+    &lt;button type="button" class="btn-close" data-bs-dismiss="toast"
+    aria-label="Close"&gt;&lt;/button&gt;
+    &lt;/div&gt;
+    &lt;div class="toast-body"&gt;
+    Your,toast message here.
+    &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3"&gt;
+    &lt;div class="&#64;TopCenterClass toast colored-toast bg-primary-transparent text-primary" role="alert" aria-live="assertive"
+    aria-atomic="true"&gt;
+    &lt;div class="toast-header bg-primary text-fixed-white"&gt;
+    &lt;img class="bd-placeholder-img rounded me-2" src="@($"{NavigationManager.BaseUri}assets/images/brand-logos/toggle-dark.png")" alt="..."&gt;
+    &lt;strong class="me-auto"&gt;Xintra&lt;/strong&gt;
+    &lt;button type="button" class="btn-close" data-bs-dismiss="toast"
+    aria-label="Close"&gt;&lt;/button&gt;
+    &lt;/div&gt;
+    &lt;div class="toast-body"&gt;
+    Your,toast message here.
+    &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="toast-container position-fixed top-0 end-0 p-3"&gt;
+    &lt;div class="&#64;TopRightClass toast colored-toast bg-primary-transparent text-primary" role="alert" aria-live="assertive"
+    aria-atomic="true"&gt;
+    &lt;div class="toast-header bg-primary text-fixed-white"&gt;
+    &lt;img class="bd-placeholder-img rounded me-2" src="@($"{NavigationManager.BaseUri}assets/images/brand-logos/toggle-dark.png")" alt="..."&gt;
+    &lt;strong class="me-auto"&gt;Xintra&lt;/strong&gt;
+    &lt;button type="button" class="btn-close" data-bs-dismiss="toast"
+    aria-label="Close"&gt;&lt;/button&gt;
+    &lt;/div&gt;
+    &lt;div class="toast-body"&gt;
+    Your,toast message here.
+    &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="toast-container position-fixed top-50 start-0 translate-middle-y p-3"&gt;
+    &lt;div class="&#64;MiddleLeftClass toast colored-toast bg-primary-transparent text-primary" role="alert" aria-live="assertive"
+    aria-atomic="true"&gt;
+    &lt;div class="toast-header bg-primary text-fixed-white"&gt;
+    &lt;img class="bd-placeholder-img rounded me-2" src="@($"{NavigationManager.BaseUri}assets/images/brand-logos/toggle-dark.png")" alt="..."&gt;
+    &lt;strong class="me-auto"&gt;Xintra&lt;/strong&gt;
+    &lt;button type="button" class="btn-close" data-bs-dismiss="toast"
+    aria-label="Close"&gt;&lt;/button&gt;
+    &lt;/div&gt;
+    &lt;div class="toast-body"&gt;
+    Your,toast message here.
+    &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="toast-container position-fixed top-50 start-50 translate-middle"&gt;
+    &lt;div class="&#64;MiddleCenterClass toast colored-toast bg-primary-transparent text-primary" role="alert" aria-live="assertive"
+    aria-atomic="true"&gt;
+    &lt;div class="toast-header bg-primary text-fixed-white"&gt;
+    &lt;img class="bd-placeholder-img rounded me-2" src="@($"{NavigationManager.BaseUri}assets/images/brand-logos/toggle-dark.png")" alt="..."&gt;
+    &lt;strong class="me-auto"&gt;Xintra&lt;/strong&gt;
+    &lt;button type="button" class="btn-close" data-bs-dismiss="toast"
+    aria-label="Close"&gt;&lt;/button&gt;
+    &lt;/div&gt;
+    &lt;div class="toast-body"&gt;
+    Your,toast message here.
+    &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="toast-container position-fixed top-50 end-0 translate-middle-y p-3"&gt;
+    &lt;div class="&#64;MiddleRightClass toast colored-toast bg-primary-transparent text-primary" role="alert" aria-live="assertive"
+    aria-atomic="true"&gt;
+    &lt;div class="toast-header bg-primary text-fixed-white"&gt;
+    &lt;img class="bd-placeholder-img rounded me-2" src="@($"{NavigationManager.BaseUri}assets/images/brand-logos/toggle-dark.png")" alt="..."&gt;
+    &lt;strong class="me-auto"&gt;Xintra&lt;/strong&gt;
+    &lt;button type="button" class="btn-close" data-bs-dismiss="toast"
+    aria-label="Close"&gt;&lt;/button&gt;
+    &lt;/div&gt;
+    &lt;div class="toast-body"&gt;
+    Your,toast message here.
+    &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="toast-container position-fixed bottom-0 start-0 p-3"&gt;
+    &lt;div class="&#64;BottomLeftClass toast colored-toast bg-primary-transparent text-primary" role="alert" aria-live="assertive"
+    aria-atomic="true"&gt;
+    &lt;div class="toast-header bg-primary text-fixed-white"&gt;
+    &lt;img class="bd-placeholder-img rounded me-2" src="@($"{NavigationManager.BaseUri}assets/images/brand-logos/toggle-dark.png")" alt="..."&gt;
+    &lt;strong class="me-auto"&gt;Xintra&lt;/strong&gt;
+    &lt;button type="button" class="btn-close" data-bs-dismiss="toast"
+    aria-label="Close"&gt;&lt;/button&gt;
+    &lt;/div&gt;
+    &lt;div class="toast-body"&gt;
+    Your,toast message here.
+    &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="toast-container position-fixed bottom-0 start-50 translate-middle-x p-3"&gt;
+    &lt;div class="&#64;BottomCenterClass toast colored-toast bg-primary-transparent text-primary" role="alert" aria-live="assertive"
+    aria-atomic="true"&gt;
+    &lt;div class="toast-header bg-primary text-fixed-white"&gt;
+    &lt;img class="bd-placeholder-img rounded me-2" src="@($"{NavigationManager.BaseUri}assets/images/brand-logos/toggle-dark.png")" alt="..."&gt;
+    &lt;strong class="me-auto"&gt;Xintra&lt;/strong&gt;
+    &lt;button type="button" class="btn-close" data-bs-dismiss="toast"
+    aria-label="Close"&gt;&lt;/button&gt;
+    &lt;/div&gt;
+    &lt;div class="toast-body"&gt;
+    Your,toast message here.
+    &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="toast-container position-fixed bottom-0 end-0 p-3"&gt;
+    &lt;div class="&#64;BottomRightClass toast colored-toast bg-primary-transparent text-primary" role="alert" aria-live="assertive"
+    aria-atomic="true"&gt;
+    &lt;div class="toast-header bg-primary text-fixed-white"&gt;
+    &lt;img class="bd-placeholder-img rounded me-2" src="@($"{NavigationManager.BaseUri}assets/images/brand-logos/toggle-dark.png")" alt="..."&gt;
+    &lt;strong class="me-auto"&gt;Xintra&lt;/strong&gt;
+    &lt;button type="button" class="btn-close" data-bs-dismiss="toast"
+    aria-label="Close"&gt;&lt;/button&gt;
+    &lt;/div&gt;
+    &lt;div class="toast-body"&gt;
+    Your,toast message here.
+    &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;/div&gt;</code></pre>
+    <!-- Prism Code -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End:: row-4 -->
+
+    <!-- Prism JS -->
+    <script src="@($"{NavigationManager.BaseUri}assets/libs/prismjs/prism.js")"></script>
+    <script src="@($"{NavigationManager.BaseUri}assets/js/prism-custom.js")"></script>
+
+   @code {
+    private string currentClass = "";
+    private string PrimaryLightcurrentClass = "";
+    private string Primary1LightcurrentClass = "";
+    private string Primary2LightcurrentClass = "";
+    private string Primary3LightcurrentClass = "";
+    private string SecondaryLightcurrentClass = "";
+    private string WarningLightcurrentClass = "";
+    private string InfoLightcurrentClass = "";
+    private string SuccessLightcurrentClass = "";
+    private string DangerLightcurrentClass = "";
+    private string PrimarycurrentClass = "";
+    private string Primary1currentClass = "";
+    private string Primary2currentClass = "";
+    private string Primary3currentClass = "";
+    private string SecondarycurrentClass = "";
+    private string WarningcurrentClass = "";
+    private string InfocurrentClass = "";
+    private string SuccesscurrentClass = "";
+    private string DangercurrentClass = "";
+    private string TopLeftClass = "";
+    private string TopCenterClass = "";
+    private string TopRightClass = "";
+    private string MiddleLeftClass = "";
+    private string MiddleCenterClass = "";
+    private string MiddleRightClass = "";
+    private string BottomLeftClass = "";
+    private string BottomCenterClass = "";
+    private string BottomRightClass = "";
+
+    private async Task liveToastBtn()
+    {
+        if (currentClass == "")
+        {
+            currentClass = "show";
+            await Task.Delay(3000); // Adjust the duration (in milliseconds) as needed
+            currentClass = "";
+        }
+        else
+        {
+            currentClass = "";
+        }
+    }  
+    
+    private async Task primaryToastBtn()
+    {
+        if (PrimaryLightcurrentClass == "")
+        {
+            PrimaryLightcurrentClass = "show";
+            await Task.Delay(3000); 
+            PrimaryLightcurrentClass = "";
+        }
+        else
+        {
+            PrimaryLightcurrentClass = "";
+        }
+    }  
+    private async Task primary1ToastBtn()
+    {
+        if (Primary1LightcurrentClass == "")
+        {
+            Primary1LightcurrentClass = "show";
+            await Task.Delay(3000); 
+            Primary1LightcurrentClass = "";
+        }
+        else
+        {
+            Primary1LightcurrentClass = "";
+        }
+    }  
+    private async Task primary2ToastBtn()
+    {
+        if (Primary2LightcurrentClass == "")
+        {
+            Primary2LightcurrentClass = "show";
+            await Task.Delay(3000); 
+            Primary2LightcurrentClass = "";
+        }
+        else
+        {
+            Primary2LightcurrentClass = "";
+        }
+    }  
+    private async Task primary3ToastBtn()
+    {
+        if (Primary3LightcurrentClass == "")
+        {
+            Primary3LightcurrentClass = "show";
+            await Task.Delay(3000); 
+            Primary3LightcurrentClass = "";
+        }
+        else
+        {
+            Primary3LightcurrentClass = "";
+        }
+    }  
+    
+    private async Task secondaryToastBtn()
+    {
+        if (SecondaryLightcurrentClass == "")
+        {
+            SecondaryLightcurrentClass = "show";
+            await Task.Delay(3000); 
+            SecondaryLightcurrentClass = "";
+        }
+        else
+        {
+            SecondaryLightcurrentClass = "";
+        }
+    }  
+    
+    private async Task warningToastBtn()
+    {
+        if (WarningLightcurrentClass == "")
+        {
+            WarningLightcurrentClass = "show";
+            await Task.Delay(3000); 
+            WarningLightcurrentClass = "";
+        }
+        else
+        {
+            WarningLightcurrentClass = "";
+        }
+    }  
+    
+    private async Task infoToastBtn()
+    {
+        if (InfoLightcurrentClass == "")
+        {
+            InfoLightcurrentClass = "show";
+            await Task.Delay(3000); 
+            InfoLightcurrentClass = "";
+        }
+        else
+        {
+            InfoLightcurrentClass = "";
+        }
+    }  
+    
+    private async Task successToastBtn()
+    {
+        if (SuccessLightcurrentClass == "")
+        {
+            SuccessLightcurrentClass = "show";
+            await Task.Delay(3000); 
+            SuccessLightcurrentClass = "";
+        }
+        else
+        {
+            SuccessLightcurrentClass = "";
+        }
+    } 
+    
+    private async Task dangerToastBtn()
+    {
+        if (DangerLightcurrentClass == "")
+        {
+            DangerLightcurrentClass = "show";
+            await Task.Delay(3000); 
+            DangerLightcurrentClass = "";
+        }
+        else
+        {
+            DangerLightcurrentClass = "";
+        }
+    }  
+
+    private async Task solidprimaryToastBtn()
+    {
+        if (PrimarycurrentClass == "")
+        {
+            PrimarycurrentClass = "show";
+            await Task.Delay(3000); 
+            PrimarycurrentClass = "";
+        }
+        else
+        {
+            PrimarycurrentClass = "";
+        }
+    }  
+    private async Task solidprimary1ToastBtn()
+    {
+        if (Primary1currentClass == "")
+        {
+            Primary1currentClass = "show";
+            await Task.Delay(3000); 
+            Primary1currentClass = "";
+        }
+        else
+        {
+            Primary1currentClass = "";
+        }
+    }  
+    private async Task solidprimary2ToastBtn()
+    {
+        if (Primary2currentClass == "")
+        {
+            Primary2currentClass = "show";
+            await Task.Delay(3000); 
+            Primary2currentClass = "";
+        }
+        else
+        {
+            Primary2currentClass = "";
+        }
+    }  
+    private async Task solidprimary3ToastBtn()
+    {
+        if (Primary3currentClass == "")
+        {
+            Primary3currentClass = "show";
+            await Task.Delay(3000); 
+            Primary3currentClass = "";
+        }
+        else
+        {
+            Primary3currentClass = "";
+        }
+    }  
+    
+    private async Task solidsecondaryToastBtn()
+    {
+        if (SecondarycurrentClass == "")
+        {
+            SecondarycurrentClass = "show";
+            await Task.Delay(3000); 
+            SecondarycurrentClass = "";
+        }
+        else
+        {
+            SecondarycurrentClass = "";
+        }
+    }  
+    
+    private async Task solidwarningToastBtn()
+    {
+        if (WarningcurrentClass == "")
+        {
+            WarningcurrentClass = "show";
+            await Task.Delay(3000); 
+            WarningcurrentClass = "";
+        }
+        else
+        {
+            WarningcurrentClass = "";
+        }
+    }  
+    
+    private async Task solidinfoToastBtn()
+    {
+        if (InfocurrentClass == "")
+        {
+            InfocurrentClass = "show";
+            await Task.Delay(3000); 
+            InfocurrentClass = "";
+        }
+        else
+        {
+            InfocurrentClass = "";
+        }
+    }  
+    
+    private async Task solidsuccessToastBtn()
+    {
+        if (SuccesscurrentClass == "")
+        {
+            SuccesscurrentClass = "show";
+            await Task.Delay(3000); 
+            SuccesscurrentClass = "";
+        }
+        else
+        {
+            SuccesscurrentClass = "";
+        }
+    } 
+    
+    private async Task soliddangerToastBtn()
+    {
+        if (DangercurrentClass == "")
+        {
+            DangercurrentClass = "show";
+            await Task.Delay(3000); 
+            DangercurrentClass = "";
+        }
+        else
+        {
+            DangercurrentClass = "";
+        }
+    }  
+
+    private async Task topleftToastBtn()
+    {
+        if (TopLeftClass == "")
+        {
+            TopLeftClass = "show";
+            await Task.Delay(3000); 
+            TopLeftClass = "";
+        }
+        else
+        {
+            TopLeftClass = "";
+        }
+    }
+
+    private async Task topcenterToastBtn()
+    {
+        if (TopCenterClass == "")
+        {
+            TopCenterClass = "show";
+            await Task.Delay(3000); 
+            TopCenterClass = "";
+        }
+        else
+        {
+            TopCenterClass = "";
+        }
+    }  
+    
+    private async Task toprightToastBtn()
+    {
+        if (TopRightClass == "")
+        {
+            TopRightClass = "show";
+            await Task.Delay(3000); 
+            TopRightClass = "";
+        }
+        else
+        {
+            TopRightClass = "";
+        }
+    }  
+    
+    private async Task middleleftToastBtn()
+    {
+        if (MiddleLeftClass == "")
+        {
+            MiddleLeftClass = "show";
+            await Task.Delay(3000); 
+            MiddleLeftClass = "";
+        }
+        else
+        {
+            MiddleLeftClass = "";
+        }
+    }
+    
+    private async Task middlecenterToastBtn()
+    {
+        if (MiddleCenterClass == "")
+        {
+            MiddleCenterClass = "show";
+            await Task.Delay(3000); 
+            MiddleCenterClass = "";
+        }
+        else
+        {
+            MiddleCenterClass = "";
+        }
+    }  
+    
+    private async Task middlerightToastBtn()
+    {
+        if (MiddleRightClass == "")
+        {
+            MiddleRightClass = "show";
+            await Task.Delay(3000); 
+            MiddleRightClass = "";
+        }
+        else
+        {
+            MiddleRightClass = "";
+        }
+    }  
+
+   private async Task bottomleftToastBtn()
+    {
+        if (BottomLeftClass == "")
+        {
+            BottomLeftClass = "show";
+            await Task.Delay(3000); 
+            BottomLeftClass = "";
+        }
+        else
+        {
+            BottomLeftClass = "";
+        }
+    }
+    
+    private async Task bottomcenterToastBtn()
+    {
+        if (BottomCenterClass == "")
+        {
+            BottomCenterClass = "show";
+            await Task.Delay(3000); 
+            BottomCenterClass = "";
+        }
+        else
+        {
+            BottomCenterClass = "";
+        }
+    }  
+    
+    private async Task bottomrightToastBtn()
+    {
+        if (BottomRightClass == "")
+        {
+            BottomRightClass = "show";
+            await Task.Delay(3000); 
+            BottomRightClass = "";
+        }
+        else
+        {
+            BottomRightClass = "";
+        }
+    }  
+
+// TOASTIFY JS //
+
+    private List<ToastMessage> toastQueue = new();
+    private bool isDisplayingToast = false;
+
+    private async Task toastbuttonBtn()
+    {
+        // Add a new toast to the queue
+        toastQueue.Add(new ToastMessage { Id = Guid.NewGuid(), Message = "I'm a toast Message" });
+
+        // Process the queue if not already processing
+        if (!isDisplayingToast)
+        {
+            await ProcessToasts();
+        }
+    }
+
+    private async Task ProcessToasts()
+    {
+        isDisplayingToast = true;
+
+        // Process each toast in the queue
+        while (toastQueue.Any())
+        {
+            var toastMessage = toastQueue.First();
+            StateHasChanged(); // Trigger UI update
+
+            // Wait for the duration of the toast
+            await Task.Delay(2000);
+
+            // Remove the displayed toast from the queue
+            toastQueue.Remove(toastMessage);
+            StateHasChanged(); // Trigger UI update
+
+            // Wait for a short delay before showing the next toast
+            await Task.Delay(500); // Adjust this delay if needed
+        }
+
+        isDisplayingToast = false;
+    }
+
+    private void CloseToast(Guid id)
+    { Console.WriteLine($"Attempting to close toast with Id: {id}");
+        var toastToRemove = toastQueue.FirstOrDefault(t => t.Id == id);
+        if (toastToRemove != null)
+        {
+            toastQueue.Remove(toastToRemove);
+            StateHasChanged(); // Trigger UI update
+        }
+    }
+
+    private class ToastMessage
+    {
+        public Guid Id { get; set; }
+        public string? Message { get; set; }
+    }
+// TOASTIFY JS //
+
+}
+@code {
+    
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Ui Elements" },
+        new SpkPageHeader.PageItem { PageTitle = "Toasts" },
+    };
+}   

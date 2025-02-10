@@ -1,0 +1,244 @@
+@page "/apex-treemap-charts"
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using ApexSeries
+@using ApexCharts
+@using TreemapData
+@inject TreemapService TreemapService
+
+    <!-- Page Header -->
+    <SpkPageHeader PageItems="PageItems" />
+    <!-- Page Header Close -->
+
+    <!-- Start::row-1 -->
+    <div class="row">
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Basic Treemap Chart</div>
+                </div>
+                <div class="card-body">
+                    <div id="treemap-basic">
+                        <SpkApex TItem="BasicTreemapchart" Items="BasicTreemapcharts" ChartOptions="BasicTreemapchartOptions" ApexHeight="350" Title="Basic Treemap" Series="BasicTreemapchartSeriesConfigs"></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Multi Dimensional Treemap Chart</div>
+                </div>
+                <div class="card-body">
+                    <div id="treemap-multi">
+                        <SpkApex TItem="MultiTreemapchart" Items="MultiTreemapcharts" ChartOptions="MultiTreemapchartOptions" ApexHeight="350" Title="Multi-dimensional Treemap" Series="MultiTreemapchartSeriesConfigs"></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Distributed Treemap Chart</div>
+                </div>
+                <div class="card-body">
+                    <div id="treemap-distributed">
+                        <SpkApex TItem="DistributedTreemapchart" Items="DistributedTreemapcharts" ChartOptions="DistributedTreemapchartOptions" ApexHeight="350" Title="Distibuted Treemap (different color for each cell)" Series="DistributedTreemapchartSeriesConfigs"></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Treemap with color ranges</div>
+                </div>
+                <div class="card-body">
+                    <div id="treemap-colorranges">
+                        <SpkApex TItem="ColorRangesTreemapchart" Items="ColorRangesTreemapcharts" ChartOptions="ColorRangesTreemapchartOptions" ApexHeight="350" Title="Treemap with Color scale" Series="ColorRangesTreemapchartSeriesConfigs"></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--End::row-1 -->
+
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Charts" },
+        new SpkPageHeader.PageItem { PageTitle = "Apex Charts" },
+        new SpkPageHeader.PageItem { PageTitle = "Apex Treemap Charts" },
+    };
+
+    // Basic Pie Chart Start //
+    private List<BasicTreemapchart> BasicTreemapcharts { get; set; } = TreemapService.BasicTreemapchart();
+    private ApexChartOptions<BasicTreemapchart> BasicTreemapchartOptions { get; set; } = new();
+    private List<SeriesConfig<BasicTreemapchart>>? BasicTreemapchartSeriesConfigs { get; set; }
+    // Basic Pie Chart End //
+
+    
+    // Multi Pie Chart Start //
+    private List<MultiTreemapchart> MultiTreemapcharts { get; set; } = TreemapService.MultiTreemapchart();
+    private ApexChartOptions<MultiTreemapchart> MultiTreemapchartOptions { get; set; } = new();
+    private List<SeriesConfig<MultiTreemapchart>>? MultiTreemapchartSeriesConfigs { get; set; }
+    // Multi Pie Chart End //
+    
+    // Distributed Pie Chart Start //
+    private List<DistributedTreemapchart> DistributedTreemapcharts { get; set; } = TreemapService.DistributedTreemapchart();
+    private ApexChartOptions<DistributedTreemapchart> DistributedTreemapchartOptions { get; set; } = new();
+    private List<SeriesConfig<DistributedTreemapchart>>? DistributedTreemapchartSeriesConfigs { get; set; }
+    // Distributed Pie Chart End //
+
+    // ColorRanges Pie Chart Start //
+    private List<ColorRangesTreemapchart> ColorRangesTreemapcharts { get; set; } = TreemapService.ColorRangesTreemapchart();
+    private ApexChartOptions<ColorRangesTreemapchart> ColorRangesTreemapchartOptions { get; set; } = new();
+    private List<SeriesConfig<ColorRangesTreemapchart>>? ColorRangesTreemapchartSeriesConfigs { get; set; }
+    // ColorRanges Pie Chart End //
+
+    protected override void OnInitialized() {
+        BasicTreemapchartOptions = new ApexChartOptions<BasicTreemapchart>{
+            Legend = new Legend
+            {
+                Show = false,
+            },
+            Colors = new Color(new List<string> { "#5c67f7"}),
+            Title = new Title{
+                Align = ApexCharts.Align.Left,
+                Style = new TitleStyle {
+                    FontSize= "13px",
+                    FontWeight= "bold",
+                    Color= "#8c9097"
+                },
+            },
+        };
+        BasicTreemapchartSeriesConfigs = new List<SeriesConfig<BasicTreemapchart>>
+        {
+            new SeriesConfig<BasicTreemapchart>
+            {
+                SeriesType = SeriesType.Treemap,
+                Name = "Team",
+                XValueSelector = e => e.BasicTreemapData ?? "null",
+                YAggregateSelector = e => e.Sum(e => e.BasicTreemapValue),
+                ShowDataLabels=true
+            },
+        };
+        
+        MultiTreemapchartOptions = new ApexChartOptions<MultiTreemapchart>{
+            Legend = new Legend
+            {
+                Show = false,
+            },
+            Colors = new Color(new List<string> { "#5c67f7", "#e354d4" }),
+            Title = new Title{
+                Align = ApexCharts.Align.Center,
+                Style = new TitleStyle {
+                    FontSize= "13px",
+                    FontWeight= "bold",
+                    Color= "#8c9097"
+                },
+            },
+        };
+        MultiTreemapchartSeriesConfigs = new List<SeriesConfig<MultiTreemapchart>>
+        {
+            new SeriesConfig<MultiTreemapchart>
+            {
+                SeriesType = SeriesType.Treemap,
+                Name = "Desktops",
+                XValueSelector = e => e.MultiTreemapData ?? "null",
+                YAggregateSelector = e => e.Sum(e => e.MultiTreemapValue),
+                ShowDataLabels=true
+            },
+            new SeriesConfig<MultiTreemapchart>
+            {
+                SeriesType = SeriesType.Treemap,
+                Name = "Mobile",
+                XValueSelector = e => e.MultiTreemapData ?? "null",
+                YAggregateSelector = e => e.Sum(e => e.MultiTreemapValue2),
+                ShowDataLabels=true
+            },
+        };
+        
+        DistributedTreemapchartOptions = new ApexChartOptions<DistributedTreemapchart>{
+            Legend = new Legend
+            {
+                Show = false,
+            },
+            PlotOptions = new PlotOptions {
+                Treemap = new() {
+                    Distributed = true,
+                    EnableShades = false
+                }
+            },
+            Colors = new Color(new List<string> { "#5c67f7","#fe7c58","#ff8e6f","#a66a5e","#a65e9a","#0cd7b1","#fe5454","#0ca3e7","#7b76fe","#2dce89","#EF6537","#8c9097"}),
+            Title = new Title{
+                Align = ApexCharts.Align.Center,
+                Style = new TitleStyle {
+                    FontSize= "13px",
+                    FontWeight= "bold",
+                    Color= "#8c9097"
+                },
+            },
+        };
+        DistributedTreemapchartSeriesConfigs = new List<SeriesConfig<DistributedTreemapchart>>
+        {
+            new SeriesConfig<DistributedTreemapchart>
+            {
+                SeriesType = SeriesType.Treemap,
+                Name = "Team",
+                XValueSelector = e => e.DistributedTreemapData ?? "null",
+                YAggregateSelector = e => e.Sum(e => e.DistributedTreemapValue),
+                ShowDataLabels=true
+            },
+        };
+        
+        ColorRangesTreemapchartOptions = new ApexChartOptions<ColorRangesTreemapchart>{
+            Legend = new Legend
+            {
+                Show = false,
+            },
+            PlotOptions = new PlotOptions {
+                Treemap = new() {
+                    EnableShades = true,
+                    ShadeIntensity = 0.5,
+                    ReverseNegativeShade = true,
+                    ColorScale = new (){
+                        Ranges = new () {
+                            new (){
+                                From = -6,
+                                To = 0,
+                                Color = "#5c67f7"
+                            },
+                            new (){
+                                From = 0.001,
+                                To = 6,
+                                Color = "#e354d4"
+                            }
+                        }
+                    }
+                }
+            },
+            DataLabels = new ApexCharts.DataLabels {
+                Enabled =true, 
+            }, 
+            Title = new Title{
+                Align = ApexCharts.Align.Left,
+                Style = new TitleStyle {
+                    FontSize= "13px",
+                    FontWeight= "bold",
+                    Color= "#8c9097"
+                },
+            },
+        };
+        ColorRangesTreemapchartSeriesConfigs = new List<SeriesConfig<ColorRangesTreemapchart>>
+        {
+            new SeriesConfig<ColorRangesTreemapchart>
+            {
+                SeriesType = SeriesType.Treemap,
+                Name = "Team",
+                XValueSelector = e => e.ColorRangesTreemapData ?? "null",
+                YAggregateSelector = e => e.Sum(e => e.ColorRangesTreemapValue),
+                ShowDataLabels=true
+            },
+        };
+    }
+}

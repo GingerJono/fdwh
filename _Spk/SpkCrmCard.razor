@@ -1,0 +1,31 @@
+
+
+@using CardModel
+
+@code {
+    [Parameter] public MainCard? CrmMainCard { get; set; } 
+}
+
+<div class="card custom-card crm-card">
+    <div class="card-body">
+        <div class="">
+            <div class="d-flex justify-content-between mb-2">
+                <div class="p-2 border border-@CrmMainCard?.color border-opacity-10 bg-@CrmMainCard?.color-transparent rounded-pill">
+                    <span class="avatar avatar-md avatar-rounded bg-@CrmMainCard?.color svg-white">
+                        @((MarkupString)(CrmMainCard?.svg ?? string.Empty))
+                    </span>
+                </div>
+            </div>
+            <p class="flex-fill text-muted fs-14 mb-0">@CrmMainCard?.title</p>
+        </div>
+        <div class="d-flex align-items-center justify-content-between mt-1">
+            <h4 class="mb-0 d-flex align-items-center">@CrmMainCard?.price</h4>
+            @if (@CrmMainCard?.IsIncreased == true) {
+                <SpkBadge BadgeClass="text-success bg-success-transparent d-flex align-items-center fs-11 me-0 ms-2 mb-0" IsRounded="true"><i class="ri-arrow-left-up-line fs-11"></i>+@CrmMainCard?.percentage%</SpkBadge>
+            }
+            else {
+                <SpkBadge BadgeClass="text-danger bg-danger-transparent d-flex align-items-center fs-11 me-0 ms-2 mb-0" IsRounded="true"><i class="ri-arrow-left-down-line fs-11"></i>-@CrmMainCard?.percentage%</SpkBadge>
+            }
+        </div>
+    </div>
+</div>

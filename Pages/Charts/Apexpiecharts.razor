@@ -1,0 +1,403 @@
+@page "/apex-pie-charts"
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using ApexSeries
+@using ApexCharts
+@using PieChartData
+@inject PieChartService PieChartService
+
+    <!-- Page Header -->
+    <SpkPageHeader PageItems="PageItems" />
+    <!-- Page Header Close -->
+
+    <!-- Start::row-1 -->
+    <div class="row">
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Basic Pie Chart</div>
+                </div>
+                <div class="card-body">
+                    <SpkApex TItem="Piebasicchart" ApexHeight="300" Items="Piebasiccharts" Series="PiebasicchartSeriesConfigs" ChartOptions="PiebasicchartOptions"></SpkApex>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Simple Donut Chart</div>
+                </div>
+                <div class="card-body">
+                    <div id="donut-simple">
+                        <SpkApex TItem="PieSimplechart" ApexHeight="300" Items="PieSimplecharts" Series="PieSimplechartSeriesConfigs" ChartOptions="PieSimplechartOptions"></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Monochrome Pie Chart</div>
+                </div>
+                <div class="card-body">
+                    <div id="pie-monochrome">
+                        <SpkApex TItem="PieMonochromechart" ApexHeight="300" Items="PieMonochromecharts" Series="PieMonochromechartSeriesConfigs" ChartOptions="PieMonochromechartOptions"></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Gradient Donut Chart</div>
+                </div>
+                <div class="card-body">
+                    <div id="donut-gradient">
+                        <SpkApex TItem="PieGradientchart" ApexHeight="310" Title="Gradient Donut with custom Start-angle" Items="PieGradientcharts" Series="PieGradientchartSeriesConfigs" ChartOptions="PieGradientchartOptions"></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Donut Chart With Patterns</div>
+                </div>
+                <div class="card-body">
+                    <div id="donut-pattern">
+                        <SpkApex TItem="PiePatternchart" ApexHeight="330" Title="Favourite Movie Type" Items="PiePatterncharts" Series="PiePatternchartSeriesConfigs" ChartOptions="PiePatternchartOptions"></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Image Filled Pie Chart</div>
+                </div>
+                <div class="card-body">
+                    <div id="pie-image">
+                        <SpkApex TItem="PieImagechart" ApexHeight="340" Title="Favourite Movie Type" Items="PieImagecharts" Series="PieImagechartSeriesConfigs" ChartOptions="PieImagechartOptions"></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--End::row-1 -->
+
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Charts" },
+        new SpkPageHeader.PageItem { PageTitle = "Apex Charts" },
+        new SpkPageHeader.PageItem { PageTitle = "Apex Pie Charts" },
+    };
+    // Basic Pie Chart Start //
+    private List<Piebasicchart> Piebasiccharts { get; set; } = PieChartService.Piebasicchart();
+    private ApexChartOptions<Piebasicchart> PiebasicchartOptions { get; set; } = new();
+    private List<SeriesConfig<Piebasicchart>>? PiebasicchartSeriesConfigs { get; set; }
+   
+    // Basic Pie Chart End //
+
+    // Simple Pie Chart Start //
+    private List<PieSimplechart> PieSimplecharts { get; set; } = PieChartService.PieSimplechart();
+    private ApexChartOptions<PieSimplechart> PieSimplechartOptions { get; set; } = new();
+    private List<SeriesConfig<PieSimplechart>>? PieSimplechartSeriesConfigs { get; set; }
+    
+    // Simple Pie Chart End //
+                        
+    // Monochrome Pie Chart Start //
+    private List<PieMonochromechart> PieMonochromecharts { get; set; } = PieChartService.PieMonochromechart();
+    private ApexChartOptions<PieMonochromechart> PieMonochromechartOptions { get; set; } = new();
+    private List<SeriesConfig<PieMonochromechart>>? PieMonochromechartSeriesConfigs { get; set; }
+   
+    // Monochrome Pie Chart End //
+                        
+    // Gradient Pie Chart Start //
+    private List<PieGradientchart> PieGradientcharts { get; set; } = PieChartService.PieGradientchart();
+    private ApexChartOptions<PieGradientchart> PieGradientchartOptions { get; set; } = new();
+    private List<SeriesConfig<PieGradientchart>>? PieGradientchartSeriesConfigs { get; set; }
+   
+    // Gradient Pie Chart End //
+                        
+    // Pattern Pie Chart Start //
+    private List<PiePatternchart> PiePatterncharts { get; set; } = PieChartService.PiePatternchart();
+    private ApexChartOptions<PiePatternchart> PiePatternchartOptions { get; set; } = new();
+    private List<SeriesConfig<PiePatternchart>>? PiePatternchartSeriesConfigs { get; set; }
+    
+    // Pattern Pie Chart End //
+                        
+    // Image Pie Chart Start //
+    private List<PieImagechart> PieImagecharts { get; set; } = PieChartService.PieImagechart();
+    private ApexChartOptions<PieImagechart> PieImagechartOptions { get; set; } = new();
+    private List<SeriesConfig<PieImagechart>>? PieImagechartSeriesConfigs { get; set; }
+    
+    // Image Pie Chart End //
+
+    protected override void OnInitialized() {
+
+        PiebasicchartOptions = new ApexChartOptions<Piebasicchart>
+        {
+            Colors = new Color(new List<string> { "#5c67f7", "#e354d4", "#ff8e6f", "#0ca3e7", "#fe5454" }),
+            DataLabels = new ApexCharts.DataLabels {
+                Enabled = true,
+                DropShadow = new() {
+                    Enabled =false,
+                },
+            }, 
+            Legend = new Legend
+            {
+                Position = LegendPosition.Bottom,
+            }
+        };
+        PiebasicchartSeriesConfigs = new List<SeriesConfig<Piebasicchart>>
+        {
+            new SeriesConfig<Piebasicchart>
+            {
+                SeriesType = SeriesType.Pie,
+                Name = "Team",
+                XValueSelector = e => e.TeamSeries ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.Value),
+                ShowDataLabels=true
+            },
+        };
+
+        PieSimplechartOptions = new ApexChartOptions<PieSimplechart>
+        {
+            Colors = new Color(new List<string> { "#5c67f7", "#e354d4", "#ff8e6f", "#0ca3e7", "#fe5454" }),
+            DataLabels = new ApexCharts.DataLabels {
+                Enabled = true,
+                DropShadow = new() {
+                    Enabled =false,
+                },
+            }, 
+            Legend = new Legend
+            {
+                Position = LegendPosition.Bottom,
+            }
+        };
+        PieSimplechartSeriesConfigs = new List<SeriesConfig<PieSimplechart>>
+        {
+            new SeriesConfig<PieSimplechart>
+            {
+                SeriesType = SeriesType.Donut,
+                Name = "Team",
+                XValueSelector = e => e.PieSimpleData ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.SimpleValue),
+                ShowDataLabels=true
+            },
+        };
+
+        PieMonochromechartOptions = new ApexChartOptions<PieMonochromechart>
+        {
+            Title = new Title{
+                Style = new TitleStyle {
+                    FontSize= "13px",
+                    FontWeight= "bold",
+                    Color= "#8c9097"
+                },
+            },
+            Theme = new Theme {
+                Mode = Mode.Light,
+                Monochrome = new ThemeMonochrome  {
+                    Enabled= true,
+                    ShadeIntensity = 0.6,
+                    Color= "#5c67f7",
+                }
+            },
+            PlotOptions = new PlotOptions {
+                Pie = new(){
+                    DataLabels = new(){
+                        Offset = -5,
+                    },
+                },
+            },
+            DataLabels = new ApexCharts.DataLabels {
+                Enabled =false,
+                DropShadow = new() {
+                    Enabled =false,
+                },
+            }, 
+            Legend = new Legend
+            {
+                Show =false,
+            }
+        };
+        PieMonochromechartSeriesConfigs = new List<SeriesConfig<PieMonochromechart>>
+        {
+            new SeriesConfig<PieMonochromechart>
+            {
+                SeriesType = SeriesType.Pie,
+                Name = "Team",
+                XValueSelector = e => e.Week ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.MonochromeValue),
+                ShowDataLabels=true
+            },
+        };
+        
+        PieGradientchartOptions = new ApexChartOptions<PieGradientchart>
+        {
+            Colors = new Color(new List<string> { "#5c67f7", "#e354d4", "#ff8e6f", "#0ca3e7", "#fe5454"}),
+            Title = new Title{
+                Style = new TitleStyle {
+                    FontSize= "13px",
+                    FontWeight= "bold",
+                    Color= "#8c9097"
+                },
+            },
+            PlotOptions = new PlotOptions {
+                Pie = new(){
+                    StartAngle = -90,
+                    EndAngle = 270,
+                },
+            },
+            DataLabels = new ApexCharts.DataLabels {
+                Enabled =false,
+            },  
+            Fill = new Fill {
+                Type = new List<FillType> { FillType.Gradient},
+            },
+            Legend = new Legend
+            {
+                Position = LegendPosition.Bottom,
+                Show = true,
+                Formatter = @"function (val, opts) {
+                    return val +  ' -'   + opts.w.globals.series[opts.seriesIndex];
+                }",
+            }
+        };
+        PieGradientchartSeriesConfigs = new List<SeriesConfig<PieGradientchart>>
+        {
+            new SeriesConfig<PieGradientchart>
+            {
+                SeriesType = SeriesType.Donut,
+                Name = "Team",
+                XValueSelector = e => e.PieGradientData ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.GradientValue),
+                ShowDataLabels=true
+            },
+        };
+        
+        PiePatternchartOptions = new ApexChartOptions<PiePatternchart>
+        {
+            Chart = new () {
+                DropShadow = new ApexCharts.DropShadow {
+                    Enabled = true,
+                    Color = "#111",
+                    Top = -1,
+                    Left = 3,
+                    Blur = 3,
+                    Opacity = 0.2
+                }
+            },
+            Stroke = new() {
+                Width = 0,
+            },
+            Colors = new Color(new List<string> { "#5c67f7", "#e354d4", "#ff8e6f", "#0ca3e7", "#fe5454"}),
+            Title = new Title{
+                Style = new TitleStyle {
+                    FontSize= "13px",
+                    FontWeight= "bold",
+                    Color= "#8c9097"
+                },
+            },
+            PlotOptions = new PlotOptions {
+                Pie = new(){
+                    Donut= new(){
+                        Labels=new(){
+                            Show=  true,
+                            Total= new(){
+                                ShowAlways= true,
+                                Show= true,
+                            },
+                        },
+                    },
+                },
+            },
+            DataLabels = new ApexCharts.DataLabels {
+                Enabled =true, 
+                Style = new DataLabelsStyle {
+                    FontSize= ".8125rem",
+                    FontWeight= "semibold",
+                    Colors = new Color(new List<string> { "#111" }),
+                },
+                Background= new() {
+                    Enabled = true,
+                    ForeColor = "#fff",
+                    BorderWidth = 0,
+                },
+            },  
+            Fill = new Fill {
+                Type = new List<FillType> { FillType.Pattern},
+                Opacity = 1,
+                 Pattern = new FillPattern
+                {
+                    Style = [ApexCharts.FillPatternStyle.VerticalLines,ApexCharts.FillPatternStyle.Squares,ApexCharts.FillPatternStyle.HorizontalLines,ApexCharts.FillPatternStyle.Circles, ApexCharts.FillPatternStyle.SlantedLines]
+                },
+            },
+            Legend = new Legend
+            {
+                Position = LegendPosition.Bottom,
+                Show = true,
+            }
+        };
+        PiePatternchartSeriesConfigs = new List<SeriesConfig<PiePatternchart>>
+        {
+            new SeriesConfig<PiePatternchart>
+            {
+                SeriesType = SeriesType.Donut,
+                Name = "Team",
+                XValueSelector = e => e.PiePatternData ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.PatternValue),
+                ShowDataLabels=true
+            },
+        };
+        
+        PieImagechartOptions = new ApexChartOptions<PieImagechart>
+        {
+            Stroke = new() {
+                Width = 4,
+            },
+            Colors = new Color(new List<string> { "#93C3EE", "#E5C6A0", "#669DB5", "#94A74A"}),
+            DataLabels = new ApexCharts.DataLabels {
+                Enabled =true, 
+                Style = new DataLabelsStyle {
+                    Colors = new Color(new List<string> { "#111" }),
+                },
+                Background= new() {
+                    Enabled = true,
+                    ForeColor = "#fff",
+                    BorderWidth = 0,
+                },
+            }, 
+            Fill = new Fill {
+                Type = new List<FillType> { FillType.Image},
+                Opacity = 0.85,
+                Image = new ApexCharts.FillImage {
+                    Src= [
+                        "../assets/images/media/media-21.jpg",
+                        "../assets/images/media/media-21.jpg",
+                        "../assets/images/media/media-21.jpg",
+                        "../assets/images/media/media-21.jpg",
+                    ],
+                    Width = 25,
+                }
+            },
+            Legend = new Legend
+            {
+                Position = LegendPosition.Bottom,
+                Show = true,
+            }
+        };
+        PieImagechartSeriesConfigs = new List<SeriesConfig<PieImagechart>>
+        {
+            new SeriesConfig<PieImagechart>
+            {
+                SeriesType = SeriesType.Donut,
+                Name = "Team",
+                XValueSelector = e => e.PieImageData ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.ImageValue),
+                ShowDataLabels=true
+            },
+        };
+    }
+}

@@ -1,0 +1,174 @@
+@page "/blog-create"
+@using FlatpickrBlazor
+@using FlatpickrBlazor.Components
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+
+    <!-- Flatpickr Css -->
+    <link href="_content/FlatpickrBlazor/flatpickr.min.css" rel="stylesheet" />
+
+    <!-- Filepond CSS -->
+    <link rel="stylesheet" href="@($"{NavigationManager.BaseUri}assets/libs/filepond/dist/filepond.min.css")">
+    <link rel="stylesheet" href="@($"{NavigationManager.BaseUri}assets/libs/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.css")">
+    <link rel="stylesheet" href="@($"{NavigationManager.BaseUri}assets/libs/filepond-plugin-image-edit/dist/filepond-plugin-image-edit.min.css")">
+
+    <!-- Quill CSS -->
+    <link rel="stylesheet" href="@($"{NavigationManager.BaseUri}assets/libs/quill/dist/quill.snow.css")">
+    <link rel="stylesheet" href="@($"{NavigationManager.BaseUri}assets/libs/quill/dist/quill.bubble.css")">
+
+    <!-- Start::page-header -->
+    <SpkPageHeader PageItems="PageItems" />
+    <!-- End::page-header -->
+
+    <!-- Start::row-1 -->
+    <div class="row">
+        <div class="col-xxl-12 col-xl-12 col-lg-12 col-md-12 col-sm-12">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">New Blog</div>
+                </div>
+                <div class="card-body">
+                    <div class="row gy-3">
+                        <div class="col-xl-12">
+                            <label for="blog-title" class="form-label">Blog Title</label>
+                            <input type="text" class="form-control" id="blog-title" placeholder="Blog Title">
+                        </div>
+                        <div class="col-xl-6">
+                            <label for="blog-category" class="form-label">Blog Category</label>
+                            <select class="form-control tomselect">
+                                <option value="">Select Category</option>
+                                <option value="Choice 1">Nature</option>
+                                <option value="Choice 2">Sports</option>
+                                <option value="Choice 3">Food</option>
+                                <option value="Choice 3">Travel</option>
+                                <option value="Choice 3">Fashion</option>
+                                <option value="Choice 3">Beauty</option>
+                            </select>
+                        </div>
+                        <div class="col-xl-6">
+                            <label for="blog-author-email" class="form-label">Email</label>
+                            <input type="text" class="form-control" id="blog-author-email" placeholder="Enter Email">
+                        </div>
+                        <div class="col-xl-6">
+                            <label for="blog-author" class="form-label">Blog Author</label>
+                            <input type="text" class="form-control" id="blog-author" placeholder="Enter Name">
+                        </div>
+                        <div class="col-xl-6">
+                            <label for="publish-time" class="form-label">Publish Time</label>
+                            <Flatpickr class="form-control" @ref="_timepikcr" Options="@_timepikcrOptions" placeholder="Choose time"/>
+                        </div>
+                        <div class="col-xl-12">
+                            <label for="blog-tags" class="form-label">Blog Tags</label>
+                            <select class="form-control tomselect-multiple" name="blog-tags" id="blog-tags" multiple>
+                                <option value="Top Blog" selected>Top Blog</option>
+                                <option value="Blogger">Blogger</option>
+                                <option value="Adventure">Adventure</option>
+                                <option value="Landscape" selected>Landscape</option>
+                            </select>
+                        </div>
+                        <div class="col-xl-6">
+                            <label for="publish-date" class="form-label">Publish Date</label>
+                            <Flatpickr class="form-control" @ref="_datetime" Options="@_flatpickrOptions2"  placeholder="Choose date and time"/>
+                        </div>
+                        <div class="col-xl-6">
+                            <label for="product-status-add" class="form-label">Published Status</label>
+                            <select class="form-control tomselect">
+                                <option value="">Select</option>
+                                <option value="Published">Published</option>
+                                <option value="Scheduled">Hold</option>
+                            </select>
+                        </div>
+                        <div class="col-xl-12 blog-images-container">
+                            <label for="blog-author-email" class="form-label">Blog Images</label>
+                            <input type="file" class="multiple-filepond" name="filepond" multiple data-allow-reorder="true" data-max-file-size="3MB" data-max-files="6">
+                        </div>
+                        <div class="col-xl-12">
+                            <label class="form-label">Blog Content</label>
+                            <div id="product-features">
+                                <SpkEditor @ref="QuillHtml" ShowMainHeader=true ShowFont=true ShowTextFormatting=true ShowBlockFormatting=true ShowHeader=true ShowLists=true ShowColor=true ShowAlignment=true ShowClean=true />
+                            </div>
+                        </div>
+                        <div class="col-xl-12">
+                            <label class="form-label">Blog Type</label>
+                            <div class="d-flex align-items-center">
+                                <div class="form-check me-3">
+                                    <input class="form-check-input" type="radio" name="blog-type" id="blog-free1" checked>
+                                    <label class="form-check-label" for="blog-free1">
+                                        Free
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="blog-type" id="blog-paid1">
+                                    <label class="form-check-label" for="blog-paid1">
+                                        Paid
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="btn-list text-end">
+                        <SpkButtons ButtonClass="btn-primary1">Save As Draft</SpkButtons>
+                        <SpkButtons ButtonClass="btn-primary me-0">Post Blog</SpkButtons>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--End::row-1 -->
+
+    <!-- TomSelect JS -->
+    <script src="@($"{NavigationManager.BaseUri}assets/libs/tom-select/dist/js/tom-select.complete.min.js")"></script>
+    <script src="@($"{NavigationManager.BaseUri}assets/js/tomselect.js")"></script>
+
+    <!-- Quill Editor JS -->
+    <script src="@($"{NavigationManager.BaseUri}assets/libs/quill/dist/quill.js")"></script>
+    <script src="_content/Blazored.TextEditor/quill-blot-formatter.min.js"></script>
+    <script src="_content/Blazored.TextEditor/Blazored-BlazorQuill.js"></script>
+
+    <!-- Filepond JS -->
+    <script src="@($"{NavigationManager.BaseUri}assets/libs/filepond/dist/filepond.min.js")"></script>
+    <script src="@($"{NavigationManager.BaseUri}assets/libs/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.js")"></script>
+    <script src="@($"{NavigationManager.BaseUri}assets/libs/filepond-plugin-image-exif-orientation/dist/filepond-plugin-image-exif-orientation.min.js")"></script>
+    <script src="@($"{NavigationManager.BaseUri}assets/libs/filepond-plugin-file-validate-size/dist/filepond-plugin-file-validate-size.min.js")"></script>
+    <script src="@($"{NavigationManager.BaseUri}assets/libs/filepond-plugin-file-encode/dist/filepond-plugin-file-encode.min.js")"></script>
+    <script src="@($"{NavigationManager.BaseUri}assets/libs/filepond-plugin-image-edit/dist/filepond-plugin-image-edit.min.js")"></script>
+    <script src="@($"{NavigationManager.BaseUri}assets/libs/filepond-plugin-file-validate-type/dist/filepond-plugin-file-validate-type.min.js")"></script>
+    <script src="@($"{NavigationManager.BaseUri}assets/libs/filepond-plugin-file-validate-type/dist/filepond-plugin-file-validate-type.min.js")"></script>
+    <script src="@($"{NavigationManager.BaseUri}assets/libs/filepond-plugin-image-crop/dist/filepond-plugin-image-crop.min.js")"></script>
+    <script src="@($"{NavigationManager.BaseUri}assets/libs/filepond-plugin-image-resize/dist/filepond-plugin-image-resize.min.js")"></script>
+    <script src="@($"{NavigationManager.BaseUri}assets/libs/filepond-plugin-image-transform/dist/filepond-plugin-image-transform.min.js")"></script>
+    <script src="@($"{NavigationManager.BaseUri}assets/js/filepond.js")"></script>  
+    
+@code{
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Pages" },
+        new SpkPageHeader.PageItem { PageTitle = "Blog" },
+        new SpkPageHeader.PageItem { PageTitle = "Blog Create" },
+    };
+}
+
+@code {
+     <!-- Flatpickr JS Start -->
+    public Flatpickr? _datetime;
+    private FlatpickrBlazor.FlatpickrOptions _flatpickrOptions2 = new FlatpickrBlazor.FlatpickrOptions   
+    {
+        EnableTime = true,
+        DateFormat = "Y-m-d H:i",
+    };
+
+    public Flatpickr? _flatpickr;
+    public Flatpickr? _timepikcr;
+     private FlatpickrBlazor.FlatpickrOptions _timepikcrOptions = new FlatpickrBlazor.FlatpickrOptions
+    {
+        EnableTime = true, 
+        DateFormat = "H:i",
+        NoCalendar = true,
+    };    
+    <!-- Flatpickr JS End -->
+
+    <!-- QuilEditor JS Start -->
+     private SpkEditor ? QuillHtml;
+    <!-- QuilEditor JS Start -->
+}

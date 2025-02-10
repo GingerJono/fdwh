@@ -1,0 +1,27 @@
+
+@using CardModel
+
+@code {
+    [Parameter] public Reviews? Review { get; set; }    
+}
+@if(Review != null) {
+   <div class="card custom-card mb-2 overflow-hidden">
+        <div class="card-body">
+            <p class="fs-16">
+                <i class="ri-double-quotes-l fs-1 lh-1 me-3"></i> @Review.Review
+            </p>
+            <div class="d-flex justify-content-end flex-wrap gap-3">
+                <div class="d-flex">
+                    <div class="me-2 my-auto mb-0">
+                        <div class="mb-0 lh-1 fs-12 fw-semibold"> @Review.User
+                            <span class="fs-11 fw-normal ms-2"><i class="ri-star-fill text-warning fs-9 mb-1 align-middle"></i>
+                                @Review.Rating</span></div>
+                        <p class="fs-12 mb-0 op-7">@Review.Designation</p>
+                    </div>
+                    <img src="../assets/images/faces/1.jpg" alt="img"
+                        class="avatar avatar-md avatar-rounded border border-3 border-primary2">
+                </div>
+            </div>
+        </div>
+    </div>
+}

@@ -1,0 +1,53 @@
+@using PricingData
+@inject PricingService PricingService
+@code {
+    [Parameter] public PricingCard? Pricing { get; set; }    
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}
+
+
+@if(Pricing != null){
+<div class="card custom-card pricing-card @Pricing.PricingBg">
+    @if(Pricing.Offer){
+        <div class="pricing-table-item-icon">
+            <i class="fe fe-zap me-2"></i> @Pricing.OfferValue
+        </div>
+    }
+    <div class="card-body p-3 border-bottom border-block-end-dashed @(!string.IsNullOrEmpty(Pricing.PricingBg) ?"border-white-1":"")">
+        <h6 class="fw-medium mb-1 @(!string.IsNullOrEmpty(Pricing.PricingBg) ?"text-fixed-white":"")">@Pricing.Title</h6>
+        <h2 class="mb-3 fw-semibold d-block  @(!string.IsNullOrEmpty(Pricing.PricingBg) ?"text-fixed-white":"")">@Pricing.Amount<span class="fs-12 fw-medium ms-1 @(!string.IsNullOrEmpty(Pricing.PricingBg) ?"op-8":"")"> / @(Pricing.Plan ? "Month":"Annum")</span></h2>
+        <span class="d-block  @(!string.IsNullOrEmpty(Pricing.PricingBg) ?"text-fixed-white op-7":"text-muted mb-1") fs-11">@Pricing.Desc</span>
+    </div>
+    <div class="card-body @Pricing.PricingClass @(!string.IsNullOrEmpty(Pricing.PricingBg) ?"text-fixed-white":"")">
+        <ul class="list-unstyled pricing-body">
+            @if(Pricing.Features?.Any() == true){
+                @foreach (var List in Pricing.Features)
+                {
+                    <li>
+                        <div class="d-flex align-items-center">
+                            <span class="avatar avatar-xs svg-success">
+                                <i class="ti ti-circle-arrow-right-filled @(!string.IsNullOrEmpty(Pricing.PricingBg) ?"op-8":"text-primary") fs-18"></i>
+                            </span>
+                            <span class="ms-2 my-auto flex-fill">
+                               @List.FeatureDesc
+                            </span>
+                            @if(!string.IsNullOrEmpty(List.Badge)){
+                                <SpkBadge BadgeClass="@(!string.IsNullOrEmpty(Pricing.PricingBg) ?"bg-success":"bg-primary2-transparent")" IsRounded=true>@List.Badge</SpkBadge>
+                            } 
+                            @if(!string.IsNullOrEmpty(List.InfoDesc)){
+                                <SpkTooltip TooltipClass="@($"{(!string.IsNullOrEmpty(Pricing.PricingBg) ? "bg-white-transparent op-8" : "bg-info-transparent")} p-1 lh-1 rounded-pill")" Tag="span" TooltipTitle="@List.InfoDesc"><i class="ri-information-2-line"></i></SpkTooltip>
+                            }
+                            @if(!string.IsNullOrEmpty(List.Validity)){
+                                <span class="@(!string.IsNullOrEmpty(Pricing.PricingBg) ?"op-5":"text-muted") fs-12 fw-medium">@List.Validity</span>
+                            }
+                        </div>
+                    </li>
+                }
+            }
+        </ul>
+    </div>
+    <div class="card-footer border-top border-block-start-dashed @(!string.IsNullOrEmpty(Pricing.PricingBg) ?"border-white-1 ":"")p-3">
+        <SpkButtons ButtonClass="@(!string.IsNullOrEmpty(Pricing.PricingBg) == true ? "btn-white d-grid w-100" : "btn-primary d-grid w-100")" ButtonSize="btn-lg"><span class="ms-4 me-4">Get Started!</span></SpkButtons>
+    </div>
+</div>
+}

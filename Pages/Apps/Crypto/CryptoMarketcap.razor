@@ -1,0 +1,362 @@
+@page "/crypto-marketcap"
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using ApexSeries
+@using CryptoData
+@inject CryptoDataService CryptoDataService
+@using CardModel
+
+    <!-- Page Header -->
+    <SpkPageHeader PageItems="PageItems" />
+    <!-- Page Header Close -->
+
+    <!-- Start::row-1 -->
+    <div class="row">
+         @foreach(var MainCard in CryptoDataService.GetMarketcapData()) {
+            <div class="col-xxl-4 col-xl-6 col-lg-12">
+                <SpkMarketcapCard MainCard="MainCard" ChartOptions="GenerateDynamicChartOptions(MainCard)" ChartItems="@CryptoDataService.GetMarketcapChart(MainCard)" SeriesConfigs="GenerateDynamicSeriesConfigs()"/>
+            </div>
+        }
+    </div>
+    <!--End::row-1 -->
+
+    <!-- Start::row-2  -->
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-header justify-content-between">
+                    <div class="card-title">
+                        Crypto MarketCap
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <div>
+                            <input class="form-control form-control-sm" type="text" placeholder="Search Here" aria-label=".form-control-sm example">
+                        </div>
+                        <SpkDropdowns Tag="a" DropdownClass="btn btn-primary btn-sm" DropdownText="Sort By<i class='ri-arrow-down-s-line align-middle ms-1 d-inline-block'></i>" DropdownToggle=false>
+                            <ChildContent2>
+                                <ul class="dropdown-menu" role="menu">
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Market Cap</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Price</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Trading Volume</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Price Change (24h)</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Rank</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">A - Z</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">All-Time High (ATH)</a></li>
+                                </ul>
+                            </ChildContent2>
+                        </SpkDropdowns>
+                        <div>
+                            <SpkButtons ButtonClass="btn-secondary" ButtonSize="btn-sm">View All</SpkButtons>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <SpkTables Items="CryptoDataService.GetMarketCapHeadersData()" Tableclass="text-nowrap">
+                         @foreach(var Item in CryptoDataService.GetMarketCapListData()){
+                            <tr>
+                                <td class="text-center">
+                                    <a href="javascript:void(0);"><i class="ri-star-line fs-16 text-muted"></i></a>
+                                </td>
+                                <td>@Item.Id</td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="lh-1">
+                                            <span class="avatar avatar-xs avatar-rounded">
+                                                <img src="@Item.CryptoImg" alt="">
+                                            </span>
+                                        </div>
+                                        <div class="fw-medium"><a href="javascript:void(0);">@Item.Crypto</a></div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="fw-medium">@Item.MarketCap</span>
+                                </td>
+                                <td>
+                                    <div class="overflow-hidden">
+                                        <SpkApex TItem="CryptoData.ExchangeChart" ChartOptions="GenerateDynamic1ChartOptions(Item)" Items="CryptoDataService.GetMarketCapListChart(Item)" Series="GenerateDynamic1SeriesConfigs()" />
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="@(Item.Change ? "text-success" : "text-danger") fw-medium"><i class="@(Item.Change ? "ti ti-arrow-narrow-up" : "ti ti-arrow-narrow-down") fs-15 fw-medium"></i>@Item.Changevalue</span>
+                                </td>
+                                <td>
+                                    <span class="fw-medium">
+                                        <a href="javascript:void(0);">@Item.Price</a>
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="@(Item.Change24h ? "text-success" : "text-danger") fw-medium"><i class="@(Item.Change ? "ti ti-arrow-narrow-up" : "ti ti-arrow-narrow-down") fs-15 fw-medium"></i>@Item.Changevalue24h</span>
+                                </td>
+                                <td>
+                                    <a href="javascript:void(0)">
+                                        <span class="d-block fw-medium">@Item.Volume</span>
+                                    </a>
+                                </td>
+                                <td>
+                                    <a href="javascript:void(0);">
+                                        <span class="fw-medium d-block  @(!string.IsNullOrEmpty(Item.SupplyValue) == true ? "mb-2":"")" >
+                                            @Item.Supply
+                                        </span>
+                                        @if(!string.IsNullOrEmpty(Item.SupplyValue)){
+                                            <SpkProgress ProgressClass="progress-stacked w-75" ProgressSize="progress-xs">
+                                                <div class="progress-bar bg-success op-5" role="progressbar" style="width: @Item.SupplyValue%"
+                                                    aria-valuenow="@Item.SupplyValue" aria-valuemin="0" aria-valuemax="100"></div>
+                                                <div class="progress-bar bg-danger op-5" role="progressbar" style="width: @Item.SupplyValue2%"
+                                                    aria-valuenow="@Item.SupplyValue2" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </SpkProgress>
+                                        }
+                                    </a>    
+                                </td>
+                                <td>
+                                    <SpkButtons ButtonClass="btn-success-light" ButtonSize="btn-sm">Trade</SpkButtons>
+                                </td>
+                            </tr>
+                         }
+                    </SpkTables>
+                </div>
+                <div class="card-footer border-top-0">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination mb-0 float-end">
+                            <li class="page-item disabled">
+                                <a class="page-link">Previous</a>
+                            </li>
+                            <li class="page-item"><a class="page-link" href="javascript:void(0);">1</a></li>
+                            <li class="page-item active" aria-current="page">
+                                <a class="page-link" href="javascript:void(0);">2</a>
+                            </li>
+                            <li class="page-item"><a class="page-link" href="javascript:void(0);">3</a></li>
+                            <li class="page-item">
+                                <a class="page-link" href="javascript:void(0);">Next</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End::row-2  -->
+
+@code {    
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Apps" },
+        new SpkPageHeader.PageItem { PageTitle = "Crypto" },
+        new SpkPageHeader.PageItem { PageTitle = "Marketcap" },
+    };
+    
+    // CryptoCard Start //
+    private ApexChartOptions<ExchangeChart> GenerateDynamicChartOptions(MarketCap MainCard) =>
+    MainCard.CryptoTitle switch
+    {
+        "Bitcoin" => MarketCap1ChartOptions ,
+        "Dash" => MarketCap2ChartOptions ,
+        _ => MarketCap3ChartOptions 
+    };
+    private List<SeriesConfig<ExchangeChart>> GenerateDynamicSeriesConfigs() {
+        return new List<SeriesConfig<ExchangeChart>>
+        {
+            new SeriesConfig<ExchangeChart>
+            {
+                SeriesType = SeriesType.Area,  
+                XValueSelector = e => e.Series,  
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.Value)
+            },
+        };
+    } 
+    private ApexChartOptions<ExchangeChart> MarketCap1ChartOptions  { get; set; } = new();
+    private ApexChartOptions<ExchangeChart> MarketCap2ChartOptions { get; set; } = new();
+    private ApexChartOptions<ExchangeChart> MarketCap3ChartOptions { get; set; } = new();
+    //  CryptoCard End // 
+    
+    // CryptoCard Start //
+    private ApexChartOptions<ExchangeChart> GenerateDynamic1ChartOptions(MarketCapList Item) =>
+    Item.Id switch
+    {
+        1 => MarketCaplist1ChartOptions,
+        2 => MarketCaplist2ChartOptions,
+        3 => MarketCaplist3ChartOptions,
+        4 => MarketCaplist4ChartOptions,
+        5 => MarketCaplist5ChartOptions,
+        6 => MarketCaplist6ChartOptions,
+        7 => MarketCaplist7ChartOptions,
+        8 => MarketCaplist8ChartOptions,
+        9 => MarketCaplist9ChartOptions,
+        _ => MarketCaplist10ChartOptions,
+    };
+    private List<SeriesConfig<ExchangeChart>> GenerateDynamic1SeriesConfigs() {
+        return new List<SeriesConfig<ExchangeChart>>
+        {
+            new SeriesConfig<ExchangeChart>
+            {
+                SeriesType = SeriesType.Bar,  
+                XValueSelector = e => e.Series,  
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.Value)
+            },
+        };
+    } 
+    private ApexChartOptions<ExchangeChart>  MarketCaplist1ChartOptions  { get; set; } = new();
+    private ApexChartOptions<ExchangeChart>  MarketCaplist2ChartOptions  { get; set; } = new();
+    private ApexChartOptions<ExchangeChart>  MarketCaplist3ChartOptions  { get; set; } = new();
+    private ApexChartOptions<ExchangeChart>  MarketCaplist4ChartOptions  { get; set; } = new();
+    private ApexChartOptions<ExchangeChart>  MarketCaplist5ChartOptions  { get; set; } = new();
+    private ApexChartOptions<ExchangeChart>  MarketCaplist6ChartOptions  { get; set; } = new();
+    private ApexChartOptions<ExchangeChart>  MarketCaplist7ChartOptions  { get; set; } = new();
+    private ApexChartOptions<ExchangeChart>  MarketCaplist8ChartOptions  { get; set; } = new();
+    private ApexChartOptions<ExchangeChart>  MarketCaplist9ChartOptions  { get; set; } = new();
+    private ApexChartOptions<ExchangeChart>  MarketCaplist10ChartOptions  { get; set; } = new();
+    //  CryptoCard End // 
+
+    protected override void OnInitialized() {
+
+        // CryptoCard Start //
+        List<string> color1 = new List<string> { "rgb(40, 207, 160)","rgba(40, 207, 160, 0.1)","rgba(40, 207, 160, 0.1)"};
+        List<string> color2 = new List<string> { "rgb(230, 112, 217)","rgba(230, 112, 217, 0.1)","rgba(230, 112, 217, 0.1)"};
+        List<string> color3 = new List<string> { "rgb(33, 206, 173)","rgba(33, 206, 173, 0.1)","rgba(33, 206, 173, 0.1)"};
+            
+        MarketCap1ChartOptions   = InitializeChartOptions<ExchangeChart>(color1);
+        MarketCap2ChartOptions   = InitializeChartOptions<ExchangeChart>(color2);
+        MarketCap3ChartOptions   = InitializeChartOptions<ExchangeChart>(color3);
+        //  CryptoCard End //
+        
+
+        // MarketcapList Start //
+        List<string> MarketCaplistcolor1 = new List<string> { "rgb(227, 84, 212)"};
+        List<string> MarketCaplistcolor2 = new List<string> { "rgb(33, 206, 158)"};
+        List<string> MarketCaplistcolor3 = new List<string> { "rgb(33, 206, 158)"};
+        List<string> MarketCaplistcolor4 = new List<string> { "rgb(33, 206, 158)"};
+        List<string> MarketCaplistcolor5 = new List<string> { "rgb(227, 84, 212)"};
+        List<string> MarketCaplistcolor6 = new List<string> { "rgb(33, 206, 158)"};
+        List<string> MarketCaplistcolor7 = new List<string> { "rgb(33, 206, 158)"};
+        List<string> MarketCaplistcolor8 = new List<string> { "rgb(227, 84, 212)"};
+        List<string> MarketCaplistcolor9 = new List<string> { "rgb(227, 84, 212)"};
+        List<string> MarketCaplistcolor10 = new List<string> { "rgb(33, 206, 158)"};
+            
+        MarketCaplist1ChartOptions   = InitializeChart1Options<ExchangeChart>(MarketCaplistcolor1);
+        MarketCaplist2ChartOptions   = InitializeChart1Options<ExchangeChart>(MarketCaplistcolor2);
+        MarketCaplist3ChartOptions   = InitializeChart1Options<ExchangeChart>(MarketCaplistcolor3);
+        MarketCaplist4ChartOptions   = InitializeChart1Options<ExchangeChart>(MarketCaplistcolor4);
+        MarketCaplist5ChartOptions   = InitializeChart1Options<ExchangeChart>(MarketCaplistcolor5);
+        MarketCaplist6ChartOptions   = InitializeChart1Options<ExchangeChart>(MarketCaplistcolor6);
+        MarketCaplist7ChartOptions   = InitializeChart1Options<ExchangeChart>(MarketCaplistcolor7);
+        MarketCaplist8ChartOptions   = InitializeChart1Options<ExchangeChart>(MarketCaplistcolor8);
+        MarketCaplist9ChartOptions   = InitializeChart1Options<ExchangeChart>(MarketCaplistcolor9);
+        MarketCaplist10ChartOptions   = InitializeChart1Options<ExchangeChart>(MarketCaplistcolor10);
+        //  MarketcapList End //
+    }
+    // CryptoCard Start //
+    private ApexChartOptions<T> InitializeChartOptions<T>(List<string> colors) where T : class, ILineGraph
+    {
+        return new ApexChartOptions<T>
+        {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = false},
+                }, 
+                Height ="40px",
+                Width = "163px",
+                Sparkline = new () {
+                    Enabled = true
+                },
+            },
+            Grid = new Grid {
+                BorderColor = "transparent",
+            },
+            Colors = new Color(colors),
+            Stroke = new Stroke { 
+                Curve = Curve.Smooth,
+                LineCap = ApexCharts.LineCap.Butt,
+                Width = 1,
+                DashArray= [2]
+            },
+            Tooltip = new Tooltip
+            {
+                Enabled = true,
+                X = new TooltipX
+                {
+                    Show = false
+                },
+                Y = new TooltipY
+                {
+                    Title = new TooltipYTitle
+                    {
+                        Formatter = @"function(seriesName) {
+                            return '';
+                        }"
+                    }
+                },
+                Marker = new TooltipMarker
+                {
+                    Show = false
+                },
+                Theme = ApexCharts.Mode.Dark
+            },
+            Xaxis =  new XAxis {
+                Crosshairs= new() {
+                    Show= false,
+                }
+            },
+            Fill = new Fill {
+                Type = new List<FillType> { FillType.Gradient, FillType.Gradient },
+                Gradient = new FillGradient {
+                    OpacityFrom = 0.5,
+                    OpacityTo = 0.2,
+                    Stops= [0, 60],
+                    ColorStops = new List<FillGradientStops> {
+                        new FillGradientStops { Offset = 0, Color = colors.Count > 1 ? colors[1] : colors[0], Opacity = 1 },
+                        new FillGradientStops { Offset = 60, Color = colors.Count > 2 ? colors[2] : colors[0], Opacity = 1 }
+                    },
+                }
+            },
+        };
+    }
+    //  CryptoCard End // 
+
+    // MarketcapList Start //
+    private ApexChartOptions<T> InitializeChart1Options<T>(List<string> colors) where T : class, ILineGraph
+    {
+        return new ApexChartOptions<T>
+        {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = false},
+                }, 
+                Height ="30px",
+                Width ="120px",
+                Sparkline = new () {
+                    Enabled = true
+                },
+            }, 
+            PlotOptions = new PlotOptions {
+                Bar = new PlotOptionsBar {
+                    Horizontal = false,
+                    BorderRadius = 2,
+                    ColumnWidth = "100%",
+                }
+            },
+            Colors = new Color(colors),
+            Stroke = new Stroke { 
+                Curve = Curve.Smooth,
+                Width = 2,
+            },
+            Tooltip = new Tooltip{
+                Enabled = true,
+                Fixed=  new() {
+                    Enabled = false,
+                },
+                X = new TooltipX
+                {
+                    Show = false
+                },
+                Y = new TooltipY
+                {
+                    Title = new TooltipYTitle
+                    {
+                        Formatter = @"function(seriesName) {
+                            return '';
+                        }"
+                    }
+                },
+            },
+        };
+    }
+    //  MarketcapList End // 
+}

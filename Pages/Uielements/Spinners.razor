@@ -1,0 +1,592 @@
+@page "/spinners"
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+ 
+    <!-- Prism CSS -->
+    <link rel="stylesheet" href="@($"{NavigationManager.BaseUri}assets/libs/prismjs/themes/prism-coy.min.css")">
+      
+    <!-- Page Header -->
+    <SpkPageHeader PageItems="PageItems"/>
+    <!-- Page Header Close -->
+
+    <!-- Start:: row-1 -->
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-header justify-content-between">
+                    <div class="card-title">
+                        Colors
+                    </div>
+                    <div class="prism-toggle">
+                        <SpkButtons ButtonClass="btn-primary-light" ButtonSize="btn-sm">Show Code<i class="ri-code-line ms-2 d-inline-block align-middle"></i></SpkButtons>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <div class="spinner-border text-primary1" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <div class="spinner-border text-primary2" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <div class="spinner-border text-primary3" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <div class="spinner-border text-secondary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <div class="spinner-border text-success" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <div class="spinner-border text-danger" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <div class="spinner-border text-warning" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <div class="spinner-border text-info" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <div class="spinner-border text-light" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <div class="spinner-border text-dark" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+                <div class="card-footer d-none border-top-0">
+<!-- Prism Code -->
+<pre class="language-html"><code class="language-html">&lt;div class="spinner-border text-primary" role="status"&gt;
+&lt;span class="visually-hidden"&gt;Loading...&lt;/span&gt;
+&lt;/div&gt;
+&lt;div class="spinner-border text-primary1" role="status"&gt;
+&lt;span class="visually-hidden"&gt;Loading...&lt;/span&gt;
+&lt;/div&gt;
+&lt;div class="spinner-border text-primary2" role="status"&gt;
+&lt;span class="visually-hidden"&gt;Loading...&lt;/span&gt;
+&lt;/div&gt;
+&lt;div class="spinner-border text-primary3" role="status"&gt;
+&lt;span class="visually-hidden"&gt;Loading...&lt;/span&gt;
+&lt;/div&gt;
+&lt;div class="spinner-border text-secondary" role="status"&gt;
+&lt;span class="visually-hidden"&gt;Loading...&lt;/span&gt;
+&lt;/div&gt;
+&lt;div class="spinner-border text-success" role="status"&gt;
+&lt;span class="visually-hidden"&gt;Loading...&lt;/span&gt;
+&lt;/div&gt;
+&lt;div class="spinner-border text-danger" role="status"&gt;
+&lt;span class="visually-hidden"&gt;Loading...&lt;/span&gt;
+&lt;/div&gt;
+&lt;div class="spinner-border text-warning" role="status"&gt;
+&lt;span class="visually-hidden"&gt;Loading...&lt;/span&gt;
+&lt;/div&gt;
+&lt;div class="spinner-border text-info" role="status"&gt;
+&lt;span class="visually-hidden"&gt;Loading...&lt;/span&gt;
+&lt;/div&gt;
+&lt;div class="spinner-border text-light" role="status"&gt;
+&lt;span class="visually-hidden"&gt;Loading...&lt;/span&gt;
+&lt;/div&gt;
+&lt;div class="spinner-border text-dark" role="status"&gt;
+&lt;span class="visually-hidden"&gt;Loading...&lt;/span&gt;
+&lt;/div&gt;</code></pre>
+<!-- Prism Code -->
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-header justify-content-between">
+                    <div class="card-title">
+                        Growing spinner
+                    </div>
+                    <div class="prism-toggle">
+                        <SpkButtons ButtonClass="btn-primary-light" ButtonSize="btn-sm">Show Code<i class="ri-code-line ms-2 d-inline-block align-middle"></i></SpkButtons>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="spinner-grow text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <div class="spinner-grow text-primary1" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <div class="spinner-grow text-primary2" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <div class="spinner-grow text-primary3" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <div class="spinner-grow text-secondary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <div class="spinner-grow text-success" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <div class="spinner-grow text-danger" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <div class="spinner-grow text-warning" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <div class="spinner-grow text-info" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <div class="spinner-grow text-light" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <div class="spinner-grow text-dark" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+                <div class="card-footer d-none border-top-0">
+<!-- Prism Code -->
+<pre class="language-html"><code class="language-html">&lt;div class="spinner-grow text-primary" role="status"&gt;
+&lt;span class="visually-hidden"&gt;Loading...&lt;/span&gt;
+&lt;/div&gt;
+&lt;div class="spinner-grow text-primary1" role="status"&gt;
+&lt;span class="visually-hidden"&gt;Loading...&lt;/span&gt;
+&lt;/div&gt;
+&lt;div class="spinner-grow text-primary2" role="status"&gt;
+&lt;span class="visually-hidden"&gt;Loading...&lt;/span&gt;
+&lt;/div&gt;
+&lt;div class="spinner-grow text-primary3" role="status"&gt;
+&lt;span class="visually-hidden"&gt;Loading...&lt;/span&gt;
+&lt;/div&gt;
+&lt;div class="spinner-grow text-secondary" role="status"&gt;
+&lt;span class="visually-hidden"&gt;Loading...&lt;/span&gt;
+&lt;/div&gt;
+&lt;div class="spinner-grow text-success" role="status"&gt;
+&lt;span class="visually-hidden"&gt;Loading...&lt;/span&gt;
+&lt;/div&gt;
+&lt;div class="spinner-grow text-danger" role="status"&gt;
+&lt;span class="visually-hidden"&gt;Loading...&lt;/span&gt;
+&lt;/div&gt;
+&lt;div class="spinner-grow text-warning" role="status"&gt;
+&lt;span class="visually-hidden"&gt;Loading...&lt;/span&gt;
+&lt;/div&gt;
+&lt;div class="spinner-grow text-info" role="status"&gt;
+&lt;span class="visually-hidden"&gt;Loading...&lt;/span&gt;
+&lt;/div&gt;
+&lt;div class="spinner-grow text-light" role="status"&gt;
+&lt;span class="visually-hidden"&gt;Loading...&lt;/span&gt;
+&lt;/div&gt;
+&lt;div class="spinner-grow text-dark" role="status"&gt;
+&lt;span class="visually-hidden"&gt;Loading...&lt;/span&gt;
+&lt;/div&gt;</code></pre>
+<!-- Prism Code -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End:: row-1 -->
+
+    <!-- Start:: row-2 -->
+    <div class="row">
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header justify-content-between">
+                    <div class="card-title">
+                        Growing spinner
+                    </div>
+                    <div class="prism-toggle">
+                        <SpkButtons ButtonClass="btn-primary-light" ButtonSize="btn-sm">Show Code<i class="ri-code-line ms-2 d-inline-block align-middle"></i></SpkButtons>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="spinner-grow" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+                <div class="card-footer d-none border-top-0">
+<!-- Prism Code -->
+<pre class="language-html"><code class="language-html">&lt;div class="spinner-grow" role="status"&gt;
+&lt;span class="visually-hidden"&gt;Loading...&lt;/span&gt;
+&lt;/div&gt;</code></pre>
+<!-- Prism Code -->
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header justify-content-between">
+                    <div class="card-title">
+                        Border spinner
+                    </div>
+                    <div class="prism-toggle">
+                        <SpkButtons ButtonClass="btn-primary-light" ButtonSize="btn-sm">Show Code<i class="ri-code-line ms-2 d-inline-block align-middle"></i></SpkButtons>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+                <div class="card-footer d-none border-top-0">
+<!-- Prism Code -->
+<pre class="language-html"><code class="language-html">&lt;div class="spinner-border" role="status"&gt;
+&lt;span class="visually-hidden"&gt;Loading...&lt;/span&gt;
+&lt;/div&gt;</code></pre>
+<!-- Prism Code -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End:: row-2 -->
+
+    <!-- Start:: row-3 -->
+    <div class="row">
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header justify-content-between">
+                    <div class="card-title">
+                        Alignment Flex
+                    </div>
+                    <div class="prism-toggle">
+                        <SpkButtons ButtonClass="btn-primary-light" ButtonSize="btn-sm">Show Code<i class="ri-code-line ms-2 d-inline-block align-middle"></i></SpkButtons>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-center mb-4">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <strong>Loading...</strong>
+                        <div class="spinner-border ms-auto" role="status" aria-hidden="true"></div>
+                    </div>
+                </div>
+                <div class="card-footer d-none border-top-0">
+<!-- Prism Code -->
+<pre class="language-html"><code class="language-html">&lt;div class="d-flex justify-content-center mb-4"&gt;
+&lt;div class="spinner-border" role="status"&gt;
+&lt;span class="visually-hidden"&gt;Loading...&lt;/span&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="d-flex align-items-center"&gt;
+&lt;strong&gt;Loading...&lt;/strong&gt;
+&lt;div class="spinner-border ms-auto" role="status" aria-hidden="true"&gt;&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+<!-- Prism Code -->
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header justify-content-between">
+                    <div class="card-title">
+                        Alignment Float
+                    </div>
+                    <div class="prism-toggle">
+                        <SpkButtons ButtonClass="btn-primary-light" ButtonSize="btn-sm">Show Code<i class="ri-code-line ms-2 d-inline-block align-middle"></i></SpkButtons>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="clearfix mb-4">
+                        <div class="spinner-border float-end" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                    <div class="clearfix">
+                        <div class="spinner-border float-start" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-none border-top-0">
+<!-- Prism Code -->
+<pre class="language-html"><code class="language-html">&lt;div class="clearfix mb-4"&gt;
+&lt;div class="spinner-border float-end" role="status"&gt;
+&lt;span class="visually-hidden"&gt;Loading...&lt;/span&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="clearfix"&gt;
+&lt;div class="spinner-border float-start" role="status"&gt;
+&lt;span class="visually-hidden"&gt;Loading...&lt;/span&gt;
+&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+<!-- Prism Code -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End:: row-3 -->
+
+    <!-- Start:: row-4 -->
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-header justify-content-between">
+                    <div class="card-title">Buttons</div>
+                    <div class="prism-toggle">
+                        <SpkButtons ButtonClass="btn-primary-light" ButtonSize="btn-sm">Show Code<i class="ri-code-line ms-2 d-inline-block align-middle"></i></SpkButtons>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="btn-list">
+                        <SpkButtons ButtonClass="btn-primary-light" disabled>
+                            <span class="spinner-border spinner-border-sm align-middle" role="status"
+                                aria-hidden="true"></span>
+                            <span class="visually-hidden">Loading...</span>
+                        </SpkButtons>
+                        <SpkButtons ButtonClass="btn-primary-light" disabled>
+                            <span class="spinner-border spinner-border-sm align-middle" role="status"
+                                aria-hidden="true"></span>
+                            Loading...
+                        </SpkButtons>
+                        <SpkButtons ButtonClass="btn-primary-light" disabled>
+                            <span class="spinner-grow spinner-grow-sm align-middle" role="status"
+                                aria-hidden="true"></span>
+                            <span class="visually-hidden">Loading...</span>
+                        </SpkButtons>
+                        <SpkButtons ButtonClass="btn-primary-light" disabled>
+                            <span class="spinner-grow spinner-grow-sm align-middle" role="status"
+                                aria-hidden="true"></span>
+                            Loading...
+                        </SpkButtons>
+                        <SpkButtons ButtonClass="btn-primary1-light" disabled>
+                            <span class="spinner-grow spinner-grow-sm align-middle" role="status"
+                                aria-hidden="true"></span>
+                            Loading...
+                        </SpkButtons>
+                        <SpkButtons ButtonClass="btn-primary2-light" disabled>
+                            <span class="spinner-grow spinner-grow-sm align-middle" role="status"
+                                aria-hidden="true"></span>
+                            Loading...
+                        </SpkButtons>
+                        <SpkButtons ButtonClass="btn-primary3-light" disabled>
+                            <span class="spinner-grow spinner-grow-sm align-middle" role="status"
+                                aria-hidden="true"></span>
+                            Loading...
+                        </SpkButtons>
+                        <SpkButtons ButtonClass="btn-secondary-light" disabled>
+                            <span class="spinner-grow spinner-grow-sm align-middle" role="status"
+                                aria-hidden="true"></span>
+                            Loading...
+                        </SpkButtons>
+                        <SpkButtons ButtonClass="btn-success-light" disabled>
+                            <span class="spinner-grow spinner-grow-sm align-middle" role="status"
+                                aria-hidden="true"></span>
+                            Loading...
+                        </SpkButtons>
+                        <SpkButtons ButtonClass="btn-info-light" disabled>
+                            <span class="spinner-grow spinner-grow-sm align-middle" role="status"
+                                aria-hidden="true"></span>
+                            Loading...
+                        </SpkButtons>
+                        <SpkButtons ButtonClass="btn-warning-light" disabled>
+                            <span class="spinner-grow spinner-grow-sm align-middle" role="status"
+                                aria-hidden="true"></span>
+                            Loading...
+                        </SpkButtons>
+                        <SpkButtons ButtonClass="btn-danger-light" disabled>
+                            <span class="spinner-grow spinner-grow-sm align-middle" role="status"
+                                aria-hidden="true"></span>
+                            Loading...
+                        </SpkButtons>
+                        <SpkButtons ButtonClass="btn-light" disabled>
+                            <span class="spinner-grow spinner-grow-sm align-middle" role="status"
+                                aria-hidden="true"></span>
+                            Loading...
+                        </SpkButtons>
+                        <SpkButtons ButtonClass="btn-dark text-fixed-white" disabled>
+                            <span class="spinner-grow spinner-grow-sm align-middle" role="status"
+                                aria-hidden="true"></span>
+                            Loading...
+                        </SpkButtons>
+                    </div>
+                </div>
+                <div class="card-footer d-none border-top-0">
+<!-- Prism Code -->
+<pre class="language-html"><code class="language-html">&lt;div class="btn-list"&gt;
+&lt;button class="btn btn-primary-light" type="button" disabled&gt;
+&lt;span class="spinner-border spinner-border-sm align-middle" role="status"
+aria-hidden="true"&gt;&lt;/span&gt;
+&lt;span class="visually-hidden"&gt;Loading...&lt;/span&gt;
+&lt;/button&gt;
+&lt;button class="btn btn-primary-light" type="button" disabled&gt;
+&lt;span class="spinner-border spinner-border-sm align-middle" role="status"
+aria-hidden="true"&gt;&lt;/span&gt;
+Loading...
+&lt;/button&gt;
+&lt;button class="btn btn-primary-light" type="button" disabled&gt;
+&lt;span class="spinner-grow spinner-grow-sm align-middle" role="status"
+aria-hidden="true"&gt;&lt;/span&gt;
+&lt;span class="visually-hidden"&gt;Loading...&lt;/span&gt;
+&lt;/button&gt;
+&lt;button class="btn btn-primary-light" type="button" disabled&gt;
+&lt;span class="spinner-grow spinner-grow-sm align-middle" role="status"
+aria-hidden="true"&gt;&lt;/span&gt;
+Loading...
+&lt;/button&gt;
+&lt;button class="btn btn-primary1-light" type="button" disabled&gt;
+&lt;span class="spinner-grow spinner-grow-sm align-middle" role="status"
+aria-hidden="true"&gt;&lt;/span&gt;
+Loading...
+&lt;/button&gt;
+&lt;button class="btn btn-primary2-light" type="button" disabled&gt;
+&lt;span class="spinner-grow spinner-grow-sm align-middle" role="status"
+aria-hidden="true"&gt;&lt;/span&gt;
+Loading...
+&lt;/button&gt;
+&lt;button class="btn btn-primary3-light" type="button" disabled&gt;
+&lt;span class="spinner-grow spinner-grow-sm align-middle" role="status"
+aria-hidden="true"&gt;&lt;/span&gt;
+Loading...
+&lt;/button&gt;
+&lt;button class="btn btn-secondary-light" type="button" disabled&gt;
+&lt;span class="spinner-grow spinner-grow-sm align-middle" role="status"
+aria-hidden="true"&gt;&lt;/span&gt;
+Loading...
+&lt;/button&gt;
+&lt;button class="btn btn-success-light" type="button" disabled&gt;
+&lt;span class="spinner-grow spinner-grow-sm align-middle" role="status"
+aria-hidden="true"&gt;&lt;/span&gt;
+Loading...
+&lt;/button&gt;
+&lt;button class="btn btn-info-light" type="button" disabled&gt;
+&lt;span class="spinner-grow spinner-grow-sm align-middle" role="status"
+aria-hidden="true"&gt;&lt;/span&gt;
+Loading...
+&lt;/button&gt;
+&lt;button class="btn btn-warning-light" type="button" disabled&gt;
+&lt;span class="spinner-grow spinner-grow-sm align-middle" role="status"
+aria-hidden="true"&gt;&lt;/span&gt;
+Loading...
+&lt;/button&gt;
+&lt;button class="btn btn-danger-light" type="button" disabled&gt;
+&lt;span class="spinner-grow spinner-grow-sm align-middle" role="status"
+aria-hidden="true"&gt;&lt;/span&gt;
+Loading...
+&lt;/button&gt;
+&lt;button class="btn btn-light" type="button" disabled&gt;
+&lt;span class="spinner-grow spinner-grow-sm align-middle" role="status"
+aria-hidden="true"&gt;&lt;/span&gt;
+Loading...
+&lt;/button&gt;
+&lt;button class="btn btn-dark text-fixed-white" type="button" disabled&gt;
+&lt;span class="spinner-grow spinner-grow-sm align-middle" role="status"
+aria-hidden="true"&gt;&lt;/span&gt;
+Loading...
+&lt;/button&gt;
+&lt;/div&gt;</code></pre>
+<!-- Prism Code -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End:: row-4 -->
+
+    <!-- Start:: row-5 -->
+    <div class="row">
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header justify-content-between">
+                    <div class="card-title">
+                        Alignment Margin
+                    </div>
+                    <div class="prism-toggle">
+                        <SpkButtons ButtonClass="btn-primary-light" ButtonSize="btn-sm">Show Code<i class="ri-code-line ms-2 d-inline-block align-middle"></i></SpkButtons>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="spinner-border m-5" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+                <div class="card-footer d-none border-top-0">
+<!-- Prism Code -->
+<pre class="language-html"><code class="language-html">&lt;div class="spinner-border m-5" role="status"&gt;
+&lt;span class="visually-hidden"&gt;Loading...&lt;/span&gt;
+&lt;/div&gt;</code></pre>
+<!-- Prism Code -->
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header justify-content-between">
+                    <div class="card-title">
+                        Alignment Text center
+                    </div>
+                    <div class="prism-toggle">
+                        <SpkButtons ButtonClass="btn-primary-light" ButtonSize="btn-sm">Show Code<i class="ri-code-line ms-2 d-inline-block align-middle"></i></SpkButtons>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="text-center">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-none border-top-0">
+<!-- Prism Code -->
+<pre class="language-html"><code class="language-html">&lt;div class="text-center"&gt;
+&lt;div class="spinner-border" role="status"&gt;
+&lt;span class="visually-hidden"&gt;Loading...&lt;/span&gt;
+&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+<!-- Prism Code -->
+                </div>
+            </div>
+            <div class="card custom-card">
+                <div class="card-header justify-content-between">
+                    <div class="card-title">
+                        Spinner Sizes
+                    </div>
+                    <div class="prism-toggle">
+                        <SpkButtons ButtonClass="btn-primary-light" ButtonSize="btn-sm">Show Code<i class="ri-code-line ms-2 d-inline-block align-middle"></i></SpkButtons>
+                    </div>
+                </div>
+                <div class="card-body d-flex align-items-center">
+                    <div class="spinner-border spinner-border-sm me-4" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <div class="spinner-grow spinner-grow-sm me-4" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <div class="spinner-border me-4" style="width: 3rem; height: 3rem;"
+                        role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <div class="spinner-grow" style="width: 3rem; height: 3rem;" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+                <div class="card-footer d-none border-top-0">
+<!-- Prism Code -->
+<pre class="language-html"><code class="language-html">&lt;div class="spinner-border spinner-border-sm me-4" role="status"&gt;
+&lt;span class="visually-hidden"&gt;Loading...&lt;/span&gt;
+&lt;/div&gt;
+&lt;div class="spinner-grow spinner-grow-sm me-4" role="status"&gt;
+&lt;span class="visually-hidden"&gt;Loading...&lt;/span&gt;
+&lt;/div&gt;
+&lt;div class="spinner-border me-4" style="width: 3rem; height: 3rem;"
+role="status"&gt;
+&lt;span class="visually-hidden"&gt;Loading...&lt;/span&gt;
+&lt;/div&gt;
+&lt;div class="spinner-grow" style="width: 3rem; height: 3rem;" role="status"&gt;
+&lt;span class="visually-hidden"&gt;Loading...&lt;/span&gt;
+&lt;/div&gt;</code></pre>
+<!-- Prism Code -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End:: row-5 -->
+           
+    <!-- Prism JS -->
+    <script src="@($"{NavigationManager.BaseUri}assets/libs/prismjs/prism.js")"></script>
+    <script src="@($"{NavigationManager.BaseUri}assets/js/prism-custom.js")"></script>
+    
+@code {
+    
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Ui Elements" },
+        new SpkPageHeader.PageItem { PageTitle = "Spinners" },
+    };
+}   
+        

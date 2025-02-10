@@ -1,0 +1,21 @@
+@using CardModel
+
+@code {
+    [Parameter] public Socialcard? Socialcard { get; set; } 
+}
+@if(Socialcard != null){
+    <div class="card custom-card social-cards @Socialcard.CardClass">
+        <div class="card-body flex-fill">
+            <div class="d-flex flex-wrap gap-2 align-items-center justify-content-between">
+                <div>
+                    <p class="flex-fill fs-15 fw-medium mb-1 @Socialcard.titleClass">@Socialcard.title</p>
+                    <p class="mb-2 fs-24 fw-medium">@Socialcard.Value</p>
+                    <div class="flex-between">
+                        <span class="text-muted fs-12">@Socialcard.Duration</span>
+                        <span class="@(Socialcard.IsIncreased ? "text-success" :"text-danger") d-inline-block"><i class="@(Socialcard.IsIncreased ? "bi bi-arrow-up-right" :"bi bi-arrow-down-right") me-1 fs-10"></i>@Socialcard.Percentage</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

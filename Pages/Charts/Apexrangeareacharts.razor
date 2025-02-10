@@ -1,0 +1,190 @@
+@page "/apex-rangearea-charts"
+@using System.Collections.Generic
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using ApexSeries
+@using ApexCharts
+@using RangeChartData
+@inject RangeChartService RangeChartService
+
+    <!-- Page Header -->
+    <SpkPageHeader PageItems="PageItems" />
+    <!-- Page Header Close -->
+
+    <!-- Start::row-1 -->
+    <div class="row">
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        Basic Range Area Chart
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="rangearea-basic">
+                        <ApexChart TItem="Rangeareabasic" Title="New York Temperature (all year round)" Height="350" Options="rangeareabasicoptions">
+                            <ApexRangeAreaSeries TItem="Rangeareabasic" Items="temperatures" Name="New York Temperature" XValue="@(e => e.Month)" Top="@(e => e.HighestTemperature.HasValue ? (decimal)e.HighestTemperature.Value : 0)" Bottom="@(e => e.LowestTemperature.HasValue ? (decimal)e.LowestTemperature.Value : 0)"/>
+                        </ApexChart>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        Combo Range Area Chart
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="rangearea-combo">
+                        <SpkApex TItem="Rangeareamixed" ApexHeight="350" Items="temperaturesMixed" ChartOptions="rangeareamixedoptions" Series="RangeareamixedSeriesConfigs" Title="Range Area with Forecast Line (Combo)"></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--End::row-1 -->
+    
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Charts" },
+        new SpkPageHeader.PageItem { PageTitle = "Apex Charts" },
+        new SpkPageHeader.PageItem { PageTitle = "Apex Range Area Charts" },
+    };
+    // Range Area Chart Start //
+    private List<Rangeareabasic> temperatures { get; set; } = RangeChartService.GetRangeareabasic();
+    private ApexChartOptions<Rangeareabasic> rangeareabasicoptions { get; set; } = new();
+    // Range Area Chart End //
+
+    // Combo Range Area Chart Start //
+
+    private List<Rangeareamixed> temperaturesMixed { get; set; } = RangeChartService.GetRangeareamixed();
+    private ApexChartOptions<Rangeareamixed>? rangeareamixedoptions;
+    private List<SeriesConfig<Rangeareamixed>>? RangeareamixedSeriesConfigs { get; set; }
+        
+    // Combo Range Area Chart End //
+    
+    protected override void OnInitialized()
+    {
+        rangeareabasicoptions = new ApexChartOptions<Rangeareabasic>
+        {
+            Stroke = new Stroke { 
+                Curve = Curve.Straight,
+            },
+            Title = new Title{
+                Style = new TitleStyle {
+                    FontSize= "14px",
+                    Color= "#8d9eb5"
+                },
+            },
+            Markers = new Markers {
+                Hover = new () {
+                    SizeOffset = 5
+                }
+            },
+            Colors = new Color(new List<string> { "#5c67f7" }),
+            Xaxis =  new XAxis {  
+                Categories = temperatures.Select(e => e.Month).ToList()
+            },
+            Yaxis = new List<YAxis>
+            {
+                new YAxis
+                {
+                    Labels = new YAxisLabels
+                    {
+                        Formatter = @"function(val) {
+                            return val + '°C';
+                        }"
+                    },
+                    Min = -8,
+                    Max = 32,
+                    StepSize = 8,
+                }
+            }
+        };
+
+        rangeareamixedoptions = new ApexChartOptions<Rangeareamixed>
+        {
+            Chart = new ApexCharts.Chart
+            {
+                Type = ApexCharts.ChartType.RangeArea
+            },
+            Title = new Title{
+                Style = new TitleStyle {
+                    FontSize= "14px",
+                    Color= "#8d9eb5"
+                },
+            },
+            ForecastDataPoints = new ForecastDataPoints
+            {
+                Count = 2,
+            },
+            DataLabels = new DataLabels
+            {
+                Enabled = false
+            },
+            Colors = new Color(new List<string> {"#e354d4","#5c67f7","#e354d4" ,"#5c67f7"}),
+            Stroke=new Stroke{
+                Width=[0,0,2,0],
+                Curve = Curve.Straight,
+            },
+            Fill = new Fill
+            {
+                Opacity = [0.3,1]
+            },
+            Legend = new Legend
+            {
+                Show = true,
+                CustomLegendItems = new List<string> { "Team A","Team B" }
+            },
+            Markers = new Markers
+            {
+                Hover = new MarkersHover
+                {
+                    SizeOffset = 5
+                }
+            },
+            Yaxis = new List<YAxis>
+            {
+                new YAxis
+                {
+                    Min = 0,
+                    Max = 8000,
+                    StepSize = 2000,
+                }
+            }
+        };
+        RangeareamixedSeriesConfigs = new List<SeriesConfig<Rangeareamixed>>
+        {
+            new SeriesConfig<Rangeareamixed>
+            {
+                Name = "Team A",
+                XValueSelector=e => e.Month ?? "unknown",
+                TopSelector = e => e.HighestTemperature.HasValue ? (decimal)e.HighestTemperature.Value : 0M,
+                BottomSelector = e => e.LowestTemperature.HasValue ? (decimal)e.LowestTemperature.Value : 0M
+            },
+            new SeriesConfig<Rangeareamixed>
+            {
+                SeriesType=SeriesType.Line,
+                Name = "Current",
+                XValueSelector=e => e.Month ?? "unknown",
+                YValueSelector = e => e.CurrentTemperature.HasValue ? (decimal)e.CurrentTemperature.Value : 0M,
+            },
+            new SeriesConfig<Rangeareamixed>
+            {
+                Name = "Team B",
+                XValueSelector=e => e.Month ?? "unknown",
+                TopSelector = e => e.HighestTemperature2.HasValue ? (decimal)e.HighestTemperature2.Value : 0M,
+                BottomSelector = e => e.LowestTemperature2.HasValue ? (decimal)e.LowestTemperature2.Value : 0M
+            },
+            new SeriesConfig<Rangeareamixed>
+            {
+                SeriesType=SeriesType.Line,
+                Name = "Current",
+                XValueSelector=e => e.Month ?? "unknown",
+                YValueSelector = e => e.CurrentTemperature2.HasValue ? (decimal)e.CurrentTemperature2.Value : 0M,
+            },
+        };
+    }
+}

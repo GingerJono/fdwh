@@ -1,0 +1,549 @@
+@page "/apex-radialbar-charts"
+@using System.Collections.Generic
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using ApexSeries
+@using ApexCharts
+@using RadialChartData
+@inject RadialChartService RadialChartService
+
+    <!-- Page Header -->
+    <SpkPageHeader PageItems="PageItems" />
+    <!-- Page Header Close -->
+
+    <!-- Start::row-1 -->
+    <div class="row">
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Basic Radialbar Chart</div>
+                </div>
+                <div class="card-body">
+                    <div id="radialbar-basic">
+                        <SpkApex Series="RadialbarbasicSeriesConfigs" TItem="Radialbarbasic" Items="Radialbarbasics" ApexHeight="300" ChartOptions="RadarbasicChartOptions"></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Multiple Radialbar Chart</div>
+                </div>
+                <div class="card-body">
+                    <div id="radialbar-multiple">
+                        <SpkApex Series="RadialbarmultipleSeriesConfigs" TItem="Radialbarmultiple" Items="Radialbarmultiples" ApexHeight="300" ChartOptions="RadarmultipleChartOptions"></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Circle Chart - Custom Angle</div>
+                </div>
+                <div class="card-body">
+                    <div id="circle-custom">
+                        <SpkApex Series="RadialbarcustomSeriesConfigs" TItem="Radialbarcustom" Items="Radialbarcustoms" ApexHeight="300" ChartOptions="RadarcustomChartOptions"></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Gradient Circle Chart</div>
+                </div>
+                <div class="card-body">
+                    <div id="gradient-circle">
+                        <SpkApex Series="RadialbarGradientSeriesConfigs" TItem="RadialbarGradient" Items="RadialbarGradients" ApexHeight="300" ChartOptions="RadarGradientChartOptions"></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Stroked Circular Gauge</div>
+                </div>
+                <div class="card-body">
+                    <div id="circular-stroked">
+                        <SpkApex Series="RadialbarCircularSeriesConfigs" TItem="RadialbarCircular" Items="RadialbarCirculars" ApexHeight="300" ChartOptions="RadarCircularChartOptions"></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Circle Chart With Image</div>
+                </div>
+                <div class="card-body">
+                    <div id="circle-image">
+                        <SpkApex Series="RadialbarImageSeriesConfigs" TItem="RadialbarImage" Items="RadialbarImages" ApexHeight="300" ChartOptions="RadarImageChartOptions"></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Semi Circular Gauge</div>
+                </div>
+                <div class="card-body">
+                    <div id="circular-semi">
+                        <SpkApex Series="RadialbarSemiCircularSeriesConfigs" TItem="RadialbarSemiCircular" Items="RadialbarSemiCirculars" ApexHeight="300" ChartOptions="RadarSemiCircularChartOptions"></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--End::row-1 -->
+
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Charts" },
+        new SpkPageHeader.PageItem { PageTitle = "Apex Charts" },
+        new SpkPageHeader.PageItem { PageTitle = "Apex Radialbar Charts" },
+    };
+    // Basic Radialbar Chart Start //
+    private List<Radialbarbasic> Radialbarbasics { get; set; } = RadialChartService.Radialbarbasic();
+    private ApexChartOptions<Radialbarbasic> RadarbasicChartOptions { get; set; } = new();
+    private List<SeriesConfig<Radialbarbasic>>? RadialbarbasicSeriesConfigs { get; set; }
+    // Basic Radialbar Chart End //
+    
+    // Multiple Radialbar Chart Start //
+    private List<Radialbarmultiple> Radialbarmultiples { get; set; } = RadialChartService.Radialbarmultiple();
+    private ApexChartOptions<Radialbarmultiple> RadarmultipleChartOptions { get; set; } = new();
+    private List<SeriesConfig<Radialbarmultiple>>? RadialbarmultipleSeriesConfigs { get; set; }
+    // Multiple Radialbar Chart End //
+
+    // Custom Radialbar Chart Start //
+    private List<Radialbarcustom> Radialbarcustoms { get; set; } = RadialChartService.Radialbarcustom();
+    private ApexChartOptions<Radialbarcustom> RadarcustomChartOptions { get; set; } = new();
+    private List<SeriesConfig<Radialbarcustom>>? RadialbarcustomSeriesConfigs { get; set; }
+    // Custom Radialbar Chart End //
+
+    // Gradient Radialbar Chart Start //
+    private List<RadialbarGradient> RadialbarGradients { get; set; } = RadialChartService.RadialbarGradient();
+    private ApexChartOptions<RadialbarGradient> RadarGradientChartOptions { get; set; } = new();
+    private List<SeriesConfig<RadialbarGradient>>? RadialbarGradientSeriesConfigs { get; set; }
+
+    // Gradient Radialbar Chart End //
+
+    // Circular Radialbar Chart Start //
+    private List<RadialbarCircular> RadialbarCirculars { get; set; } = RadialChartService.RadialbarCircular();
+    private ApexChartOptions<RadialbarCircular> RadarCircularChartOptions { get; set; } = new();
+    private List<SeriesConfig<RadialbarCircular>>? RadialbarCircularSeriesConfigs { get; set; }
+    // Circular Radialbar Chart End //
+
+    // Image Radialbar Chart Start //
+    private List<RadialbarImage> RadialbarImages { get; set; } = RadialChartService.RadialbarImage();
+    private ApexChartOptions<RadialbarImage> RadarImageChartOptions { get; set; } = new();
+    private List<SeriesConfig<RadialbarImage>>? RadialbarImageSeriesConfigs { get; set; }
+    // Image Radialbar Chart End //
+
+    // SemiCircular Radialbar Chart Start //
+    private List<RadialbarSemiCircular> RadialbarSemiCirculars { get; set; } = RadialChartService.RadialbarSemiCircular();
+    private ApexChartOptions<RadialbarSemiCircular> RadarSemiCircularChartOptions { get; set; } = new();
+    private List<SeriesConfig<RadialbarSemiCircular>>? RadialbarSemiCircularSeriesConfigs { get; set; }
+    // SemiCircular Radialbar Chart End //
+
+    protected override void OnInitialized() {
+
+        RadarbasicChartOptions = new ApexChartOptions<Radialbarbasic>
+        {
+            Colors = new Color(new List<string> { "#5c67f7" }),
+            PlotOptions = new PlotOptions 
+            {
+                RadialBar  = new PlotOptionsRadialBar
+                {    
+                    Hollow= new() {
+                        Size ="70%",
+                    },
+                }
+            },
+        };
+        RadialbarbasicSeriesConfigs = new List<SeriesConfig<Radialbarbasic>>
+        {
+            new SeriesConfig<Radialbarbasic>
+            {
+                SeriesType = SeriesType.RadialBar,
+                Name = "Cricket",
+                XValueSelector = e => e.RadialLabel ?? "null",
+                YAggregateSelector = e => decimal.Round(e.Average(e => e.Value))
+            },
+        };
+        
+        RadarmultipleChartOptions = new ApexChartOptions<Radialbarmultiple>
+        {
+            Colors = new Color(new List<string> { "#5c67f7", "#e354d4", "#ff8e6f", "#fe5454" }),
+            PlotOptions = new PlotOptions
+            {
+                RadialBar = new PlotOptionsRadialBar
+                {
+                    DataLabels = new RadialBarDataLabels
+                    {
+                        Name = new (){
+                            FontSize = "24px",
+                        },
+                        Value = new (){
+                            FontSize = "16px",
+                        },
+                        Total = new RadialBarDataLabelsTotal
+                        {
+                            Show = true,
+                            Label = "Total",
+                            Formatter = @"function (w) {
+                                return 249
+                            }"
+                        }
+                    }
+                }
+            }
+        };
+        RadialbarmultipleSeriesConfigs = new List<SeriesConfig<Radialbarmultiple>>
+        {
+            new SeriesConfig<Radialbarmultiple>
+            {
+                SeriesType = SeriesType.RadialBar,
+                Name = "Fruits",
+                XValueSelector = e => e.Fruits ?? "null",
+                YAggregateSelector = e => decimal.Round(e.Average(e => e.Value))
+            },
+        };
+        
+        RadarcustomChartOptions = new ApexChartOptions<Radialbarcustom>
+        {
+            Colors = new Color(new List<string> { "#5c67f7", "#e354d4", "#ff8e6f", "#fe5454"}),
+            PlotOptions = new PlotOptions
+            {
+                RadialBar = new PlotOptionsRadialBar
+                {
+                    OffsetY = 0,
+                    StartAngle = 0,
+                    EndAngle = 270,
+                    DataLabels = new RadialBarDataLabels
+                    {
+                        Name = new (){
+                            Show = false,
+                        },
+                        Value = new (){
+                           Show = false,
+                        },
+                    },
+                    Hollow= new() {
+                        Margin = 5,
+                        Size ="30%",
+                        Background = "transparent",
+                        Image = "undefined",
+                    },
+                }
+            },
+            Legend = new Legend
+            {
+                Position = LegendPosition.Bottom,
+                Show = true,
+                FontSize = "14px",
+                Floating = true,
+                Labels = new() {
+                    UseSeriesColors = true,
+                },
+                Formatter = @"function (seriesName, opts) {
+                    return seriesName + ' : ' + opts.w.globals.series[opts.seriesIndex]
+                }",
+                ItemMargin= new() {
+                    Vertical= 4
+                }
+            }
+        };
+        RadialbarcustomSeriesConfigs = new List<SeriesConfig<Radialbarcustom>>
+        {
+            new SeriesConfig<Radialbarcustom>
+            {
+                SeriesType = SeriesType.RadialBar,
+                Name = "Social",
+                XValueSelector = e => e.SocialApps ?? "null",
+                YAggregateSelector = e => decimal.Round(e.Average(e => e.Value))
+            },
+        };
+
+        RadarGradientChartOptions = new ApexChartOptions<RadialbarGradient>
+        {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = true, Zoomin = true, Zoomout = true,Pan = true, Reset = true,  Download = true},
+                }, 
+            }, 
+            PlotOptions = new PlotOptions
+            {
+                RadialBar = new PlotOptionsRadialBar
+                {
+                    StartAngle = -135,
+                    EndAngle = 225,
+                    DataLabels = new RadialBarDataLabels
+                    {
+                        Show = true,
+                        Name = new (){
+                            Show = true,
+                            OffsetY = -10,
+                            Color = "#888",
+                            FontSize = "17px"
+                        },
+                        Value = new (){
+                           Show = true,
+                            Formatter = @"function (val) {
+                                return parseInt(val);
+                            }",
+                            Color = "#111",
+                            FontSize = "36px"
+                        },
+                    },
+                    Hollow= new Hollow () {
+                        Margin = 0,
+                        Size ="75%",
+                        Background = "#fff",
+                        Image = "undefined",
+                        ImageOffsetX= 0,
+                        ImageOffsetY= 0,
+                        Position= ApexCharts.GridPosition.Front,
+                         DropShadow = new () {
+                            Enabled = true,
+                            Top = 3,
+                            Left = 0,
+                            Blur = 4,
+                            Opacity = 0.24
+                        },
+                    },
+                    Track = new() {
+                        Background = "#fff",
+                        Width = 67,
+                        Margin = 0, // margin is in pixels
+                        DropShadow = new(){
+                            Enabled = true,
+                            Top = -3,
+                            Left = 0,
+                            Blur = 4,
+                            Opacity = 0.35
+                        }
+                    },
+                }
+            },
+            Fill = new Fill {
+                Type = new List<FillType> { FillType.Gradient, FillType.Gradient },
+                Gradient = new ApexCharts.FillGradient {
+                    ShadeIntensity = 0.5,
+                    Shade = ApexCharts.GradientShade.Dark,
+                    Type = ApexCharts.GradientType.Horizontal,
+                    GradientToColors = new Color(new List<string> {"#e354d4"}),
+                    InverseColors = true,
+                    OpacityFrom = 1,
+                    OpacityTo = 1,
+                    Stops = [0, 100],
+                }
+            },
+            Stroke = new Stroke { 
+                LineCap = LineCap.Round
+            }, 
+        };
+        RadialbarGradientSeriesConfigs = new List<SeriesConfig<RadialbarGradient>>
+        {
+            new SeriesConfig<RadialbarGradient>
+            {
+                SeriesType = SeriesType.RadialBar,
+                Name = "Percenteage",
+                XValueSelector = e => e.GradientRadialLabel ?? "null",
+                YAggregateSelector = e => decimal.Round(e.Average(e => e.Value))
+            },
+        };
+
+        RadarCircularChartOptions = new ApexChartOptions<RadialbarCircular>
+        {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = false},
+                }, 
+                OffsetY = -10
+            }, 
+            Colors = new Color(new List<string> { "#5c67f7"}),
+            PlotOptions = new PlotOptions
+            {
+                RadialBar = new PlotOptionsRadialBar
+                {
+                    StartAngle = -135,
+                    EndAngle = 135,
+                    DataLabels = new RadialBarDataLabels
+                    {
+                        Show = true,
+                        Name = new (){
+                            Show = true,
+                            OffsetY = 120,
+                            Color = "undefined",
+                            FontSize = "16px"
+                        },
+                        Value = new (){
+                           Show = true,
+                            OffsetY = 76,
+                            Formatter = @"function (val) {
+                                return val + '%';
+                            }",
+                            Color = "undefined",
+                            FontSize = "22px"
+                        },
+                    },
+                }
+            },
+            Fill = new Fill {
+                Type = new List<FillType> { FillType.Gradient, FillType.Gradient },
+                Gradient = new ApexCharts.FillGradient {
+                    ShadeIntensity = 0.15,
+                    Shade = ApexCharts.GradientShade.Dark,
+                    InverseColors = false,
+                    OpacityFrom = 1,
+                    OpacityTo = 1,
+                    Stops = [0, 50, 65, 91],
+                }
+            },
+            Stroke = new Stroke { 
+                DashArray = 4
+            }, 
+        };
+        RadialbarCircularSeriesConfigs = new List<SeriesConfig<RadialbarCircular>>
+        {
+            new SeriesConfig<RadialbarCircular>
+            {
+                SeriesType = SeriesType.RadialBar,
+                Name = "Percenteage",
+                XValueSelector = e => e.CircularRadialLabel ?? "null",
+                YAggregateSelector = e => decimal.Round(e.Average(e => e.Value))
+            },
+        };
+
+        RadarImageChartOptions = new ApexChartOptions<RadialbarImage>
+        {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = false},
+                }, 
+            }, 
+            PlotOptions = new PlotOptions
+            {
+                RadialBar = new PlotOptionsRadialBar
+                {
+                    DataLabels = new RadialBarDataLabels
+                    {
+                        Name = new (){
+                            Show = false,
+                            Color = "#fff",
+                        },
+                        Value = new (){
+                            Show = true,
+                            Color = "#333",
+                            FontSize = "22px",
+                            OffsetY = 10,
+                        },
+                    },
+                    Hollow= new Hollow () {
+                        Margin = 15,
+                        Size ="70%",
+                        ImageWidth = 32,
+                        ImageHeight = 32,
+                        ImageClipped = false
+                    },
+                }
+            },
+            Fill = new Fill {
+                Type = new List<FillType> { FillType.Image},
+                Image = new ApexCharts.FillImage {
+                    Src= "../assets/images/media/media-64.jpg",
+                }
+            },
+            Stroke = new Stroke { 
+                LineCap = LineCap.Round
+            }, 
+        };
+        RadialbarImageSeriesConfigs = new List<SeriesConfig<RadialbarImage>>
+        {
+            new SeriesConfig<RadialbarImage>
+            {
+                SeriesType = SeriesType.RadialBar,
+                Name = "Percenteage",
+                XValueSelector = e => e.ImageRadialLabel ?? "null",
+                YAggregateSelector = e => decimal.Round(e.Average(e => e.Value))
+            },
+        };
+
+        RadarSemiCircularChartOptions = new ApexChartOptions<RadialbarSemiCircular>
+        {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = false},
+                }, 
+                OffsetY= -20,
+                Sparkline= new() {
+                    Enabled= true
+                }
+            }, 
+            Colors = new Color(new List<string> { "#5c67f7"}),
+            PlotOptions = new PlotOptions
+            {
+                RadialBar = new PlotOptionsRadialBar
+                {
+                    StartAngle = -90,
+                    EndAngle = 90,
+                    DataLabels = new RadialBarDataLabels
+                    {
+                        Show = true,
+                        Name = new (){
+                            Show = false,
+                        },
+                        Value = new (){  
+                            OffsetY= -2,
+                            Show = true,
+                            FontSize = "22px"
+                        },
+                    },
+                    Track = new() {
+                        Background = "#fff",
+                        Width = 97,
+                        Margin = 5, 
+                        DropShadow = new(){
+                            Enabled = false,
+                            Top = 2,
+                            Left = 0,
+                            Color = "#999",
+                            Blur = 2,
+                            Opacity = 1
+                        }
+                    },
+                }
+            },
+            Grid = new Grid {
+                Padding= new () {
+                    Top = -10
+                }
+            },
+            Fill = new Fill {
+                Type = new List<FillType> { FillType.Gradient },
+                Gradient = new ApexCharts.FillGradient {
+                    ShadeIntensity = 0.4,
+                    Shade = ApexCharts.GradientShade.Light,
+                    InverseColors = false,
+                    OpacityFrom = 1,
+                    OpacityTo = 1,
+                    Stops = [0, 50, 53, 91],
+                }
+            },
+        };
+        RadialbarSemiCircularSeriesConfigs = new List<SeriesConfig<RadialbarSemiCircular>>
+        {
+            new SeriesConfig<RadialbarSemiCircular>
+            {
+                SeriesType = SeriesType.RadialBar,
+                Name = "Percenteage",
+                XValueSelector = e => e.SemiCircularRadialLabel ?? "null",
+                YAggregateSelector = e => decimal.Round(e.Average(e => e.Value))
+            },
+        };
+    }
+}

@@ -1,0 +1,500 @@
+@page "/apex-timeline-charts"
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using ApexSeries
+@using ApexCharts
+@using TimelineChartData
+@inject TimelineChartService TimelineChartService
+
+    <!-- Page Header -->
+    <SpkPageHeader PageItems="PageItems" />
+    <!-- Page Header Close -->
+
+    <!-- Start::row-1 -->
+    <div class="row">
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Basic TImeline Chart</div>
+                </div>
+                <div class="card-body">
+                    <div id="timeline-basic">
+                        <SpkApex  RangeSeries=true  TItem="BasicTImeline" ApexHeight="320" ChartOptions="BasicTImelineoptions" XAxisType="XAxisType.Datetime" Items="BasicTImelineChart" Series="BasicTImelineSeriesConfigs"></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Multiple Colored TImeline Chart</div>
+                </div>
+                <div class="card-body">
+                    <div id="timeline-colors">
+                        <SpkApex  RangeSeries=true  TItem="MultiColoredTImeline" ApexHeight="320" ChartOptions="MultiColoredTImelineoptions" XAxisType="XAxisType.Datetime" Items="MultiColoredTImelineChart" Series="MultiColoredTImelineSeriesConfigs"></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Multi Series Timeline Chart</div>
+                </div>
+                <div class="card-body">
+                    <div id="timeline-multi">
+                    <ApexChart TItem="Activity" Height="320" Options=MultiseriesTImelineoptions Debug="true" XAxisType="XAxisType.Datetime">
+                            @foreach (var personGroup in activities.GroupBy(e => e.Person))
+                            {
+                                <ApexRangeSeries TItem="Activity" Items="personGroup" XValue="@(e=> e.Name)" YMinValue="@(e=> e.Start.ToUnixTimeMilliseconds())" YMaxValue="@(e=> e.End.ToUnixTimeMilliseconds())" Name="@personGroup.Key" />
+                            }
+                        </ApexChart>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Advanced Timeline Chart</div>
+                </div>
+                <div class="card-body">
+                    <div id="timeline-advanced">
+                    <ApexChart TItem="Activity2" Height="320" Options=AdvancedTImelineoptions Debug="true" XAxisType="XAxisType.Datetime">
+                            @foreach (var personGroup2 in activities2.GroupBy(e => e.Person2))
+                            {
+                                <ApexRangeSeries TItem="Activity2" Items="personGroup2" XValue="@(e=> e.Name)" YMinValue="@(e=> e.Start.ToUnixTimeMilliseconds())" YMaxValue="@(e=> e.End.ToUnixTimeMilliseconds())" Name="@personGroup2.Key" />
+                            }
+                        </ApexChart>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Timeline-Grouped Rows</div>
+                </div>
+                <div class="card-body">
+                    <div id="timeline-grouped">
+                    <ApexChart TItem="Activity3" Height="320" Options=GroupedTImelineoptions Debug="true" XAxisType="XAxisType.Datetime">
+                            @foreach (var personGroup3 in activities3.GroupBy(e => e.Person3))
+                            {
+                                <ApexRangeSeries TItem="Activity3" Items="personGroup3" XValue="@(e=> e.Name)" YMinValue="@(e=> e.Start.ToUnixTimeMilliseconds())" YMaxValue="@(e=> e.End.ToUnixTimeMilliseconds())" Name="@personGroup3.Key" />
+                            }
+                        </ApexChart>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Dumbbell Chart</div>
+                </div>
+                <div class="card-body">
+                    <div id="dumbbell-chart">
+                        <SpkApex RangeSeries=true TItem="DumbbellChart" ApexHeight="320" ChartOptions="DumbbellChartoptions" Items="DumbbellCharts" Series="DumbbellChartSeriesConfigs" Title="Paygap Disparity"></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--End::row-1 -->
+
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Charts" },
+        new SpkPageHeader.PageItem { PageTitle = "Apex Charts" },
+        new SpkPageHeader.PageItem { PageTitle = "Timeline Charts" },
+    };
+    // Basic TImeline Chart Start //
+    private List<BasicTImeline> BasicTImelineChart { get; set; } = TimelineChartService.GetBasicTImelines();
+    private ApexChartOptions<BasicTImeline> BasicTImelineoptions { get; set; } = new();
+    private List<SeriesConfig<BasicTImeline>>? BasicTImelineSeriesConfigs { get; set; }
+    //  Basic TImeline Chart End //
+
+    // MultiColored TImeline Chart Start //
+    private List<MultiColoredTImeline> MultiColoredTImelineChart { get; set; } = TimelineChartService.GetMultiColoredTImelines();
+    private ApexChartOptions<MultiColoredTImeline> MultiColoredTImelineoptions { get; set; } = new();
+    private List<SeriesConfig<MultiColoredTImeline>>? MultiColoredTImelineSeriesConfigs { get; set; }
+    //  MultiColored TImeline Chart End //
+
+    // Multiseries TImeline Chart Start //
+    private List<Activity> activities { get; set; } = new();
+    private ApexChartOptions<Activity> MultiseriesTImelineoptions { get; set; } = new();
+    //  Multiseries TImeline Chart End //
+
+    // Advanced TImeline Chart Start //
+     private List<Activity2> activities2 { get; set; } = new();
+    private ApexChartOptions<Activity2> AdvancedTImelineoptions { get; set; } = new();
+    //  Advanced TImeline Chart End //
+
+    // Grouped TImeline Chart Start //
+     private List<Activity3> activities3 { get; set; } = new();
+    private ApexChartOptions<Activity3> GroupedTImelineoptions { get; set; } = new();
+    //  Grouped TImeline Chart End //
+    
+    // Dumbbell  TImeline Chart Start //
+    private List<DumbbellChart> DumbbellCharts { get; set; } = TimelineChartService.GetDumbbellChart();
+    private ApexChartOptions<DumbbellChart> DumbbellChartoptions { get; set; } = new();
+    private List<SeriesConfig<DumbbellChart>>? DumbbellChartSeriesConfigs { get; set; }
+    //  Dumbbell  TImeline Chart End //
+     protected override void OnInitialized()
+    {
+        BasicTImelineoptions = new ApexChartOptions<BasicTImeline>
+        {
+            Grid = new Grid {
+                BorderColor = "#f2f5f7",
+            },
+            Colors = new Color(new List<string> { "#5c67f7" }),
+            PlotOptions = new PlotOptions
+            {
+                Bar = new PlotOptionsBar
+                {
+                    Horizontal = true
+                }
+            },
+            Tooltip = new ApexCharts.Tooltip
+            {
+                X = new TooltipX
+                {
+                    Format = "dd MMM yyyy HH:mm"
+                }
+            },
+            Xaxis =  new XAxis {  
+                Labels = new XAxisLabels {
+                    Show = true,
+                    Style = new() {
+                        Colors = "#8c9097",
+                        FontSize = "11px",
+                        FontWeight = 600,
+                        CssClass = "apexcharts-xaxis-label",
+                    },
+                }
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis // Define the first YAxis object
+                {
+                    Labels = new YAxisLabels
+                    {
+                        Show = true,
+                        Style = new() {
+                            Colors = "#8c9097",
+                            FontSize = "11px",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label",
+                        },
+                    }, 
+                }
+            },
+        };
+        BasicTImelineSeriesConfigs = new List<SeriesConfig<BasicTImeline>>
+        {
+            new SeriesConfig<BasicTImeline>
+            {
+                XValueSelector = e => e.Name ?? "unknown",
+                YMinValueSelector = e =>e.StartDate.ToUnixTimeMilliseconds(),
+                YMaxValueSelector = e =>e.EndDate.ToUnixTimeMilliseconds()
+            },
+        };
+        
+        MultiColoredTImelineoptions = new ApexChartOptions<MultiColoredTImeline>
+        {
+            Grid = new Grid {
+                BorderColor = "#f2f5f7",
+            },
+            PlotOptions = new PlotOptions
+            {
+                Bar = new PlotOptionsBar
+                {
+                    Distributed= true,
+                    Horizontal = true,
+                    DataLabels = new() {
+                        HideOverflowingLabels = false
+                    }
+                }
+            },
+            DataLabels = new ApexCharts.DataLabels {
+                Enabled = true,
+                Formatter = @"function (val, opts) {
+                    var label = opts.w.globals.labels[opts.dataPointIndex]
+                    var a = moment(val[0])
+                    var b = moment(val[1])
+                    var diff = b.diff(a, 'days')
+                    return label + ': ' + diff + (diff > 1 ? ' days' : ' day')
+                }",
+                Style= new() {
+                    Colors = ["#f3f4f5", "#fff"]
+                }
+            }, 
+            Tooltip = new ApexCharts.Tooltip 
+            {
+                X = new TooltipX
+                {
+                    Format = "dd MMM yyyy HH:mm"
+                }
+            },
+            Xaxis =  new XAxis {  
+                Labels = new XAxisLabels {
+                    Show = true,
+                    Style = new() {
+                        Colors = "#8c9097",
+                        FontSize = "11px",
+                        FontWeight = 600,
+                        CssClass = "apexcharts-xaxis-label",
+                    },
+                }
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis 
+                {
+                    Show = false, 
+                }
+            },
+        };
+        MultiColoredTImelineSeriesConfigs = new List<SeriesConfig<MultiColoredTImeline>>
+        {
+            new SeriesConfig<MultiColoredTImeline>
+            {
+                XValueSelector = e => e.Name ?? "unknown",
+                YMinValueSelector = e =>e.StartDate.ToUnixTimeMilliseconds(),
+                YMaxValueSelector = e =>e.EndDate.ToUnixTimeMilliseconds(),
+                PointColor = e => e.PointColor ?? "unknown",
+                ShowDataLabels=true
+            },
+        };
+
+        var date = DateTime.Now;
+        activities.Add(new Activity { Person = "Bob", Name = "Design", Start = date.AddDays(-30), End = date.AddDays(-10) });
+        activities.Add(new Activity { Person = "Bob", Name = "Code", Start = date.AddDays(-15), End = date });
+        activities.Add(new Activity { Person = "Bob", Name = "Test", Start = date.AddDays(-4), End = date.AddDays(5) });
+
+        activities.Add(new Activity { Person = "Joe", Name = "Design", Start = date.AddDays(-35), End = date.AddDays(-6) });
+        activities.Add(new Activity { Person = "Joe", Name = "Code", Start = date.AddDays(-20), End = date.AddDays(-5) });
+        activities.Add(new Activity { Person = "Joe", Name = "Test", Start = date.AddDays(10), End = date.AddDays(5) });
+
+        MultiseriesTImelineoptions = new ApexChartOptions<Activity>
+        {
+            Colors = new Color(new List<string> { "#5c67f7", "#e354d4" }),
+            PlotOptions = new PlotOptions
+            {
+                Bar = new PlotOptionsBar
+                {
+                    Horizontal = true,
+                    RangeBarOverlap = false,
+                }
+            },
+            DataLabels = new ApexCharts.DataLabels {
+                Enabled = true,
+                Formatter = @"function (val) {
+                    var a = moment(val[0])
+                    var b = moment(val[1])
+                    var diff = b.diff(a, 'days')
+                    return diff + (diff > 1 ? ' days' : ' day')
+                }",
+            }, 
+            Fill = new Fill {
+                Type = new List<FillType> { FillType.Gradient},
+                Gradient = new ApexCharts.FillGradient {
+                    ShadeIntensity = 0.25,
+                    Shade = ApexCharts.GradientShade.Light,
+                    Type = ApexCharts.GradientType.Vertical,
+                    OpacityFrom = 1,
+                    OpacityTo = 1,
+                    Stops = [50, 0, 100, 100],
+                }
+            },
+            Legend = new Legend  { 
+                Show=true,
+                Position = LegendPosition.Top,
+            }, 
+            Xaxis =  new XAxis {  
+                Labels = new XAxisLabels {
+                    Show = true,
+                    Style = new() {
+                        Colors = "#8c9097",
+                        FontSize = "11px",
+                        FontWeight = 600,
+                        CssClass = "apexcharts-xaxis-label",
+                    },
+                }
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis 
+                {
+                   Labels = new YAxisLabels
+                    {
+                        Show = true,
+                        Style = new() {
+                            Colors = "#8c9097",
+                            FontSize = "11px",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label",
+                        },
+                    }, 
+                }
+            },
+        };
+
+        var date2 = DateTime.Now;
+        activities2.Add(new Activity2 { Person2 = "Bob", Name = "Design", Start = date2.AddDays(-30), End = date2.AddDays(-10) });
+        activities2.Add(new Activity2 { Person2 = "Bob", Name = "Code", Start = date2.AddDays(-15), End = date2 });
+        activities2.Add(new Activity2 { Person2 = "Bob", Name = "Code", Start = date2.AddDays(-4), End = date2.AddDays(5) });
+        activities2.Add(new Activity2 { Person2 = "Bob", Name = "Test", Start = date2.AddDays(-30), End = date2.AddDays(-10) });
+        activities2.Add(new Activity2 { Person2 = "Bob", Name = "Test", Start = date2.AddDays(-5), End = date2.AddDays(10)});
+        activities2.Add(new Activity2 { Person2 = "Bob", Name = "Validation", Start = date2.AddDays(-4), End = date2.AddDays(5) });
+        activities2.Add(new Activity2 { Person2 = "Bob", Name = "Design", Start = date2.AddDays(-15), End = date2 });
+
+        activities2.Add(new Activity2 { Person2 = "Joe", Name = "Design", Start = date2.AddDays(-35), End = date2.AddDays(-6) });
+        activities2.Add(new Activity2 { Person2 = "Joe", Name = "Code", Start = date2.AddDays(-20), End = date2.AddDays(-5) });
+        activities2.Add(new Activity2 { Person2 = "Joe", Name = "Test", Start = date2.AddDays(10), End = date2.AddDays(5) });
+
+        activities2.Add(new Activity2 { Person2 = "Dan", Name = "Design", Start = date2.AddDays(-30), End = date2.AddDays(-10) });
+        activities2.Add(new Activity2 { Person2 = "Dan", Name = "Code", Start = date2.AddDays(-15), End = date2 });
+        activities2.Add(new Activity2 { Person2 = "Dan", Name = "Test", Start = date2.AddDays(-4), End = date2.AddDays(5) });
+
+        AdvancedTImelineoptions = new ApexChartOptions<Activity2>
+        {
+            Colors = new Color(new List<string> { "#5c67f7", "#e354d4", "#ff8e6f" }),
+            PlotOptions = new PlotOptions
+            {
+                Bar = new PlotOptionsBar
+                {
+                    Horizontal = true,
+                    BarHeight = "80%"
+                }
+            },
+            DataLabels = new ApexCharts.DataLabels {
+                Enabled = true,
+                Formatter = @"function (val) {
+                    var a = moment(val[0])
+                    var b = moment(val[1])
+                    var diff = b.diff(a, 'days')
+                    return diff + (diff > 1 ? ' days' : ' day')
+                }",
+            }, 
+            Stroke = new Stroke { 
+                Width = 1,
+            }, 
+            Fill = new Fill {
+                Type = new List<FillType> { FillType.Solid},
+                Opacity= 0.6
+            },
+            Legend = new Legend  { 
+                Show = true,
+                Position = LegendPosition.Top,
+                HorizontalAlign = Align.Center,
+            }, 
+        };
+
+         var date3 = DateTime.Now;
+        activities3.Add(new Activity3 { Person3 = "George Washington", Name = "President", Start = date3.AddDays(-40), End = date3.AddDays(-30) });
+        activities3.Add(new Activity3 { Person3 = "John Adams", Name = "President", Start = date3.AddDays(-30), End = date3.AddDays(-25) });
+        activities3.Add(new Activity3 { Person3 = "Thomas Jefferson", Name = "President", Start = date3.AddDays(-25), End = date3.AddDays(-15) });
+
+        activities3.Add(new Activity3 { Person3 = "John Adams", Name = "Vice President", Start = date3.AddDays(-40), End = date3.AddDays(-30) });
+        activities3.Add(new Activity3 { Person3 = "Thomas Jefferson", Name = "Vice President", Start = date3.AddDays(-30), End = date3.AddDays(-25) });
+        activities3.Add(new Activity3 { Person3 = "Aaron Burr", Name = "Vice President", Start = date3.AddDays(-25), End = date3.AddDays(-20) });
+        activities3.Add(new Activity3 { Person3 = "George Clinton", Name = "Vice President", Start = date3.AddDays(-20), End = date3.AddDays(-10) });
+
+        activities3.Add(new Activity3 { Person3 = "John Jay", Name = "Secretary of State", Start = date3.AddDays(-40), End = date3.AddDays(-38) });
+        activities3.Add(new Activity3 { Person3 = "Thomas Jefferson", Name = "Secretary of State", Start = date3.AddDays(-38), End = date3.AddDays(-33) });
+        activities3.Add(new Activity3 { Person3 = "Edmund Randolph", Name = "Secretary of State", Start = date3.AddDays(-33), End = date3.AddDays(-30) });
+        activities3.Add(new Activity3 { Person3 = "Timothy Pickering", Name = "Secretary of State", Start = date3.AddDays(-30), End = date3.AddDays(-25) });
+        activities3.Add(new Activity3 { Person3 = "Charles Lee", Name = "Secretary of State", Start = date3.AddDays(-25), End = date3.AddDays(-24) });
+        activities3.Add(new Activity3 { Person3 = "John Marshall", Name = "Secretary of State", Start = date3.AddDays(-24), End = date3.AddDays(-21) });
+        activities3.Add(new Activity3 { Person3 = "Levi Lincoln", Name = "Secretary of State", Start = date3.AddDays(-21), End = date3.AddDays(-20) });
+        activities3.Add(new Activity3 { Person3 = "James Madison", Name = "Secretary of State", Start = date3.AddDays(-20), End = date3.AddDays(-10) });
+
+        GroupedTImelineoptions = new ApexChartOptions<Activity3>
+        {
+            Colors = new Color(new List<string> {  "#5c67f7", "#e354d4", "#ff8e6f", "#fe5454", "#7b76fe",
+            "#3F51B5", "#546E7A", "#D4526E", "#8D5B4C", "#F86624",
+            "#D7263D", "#1B998B", "#2E294E", "#F46036", "#E2C044"}),
+            PlotOptions = new PlotOptions
+            {
+                Bar = new PlotOptionsBar
+                {
+                    Horizontal = true,
+                    RangeBarGroupRows = true,
+                    RangeBarOverlap = true,
+                    BarHeight = "50%"
+                }
+            },
+            DataLabels = new ApexCharts.DataLabels {
+                Enabled = true,
+                Formatter = @"function (val) {
+                    var a = moment(val[0])
+                    var b = moment(val[1])
+                    var diff = b.diff(a, 'days')
+                    return diff + (diff > 1 ? ' days' : ' day')
+                }",
+            }, 
+            Stroke = new Stroke { 
+                Width = 1,
+            }, 
+            Legend = new Legend  { 
+                Show=true,
+                Position = LegendPosition.Right,
+            }, 
+        };
+
+        DumbbellChartoptions = new ApexChartOptions<DumbbellChart> {
+            Grid = new Grid {
+                BorderColor = "#f2f5f7",
+                Xaxis=new() {
+                    Lines=new() {
+                        Show= true
+                    }
+                },
+                Yaxis=new() {
+                    Lines=new() {
+                        Show= true
+                    }
+                }
+            },
+            Colors = new Color(new List<string> { "#5c67f7", "#e354d4"}),
+            PlotOptions = new PlotOptions
+            {
+                Bar = new PlotOptionsBar
+                {
+                    Horizontal = true,
+                    IsDumbbell= true,
+                    DumbbellColors=  ["#5c67f7", "#e354d4"],
+                }
+            }, 
+            Fill = new Fill {
+                Type = new List<FillType> { FillType.Gradient },
+                Gradient = new ApexCharts.FillGradient {
+                    InverseColors = false,
+                    GradientToColors = new Color(new List<string> {"#5c67f7", "#e354d4"}),
+                    Stops = [0, 100],
+                    ColorStops = new List<FillGradientStops> {
+                        new FillGradientStops { Offset = 0, Color = "#5c67f7", Opacity = 1 },
+                        new FillGradientStops { Offset = 100, Color = "#e354d4", Opacity = 1 }
+                    },
+                }
+            },
+            DataLabels = new ApexCharts.DataLabels {
+                Enabled = true,
+            }, 
+            Legend = new Legend  { 
+                Show=true,
+                ShowForSingleSeries=true,
+                Position= ApexCharts.LegendPosition.Top,
+                HorizontalAlign = Align.Left,
+                CustomLegendItems= ["Female", "Male"]
+            }, 
+        };
+        DumbbellChartSeriesConfigs = new List<SeriesConfig<DumbbellChart>>
+        {
+            new SeriesConfig<DumbbellChart>
+            {
+                XValueSelector = e => e.Name ?? "unknown",
+                YMinValueSelector = e =>e.StartDate,
+                YMaxValueSelector = e =>e.EndDate,
+            },
+        };
+    }
+}

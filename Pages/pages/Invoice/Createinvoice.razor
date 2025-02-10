@@ -1,0 +1,334 @@
+@page "/invoice-create"
+@using FlatpickrBlazor
+@using FlatpickrBlazor.Components
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using InvoiceData
+@inject InvoiceService InvoiceService
+
+    <!-- Flatpickr Css -->
+    <link href="_content/FlatpickrBlazor/flatpickr.min.css" rel="stylesheet" />
+
+    <!-- Start::page-header -->
+    <SpkPageHeader PageItems="PageItems" />
+    <!-- End::page-header -->
+
+    <!-- Start::row-1 -->
+    <div class="row">
+        <div class="col-xl-9">
+            <div class="card custom-card">
+                <div class="card-header d-md-flex d-block">
+                    <div class="h5 mb-0 d-sm-flex d-block align-items-center">
+                        <div>
+                            <img src="../assets/images/brand-logos/toggle-logo.png" alt="">
+                        </div> 
+                        <div class="ms-sm-2 ms-0 mt-sm-0 mt-2">
+                            <input type="text" class="form-control form-control-light form-control-sm" placeholder="Invoice Title" value="INV TITLE"> 
+                        </div> 
+                        <div class="mx-2">:</div>
+                        <div class="mt-sm-0 mt-2">
+                            <input type="text" class="form-control form-control-light form-control-sm" placeholder="Invoice ID" value="INV ID"> 
+                        </div>
+                    </div>
+                    <div class="ms-auto mt-md-0 mt-2">
+                        <SpkButtons ButtonClass="btn-primary me-2" ButtonSize="btn-sm">Save As PDF<i class="ri-file-pdf-line ms-1 align-middle d-inline-block"></i></SpkButtons>
+                        <SpkButtons ButtonClass="btn-icon btn-primary1-light me-2" ButtonSize="btn-sm"><i class="bi bi-plus-lg"></i></SpkButtons>
+                        <SpkButtons ButtonClass="btn-icon btn-primary2-light me-2" ButtonSize="btn-sm"><i class="bi bi-download"></i></SpkButtons>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row gy-3">
+                        <div class="col-xl-12">
+                            <div class="row">
+                                <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6">
+                                    <p class="dw-semibold mb-2">
+                                        Billing From :
+                                    </p>
+                                    <div class="row gy-2">
+                                        <div class="col-xl-12">
+                                            <input type="text" class="form-control form-control-light" id="Company-Name" placeholder="Company Name" value="SPRUKO TECHNOLOGIES">
+                                        </div>
+                                        <div class="col-xl-12">
+                                            <textarea class="form-control form-control-light" id="company-address" placeholder="Enter Address" rows="3"></textarea>
+                                        </div>
+                                        <div class="col-xl-12">
+                                            <input type="text" class="form-control form-control-light" id="company-mail" placeholder="Company Email" value="">
+                                        </div>
+                                        <div class="col-xl-12">
+                                            <input type="text" class="form-control form-control-light" id="company-phone" placeholder="Phone Number" value="">
+                                        </div>
+                                        <div class="col-xl-12">
+                                            <textarea class="form-control form-control-light" id="invoice-subject" placeholder="Subject" rows="4"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6 ms-auto mt-sm-0 mt-3">
+                                    <p class="dw-semibold mb-2">
+                                        Billing To :
+                                    </p>
+                                    <div class="row gy-2">
+                                        <div class="col-xl-12">
+                                            <input type="text" class="form-control form-control-light" id="customer-Name" placeholder="Customer Name" value="Henry Milo">
+                                        </div>
+                                        <div class="col-xl-12">
+                                            <textarea class="form-control form-control-light" id="customer-address" placeholder="Enter Address" rows="3"></textarea>
+                                        </div>
+                                        <div class="col-xl-12">
+                                            <input type="text" class="form-control form-control-light" id="customer-mail" placeholder="Customer Email" value="">
+                                        </div>
+                                        <div class="col-xl-12">
+                                            <input type="text" class="form-control form-control-light" id="customer-phone" placeholder="Phone Number" value="">
+                                        </div>
+                                        <div class="col-xl-12">
+                                            <input type="text" class="form-control form-control-light" id="zip-code" placeholder="Zip Code" value="">
+                                        </div>
+                                        <div class="col-xl-12 choices-control">
+                                            <p class="dw-semibold mb-2 mt-2">
+                                                Currency :
+                                            </p>
+                                            <select class="form-control tomselect">
+                                                <option value="">Select Currency</option>
+                                                <option value="Armani">USD - (United States Dollar)</option>
+                                                <option value="Lacoste">BHD - (Bahraini Dinar)</option>
+                                                <option value="Puma">KWD - (Kuwaiti Dinar)</option>
+                                                <option value="Spykar">CHF - (Swiss Franc)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3"> 
+                            <label for="invoice-number" class="form-label">Invoice ID</label>
+                            <input type="text" class="form-control form-control-light" id="invoice-number" placeholder="Inv No" value="#SHG148756965">
+                        </div>
+                        <div class="col-xl-3">
+                            <label for="invoice-date-issued" class="form-label">Date Issued</label>
+                            <Flatpickr class="form-control form-control-light" @ref="_flatpickr" placeholder="Choose date"/>
+                        </div>
+                        <div class="col-xl-3">
+                            <label for="invoice-date-due" class="form-label">Due Date</label>
+                            <Flatpickr class="form-control form-control-light" @ref="_flatpickr" placeholder="Choose date"/>
+                        </div>
+                        <div class="col-xl-3"> 
+                            <label for="invoice-due-amount" class="form-label">Due Amount</label>
+                            <input type="text" class="form-control form-control-light" id="invoice-due-amount" placeholder="Enter Amount" value="$24,784.54">
+                        </div>
+                        <div class="col-xl-12">
+                            <SpkTables Items="InvoiceService.GetCreateInvoiceHeadersData()" Tableclass="nowrap text-nowrap border mt-3">
+                                @foreach(var (list , index) in InvoiceService.GetCreateInvoiceListData().Select((value, i) => (value, i))) 
+                                {
+                                    <tr> 
+                                        <td>
+                                            @index
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-light" placeholder="Enter Product Name">
+                                        </td>
+                                        <td>
+                                            <textarea rows="1" class="form-control form-control-light" placeholder="Enter Description"></textarea>
+                                        </td>
+                                        <td class="invoice-quantity-container">
+                                            <div class="input-group border rounded flex-nowrap">
+                                                <SpkButtons ButtonClass="btn-icon btn-primary input-group-text flex-fill product-quantity-minus" @onclick="() => DecrementCount(index, -1)"><i class="ri-subtract-line"></i></SpkButtons>
+                                                <input type="text" class="form-control form-control-sm border-0 text-center w-100" aria-label="quantity" @bind="quantity[index]" />
+                                                <SpkButtons ButtonClass="btn-icon btn-primary input-group-text flex-fill product-quantity-minus" @onclick="() => IncrementCount(index, 1)"><i class="ri-add-line"></i></SpkButtons>
+                                            </div>
+                                        </td>
+                                        <td><input class="form-control form-control-light" placeholder="" type="number" value="@list.Unit"></td>
+                                        <td><input class="form-control form-control-light" placeholder="" type="number" value="@list.Total"></td>
+                                        <td>
+                                            <SpkButtons ButtonClass="btn-icon btn-danger-light" ButtonSize="btn-sm" @onclick="@(() => DeleteInvoiceList(index))"><i class="ri-delete-bin-5-line"></i></SpkButtons>
+                                        </td>
+                                    </tr> 
+                                }
+                                <tr>
+                                    <td colspan="6" class="border-bottom-0">
+                                        <SpkButtons Tag="a" ButtonClass="btn-light" @onclick="AddProductRow"><i class="bi bi-plus-lg"></i> Add Product</SpkButtons>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="5"></td>
+                                    <td colspan="2">
+                                        <SpkTables Tableclass="table-sm text-nowrap mb-0 table-borderless">
+                                            <tr>
+                                                <th scope="row">
+                                                    <div class="fw-medium">Sub Total :</div>
+                                                </th>
+                                                <td>
+                                                    <input type="text" class="form-control form-control-light invoice-amount-input" placeholder="Enter Amount" value="$2519.89">
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">
+                                                    <div class="fw-medium">Avail Discount :</div>
+                                                </th>
+                                                <td>
+                                                    <input type="text" class="form-control form-control-light invoice-amount-input" placeholder="Enter Amount" value="$15.58">
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">
+                                                    <div class="fw-medium">Coupon Discount <span class="text-success">(3.5%)</span> :</div>
+                                                </th>
+                                                <td>
+                                                    <input type="text" class="form-control form-control-light invoice-amount-input" placeholder="Enter Amount" value="$112.00">
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">
+                                                    <div class="fw-medium">Vat <span class="text-danger">(7.5%)</span> :</div>
+                                                </th>
+                                                <td>
+                                                    <input type="text" class="form-control form-control-light invoice-amount-input" placeholder="Enter Amount" value="$214.00">
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">
+                                                    <div class="fw-medium">Due Till Date :</div>
+                                                </th>
+                                                <td>
+                                                    <input type="text" class="form-control form-control-light invoice-amount-input" placeholder="Enter Amount" value="$2.00">
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">
+                                                    <div class="fs-14 fw-medium">Total :</div>
+                                                </th>
+                                                <td>
+                                                    <input type="text" class="form-control form-control-light invoice-amount-input" placeholder="Enter Amount" value="$2,106.68">
+                                                </td>
+                                            </tr>
+                                        </SpkTables>
+                                    </td>
+                                </tr>
+                            </SpkTables>
+                        </div>
+                        <div class="col-xl-12">
+                            <div>
+                                <label for="invoice-note" class="form-label">Note:</label>
+                                <textarea class="form-control form-control-light" id="invoice-note" rows="3">If you're not satisfied with the product, you can return the unused item within 10 days of the delivery date. For refund options, please visit the official website and review the available refund policies.</textarea>
+                            </div>    
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between gap-2">
+                    <SpkButtons ButtonClass="btn-primary1-light"><i class="ri-eye-line me-1 align-middle d-inline-block"></i>Preview</SpkButtons>
+                    <SpkButtons ButtonClass="btn-primary">Send Invoice <i class="ri-send-plane-2-line ms-1 align-middle d-inline-block"></i></SpkButtons>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        Mode Of Payment
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row gy-3">
+                        <div class="col-xl-12">
+                            <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+                                <input type="radio" class="btn-check" name="btnradio" id="btnradio2">
+                                <label class="btn btn-outline-primary mt-sm-0 mt-1" for="btnradio2">UPI</label>
+                                <input type="radio" class="btn-check" name="btnradio" id="btnradio3" checked="">
+                                <label class="btn btn-outline-primary mt-sm-0 mt-1" for="btnradio3">Credit/Debit Card</label>
+                            </div>
+                        </div>
+                        <div class="col-xl-12">
+                            <input type="text" class="form-control form-control-light" id="invoice-payment-cardname" placeholder="Card Number" value="1323 3213 4546 XXXX">
+                            <label for="invoice-payment-cardname" class="form-label mb-0"><a class="text-muted fs-11" href="javascript:void(0);">Enter valid card number <sup class="fs-12 text-danger align-middle"> *</sup></a></label>
+                        </div>
+                        <div class="col-xl-12">
+                            <input type="text" class="form-control form-control-light" placeholder="Card Holder Name">
+                        </div>
+                        <div class="col-xl-12">
+                            <input type="password" class="form-control form-control-light mb-2" placeholder="Enter OTP">
+                        </div>
+                        <div class="col-xl-12">
+                            <SpkAlert AlertClass="alert-primary2">Please Make sure to pay the invoice bill within 120 days.</SpkAlert>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--End::row-1 -->
+
+<!-- TomSelect JS -->
+<script src="@($"{NavigationManager.BaseUri}assets/libs/tom-select/dist/js/tom-select.complete.min.js")"></script>
+<script src="@($"{NavigationManager.BaseUri}assets/js/tomselect.js")"></script>
+        
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Pages" },
+        new SpkPageHeader.PageItem { PageTitle = "Invoice" },
+        new SpkPageHeader.PageItem { PageTitle = "Create Invoice" },
+    };
+    <!-- Flatpickr JS Start -->
+    public Flatpickr? _flatpickr;
+    public Flatpickr? _flatpickr1;
+    <!-- Flatpickr JS End -->
+
+    private Dictionary<int, int> quantity = new Dictionary<int, int>();
+
+    protected override void OnInitialized()
+    {
+        var data = InvoiceService.GetCreateInvoiceHeadersData().Select((value, i) => (value, i)).ToList();
+
+        foreach (var item in data)
+        {
+            if (!quantity.ContainsKey(item.i))
+            {
+                quantity[item.i] = 0; 
+            }
+        }
+    }
+
+    private void IncrementCount(int index, int change)
+    {
+        if (!quantity.ContainsKey(index))
+        {
+            quantity[index] = 0;
+        }
+
+        quantity[index] += change;
+    }
+    private void DecrementCount(int index, int change)
+    {
+        if (!quantity.ContainsKey(index))
+        {
+            quantity[index] = 0; 
+        }
+
+        if (quantity[index] > 0) 
+        {
+            quantity[index] -= 1; 
+        }
+    }
+    protected void DeleteInvoiceList(int index)
+    {
+        var invoiceList = InvoiceService.GetCreateInvoiceListData();
+        
+        if (index >= 0 && index < invoiceList.Count)
+        {
+            invoiceList.RemoveAt(index); 
+        }
+    }
+    private void AddProductRow()
+    {
+        var newProduct = new CreateInvoiceList
+        {
+            Name = "New Product",
+            Description = "",
+            Quantity = 1,
+            Unit = "Unit",
+            Total = "0"
+        };
+
+        // Add the new product to the list
+        InvoiceService.GetCreateInvoiceListData().Add(newProduct);
+    }
+}
+
+

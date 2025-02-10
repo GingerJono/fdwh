@@ -1,0 +1,346 @@
+@page "/colors"
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager 
+@using Sandbox._Spk
+@using ColorsData
+@inject ColorsService ColorsService
+
+    <!-- Page Header -->
+    <SpkPageHeader PageItems="PageItems" />
+    <!-- Page Header Close -->
+
+    <!-- Start:: row-1 -->
+    <div class="row">
+        <div class="col-lg-12 col-sm-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        Background Colors
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row row-cols-12 d-flex align-items-center">
+                        @foreach(var list in ColorsService.GetColorsData().Take(11)) {
+                            <div class="p-3 col-xl-2 col-lg-6">
+                                <div class="m-2 bg-@list.ColorsClass mx-auto color-container"></div>
+                                <p class="pb-0 mb-0 fw-medium text-center"><code>.bg-@list.ColorsClass</code></p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-12 col-sm-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        Background gradients
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row row-cols-12 d-flex align-items-center">
+                        @foreach(var list in ColorsService.GetColorsData().Take(11)) {
+                            <div class="p-3 col-xl-2 col-lg-6">
+                                <div class="m-2 bg-@list.ColorsClass-gradient mx-auto color-container"></div>
+                                <p class="pb-0 mb-0 fw-medium text-center"><code>.bg-@list.ColorsClass-gradient</code></p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-12 col-sm-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        Background transparent colors
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row row-cols-12 d-flex align-items-center">
+                        @foreach(var list in ColorsService.GetColorsData().Take(11)) {
+                            <div class="p-3 col-xl-2 col-lg-6">
+                                <div class="m-2 bg-@list.ColorsClass-transparent mx-auto color-container"></div>
+                                <p class="pb-0 mb-0 fw-medium text-center"><code>.bg-@list.ColorsClass-transparent</code></p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-12 col-sm-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        Background outline colors
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row row-cols-12 d-flex align-items-center">
+                        @foreach(var list in ColorsService.GetColorsData().Take(11)) {
+                        <div class="p-3 col-xl-2 col-lg-6">
+                            <div class="m-2 bg-outline-@list.ColorsClass mx-auto color-container"><i class="bi bi-emoji-smile fs-18"></i></div>
+                            <p class="pb-0 mb-0 fw-medium text-center"><code>.bg-outline-@list.ColorsClass</code></p>
+                        </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-12 col-sm-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        Border Colors
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row row-cols-12 d-flex align-items-center">
+                        @foreach(var list in ColorsService.GetColorsData().Take(11)) {
+                        <div class="p-3 col-xl-2 col-lg-6">
+                            <div class="m-2 border border-@list.ColorsClass mx-auto color-container"></div>
+                            <p class="pb-0 mb-0 fw-medium text-center"><code>.border-@list.ColorsClass</code></p>
+                        </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-12 col-sm-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        Background Opacity
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row row-cols-12 d-flex align-items-center">
+                        <div class="p-3 col">
+                            <div class="m-2 bg-success bg-opacity-100 text-fixed-white mx-auto color-container">100%</div>
+                            <p class="pb-0 mb-0 fw-medium text-center"><code>.bg-opacity-75</code></p>
+                        </div>
+                        <div class="p-3 col">
+                            <div class="m-2 bg-success text-fixed-white bg-opacity-75 mx-auto color-container">75%</div>
+                            <p class="pb-0 mb-0 fw-medium text-center"><code>.bg-opacity-75</code></p>
+                        </div>
+                        <div class="p-3 col">
+                            <div class="m-2 bg-success text-fixed-dark bg-opacity-50 mx-auto color-container">50%</div>
+                            <p class="pb-0 mb-0 fw-medium text-center"><code>.bg-opacity-50</code></p>
+                        </div>
+                        <div class="p-3 col">
+                            <div class="m-2 bg-success text-fixed-dark bg-opacity-25 mx-auto color-container">25%</div>
+                            <p class="pb-0 mb-0 fw-medium text-center"><code>.bg-opacity-25</code></p>
+                        </div>
+                        <div class="p-3 col">
+                            <div class="m-2 bg-success text-fixed-dark bg-opacity-10 mx-auto color-container">10%</div>
+                            <p class="pb-0 mb-0 fw-medium text-center"><code>.bg-opacity-10</code></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>    
+    <!-- End:: row-1 -->
+
+    <!-- Start:: row-2 -->
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                            Text Colors
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row row-cols-12 d-flex align-items-center">
+                        @foreach(var list in ColorsService.GetColorsData()) {
+                            var MainClass = $"{list.ColorsClass}";
+                            var additionalClass = list.ColorsClass == "light" ? "bg-dark" : "";
+                            var combinedClasses = $"{MainClass} {additionalClass} ".Trim();
+                            <div class="p-3 col-xl-2 col-lg-6">
+                                <div class="m-2 text-@combinedClasses fw-medium fs-14 text-center">@list.ColorsClass</div>
+                                <p class="pb-0 mb-0 fw-medium text-center"><code>.text-@list.ColorsClass</code></p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End:: row-2 -->
+
+    <!-- Start:: row-3 -->
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="row">
+                <div class="col-xl-12">
+                    <div class="card custom-card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                Text Opacity
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row row-cols-12 d-flex align-items-center">
+                                <div class="p-3 col">
+                                    <div class="m-2 text-primary fw-medium fs-14 text-center">Opacity-100</div>
+                                    <p class="pb-0 mb-0 fw-medium text-center"><code>100% opacity</code></p>
+                                </div>
+                                <div class="p-3 col">
+                                    <div class="m-2 text-primary text-opacity-75 fw-medium fs-14 text-center">Opacity-100</div>
+                                    <p class="pb-0 mb-0 fw-medium text-center"><code>.text-opacity-75</code></p>
+                                </div>
+                                <div class="p-3 col">
+                                    <div class="m-2 text-primary text-opacity-50 fw-medium fs-14 text-center">Opacity-100</div>
+                                    <p class="pb-0 mb-0 fw-medium text-center"><code>.text-opacity-50</code></p>
+                                </div>
+                                <div class="p-3 col">
+                                    <div class="m-2 text-primary text-opacity-25 fw-medium fs-14 text-center">Opacity-100</div>
+                                    <p class="pb-0 mb-0 fw-medium text-center"><code>.text-opacity-25</code></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End:: row-3 -->
+
+    <!-- Start:: row-4 -->
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        Callout
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="callout">Lorem ipsum dolor sit amet consectetur adipisicing
+                        elit. </div>
+                    <div class="callout callout-info">Lorem ipsum dolor sit amet consectetur
+                        adipisicing
+                        elit. </div>
+                    <div class="callout callout-warning">Lorem ipsum dolor sit amet
+                        consectetur
+                        adipisicing elit. </div>
+                    <div class="callout callout-danger">Lorem ipsum dolor sit amet
+                        consectetur
+                        adipisicing elit.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End:: row-4 -->
+
+    <!-- Start:: row-5 -->
+    <h6 class="mb-3">Other Colors:</h6>
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-body d-xl-flex flex-wrap">
+                    @foreach(var list in ColorsService.GetColorsData2()) {
+                        <div class="flex-fill p-3 @($"bd-blue{list.ColorsClass}")">@($"$blue{list.ColorsClass}")</div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-body d-xl-flex flex-wrap">
+                    @foreach(var list in ColorsService.GetColorsData2()) {
+                        <div class="flex-fill p-3 @($"bd-indigo{list.ColorsClass}")">@($"$indigo{list.ColorsClass}")</div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-body d-xl-flex flex-wrap">
+                    @foreach(var list in ColorsService.GetColorsData2()) {
+                        <div class="flex-fill p-3 @($"bd-purple{list.ColorsClass}")">@($"$purple{list.ColorsClass}")</div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-body d-xl-flex flex-wrap">
+                    @foreach(var list in ColorsService.GetColorsData2()) {
+                        <div class="flex-fill p-3 @($"bd-pink{list.ColorsClass}")">@($"$pink{list.ColorsClass}")</div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-body d-xl-flex flex-wrap">
+                    @foreach(var list in ColorsService.GetColorsData2()) {
+                        <div class="flex-fill p-3 @($"bd-red{list.ColorsClass}")">@($"$red{list.ColorsClass}")</div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-body d-xl-flex flex-wrap">
+                    @foreach(var list in ColorsService.GetColorsData2()) {
+                        <div class="flex-fill p-3 @($"bd-orange{list.ColorsClass}")">@($"$orange{list.ColorsClass}")</div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-body d-xl-flex flex-wrap">
+                    @foreach(var list in ColorsService.GetColorsData2()) {
+                        <div class="flex-fill p-3 @($"bd-yellow{list.ColorsClass}")">@($"$yellow{list.ColorsClass}")</div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-body d-xl-flex flex-wrap">
+                    @foreach(var list in ColorsService.GetColorsData2()) {
+                        <div class="flex-fill p-3 @($"bd-green{list.ColorsClass}")">@($"$green{list.ColorsClass}")</div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-body d-xl-flex flex-wrap">
+                    @foreach(var list in ColorsService.GetColorsData2()) {
+                        <div class="flex-fill p-3 @($"bd-teal{list.ColorsClass}")">@($"$teal{list.ColorsClass}")</div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-body d-xl-flex flex-wrap">
+                    @foreach(var list in ColorsService.GetColorsData2()) {
+                        <div class="flex-fill p-3 @($"bd-cyan{list.ColorsClass}")">@($"$cyan{list.ColorsClass}")</div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-body d-xl-flex flex-wrap">
+                    @foreach(var list in ColorsService.GetColorsData2()) {
+                        <div class="flex-fill p-3 @($"bd-gray{list.ColorsClass}")">@($"$gray{list.ColorsClass}")</div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End:: row-5 -->
+@code {   
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Utilities" },
+        new SpkPageHeader.PageItem { PageTitle = "Colors" },
+    };
+}

@@ -1,0 +1,90 @@
+@page "/timeline"
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using Sandbox._Spk.Timeline
+@using TimelineData
+@inject TimelineService TimelineService
+
+    <!-- Page Header -->
+    <SpkPageHeader PageItems="PageItems" />
+    <!-- Page Header Close -->
+
+    <!-- Start:: row-1 -->
+    <div class="row justify-content-center">
+        <div class="col-xxl-11">
+            <div class="card custom-card border overflow-hidden">
+                <div class="card-header">
+                    <div class="card-title">
+                        Timeline 01
+                    </div>
+                </div>
+                <div class="card-body bg-light bg-opacity-75">
+                    <div class="timeline container">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="timeline-container">
+                                    <div class="timeline-continue pt-0">
+                                        @foreach(var timeline in TimelineService.GetTimelineData1()) {
+                                            <SpkTimeline1 activity="timeline"></SpkTimeline1>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End:: row-1 -->
+
+    <!-- Start:: row-2 -->
+    <div class="row justify-content-center timeline-2">
+        <div class="col-xxl-11">
+            <div class="card custom-card">
+                <div class="card-header justify-content-between">
+                    <div class="card-title">
+                        Timeline 02
+                    </div>
+                </div>
+                <ul class="notification container px-3">
+                    @foreach(var timeline in TimelineService.GetTimelineData2()) {
+                        <SpkTimeline2 activity="timeline"></SpkTimeline2>
+                    }
+                </ul>
+                <div class="text-center mb-4">
+                    <SpkButtons ButtonClass="btn-success-light btn-loader mx-auto">
+                        <span class="me-2">Loading</span>
+                        <span class="loading"><i class="ri-loader-4-line fs-16"></i></span>
+                    </SpkButtons>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End:: row-2 -->
+
+    <!-- Start:: row-3 -->
+    <div class="row justify-content-center timeline-3">
+        <div class="col-xxl-11">
+            <div class="card custom-card">
+                <div class="card-header pb-4">
+                    <div class="card-title">Timeline 03</div>
+                </div>
+                <div class="card-body pt-xxl-5 mt-xxl-5">
+                    <div class="timeline-steps">
+                        @foreach(var timeline in TimelineService.GetTimelineData3()) {
+                            <SpkTimeline3 activity="timeline"></SpkTimeline3>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End:: row-3 -->
+
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Pages" },
+        new SpkPageHeader.PageItem { PageTitle = "Timeline" },
+    }; 
+}

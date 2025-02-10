@@ -1,0 +1,79 @@
+@using CrmData
+@inject CrmDataService CrmDataService
+
+@code {
+    [Parameter] public DealCategory? CrmDeal { get; set; } 
+}
+
+@if(CrmDeal != null){
+    <div class="card custom-card border border-@CrmDeal.DealcardClass border-opacity-50">
+        <div class="card-body p-3">
+            <div class="d-flex align-items-top flex-wrap justify-content-between">
+                <div>
+                    <h6 class="fw-medium mb-0 @CrmDeal.DealClass"><i class="ri-circle-fill p-1 lh-1 fs-7 rounded-2 bg-@CrmDeal.DealcardClass-transparent text-@CrmDeal.DealcardClass me-2 align-middle"></i>@CrmDeal.DealTitle</h6>
+                </div>
+                <div class="ms-auto text-center">
+                    <SpkBadge BadgeClass="@($"bg-{CrmDeal.DealcardClass}")">@CrmDeal.Badge</SpkBadge>
+                </div> 
+            </div>
+        </div>
+    </div>
+    <div id="@CrmDeal.DeaId">
+    @if (CrmDeal.DealCard != null) {
+        @foreach (var Item in CrmDeal.DealCard) {
+            <div class="card custom-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center gap-2 mb-3"> 
+                        <div class="d-flex align-items-center gap-1 flex-wrap">
+                            <div class="lh-1">
+                                <span class="avatar avatar-sm avatar-rounded">
+                                    <img src="@Item.DealImg" alt="">
+                                </span>
+                            </div>
+                            <div>
+                                <div class="">@Item.Deal</div>
+                                <div class="text-muted fs-10">@Item.Duration</div>
+                            </div>
+                        </div>
+                        <SpkDropdowns DropdownClass="btn-sm btn-light btn-icons text-muted" DropdownText="<i class='fe fe-more-vertical'></i>" DropdownToggle=false DropdownMainClass="ms-auto">
+                            <ChildContent2>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Edit</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);"  @onclick="() => { if (!string.IsNullOrEmpty(Item.Id)) DeleteDeal(Item.Id); }">Delete</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">View Details</a></li>
+                                </ul>
+                            </ChildContent2>
+                        </SpkDropdowns>
+                    </div>
+                    <p class="fw-medium mb-1 fs-14">@Item.Title</p>
+                    <p class="fw-medium"><span class="text-muted fw-normal">@Item.AmountType:</span> @Item.Amount</p>
+                    <div class="deal-description">
+                        <div class="">
+                            <a href="javascript:void(0);" class="company-name">@Item.Status</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }  
+    }
+    </div>
+}
+
+
+@code {
+    protected void DeleteDeal(string id)
+    {
+        var DealToRemove = CrmDataService.GetDealList().SelectMany(category => category.DealCard ?? new List<DealItem>()).FirstOrDefault(Deal => Deal.Id == id);
+
+        if (DealToRemove != null)
+        {
+            foreach (var category in CrmDataService.GetDealList())
+            {
+                if (category.DealCard != null && category.DealCard.Remove(DealToRemove))
+                {
+                    break; 
+                }
+            }
+        }
+    }
+}

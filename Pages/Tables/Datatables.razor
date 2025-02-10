@@ -1,0 +1,265 @@
+@page "/data-tables"
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager
+@using Sandbox._Spk
+@using DataTablesData
+@inject DataTablesService DataTablesService
+
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.3.0/css/responsive.bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.bootstrap5.min.css">
+
+    <!-- Page Header -->
+    <SpkPageHeader PageItems="PageItems" />
+    <!-- Page Header Close -->
+
+    <SpkAlert AlertClass="alert-secondary fs-15 mb-4" IsDismissible=true>
+        We Placed <span class="text-black fw-medium">Datatables</span> only in this page by using <span class="text-black fw-medium">jquery</span> cdn link.
+    </SpkAlert>
+
+    <!-- Start::row-1 -->
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        Basic Datatable
+                    </div>
+                </div>
+                <div class="card-body">
+                    <SpkTables Items="DataTablesService.GetBasicHeaderData()" Tableclass="table-bordered text-nowrap w-100" TableId="datatable-basic">
+                        @foreach(var list in DataTablesService.GetDataTable1()){
+                                <tr>
+                                    <td>@list.name</td>
+                                    <td>@list.position</td>
+                                    <td>@list.office</td>
+                                    <td>@list.age</td>
+                                    <td>@list.startdate</td>
+                                    <td>@list.salary</td>
+                                </tr>
+                        }
+                    </SpkTables>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--End::row-1 -->
+
+    <!-- Start:: row-2 -->
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        Responsive Datatable
+                    </div>
+                </div>
+                <div class="card-body">
+                    <SpkTables Items="DataTablesService.GetHeader2Data()" Tableclass="table-bordered text-nowrap w-100" TableId="responsiveDataTable">
+                        @foreach(var list in DataTablesService.GetDataTable2()){
+                                <tr>
+                                    <td>@list.name</td>
+                                    <td>@list.lastname</td>
+                                    <td>@list.position</td>
+                                    <td>@list.startdate</td>
+                                    <td>@list.salary</td>
+                                    <td>@list.email</td>
+                                </tr>
+                        }
+                    </SpkTables>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End:: row-2 -->
+
+    <!-- Start:: row-3 -->
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        Responsive Modal Datatable
+                    </div>
+                </div>
+                <div class="card-body">
+                    <SpkTables Items="DataTablesService.GetBasicHeaderData()" Tableclass="table-bordered text-nowrap w-100" TableId="responsivemodal-DataTable">
+                        @foreach(var list in DataTablesService.GetDataTable1()){
+                                <tr>
+                                    <td>@list.name</td>
+                                    <td>@list.position</td>
+                                    <td>@list.office</td>
+                                    <td>@list.age</td>
+                                    <td>@list.startdate</td>
+                                    <td>@list.salary</td>
+                                </tr>
+                        }
+                    </SpkTables>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End:: row-3 -->
+
+    <!-- Start:: row-4 -->
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">File Export Datatable</div>
+                </div>
+                <div class="card-body">
+                    <SpkTables Items="DataTablesService.GetBasicHeaderData()" Tableclass="table-bordered text-nowrap w-100" TableId="file-export">
+                        @foreach(var list in DataTablesService.GetDataTable1()){
+                                <tr>
+                                    <td>@list.name</td>
+                                    <td>@list.position</td>
+                                    <td>@list.office</td>
+                                    <td>@list.age</td>
+                                    <td>@list.startdate</td>
+                                    <td>@list.salary</td>
+                                </tr>
+                        }
+                    </SpkTables>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End:: row-4 -->
+
+    <!-- Start:: row-5 -->
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        Delete Row Datatable
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="deleted-table table-responsive">
+                        <div class="text-center">
+                            <SpkButtons id="button" ButtonClass="btn-primary mb-2 data-table-btn">Delete selected row</SpkButtons>
+                        </div>
+                        <SpkTables Items="DataTablesService.GetBasicHeaderData()" Tableclass="table-bordered text-nowrap w-100" TableId="delete-datatable">
+                            @foreach(var list in DataTablesService.GetDataTable1()){
+                                    <tr>
+                                        <td>@list.name</td>
+                                        <td>@list.position</td>
+                                        <td>@list.office</td>
+                                        <td>@list.age</td>
+                                        <td>@list.startdate</td>
+                                        <td>@list.salary</td>
+                                    </tr>
+                            }
+                        </SpkTables>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End:: row-5 -->
+
+    <!-- Start:: row-6 -->
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        Add New Row 
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <div class="text-center">
+                            <SpkButtons id="addRow" ButtonClass="btn-primary mb-2 data-table-btn">Add new row</SpkButtons>
+                        </div>
+                        <SpkTables Items="DataTablesService.GetHeader3Data()" Tableclass="table-bordered text-nowrap w-100" TableId="add-row">
+                        </SpkTables>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End:: row-6 -->
+
+    <!-- Start:: row-7 -->
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        Scroll Vertical
+                    </div>
+                </div>
+                <div class="card-body">
+                    <SpkTables Items="DataTablesService.GetBasicHeaderData()" Tableclass="table-bordered text-nowrap w-100" TableId="scroll-vertical">
+                        @foreach(var list in DataTablesService.GetDataTable1()){
+                                <tr>
+                                    <td>@list.name</td>
+                                    <td>@list.position</td>
+                                    <td>@list.office</td>
+                                    <td>@list.age</td>
+                                    <td>@list.startdate</td>
+                                    <td>@list.salary</td>
+                                </tr>
+                        }
+                    </SpkTables>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End:: row-7 -->
+
+    <!-- Start:: row-8 -->
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        Hidden Columns Datatable
+                    </div>
+                </div>
+                <div class="card-body">
+                    <SpkTables Items="DataTablesService.GetBasicHeaderData()" Tableclass="table-bordered text-nowrap w-100" TableId="hidden-columns">
+                        @foreach(var list in DataTablesService.GetDataTable1()){
+                                <tr>
+                                    <td>@list.name</td>
+                                    <td>@list.position</td>
+                                    <td>@list.office</td>
+                                    <td>@list.age</td>
+                                    <td>@list.startdate</td>
+                                    <td>@list.salary</td>
+                                </tr>
+                        }
+                    </SpkTables>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End:: row-8 -->
+
+    <!-- jquery Cdn -->
+    <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
+
+    <!-- Datatables Cdn -->
+    <script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.12.1/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.3.0/js/dataTables.responsive.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.print.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.6/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+    <!-- Internal Datatables JS -->
+    <script src="@($"{NavigationManager.BaseUri}assets/js/datatables.js")"></script>
+
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Tables" },
+        new SpkPageHeader.PageItem { PageTitle = "Data Tables" },
+    };
+}
+    

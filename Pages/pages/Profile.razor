@@ -1,0 +1,389 @@
+@page "/profile"
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using ProfileData
+@inject ProfileService ProfileService
+
+<!-- GLightbox CSS -->
+<link rel="stylesheet" href="../assets/libs/glightbox/dist/css/glightbox.min.css">
+
+    <!-- Page Header -->
+    <SpkPageHeader PageItems="PageItems" />
+    <!-- Page Header Close -->
+
+    <!-- Start:: row-1 -->
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card custom-card profile-card">
+                <div class="profile-banner-img">
+                    <img src="../assets/images/media/media-3.jpg" class="card-img-top" alt="...">
+                </div>
+                <div class="card-body pb-0 position-relative">
+                    <div class="row profile-content">
+                        <div class="col-xl-3">
+                            <div class="card custom-card overflow-hidden border">
+                                <div class="card-body border-bottom border-block-end-dashed">
+                                    <div class="text-center">
+                                        <span class="avatar avatar-xxl avatar-rounded online mb-3">
+                                            <img src="../assets/images/faces/11.jpg" alt="">
+                                        </span>
+                                        <h5 class="fw-semibold mb-1">Spencer Robin</h5>
+                                        <span class="d-block fw-medium text-muted mb-2">Software Development Manager</span>
+                                        <p class="fs-12 mb-0 text-muted"> <span class="me-3"><i class="ri-building-line me-1 align-middle"></i>Hamburg</span> <span><i class="ri-map-pin-line me-1 align-middle"></i>Germany</span> </p>
+                                    </div>
+                                </div>
+                                <div class="d-flex mb-0 flex-wrap gap-3 p-3 border-bottom border-block-end-dashed"> 
+                                    <div class="border-dashed rounded text-center flex-fill"> 
+                                        <div class="main-card-icon mb-2 primary1">
+                                            <div class="avatar avatar-sm bg-primary1">
+                                                <i class="fs-15 ti ti-user-check"></i>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex gap-2 justify-content-center align-items-end">
+                                            <p class="fw-semibold fs-20 mb-0">15k</p>
+                                            <p class="mb-1 text-muted">Followers</p>
+                                        </div>
+                                    </div> 
+                                    <div class="border-dashed rounded text-center flex-fill"> 
+                                        <div class="main-card-icon mb-2 secondary">
+                                            <div class="avatar avatar-sm bg-secondary">
+                                                <i class="fs-15 ti ti-user-plus"></i>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex gap-2 justify-content-center align-items-end">
+                                            <p class="fw-semibold fs-20 mb-0">241</p>
+                                            <p class="mb-1 text-muted">Following</p>
+                                        </div>
+                                    </div> 
+                                </div>
+                                <div class="p-3 pb-1 d-flex flex-wrap justify-content-between">
+                                    <div class="fw-medium fs-15 text-primary1">
+                                        Basic Info :
+                                    </div>
+                                </div>
+                                <div class="card-body border-bottom border-block-end-dashed p-0">
+                                    <ul class="list-group list-group-flush">
+                                        @foreach(var list in ProfileService.GetBasicData()){
+                                            <li class="list-group-item pt-2 border-0">
+                                                <div><span class="fw-medium me-2">@list.Title :</span><span class="text-muted">@list.Details</span></div>
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
+                                <div class="p-3 pb-1 d-flex flex-wrap justify-content-between">
+                                    <div class="fw-medium fs-15 text-primary1">
+                                        Followers :
+                                    </div>
+                                    <a href="javascript:void(0);" class="fs-12 text-muted"> View All<i class="ti ti-arrow-narrow-right ms-1"></i> </a>
+                                </div>
+                                <div class="card-body p-0">
+                                    <ul class="list-group list-group-flush">
+                                        @foreach(var list in ProfileService.GetFollowersData()){
+                                        <li class="list-group-item border-0 py-2">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="lh-1">
+                                                    <span class="avatar avatar-sm avatar-rounded">
+                                                        <img src="@list.Img" alt="">
+                                                    </span>
+                                                </div>
+                                                <div class="flex-fill">
+                                                    <span class="fw-medium">@list.Title</span>
+                                                </div>
+                                                <div> 
+                                                    <SpkButtons ButtonClass="btn-icon btn-primary-light" ButtonSize="btn-sm"><i class="ri-add-line lh-1 align-middle"></i></SpkButtons>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        }
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-9">
+                            <div class="card custom-card overflow-hidden border">
+                                <div class="card-body">
+                                    <ul class="nav nav-tabs tab-style-6 mb-3 p-0" id="myTab" role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link w-100 text-start active" id="profile-about-tab" data-bs-toggle="tab"
+                                                data-bs-target="#profile-about-tab-pane" type="button" role="tab"
+                                                aria-controls="profile-about-tab-pane" aria-selected="true">About</button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link w-100 text-start" id="edit-profile-tab" data-bs-toggle="tab"
+                                                data-bs-target="#edit-profile-tab-pane" type="button" role="tab"
+                                                aria-controls="edit-profile-tab-pane" aria-selected="true">Edit Profile</button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link w-100 text-start" id="timeline-tab" data-bs-toggle="tab"
+                                                data-bs-target="#timeline-tab-pane" type="button" role="tab"
+                                                aria-controls="timeline-tab-pane" aria-selected="false">Timeline</button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link w-100 text-start" id="gallery-tab" data-bs-toggle="tab"
+                                                data-bs-target="#gallery-tab-pane" type="button" role="tab"
+                                                aria-controls="gallery-tab-pane" aria-selected="false">Gallery</button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link w-100 text-start" id="friends-tab" data-bs-toggle="tab"
+                                                data-bs-target="#friends-tab-pane" type="button" role="tab"
+                                                aria-controls="friends-tab-pane" aria-selected="false">Friends</button>
+                                        </li>
+                                    </ul>
+                                    <div class="tab-content" id="profile-tabs">
+                                        <div class="tab-pane show active p-0 border-0" id="profile-about-tab-pane" role="tabpanel" aria-labelledby="profile-about-tab" tabindex="0">
+                                            <ul class="list-group list-group-flush border rounded-3">
+                                                <li class="list-group-item p-3">
+                                                    <span class="fw-medium fs-15 d-block mb-3"><span class="me-1">&#10024;</span>About Info :</span>
+                                                    <p class="text-muted mb-2">
+                                                        Hello, I'mSpencer Robin, a dedicated Software Development Manager based in Hamburg,Germany. I have a genuine passion for Development and enjoy delving into the nuances of Development. 
+                                                    </p>
+                                                    <p class="text-muted mb-0">
+                                                        Specializing in Managing, I strive to infuse innovation into every project I undertake. With a track record of [Key Achievements] and valuable experiences, I'm committed to continual growth and eagerly anticipate the opportunities that lie ahead.
+                                                    </p>
+                                                </li>
+                                                <li class="list-group-item p-3">
+                                                    <span class="fw-medium fs-15 d-block mb-3">Contact Info :</span>
+                                                    <div class="text-muted">
+                                                        @foreach(var list in ProfileService.GetContactInfoData()){
+                                                            <p class="@(list == ProfileService.GetContactInfoData().ToList().Last() ? "mb-0" : "mb-3 ")">
+                                                                <span class="avatar avatar-sm avatar-rounded text-@list.IconClass p-1 bg-@list.IconClass-transparent me-2">
+                                                                    <i class="@list.Icon align-middle fs-15"></i>
+                                                                </span>
+                                                                <span class="fw-medium text-default">@list.Title : </span> @list.Details
+                                                            </p>
+                                                        }
+                                                    </div>
+                                                </li>
+                                                <li class="list-group-item p-3">
+                                                    <span class="fw-medium fs-15 d-block mb-3">Skills :</span>
+                                                    <div class="w-75">
+                                                        @foreach(var list in ProfileService.GetSkillsData()){
+                                                            <a href="javascript:void(0);">
+                                                                <SpkBadge BadgeClass="bg-light text-muted m-1 border">@list.Title</SpkBadge>
+                                                            </a>
+                                                        }
+                                                    </div>
+                                                </li>
+                                                <li class="list-group-item p-3">
+                                                    <span class="fw-medium fs-15 d-block mb-3">Social Media :</span>
+                                                    <div class="d-flex align-items-center gap-5 flex-wrap">
+                                                        @foreach(var list in ProfileService.GetSocialInfoData()){
+                                                            <div class="d-flex align-items-center gap-3 me-2 flex-wrap">
+                                                                <div>
+                                                                    <span class="avatar avatar-md bg-@list.IconClass"><i class="@list.Icon fs-16"></i></span>
+                                                                </div>
+                                                                <div>
+                                                                    <span class="d-block fw-medium text-primay">@list.Title</span>
+                                                                    <span class="text-muted fw-medium">@list.Details</span>
+                                                                </div>
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="tab-pane p-0 border-0" id="edit-profile-tab-pane" role="tabpanel"
+                                        aria-labelledby="edit-profile-tab" tabindex="0">
+                                            <ul class="list-group list-group-flush border rounded-3">
+                                                <li class="list-group-item p-3">
+                                                    <span class="fw-medium fs-15 d-block mb-3">Personal Info :</span>
+                                                    <div class="row gy-3 align-items-center">
+                                                        <div class="col-xl-3">
+                                                            <div class="lh-1">
+                                                                <span class="fw-medium">User Name :</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-xl-9">
+                                                            <input type="text" class="form-control" placeholder="Placeholder" value="Spencer Robin">
+                                                        </div>
+                                                        <div class="col-xl-3">
+                                                            <div class="lh-1">
+                                                                <span class="fw-medium">First Name :</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-xl-9">
+                                                            <input type="text" class="form-control" placeholder="Placeholder" value="Spencer">
+                                                        </div>
+                                                        <div class="col-xl-3">
+                                                            <div class="lh-1">
+                                                                <span class="fw-medium">Last Name :</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-xl-9">
+                                                            <input type="text" class="form-control" placeholder="Placeholder" value="Robin">
+                                                        </div>
+                                                        <div class="col-xl-3">
+                                                            <div class="lh-1">
+                                                                <span class="fw-medium">Designation :</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-xl-9">
+                                                            <input type="text" class="form-control" placeholder="Placeholder" value="Software Development Manager">
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                                <li class="list-group-item p-3">
+                                                    <span class="fw-medium fs-15 d-block mb-3">Contact Info :</span>
+                                                    <div class="row gy-3 align-items-center">
+                                                        <div class="col-xl-3">
+                                                            <div class="lh-1">
+                                                                <span class="fw-medium">Email :</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-xl-9">
+                                                            <input type="email" class="form-control" placeholder="Placeholder" value="spencer.robin22@example.com">
+                                                        </div>
+                                                        <div class="col-xl-3">
+                                                            <div class="lh-1">
+                                                                <span class="fw-medium">Phone :</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-xl-9">
+                                                            <input type="text" class="form-control" placeholder="Placeholder" value="+1 (222) 111 - 57840">
+                                                        </div>
+                                                        <div class="col-xl-3">
+                                                            <div class="lh-1">
+                                                                <span class="fw-medium">Website :</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-xl-9">
+                                                            <input type="text" class="form-control" placeholder="Placeholder" value="www.yourwebsite.com">
+                                                        </div>
+                                                        <div class="col-xl-3">
+                                                            <div class="lh-1">
+                                                                <span class="fw-medium">Location :</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-xl-9">
+                                                            <input type="text" class="form-control" placeholder="Placeholder" value="City, Country">
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                                <li class="list-group-item p-3">
+                                                    <span class="fw-medium fs-15 d-block mb-3">Social Info :</span>
+                                                    <div class="row gy-3 align-items-center">
+                                                        <div class="col-xl-3">
+                                                            <div class="lh-1">
+                                                                <span class="fw-medium">Github :</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-xl-9">
+                                                            <input type="text" class="form-control" placeholder="Placeholder" value="github.com/spruko">
+                                                        </div>
+                                                        <div class="col-xl-3">
+                                                            <div class="lh-1">
+                                                                <span class="fw-medium">Twitter :</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-xl-9">
+                                                            <input type="text" class="form-control" placeholder="Placeholder" value="twitter.com/spruko.me">
+                                                        </div>
+                                                        <div class="col-xl-3">
+                                                            <div class="lh-1">
+                                                                <span class="fw-medium">Linkedin :</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-xl-9">
+                                                            <input type="text" class="form-control" placeholder="Placeholder" value="linkedin.com/in/spruko">
+                                                        </div>
+                                                        <div class="col-xl-3">
+                                                            <div class="lh-1">
+                                                                <span class="fw-medium">Portfolio :</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-xl-9">
+                                                            <input type="text" class="form-control" placeholder="Placeholder" value="spruko.com/">
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                                <li class="list-group-item p-3">
+                                                    <span class="fw-medium fs-15 d-block mb-3">About Info :</span>
+                                                    <div class="row gy-3 align-items-center">
+                                                        <div class="col-xl-3">
+                                                            <div class="lh-1">
+                                                                <span class="fw-medium">Biographical Info :</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-xl-9">
+                                                            <textarea class="form-control" id="text-area" rows="4">Hello, I'm [Your Name], a dedicated [Your Profession/Interest] based in [Your Location]. I have a genuine passion for [Your Hobbies/Interests] and enjoy delving into the nuances of [Your Industry/Field].
+
+                                                                Specializing in [Your Specialization/Area of Expertise], I strive to infuse innovation into every project I undertake. With a track record of [Key Achievements] and valuable experiences, I'm committed to continual growth and eagerly anticipate the opportunities that lie ahead.
+                                                            </textarea>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                                <li class="list-group-item p-3">
+                                                    <span class="fw-medium fs-15 d-block mb-3">SKILLS :</span>
+                                                    <div class="row gy-3 align-items-center">
+                                                        <div class="col-xl-3">
+                                                            <div class="lh-1">
+                                                                <span class="fw-medium">skills :</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-xl-9 mb-4">
+                                                            <input class="form-control tomselect-multiple" id="choices-text-preset-values" type="text" value="Leadership, Project Management, Technical Proficiency, Communication, Team Building, Problem-Solving, Strategic Thinking, Decision Making, Adaptability, Stakeholder Management, Conflict Resolution, Continuous Improvement" placeholder="This is a placeholder">
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="tab-pane" id="timeline-tab-pane" role="tabpanel" 
+                                            aria-labelledby="timeline-tab" tabindex="0">
+                                            <ul class="list-unstyled profile-timeline">
+                                              @foreach(var list in ProfileService.GetActivityData()) {
+                                                    <SpkActivity activity="list"></SpkActivity>
+                                                }
+                                            </ul>
+                                        </div>
+                                        <div class="tab-pane p-0 border-0" id="gallery-tab-pane" role="tabpanel"
+                                            aria-labelledby="gallery-tab" tabindex="0">
+                                            <div class="row">
+                                                @foreach(var item in ProfileService.GetGalleryData() ){
+                                                    <div class="col-lg-3 col-md-3 col-sm-6 col-12">
+                                                        <a href="@item.Img" class="glightbox card" data-gallery="gallery1">
+                                                            <img src="@item.Img" alt="image" >
+                                                        </a>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                        <div class="tab-pane p-0 border-0" id="friends-tab-pane" role="tabpanel"
+                                            aria-labelledby="friends-tab" tabindex="0">
+                                            <div class="row">
+                                                @foreach(var list in ProfileService.GetFriendsData()) {
+                                                    <div class="col-xxl-4 col-xl-4 col-lg-6 col-md-6 col-sm-12">
+                                                        <SpkProfilecard Details="list"></SpkProfilecard>
+                                                    </div>
+                                                }
+                                                <div class="col-xl-12">
+                                                    <div class="text-center">
+                                                        <SpkButtons ButtonClass="btn-primary-light">Show All</SpkButtons>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End:: row-1 -->
+
+    <!-- Gallery JS -->
+    <script src="@($"{NavigationManager.BaseUri}assets/libs/glightbox/dist/js/glightbox.min.js")"></script>
+    <script src="../assets/js/gallery.js"></script>
+
+    <!-- TomSelect JS -->
+    <script src="@($"{NavigationManager.BaseUri}assets/libs/tom-select/dist/js/tom-select.complete.min.js")"></script>
+    <script src="@($"{NavigationManager.BaseUri}assets/js/tomselect.js")"></script>
+    
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Pages" },
+        new SpkPageHeader.PageItem { PageTitle = "Profile" },
+    };
+}

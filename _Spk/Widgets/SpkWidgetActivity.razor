@@ -1,0 +1,23 @@
+
+@using CardModel
+
+@code {
+    [Parameter] public Activity? activity { get; set; }    
+}
+
+@if(activity != null){
+    <li class="">
+        <div class=""> 
+            <i class="task-icon bg-@activity.Avatarcolor"></i>
+            <h6 class="fs-14 mb-0">@((MarkupString)(activity.Title ?? string.Empty))</h6>
+            <div class="flex-grow-1 d-flex align-items-center justify-content-between">
+                <div> 
+                     <span class="fs-12 text-muted">@((MarkupString)(activity.Desc ?? string.Empty))</span>
+                 </div>
+                <div class="min-w-fit-content ms-2 text-end">
+                    <p class="mb-0 text-muted fs-11">@activity.Duration</p>
+                </div>
+            </div>
+        </div>
+    </li>
+}

@@ -1,0 +1,27 @@
+
+
+@using CardModel
+
+@code {
+    [Parameter] public MainCard? MainCard { get; set; } 
+}
+<div class="card custom-card">
+    <div class="card-body">
+        <div class="d-flex gap-3 align-items-center">
+            <div class="flex-fill">
+                <p class="text-muted fw-medium mb-2">@MainCard?.title</p>
+                <h4 class="mb-1">@MainCard?.price</h4>
+                <div class="text-muted fs-13">@MainCard?.status By <span class="@MainCard?.statusclass">@MainCard?.statusdata<i class="@MainCard?.statusicon fs-16"></i></span></div>
+            </div>
+            <span class="avatar @(MainCard?.IsRounded == true ? "avatar-rounded" : "") @MainCard?.iconclass">
+                    @if(!string.IsNullOrEmpty(MainCard?.icon)) {
+                        <i class="@MainCard?.icon fs-5"></i>
+                    }
+                    else {
+                        @((MarkupString)(MainCard?.svg ?? string.Empty))
+                    }
+            </span>
+        </div>
+    </div>
+</div>
+    

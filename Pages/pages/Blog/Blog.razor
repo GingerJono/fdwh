@@ -1,0 +1,212 @@
+@page "/blog"
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager
+@using Sandbox._Spk
+@using BlogData
+@inject BlogService BlogService
+
+    <!-- Start::page-header -->
+    <SpkPageHeader PageItems="PageItems" />
+    <!-- End::page-header -->
+
+    <!-- Start:: row-1 -->
+    <div class="row">
+        <div class="col-xxl-6">
+            <div class="card custom-card overflow-hidden">
+                <div class="card-body p-0 blog-carousel">
+                    <a href="/blog-details" class="stretched-link"></a>
+                    <BlazorSlickCarousel Configurations="ResponsiveConfigurations">
+                        <BlazorSlickCarouselContent>
+                            <div class="Carousel-slide">
+                                <img src="../assets/images/media/blog/1.jpg" class="d-block w-100" alt="...">
+                            </div>
+                            <div class="Carousel-slide">
+                                <img src="../assets/images/media/blog/3.jpg" class="d-block w-100" alt="...">
+                            </div>
+                            <div class="Carousel-slide">
+                                <img src="../assets/images/media/blog/2.jpg" class="d-block w-100" alt="...">
+                            </div>
+                        </BlazorSlickCarouselContent>
+                    </BlazorSlickCarousel>
+                    <div class="p-3">
+                        <h5 class="fw-semibold"><a href="/blog-details">Melodic Mastery: A Deep Dive into Music Notes</a></h5>
+                        <p class="mb-3">Exploring the intricate symbols and structures that form the foundation of every melody.</p>
+                        <p class="mb-3">As musicologist Charles Seeger notes, “Music is a system of communication involving structured sounds produced by members of a community that communicate with other members”</p>
+                        <p class="mb-3">“Music” is one of the most difficult terms to define, partially because beliefs about music have changed dramatically over time just in Western culture alone.<a href="javascript:void(0);" class="fw-medium text-primary ms-2 align-middle fs-12 text-Augoration-underline d-inline-block">Read More</a></p>
+                        <div class="d-flex flex-wrap align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <div class="avatar avatar-md avatar-rounded me-2">
+                                    <img src="../assets/images/faces/11.jpg" alt="">
+                                </div>
+                                <div>
+                                    <p class="mb-0 fw-medium">Justin Roy</p>
+                                    <p class="text-muted fs-12 mb-0">26,Mar 2024 - 15:37</p>
+                                </div>
+                            </div>
+                            <div class="avatar avatar-sm bg-danger-transparent avatar-rounded">
+                                <i class="ri-heart-line text-danger"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xxl-6">
+            <div class="row">
+                <div class="col-xxl-7">
+                    <SpkBlog ImgPosition="right" BlogImg="../assets/images/media/blog/4.jpg" ImgDescClass="col-xxl-8 col-md-10 col-sm-10" ImgPositionClass="col-xxl-4 col-md-2 col-sm-2" ImgMainClass="img-fluid rounded-end h-100 w-100" Title="Listening: Finding Happiness in Music" Description="Different genres and melodies can evoke joy, reduce stress, and create lasting memories." User="Nicolas Noor" UserImg="../assets/images/faces/10.jpg" PublishedOn="20,Aug 2024 - 16:32" Readmore="text-primary"></SpkBlog>
+                    <SpkBlog ImgPosition="bottom" BlogImg="../assets/images/media/blog/9.jpg" ImgDescClass="col-sm-12" ImgPositionClass="col-sm-12 text-center p-3 pt-1" ImgMainClass="img-fluid rounded w-100" Title="Music for the Soul: Enhancing Your Life Through Sound" Description="Learn how to create sacred spaces for musical reflection, find solace in times of hardship, and cultivate mindfulness through." User="Sissera William" UserImg="../assets/images/faces/8.jpg" PublishedOn="25,Aug 2024 - 04:25" Readmore="text-primary" Like=true RowClass="justify-content-center"></SpkBlog>
+                </div>
+                <div class="col-xxl-5">
+                    <div class="card custom-card overflow-hidden">
+                        <div class="card-header justify-content-between">
+                            <div class="card-title">
+                                Categories :
+                            </div>
+                            <SpkButtons Tag="a" ButtonClass="btn-light text-muted" ButtonSize="btn-sm">All<i class="ti ti-arrow-narrow-right ms-1"></i></SpkButtons>
+                        </div>
+                        <div class="card-body p-0">
+                            <ul class="list-group list-group-flush list-style">
+                                @foreach(var category in BlogService.GetBlogCategoriesData()){
+                                    <li class="list-group-item">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <span class="fw-medium"><i class="@category.icon fs-14 p-1 rounded-2 me-2 d-inline-block align-middle lh-1 bg-@category.color-transparent text-@category.color"></i>@category.title</span>
+                                            <SpkBadge BadgeClass="bg-primary-transparent">@category.Count</SpkBadge>
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="card custom-card overflow-hidden">
+                        <div class="card-header d-flex align-items-center justify-content-between">
+                            <div class="card-title">Related Blogs:</div>
+                            <div>
+                                <SpkBadge BadgeClass="bg-primary-transparent" IsRounded=true>15</SpkBadge>
+                            </div>
+                        </div>
+                        <div class="card-body p-0">
+                            <ul class="list-group list-group-flush">
+                                @foreach(var category in BlogService.GetRelatedBlogData()){
+                                    <li class="list-group-item border-bottom-0">
+                                        <div class="d-flex flew-wrap text-truncate align-items-center gap-2">
+                                            <span class="avatar avatar-xl flex-shrink-0 me-1">
+                                                <img src="@category.img" class="img-fluid" alt="...">
+                                            </span>
+                                            <div class="flex-fill text-wrap">
+                                                <a href="javascript:void(0);" class="fs-14 fw-medium mb-0">@category.title</a>
+                                                <p class="mb-1 popular-blog-content text-truncate text-muted">@category.desc</p>
+                                                <span class="text-muted fs-10">@category.posted</span>
+                                            </div>
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+                            <div class="p-3 pt-2 mt-1">
+                                <SpkButtons ButtonClass="mx-auto btn-primary btn-loader text-center justify-content-center w-100">
+                                    <span class="me-2">Load More</span>
+                                    <span class="loading"><i class="ri-loader-4-line fs-16"></i></span>
+                                </SpkButtons>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End:: row-1 -->
+
+    <!-- Start::row-2 -->
+    <div class="row">
+        <div class="col-xxl-4 col-lg-12 col-md-12">
+            <div class="card custom-card overflow-hidden">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <div class="card-title">Featured Blogs</div>
+                    <div>
+                        <SpkBadge BadgeClass="bg-primary-transparent">23 Blogs</SpkBadge>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                    @foreach(var category in BlogService.GetFeaturedBlogData()){
+                        <li class="list-group-item">
+                            <div class="d-flex flex-wrap align-items-center gap-3">
+                                <span class="avatar avatar-lg">
+                                    <img src="@category.img" class="img-fluid" alt="...">
+                                </span>
+                                <div class="flex-fill">
+                                    <a href="javascript:void(0);" class="fs-14 fw-medium mb-1">@category.title</a>
+                                    <p class="mb-0 mt-1 popular-blog-content text-truncate">
+                                     @category.desc
+                                    </p>
+                                </div>
+                                <div>
+                                    <SpkButtons ButtonClass="btn-icon btn-light rtl-rotate" ButtonSize="btn-sm"><i class="ri-arrow-right-s-line"></i></SpkButtons>
+                                </div>
+                            </div>
+                        </li>
+                    }
+                    </ul>
+                    <div class="p-3 pt-2">
+                        <SpkButtons ButtonClass="mx-auto btn-primary btn-loader text-center justify-content-center w-100">
+                            <span class="me-2">Load More</span>
+                            <span class="loading"><i class="ri-loader-4-line fs-16"></i></span>
+                        </SpkButtons>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xxl-8 col-lg-12 col-md-12">
+            <div class="row">
+                <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6">
+                    <SpkBlog ImgPosition="top" BlogImg="../assets/images/media/blog/15.jpg" ImgDescClass="col-sm-12" ImgPositionClass="col-sm-12 text-center p-3 pb-0 rounded-5" ImgMainClass="rounded-3 card-img-top" Title="<span class='lh-base'>Beats to Bliss</span>" Description="Experiencing the Euphoria of Music" User="Tilly" UserImg="../assets/images/faces/11.jpg" PublishedOn="19,Apr 2024 - 15:45" Readmore="text-primary" Like=false RowClass="justify-content-center" Link="/blog-details"></SpkBlog>
+                </div>
+                <div class="col-xxl-4 col-xl-6 col-lg-6 col-md-6">
+                    <SpkBlog ImgPosition="top" BlogImg="../assets/images/media/blog/8.jpg" ImgDescClass="col-sm-12" ImgPositionClass="col-sm-12 text-center p-3 pb-0 rounded-5" ImgMainClass="rounded-3 card-img-top" Title="<span class='lh-base'>The Pleasure of Harmony: Unlocking the Joy of Music</span>" Description="Exploring the world of 3D images doesn't have to be limited to consumption – you can also become a creator! With accessible.." User="Tilly" UserImg="../assets/images/faces/6.jpg" PublishedOn="19,Apr 2024 - 15:45" Readmore="text-primary" Like=false RowClass="justify-content-center" Link="/blog-details"></SpkBlog>
+                </div>
+                <div class="col-xxl-4 col-xl-12">
+                    <SpkBlog ImgPosition="bottom" BlogImg="../assets/images/media/blog/9.jpg" ImgDescClass="col-sm-12" ImgPositionClass="col-sm-12 text-center p-3 pt-0 rounded-5" ImgMainClass="rounded-3 card-img-top" Title="<span class='lh-base'>Tuning into Happiness: How Music Lifts Our Spirits</span>" Description="Explore the remarkable ability of music to evoke joy, uplift our moods, and nourish our souls. This blog delves into the science behind." User="Henry Milo" UserImg="../assets/images/faces/16.jpg" PublishedOn="31,Mar 2024 - 20:13" Readmore="text-primary1" Like=false RowClass="justify-content-center" Link="/blog-details"></SpkBlog>
+                </div>
+            </div>
+        </div>
+    </div> 
+    <!--End::row-2 -->
+
+    <!--Start::row-3 -->
+    <div class="row">
+        <div class="col-xxl-3 col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
+            <SpkBlog ImgPosition="top" BlogImg="../assets/images/media/blog/12.jpg" ImgDescClass="col-sm-12" ImgPositionClass="col-sm-12 text-center p-0 pb-0" ImgMainClass="card-img-top" Title="Understanding Music Notes" Description="Through detailed explanations, visual aids, and practical examples reduce stress, and create lasting memories..." User="Rosalie" UserImg="../assets/images/faces/4.jpg" PublishedOn="26,Mar 2024 - 15:37" Readmore="text-primary" Like=false RowClass="justify-content-center" Link="/blog-details"></SpkBlog>
+        </div>
+        <div class="col-xxl-3 col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
+            <SpkBlog ImgPosition="top" BlogImg="../assets/images/media/blog/10.jpg" ImgDescClass="col-sm-12" ImgPositionClass="col-sm-12 text-center p-0 pb-0" ImgMainClass="card-img-top" Title="Enhancing Your Life Through Sound" Description="Join us on a journey of discovery as we unravel the mysteries of music note.." User="Emanuel" UserImg="../assets/images/faces/12.jpg" PublishedOn="26,Mar 2024 - 15:37" Readmore="text-primary2" Like=false RowClass="justify-content-center" Link="/blog-details"></SpkBlog>
+        </div>
+        <div class="col-xxl-3 col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
+            <SpkBlog ImgPosition="bottom" BlogImg="../assets/images/media/blog/13.jpg" ImgDescClass="col-sm-12" ImgPositionClass="col-sm-12 text-center p-0 pb-0" ImgMainClass="card-img-bottom" Title="Mastering the Art of Music Notation" Description="Discover how these seemingly simple marks on a page translate into the beautiful sounds" User="Jacob" UserImg="../assets/images/faces/2.jpg" PublishedOn="06,Mar 2024 - 15:37" Readmore="text-primary3" Like=false RowClass="justify-content-center" Link="/blog-details"></SpkBlog>
+        </div>
+        <div class="col-xxl-3 col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
+            <SpkBlog ImgPosition="bottom" BlogImg="../assets/images/media/blog/11.jpg" ImgDescClass="col-sm-12" ImgPositionClass="col-sm-12 text-center p-0 pb-0" ImgMainClass="card-img-bottom" Title="How to Truly Enjoy Your Favorite Tunes?" Description="Through insightful articles, personal anecdotes, and expert advice, 'Music for the Soul'.." User="Flora" UserImg="../assets/images/faces/14.jpg" PublishedOn="26,Mar 2024 - 15:37" Readmore="text-primary3" Like=false RowClass="justify-content-center" Link="/blog-details"></SpkBlog>
+        </div>
+    </div>
+    <!--End::row-3 -->
+
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Pages" },
+        new SpkPageHeader.PageItem { PageTitle = "Blog" },
+        new SpkPageHeader.PageItem { PageTitle = "Blog" },
+    };
+    public WMBSCInitialSettings? ResponsiveConfigurations;  
+
+    protected override void OnInitialized() {
+      
+        ResponsiveConfigurations = new WMBSCInitialSettings
+        {
+            arrows = false,
+            dots = false,
+            slidesToShow = 1,
+            slidesToScroll = 1,
+            infinite = true,
+            autoplay = true,
+            autoplaySpeed = 1500,
+        };
+    }
+}

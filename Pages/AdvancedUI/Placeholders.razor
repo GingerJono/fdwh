@@ -1,0 +1,185 @@
+@page "/placeholders"
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+
+    <!-- Prism CSS -->
+    <link rel="stylesheet" href="@($"{NavigationManager.BaseUri}assets/libs/prismjs/themes/prism-coy.min.css")">
+
+    <!-- Page Header -->
+    <SpkPageHeader PageItems="PageItems" />
+    <!-- Page Header Close -->
+
+    <!-- Start:: row-1 -->
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="row">
+                <div class="col-xl-6">
+                    <div class="card custom-card">
+                        <div class="card-header justify-content-between">
+                            <div class="card-title">
+                                Sizing
+                            </div>
+                            <div class="prism-toggle">
+                                <SpkButtons ButtonClass="btn-primary-light" ButtonSize="btn-sm">Show Code<i class="ri-code-line ms-2 d-inline-block align-middle"></i></SpkButtons>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <span class="placeholder col-12 placeholder-xl mb-1"></span>
+                            <span class="placeholder col-12 placeholder-lg"></span>
+                            <span class="placeholder col-12"></span>
+                            <span class="placeholder col-12 placeholder-sm"></span>
+                            <span class="placeholder col-12 placeholder-xs"></span>
+                        </div>
+                        <div class="card-footer d-none border-top-0">
+<!-- Prism Code -->
+<pre class="language-html"><code class="language-html">&lt;span class="placeholder col-12 placeholder-xl mb-1"&gt;&lt;/span&gt;
+&lt;span class="placeholder col-12 placeholder-lg"&gt;&lt;/span&gt;
+&lt;span class="placeholder col-12"&gt;&lt;/span&gt;
+&lt;span class="placeholder col-12 placeholder-sm"&gt;&lt;/span&gt;
+&lt;span class="placeholder col-12 placeholder-xs"&gt;&lt;/span&gt;</code></pre>
+<!-- Prism Code -->
+                        </div>
+                    </div>
+                    <div class="card custom-card">
+                        <div class="card-header justify-content-between">
+                            <div class="card-title">
+                                Animation
+                            </div>
+                            <div class="prism-toggle">
+                                <SpkButtons ButtonClass="btn-primary-light" ButtonSize="btn-sm">Show Code<i class="ri-code-line ms-2 d-inline-block align-middle"></i></SpkButtons>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p class="placeholder-glow mb-0">
+                                <span class="placeholder col-12"></span>
+                            </p>
+                            <p class="placeholder-wave mb-0">
+                                <span class="placeholder col-12"></span>
+                            </p>
+                        </div>
+                        <div class="card-footer d-none border-top-0">
+<!-- Prism Code -->
+<pre class="language-html"><code class="language-html">&lt;p class="placeholder-glow mb-0"&gt;
+&lt;span class="placeholder col-12"&gt;&lt;/span&gt;
+&lt;/p&gt;
+&lt;p class="placeholder-wave mb-0"&gt;
+&lt;span class="placeholder col-12"&gt;&lt;/span&gt;
+&lt;/p&gt;</code></pre>
+<!-- Prism Code -->
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-6">
+                    <div class="card custom-card">
+                        <div class="card-header justify-content-between">
+                            <div class="card-title">
+                                Colors
+                            </div>
+                            <div class="prism-toggle">
+                                <SpkButtons ButtonClass="btn-primary-light" ButtonSize="btn-sm">Show Code<i class="ri-code-line ms-2 d-inline-block align-middle"></i></SpkButtons>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <span class="placeholder col-12"></span>
+                            <span class="placeholder col-12 bg-primary"></span>
+                            <span class="placeholder col-12 bg-primary1"></span>
+                            <span class="placeholder col-12 bg-primary2"></span>
+                            <span class="placeholder col-12 bg-primary3"></span>
+                            <span class="placeholder col-12 bg-secondary"></span>
+                            <span class="placeholder col-12 bg-success"></span>
+                            <span class="placeholder col-12 bg-danger"></span>
+                            <span class="placeholder col-12 bg-warning"></span>
+                            <span class="placeholder col-12 bg-info"></span>
+                            <span class="placeholder col-12 bg-light"></span>
+                            <span class="placeholder col-12 bg-dark"></span>
+                        </div>
+                        <div class="card-footer d-none border-top-0">
+<!-- Prism Code -->
+<pre class="language-html"><code class="language-html">&lt;span class="placeholder col-12"&gt;&lt;/span&gt;
+&lt;span class="placeholder col-12 bg-primary"&gt;&lt;/span&gt;
+&lt;span class="placeholder col-12 bg-primary1"&gt;&lt;/span&gt;
+&lt;span class="placeholder col-12 bg-primary2"&gt;&lt;/span&gt;
+&lt;span class="placeholder col-12 bg-primary3"&gt;&lt;/span&gt;
+&lt;span class="placeholder col-12 bg-secondary"&gt;&lt;/span&gt;
+&lt;span class="placeholder col-12 bg-success"&gt;&lt;/span&gt;
+&lt;span class="placeholder col-12 bg-danger"&gt;&lt;/span&gt;
+&lt;span class="placeholder col-12 bg-warning"&gt;&lt;/span&gt;
+&lt;span class="placeholder col-12 bg-info"&gt;&lt;/span&gt;
+&lt;span class="placeholder col-12 bg-light"&gt;&lt;/span&gt;
+&lt;span class="placeholder col-12 bg-dark"&gt;&lt;/span&gt;</code></pre>
+<!-- Prism Code -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End:: row-1 -->
+
+    <!-- Start:: row-2 -->
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-header justify-content-between">
+                    <div class="card-title">
+                        Width
+                    </div>
+                    <div class="prism-toggle">
+                        <SpkButtons ButtonClass="btn-primary-light" ButtonSize="btn-sm">Show Code<i class="ri-code-line ms-2 d-inline-block align-middle"></i></SpkButtons>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <span class="placeholder bg-primary col-6"></span>
+                    <span class="placeholder bg-primary w-75"></span>
+                    <span class="placeholder bg-primary" style="width: 25%;"></span>
+                </div>
+                <div class="card-footer d-none border-top-0">
+<!-- Prism Code -->
+<pre class="language-html"><code class="language-html">&lt;span class="placeholder bg-primary col-6"&gt;&lt;/span&gt;
+&lt;span class="placeholder bg-primary w-75"&gt;&lt;/span&gt;
+&lt;span class="placeholder bg-primary" style="width: 25%;"&gt;&lt;/span&gt;</code></pre>
+<!-- Prism Code -->
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
+            <div class="card custom-card">
+                <img class="card-img-top" src="../assets/images/media/media-60.jpg" alt="">
+                <div class="card-body">
+                    <h5 class="card-title">Card title</h5>
+                    <p class="card-text">Some quick example text to build on the card title and make
+                        up
+                        the bulk of the card's content.</p>
+                        <SpkButtons Tag="a" ButtonClass="btn-primary">Go somewhere</SpkButtons>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
+            <div class="card" aria-hidden="true">
+                <img class="card-img-top" src="../assets/images/media/media-61.jpg" alt="">
+                <div class="card-body">
+                    <div class="h5 card-title placeholder-glow">
+                        <span class="placeholder col-6"></span>
+                    </div>
+                    <p class="card-text placeholder-glow">
+                        <span class="placeholder col-7"></span>
+                        <span class="placeholder col-4"></span>
+                        <span class="placeholder col-4"></span>
+                        <span class="placeholder col-6"></span>
+                    </p>
+                    <SpkButtons Tag="a" ButtonClass="btn-primary disabled placeholder col-6" tabindex="-1"></SpkButtons>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Start:: row-2 -->
+
+    <!-- Prism JS -->
+    <script src="@($"{NavigationManager.BaseUri}assets/libs/prismjs/prism.js")"></script>
+    <script src="@($"{NavigationManager.BaseUri}assets/js/prism-custom.js")"></script>
+@code {    
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Advanced UI" },
+        new SpkPageHeader.PageItem { PageTitle = "Placeholders" },
+    };
+}

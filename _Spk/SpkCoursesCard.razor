@@ -1,0 +1,24 @@
+@using Sandbox._Spk
+@using CardModel
+
+@code {
+    [Parameter] public MainCard? CoursesMainCard { get; set; }
+}
+
+@if(CoursesMainCard != null){
+    <div class="card custom-card overflow-hidden">
+        <div class="card-body text-center">
+            <span class="avatar avatar-md @CoursesMainCard.iconclass svg-white avatar-rounded">
+                @((MarkupString)(CoursesMainCard.svg ?? string.Empty))
+            </span>
+            <p class="mb-1 mt-3 fw-medium">@CoursesMainCard.title</p>
+            <h4 class="fw-semibold">@CoursesMainCard.price</h4>
+            <div class="text-muted fs-13">@(CoursesMainCard.IsIncreased ? "Increased" : "Decreased") By 
+                <SpkBadge BadgeClass="@(CoursesMainCard.IsIncreased ? "bg-success-transparent mb-0" : "bg-danger-transparent mb-0")" IsRounded=true>
+                    @CoursesMainCard.percentage
+                    <i class="@(CoursesMainCard.IsIncreased ? "ri-arrow-up-line" : "ri-arrow-down-line") fs-10 align-middle ms-1"></i>
+                </SpkBadge>
+            </div>
+        </div>
+    </div>
+}

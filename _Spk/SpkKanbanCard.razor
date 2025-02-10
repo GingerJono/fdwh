@@ -1,0 +1,109 @@
+@using TasksData
+@inject TasksService TasksService
+
+@code {
+    [Parameter] public TaskCategory? MainCard { get; set; } 
+}
+
+@if(MainCard != null){
+    <div class="kanban-tasks-type @MainCard.TaskTitleClass">
+        <div class="mb-3">
+            <div class="d-flex justify-content-between align-items-center px-3 py-2 @MainCard.TaskTitlebg text-fixed-white rounded">
+                <span class="d-block fw-medium fs-15 text-uppercase">@MainCard.TaskTitle </span>
+                <div>
+                    <SpkBadge BadgeClass="badge-task text-fixed-white">@MainCard.Badge</SpkBadge>
+                </div>
+            </div>
+        </div>
+        <BlazorOverlayScrollbars>
+            <BlazorOverlayScrollbarsContent>
+                <div class="kanban-tasks" id="@MainCard.TaskTitleClass-tasks">
+                    <div id="@MainCard.TaskTitleClass-tasks-draggable" data-view-btn="@MainCard.TaskTitleClass-tasks" class="@(MainCard.TaskCard?.Any() == false ?"task-Null":"")">
+                        @if (MainCard.TaskCard != null)
+                        {
+                            @foreach (var task in MainCard.TaskCard)
+                            {
+                                <div class="card custom-card">
+                                    <div class="card-header justify-content-between">
+                                        <div class="task-badges d-flex gap-2 flex-wrap">
+                                            @if (task.TaskBadges != null)
+                                            {
+                                                @foreach (var badge in task.TaskBadges)
+                                                {
+                                                    <SpkBadge BadgeClass="@badge.BadgeClass">@badge.Badge</SpkBadge>
+                                                }
+                                            }
+                                        </div>
+                                        <SpkDropdowns DropdownClass="btn-sm btn-light" DropdownText="<i class='ri-more-2-fill'></i>" DropdownToggle=false>
+                                            <ChildContent2>
+                                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                                    <li><a class="dropdown-item" href="javascript:void(0);">View</a></li>
+                                                    <li><a class="dropdown-item" href="javascript:void(0);">Edit</a></li>
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"  @onclick="() => { if (!string.IsNullOrEmpty(task.Id)) DeleteTask(task.Id); }">Delete</a></li>
+                                                </ul>
+                                            </ChildContent2>
+                                        </SpkDropdowns>
+                                    </div>
+                                    <div class="card-body">
+                                        <h6 class="fw-medium mb-1 fs-15">@task.Title</h6>
+                                        <p class="kanban-task-description">@task.Description</p>
+                                        <div class="kanban-card-footer">
+                                            <SpkBadge BadgeClass="@(task.Priority == "High" ? "bg-primary" : task.Priority == "Low" ? "bg-warning" : "bg-info")">@task.Priority</SpkBadge>
+                                            <SpkBadge BadgeClass="@(task.Status == "In Progress" ? "bg-success" : "bg-success")">@task.Status</SpkBadge>
+                                        </div>
+                                    </div>
+                                    <div class="p-3 border-top border-block-start-dashed">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div class="avatar-list-stacked">
+                                                @if (task.TeamList != null)
+                                                {
+                                                    @foreach (var team in task.TeamList)
+                                                    {
+                                                        <span class="avatar avatar-sm avatar-rounded">
+                                                            <img src="@team.Img" alt="img">
+                                                        </span>
+                                                    }
+                                                }
+                                            </div>
+                                            <div>
+                                                <a href="javascript:void(0);" class="me-2 text-secondary">
+                                                    <span class="me-1"><i class="ri-thumb-up-fill align-middle fw-normal"></i></span><span class="fw-medium fs-12">@task.Likes</span>
+                                                </a>
+                                                <a href="javascript:void(0);" class="text-info">
+                                                    <span class="me-1"><i class="ri-message-2-line align-middle fw-normal"></i></span><span class="fw-medium fs-12">@task.Comments</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }       
+                    </div>
+                </div>
+            </BlazorOverlayScrollbarsContent>
+        </BlazorOverlayScrollbars>
+        <div class="d-flex view-more-button mt-3 gap-2 align-items-center">
+            <SpkButtons Tag="a" ButtonClass="btn-primary-light flex-fill">View More</SpkButtons>
+            <SpkButtons Tag="a" ButtonClass="btn-secondary-light border flex-fill" data-bs-toggle="modal" data-bs-target="#add-task"><i class="ri-add-line align-middle me-1 fw-medium"></i>Add Task</SpkButtons>
+        </div>
+    </div>
+}
+@code {
+    protected void DeleteTask(string id)
+    {
+        // Find the task to remove from the tasks list
+        var taskToRemove = TasksService.GetTasksList().SelectMany(category => category.TaskCard ?? new List<TaskItem>()).FirstOrDefault(task => task.Id == id);
+
+        // Remove the task if found
+        if (taskToRemove != null)
+        {
+            foreach (var category in TasksService.GetTasksList())
+            {
+                if (category.TaskCard != null && category.TaskCard.Remove(taskToRemove))
+                {
+                    break; // Task removed; exit the loop
+                }
+            }
+        }
+    }
+}

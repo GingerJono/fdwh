@@ -1,0 +1,193 @@
+@page "/apex-slope-charts"
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using ApexSeries
+@using ApexCharts
+@using SlopeChartData
+@inject SlopeChartService SlopeChartService
+
+    <!-- Page Header -->
+    <SpkPageHeader PageItems="PageItems" />
+    <!-- Page Header Close -->
+
+    <!-- Start::row-1 -->
+    <div class="row">
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title"> Basic Slope Chart</div>
+                </div>
+                <div class="card-body">
+                    <div id="basic-slope-chart">
+                        <SpkApex TItem="Slopebasicchart" Items="Slopebasiccharts" ApexHeight="350" ChartOptions="SlopebasicchartOptions" Series="SlopebasicchartSeriesConfig"></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title"> Multi-group Slope Chart</div>
+                </div>
+                <div class="card-body">
+                    <div id="multigroupchart">
+                        <SpkApex TItem="Slopebasicchart" Items="Slopemulticharts" ApexHeight="350" ChartOptions="SlopemultichartOptions" Series="SlopemultichartSeriesConfig"></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--End::row-1 -->
+
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Charts" },
+        new SpkPageHeader.PageItem { PageTitle = "Apex Charts" },
+        new SpkPageHeader.PageItem { PageTitle = "Apex Slope Charts" },
+    };
+
+    // PolarAreaItems Start //
+    private List<Slopebasicchart> Slopebasiccharts { get; set; } = SlopeChartService.GetSlopebasicchart();
+    private ApexChartOptions<Slopebasicchart> SlopebasicchartOptions { get; set; } = new();
+    private List<SeriesConfig<Slopebasicchart>>? SlopebasicchartSeriesConfig { get; set; }
+    // PolarAreaItems End //
+
+    // PolarAreaItems Start //
+    private List<Slopebasicchart> Slopemulticharts { get; set; } = SlopeChartService.GetMultiSlopebasicchart();
+    private ApexChartOptions<Slopebasicchart> SlopemultichartOptions { get; set; } = new();
+    private List<SeriesConfig<Slopebasicchart>>? SlopemultichartSeriesConfig { get; set; }
+    // PolarAreaItems End //
+
+    protected override void OnInitialized() {
+        SlopebasicchartOptions = new ApexChartOptions<Slopebasicchart>
+        {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = false},
+                }, 
+            },
+            PlotOptions = new PlotOptions
+            {
+                Line = new PlotOptionsLine
+                {
+                    IsSlopeChart = true
+                }
+            },
+            Colors = new Color(new List<string> { "#5c67f7","#E354D4", "#FFC658", "#9e5cf7" }),
+        };
+        SlopebasicchartSeriesConfig = new List<SeriesConfig<Slopebasicchart>>
+        {
+            new SeriesConfig<Slopebasicchart>
+            {
+                SeriesType = SeriesType.Line,
+                Name="Primary",
+                XValueSelector = e => e.XDATA ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.YData),
+                ShowDataLabels=true
+            },
+            new SeriesConfig<Slopebasicchart>
+            {
+                SeriesType = SeriesType.Line,
+                Name="Primary2",
+                XValueSelector = e => e.XDATA ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.YData1),
+                ShowDataLabels=true
+            },
+            new SeriesConfig<Slopebasicchart>
+            {
+                SeriesType = SeriesType.Line,
+                Name="Warning",
+                XValueSelector = e => e.XDATA ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.YData2),
+                ShowDataLabels=true
+            },
+        };
+
+        SlopemultichartOptions = new ApexChartOptions<Slopebasicchart>
+        {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = false},
+                }, 
+            },
+            PlotOptions = new PlotOptions
+            {
+                Line = new PlotOptionsLine
+                {
+                    IsSlopeChart = true
+                }
+            },
+            Colors = new Color(new List<string> { "#5c67f7","#E354D4", "#FFC658", "#9e5cf7" }),
+            Stroke= new Stroke {
+                Width= [2, 3, 4, 2],
+                DashArray= [0, 0, 5, 2],
+               Curve = Curve.Smooth,
+            },
+            Tooltip = new Tooltip
+            {
+                Enabled = true, 
+                FollowCursor= true,
+                Intersect= false,
+                Shared= true,
+            },
+            DataLabels = new ApexCharts.DataLabels {
+                Enabled = true,
+                Background=new() {
+                     Enabled = true,
+                },
+                Formatter = @"function(val, opts) {
+                    const seriesName = opts.w.config.series[opts.seriesIndex].name;
+                    return val !== null ? seriesName : '';
+                }"
+            }, 
+            Yaxis = new List<YAxis>() {
+                new YAxis // Define the first YAxis object
+                {
+                    Show= true,
+                    Labels=new() {
+                        Show= true,
+                    },
+                }
+            },
+            Xaxis =  new XAxis {  
+                Position = XAxisPosition.Bottom,
+            },
+        };
+        SlopemultichartSeriesConfig = new List<SeriesConfig<Slopebasicchart>>
+        {
+            new SeriesConfig<Slopebasicchart>
+            {
+                SeriesType = SeriesType.Line,
+                Name="Primary",
+                XValueSelector = e => e.XDATA ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.YData),
+                ShowDataLabels=true
+            },
+            new SeriesConfig<Slopebasicchart>
+            {
+                SeriesType = SeriesType.Line,
+                Name="Primary2",
+                XValueSelector = e => e.XDATA ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.YData1),
+                ShowDataLabels=true
+            },
+            new SeriesConfig<Slopebasicchart>
+            {
+                SeriesType = SeriesType.Line,
+                Name="Warning",
+                XValueSelector = e => e.XDATA ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.YData2),
+                ShowDataLabels=true
+            },
+            new SeriesConfig<Slopebasicchart>
+            {
+                SeriesType = SeriesType.Line,
+                Name="Secondary",
+                XValueSelector = e => e.XDATA ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.YData3),
+                ShowDataLabels=true
+            },
+        };
+        
+    }
+}

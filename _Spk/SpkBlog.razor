@@ -1,0 +1,63 @@
+@code {
+    [Parameter] public string? ImgPosition { get; set; }
+    [Parameter] public string? RowClass { get; set; }
+    [Parameter] public string? ImgClass { get; set; }
+    [Parameter] public string? ImgMainClass { get; set; }
+    [Parameter] public string? ImgPositionClass { get; set; }
+    [Parameter] public string? ImgDescClass { get; set; }
+    [Parameter] public string? BlogImg { get; set; }
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public string? Link { get; set; } ="javascript:void(0);";
+    [Parameter] public string? Description { get; set; }
+    [Parameter] public string? Readmore { get; set; }
+    [Parameter] public string? User { get; set; }
+    [Parameter] public string? UserImg { get; set; }
+    [Parameter] public string? PublishedOn { get; set; }
+    [Parameter] public bool Like { get; set; }
+}
+
+<div class="card custom-card overflow-hidden">
+    <div class="row g-0 @RowClass">
+        @if(ImgPosition == "top" || ImgPosition == "left"){
+            <div class="@ImgPositionClass">
+                <a href="javascript:void(0);" class="@ImgClass">
+                    <img src="@BlogImg" class="@ImgMainClass" alt="...">
+                </a>
+            </div>
+        }
+        <div class="@ImgDescClass">
+            <div class="card-body">
+                <h5 class="fw-semibold">
+                    <a href="@Link">@((MarkupString)(Title ?? string.Empty))</a>
+                </h5>
+                <span class="d-block mb-3">
+                    @((MarkupString)(Description ?? string.Empty))
+                    <a href="javascript:void(0);" class="fw-medium @Readmore ms-2 align-middle fs-12 text-Augoration-underline d-inline-block">
+                        Read More
+                    </a>
+                </span>
+                <div class="d-flex flex-wrap align-items-center justify-content-between">
+                    <div class="d-flex align-items-center">
+                        <div class="avatar avatar-md avatar-rounded me-2">
+                            <img src="@UserImg" alt="">
+                        </div>
+                        <div>
+                            <p class="mb-0 fw-medium">@User</p>
+                            <div class="text-muted fs-12 mb-0">@PublishedOn</div>
+                        </div>
+                    </div>
+                    <div class="avatar avatar-sm bg-danger-transparent avatar-rounded ms-auto">
+                        <i class="@(Like ? "ri-heart-fill":"ri-heart-line") text-danger"></i>
+                    </div>
+                </div>
+            </div>
+        </div> 
+        @if(ImgPosition == "bottom" || ImgPosition == "right"){
+            <div class="@ImgPositionClass">
+                <a href="javascript:void(0);" class="@ImgClass">
+                    <img src="@BlogImg" class="@ImgMainClass" alt="...">
+                </a>
+            </div>
+        }
+    </div>
+</div>

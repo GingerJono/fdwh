@@ -1,0 +1,520 @@
+@page "/index6"
+@using ApexCharts
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using Nft
+@inject NftService NftService
+@using ApexSeries
+
+
+            <!-- Start::page-header -->
+            <SpkPageHeader PageItems="PageItems" />
+            <!-- End::page-header -->
+
+            <!-- Start::row-1 -->
+            <div class="row">
+                <div class="col-xxl-7">
+                    <div class="card custom-card nft-banner-card overflow-hidden">
+                        <div class="card-body p-4">
+                            <div class="row align-items-center mx-0">
+                                <div class="col-xl-7">
+                                    <h4 class="fw-semibold text-fixed-white">
+                                        Your Gateway to the World of NFTs: Explore, Buy, and Sell
+                                    </h4>
+                                    <p class="text-fixed-white op-8 mb-4">Dive into the limitless possibilities of NFTs. Explore, invest, and showcase your unique digital assets.</p>
+                                    <SpkButtons ButtonClass="btn-primary me-1  mb-1 mb-sm-0">Explore Now</SpkButtons>
+                                    <SpkButtons ButtonClass="btn-primary1 me-1  mb-1 mb-sm-0">Learn More</SpkButtons>
+                                </div>
+                                <div class="col-xl-5 text-end">
+                                    <img src="../assets/images/nft-images/1.jpg" class="img-fluid nft-main-banner-image shadow p-3 me-2" alt="">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xxl-5">
+                    <div class="card custom-card flex-row">
+                        <div class="card-body bg-light m-2 rounded-1">
+                            <div class="d-flex flex-wrap align-items-center gap-3 flex-xl-nowrap"> 
+                                <div> 
+                                    <span class="avatar avatar-md bg-primary svg-white"> 
+                                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000"><path d="M0 0h24v24H0V0z" fill="none"></path><path d="M21 7.28V5c0-1.1-.9-2-2-2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-2.28c.59-.35 1-.98 1-1.72V9c0-.74-.41-1.37-1-1.72zM20 9v6h-7V9h7zM5 19V5h14v2h-6c-1.1 0-2 .9-2 2v6c0 1.1.9 2 2 2h6v2H5z"></path><circle cx="16" cy="12" r="1.5"></circle>
+                                        </svg> 
+                                    </span> 
+                                </div>
+                                <div> 
+                                    <p class="mb-0 ">Your Balance</p>
+                                    <h5 class="fw-semibold mb-0">$28,546.96<span class="text-muted fs-12 fw-normal ms-1"> Increased By <span class="text-success align-center fs-11 ms-1 fw-medium">0.14% <i class="ti ti-arrow-narrow-up fs-14"></i></span></span> </h5> 
+                                </div> 
+                                <div class="ms-auto">
+                                    <SpkButtons Tag="a" ButtonClass="btn-primary-gradient">View Transactions</SpkButtons>
+                                </div> 
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xl-3 col-md-6">
+                            <div class="card custom-card">
+                                <div class="card-body">
+                                    <div class="text-center">
+                                        <div class="icon lh-1 mb-2">
+                                            <span class="avatar avatar-md shadow-sm bg-primary-transparent border border-primary border-2 border-opacity-25 avatar-rounded">
+                                                <i class="ri-vidicon-line fs-17 lh-1"></i>
+                                            </span>
+                                        </div>
+                                        <div class="pt-1">
+                                            <h5 class="mb-0">256</h5>
+                                            <p class="text-muted mb-0">Assets</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6">
+                            <div class="card custom-card">
+                                <div class="card-body">
+                                    <div class="text-center">
+                                        <div class="icon lh-1 mb-2">
+                                            <span class="avatar avatar-md shadow-sm bg-primary1-transparent border border-primary1 border-2 border-opacity-25 avatar-rounded">
+                                                <i class="bi bi-people fs-17 lh-1"></i>
+                                            </span>
+                                        </div>
+                                        <div class="pt-1">
+                                            <h5 class="mb-0">1,543</h5>
+                                            <p class="text-muted mb-0">Followers</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6">
+                            <div class="card custom-card">
+                                <div class="card-body">
+                                    <div class="text-center">
+                                        <div class="icon lh-1 mb-2">
+                                            <span class="avatar avatar-md shadow-sm bg-primary2-transparent border border-primary2 border-2 border-opacity-25 avatar-rounded">
+                                                <i class="bi bi-heart fs-17 lh-1"></i>
+                                            </span>
+                                        </div>
+                                        <div class="pt-1">
+                                            <h5 class="mb-0">12,345</h5>
+                                            <p class="text-muted mb-0">Likes</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6">
+                            <div class="card custom-card">
+                                <div class="card-body">
+                                    <div class="text-center">
+                                        <div class="icon lh-1 mb-2">
+                                            <span class="avatar avatar-md shadow-sm bg-primary3-transparent border border-primary3 border-2 border-opacity-25 avatar-rounded">
+                                                <i class="bi bi-currency-dollar fs-17 lh-1"></i>
+                                            </span>
+                                        </div>
+                                        <div class="pt-1">
+                                            <h5 class="mb-0">$2.5k</h5>
+                                            <p class="text-muted mb-0">Bidding</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--End::row-1 -->
+
+            <!-- Start::row-2 -->
+            <div class="mb-4 d-flex align-items-center justify-content-between">
+                <h6 class="mb-0">&#128293; Hot Bids :</h6>
+                <div>
+                    <SpkButtons ButtonClass="btn-primary-light" ButtonSize="btn-sm">View All</SpkButtons>
+                </div>
+            </div>
+            <div class="row">
+                @foreach(var Nftcard in NftService.GetNftcardData()) {
+                    <div class="col-xxl-2 col-xl-4 col-md-6">
+                        <SpkMainNftCard NftMainCard="Nftcard"></SpkMainNftCard>
+                    </div>
+                }
+            </div>
+            <!-- End::row-2 -->
+
+            <!-- Start::row-3 -->
+            <div class="row">
+                <div class="col-xxl-3">
+                    <div class="card custom-card overflow-hidden">
+                        <div class="card-header justify-content-between">
+                            <div class="card-title">
+                                Featured Creators
+                            </div>
+                            <SpkDropdowns Tag="a" DropdownClass="btn-light btn btn-sm text-muted" DropdownText="View All<i class='ri-arrow-down-s-line align-middle ms-1'></i>" DropdownToggle=false>
+                                <ul class="dropdown-menu" role="menu">
+                                    <li class="border-bottom"><a class="dropdown-item" href="javascript:void(0);">Today</a></li>
+                                    <li class="border-bottom"><a class="dropdown-item" href="javascript:void(0);">This Week</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Last Week</a></li>
+                                </ul>
+                            </SpkDropdowns>
+                        </div>
+                        <div class="card-body p-0">
+                            <ul class="list-group list-group-flush mb-0">
+                                @foreach (var Featured in NftService.GetFeaturedcardData()) {
+                                    <li class="list-group-item d-flex gap-1">
+                                        <a href="javascript:void(0);">
+                                            <div class="d-flex flex-wrap align-items-center justify-content-between">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="me-2 lh-1">
+                                                        <span class="avatar avatar-md">
+                                                            <img src="@Featured.UserImg" alt="">
+                                                        </span>
+                                                    </div>
+                                                    <div>
+                                                        <p class="fw-medium mb-0">@Featured.User</p>
+                                                        <span class="text-muted fs-12">@Featured.UserId</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </a>
+                                        <div class="ms-auto my-auto">
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-2 lh-1">
+                                                   @((MarkupString)(Featured.Followers ?? string.Empty))
+                                                </div>
+                                                <SpkButtons Tag="a" ButtonClass="btn-primary-light" ButtonSize="btn-sm"><i class="ri-add-line align-middle me-1"></i>Follow</SpkButtons>
+                                            </div>
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xxl-5">
+                    <div class="card custom-card">
+                        <div class="card-header justify-content-between flex-wrap">
+                            <div class="card-title">
+                                Total Statistics
+                            </div>
+                            <SpkDropdowns Tag="a" DropdownClass="btn btn-sm btn-outline-light" DropdownText="<i class='fe fe-more-vertical'></i>" DropdownToggle=false>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Today</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">This Week</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Last Month</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Last Year</a></li>
+                                </ul>
+                            </SpkDropdowns>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="d-sm-flex flex-wrap justify-content-evenly flex-fill gap-4 p-3 border-bottom border-block-end-dashed bg-light">
+                                <div class="m-1 d-flex gap-3 justify-content-between align-items-end">
+                                    <div>
+                                        <div>Growth <SpkBadge BadgeClass="bg-success">0.14%</SpkBadge></div>
+                                        <p class="mb-0 text-muted fs-12">NFTs sold</p>
+                                    </div>
+                                    <h6 class="mb-0">$500K</h6>
+                                </div>
+                                <div class="m-1 d-flex gap-3 justify-content-between align-items-end">
+                                    <div>
+                                        <div>Market <SpkBadge BadgeClass="bg-success">0.14%</SpkBadge></div>
+                                        <p class="mb-0 text-muted fs-12">NFT marketplaces</p>
+                                    </div>
+                                    <h6 class="mb-0">$100k</h6>
+                                </div>
+                                <div class="m-1 d-flex gap-3 justify-content-between align-items-end">
+                                    <div>
+                                        <div>Bid <SpkBadge BadgeClass="bg-danger">0.14%</SpkBadge></div>
+                                        <p class="mb-0 text-muted fs-12">Highest bid</p>
+                                    </div>
+                                    <h6 class="mb-0">$5,000</h6>
+                                </div>
+                            </div>
+                            <div id="nft-statistics" class="p-3 pb-0">
+                                <SpkApex TItem="Statistics" ApexHeight="300" Items="statistics" ChartOptions="StatisticsOptions" Series="StatisticsSeriesConfigs"></SpkApex>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xxl-4">
+                    <div class="card custom-card overflow-hidden">
+                        <div class="card-header justify-content-between">
+                            <div class="card-title">
+                                Recent Activities
+                            </div>
+                            <SpkDropdowns Tag="a" DropdownClass="btn-light btn btn-sm text-muted" DropdownText="View All<i class='ri-arrow-down-s-line align-middle ms-1'></i>" DropdownToggle=false>
+                                <ul class="dropdown-menu" role="menu">
+                                    <li class="border-bottom"><a class="dropdown-item" href="javascript:void(0);">Today</a></li>
+                                    <li class="border-bottom"><a class="dropdown-item" href="javascript:void(0);">This Week</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Last Week</a></li>
+                                </ul>
+                            </SpkDropdowns>
+                        </div>
+                        <div class="card-body p-0">
+                            <ul class="list-group list-group-flush mb-0">
+                                @foreach (var Activity in NftService.GetNftActivitiesData()) {
+                                    <li class="list-group-item">
+                                        <a href="javascript:void(0);">
+                                            <div class="d-flex flex-wrap align-items-center justify-content-between flex-xl-nowrap">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="me-2 lh-1">
+                                                        <span class="avatar avatar-md avatar-rounded">
+                                                            <img src="@Activity.NftImg" alt="">
+                                                        </span>
+                                                    </div>
+                                                    <div>
+                                                        <p class="fw-medium mb-0">@((MarkupString)(Activity.NftTitle ?? string.Empty))</p>
+                                                        @((MarkupString)(Activity.NftDesc ?? string.Empty))
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <span class="text-muted fs-12 mt-1 ms-1">@Activity.NftDate</span>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- End::row-3 -->
+
+            <!-- Start::row-4 -->
+            <div class="row">
+                <div class="col-xxl-8 col-xl-8">
+                    <div class="card custom-card">
+                        <div class="card-header justify-content-between">
+                            <div class="card-title">
+                                Top Collections:
+                            </div>
+                            <div class="d-flex">
+                                <div class="me-3">
+                                    <input class="form-control form-control-sm" type="text" placeholder="Search Here" aria-label=".form-control-sm example">
+                                </div>
+                                <SpkDropdowns Tag="a" DropdownClass="btn btn-sm btn-primary" DropdownText=" Sort By<i class='ri-arrow-down-s-line align-middle ms-1 d-inline-block'></i>" DropdownToggle=false>
+                                    <ul class="dropdown-menu" role="menu">
+                                        <li><a class="dropdown-item" href="javascript:void(0);">New</a></li>
+                                        <li><a class="dropdown-item" href="javascript:void(0);">Popular</a></li>
+                                        <li><a class="dropdown-item" href="javascript:void(0);">Relevant</a></li>
+                                    </ul>
+                                </SpkDropdowns>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <SpkTables Items="NftService.GetCollectionsHeadersData()" Tableclass="table-hover table-bordered text-nowrap nft-table">
+                                @foreach (var collections in NftService.GetNftCollectionsData()){
+                                    <tr>
+                                        <td><span class="fw-medium text-primary">@collections.Rank</span></td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-2 lh-1">
+                                                    <span class="avatar avatar-md avatar-rounded">
+                                                        <img src="@collections.CollectionImg" alt="">
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <p class="mb-0 fw-semibold"><a href="javascript:void(0);" title="nft_name">@collections.Collection</a></p>
+                                                    <a href="javascript:void(0);" class="fs-12 text-muted fw-normal" title="creator_name">@collections.CollectionId</a>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-2 lh-1">
+                                                    <span class="avatar avatar-xs avatar-rounded">
+                                                        <img src="../assets/images/crypto-currencies/regular/Ethereum.svg" alt="">
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <p class="mb-0 fw-semibold"><a href="javascript:void(0);" title="nft_name">@collections.Volume</a></p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="@(collections.Hours ? "text-success" : "text-danger")"><i class="@(collections.Hours ? "ti ti-trending-up" : "ti ti-trending-down") me-1 align-middle d-inline-block"></i>@collections.Hourspercentage</span>
+                                        </td>
+                                        <td>@collections.Owners</td>
+                                        <td><span class="@(collections.Days ? "text-success" : "text-danger")"><i class="@(collections.Days ? "ti ti-trending-up" : "ti ti-trending-down") me-1 align-middle d-inline-block"></i>@collections.Dayspercentage</span></td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-2 lh-1">
+                                                    <span class="avatar avatar-xs avatar-rounded">
+                                                        <img src="../assets/images/crypto-currencies/regular/Ethereum.svg" alt="">
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <p class="mb-0 fw-semibold"><a href="javascript:void(0);" title="nft_name">@collections.Price</a></p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>@collections.Items</td>
+                                    </tr>
+                                }
+                            </SpkTables>
+                            <div class="d-flex align-items-center mt-3">
+                                <div>
+                                    Showing 5 Entries <i class="bi bi-arrow-right ms-2 fw-medium"></i>
+                                </div>
+                                <div class="ms-auto">
+                                    <nav aria-label="Page navigation" class="pagination-style-4">
+                                        <ul class="pagination mb-0">
+                                            <li class="page-item disabled">
+                                                <a class="page-link" href="javascript:void(0);">
+                                                    Prev
+                                                </a>
+                                            </li>
+                                            <li class="page-item active"><a class="page-link" href="javascript:void(0);">1</a></li>
+                                            <li class="page-item"><a class="page-link" href="javascript:void(0);">2</a></li>
+                                            <li class="page-item">
+                                                <a class="page-link text-primary" href="javascript:void(0);">
+                                                    next
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </nav>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xxl-4 col-xl-4">
+                    <div class="card custom-card overflow-hidden">
+                        <div class="card-header justify-content-between">
+                            <div class="card-title">
+                                <i class="ri-star-fill text-warning me-2"></i>Best Seller
+                            </div>
+                            <SpkButtons Tag="a" ButtonClass="btn-light text-muted" ButtonSize="btn-sm">View All</SpkButtons>
+                        </div>
+                        <div class="card-body p-0">
+                            <ul class="list-group list-group-flush">
+                                @foreach(var Seller in NftService.GetNftSellerData()){
+                                    <li class="list-group-item">
+                                        <a href="javascript:void(0);">
+                                            <div class="d-flex flex-wrap align-items-center justify-content-between">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="me-2 lh-1">
+                                                        <span class="avatar avatar-md">
+                                                            <img src="@Seller.SellerImg" alt="">
+                                                        </span>
+                                                    </div>
+                                                    <div>
+                                                        <p class="fw-medium mb-0">@Seller.Seller</p>
+                                                        <span class="text-muted fs-12 d-inline-flex">@Seller.SellerId<span class="text-primary lh-1 fs-16 ms-1 d-inline-flex"><i class="ti ti-discount-check-filled "></i></span></span>
+                                                    </div>
+                                                </div>
+                                                <div class="text-end">
+                                                    <span class="fs-12 text-muted">99.9k Bidders</span>
+                                                    <p class="fw-semibold mb-0 bid-amt align-middle fs-14">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="65" viewBox="0 0 40 65">
+                                                            <g fill="none" fill-rule="evenodd">
+                                                            <g fill-rule="nonzero" transform="translate(-227 -93)">
+                                                                <g transform="translate(227 93)"><g>
+                                                                <path fill="#8A92B2" d="M20.1.8v23.3c0 .1-.1.2-.2.2-.7.3-1.3.6-2 .9-.9.4-1.9.8-2.8 1.3L11.8 28l-2.7 1.2-3.3 1.5c-.9.4-1.8.8-2.8 1.3-.7.3-1.5.7-2.2 1-.1 0-.1.1-.2 0H.5c.3-.5.6-.9.9-1.4 1.6-2.7 3.3-5.4 4.9-8.1 1.7-2.9 3.5-5.8 5.2-8.7 1.6-2.7 3.2-5.4 4.8-8 1.2-2 2.4-3.9 3.5-5.9.2 0 .2-.1.3-.1-.1 0 0 0 0 0z"></path>
+                                                                <path fill="#454A75" d="M39.5 33c-1.5 1-3.1 1.9-4.6 2.8-4.9 2.9-9.7 5.7-14.6 8.6-.1 0-.1.1-.2.1s-.1-.1-.1-.1v-.3-19.5-.3c0-.1.1-.1.2-.1.4.2.8.4 1.3.6 1.2.6 2.5 1.1 3.7 1.7 1.1.5 2.1 1 3.2 1.4 1.1.5 2.1 1 3.2 1.5.9.4 1.9.8 2.8 1.3.9.4 1.9.8 2.8 1.3.7.3 1.4.7 2.2 1 0-.1 0 0 .1 0z"></path>
+                                                                <path fill="#8A92B2" d="M20.1 64.1s-.1 0 0 0c-.1 0-.1 0-.2-.1-2-2.8-3.9-5.5-5.9-8.3l-6-8.4c-1.9-2.7-3.9-5.4-5.8-8.2L.7 37c0-.1-.1-.1-.1-.2.1 0 .1.1.2.1 2.7 1.6 5.5 3.2 8.2 4.8 3.1 1.9 6.3 3.7 9.4 5.6.5.3 1.1.6 1.6.9.1 0 .1.1.1.2V64.1z"></path><path fill="gray" d="M.6 33s.1 0 0 0c.1 0 .1 0 0 0 0 .1 0 .1 0 0z"></path>
+                                                                <path fill="#62688F" d="M.7 33.1c0-.1 0-.1 0 0 1-.5 2-.9 3-1.4l3.9-1.8c1-.5 2-.9 3-1.4 1.4-.7 2.9-1.3 4.3-2 1-.4 2-.9 3-1.3.7-.3 1.4-.6 2.1-1 .1 0 .1-.1.2-.1V44.5c-.1.1-.1 0-.2 0-.3-.2-.6-.3-.8-.5L.9 33.2c-.1-.1-.2-.1-.2-.1zM39.4 36.8c0 .1 0 .1-.1.2-5.8 8.2-11.6 16.3-17.4 24.5-.6.9-1.2 1.7-1.8 2.6V64v-.2-15.3-.3c1.3-.8 2.6-1.6 3.9-2.3l15.3-9c0-.1.1-.1.1-.1z"></path>
+                                                                <path fill="#62688F" d="M20.1 24.2V24 1.1.9l19.2 31.8c.1.1.2.2.2.3-.4-.2-.8-.4-1.3-.6-.5-.2-1-.5-1.5-.7-.3-.1-.6-.3-1-.4-.5-.2-1.1-.5-1.6-.7-.3-.1-.6-.3-.9-.4l-2.1-.9c-.4-.2-.7-.3-1.1-.5-.5-.2-1-.5-1.5-.7-.3-.1-.6-.3-.9-.4l-2.1-.9c-.4-.2-.7-.3-1.1-.5-.5-.2-1-.5-1.5-.7-.3-.2-.7-.3-1-.5l-1.8-.9z"></path></g></g></g>
+                                                            </g>
+                                                        </svg>
+                                                        @Seller.Price <span class="fs-11 text-muted fw-normal ms-1 d-inline-flex">: Price</span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- End::row-4 -->
+
+               
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Dashboards" },
+        new SpkPageHeader.PageItem { PageTitle = "NFT" },
+    };
+    //  Total Statistics  Start //
+    private List<Statistics> statistics { get; set; } = NftService.GetStatisticsData();
+    private ApexChartOptions<Statistics> StatisticsOptions { get; set; } = new();
+    private List<SeriesConfig<Statistics>>? StatisticsSeriesConfigs { get; set; }
+    //  Total Statistics  End //
+
+    protected override void OnInitialized() {
+
+        StatisticsOptions = new ApexChartOptions<Statistics> {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = false},
+                }, 
+                DropShadow = new ApexCharts.DropShadow {
+                    Enabled = true,
+                    Color = ["var(--primary-color)", "rgb(227, 84, 212)"],
+                    Top = 7,
+                    Left = 0,
+                    Blur = 1,
+                    Opacity = 0.05
+                }
+            },
+            Grid = new Grid {
+                BorderColor = "#f1f1f1",
+                StrokeDashArray = 3
+            },
+            Colors = new Color(new List<string> {"var(--primary-color)", "rgb(227, 84, 212)"}),
+            Stroke = new Stroke { 
+                Curve = Curve.Smooth,
+                Width= [1.5, 2],
+                DashArray= [0, 5],
+            },
+            DataLabels = new DataLabels {
+                Enabled = false,
+            },
+            Fill = new Fill {
+                Type = new List<FillType> { FillType.Solid, FillType.Gradient },
+                Gradient = new FillGradient {
+                    ShadeIntensity = 0.3,
+                    OpacityFrom = 0.23,
+                    OpacityTo = 0.23,
+                },
+            },
+            Legend = new Legend {
+                Show = false,
+            }, 
+            Xaxis =  new XAxis {
+                AxisBorder = new () {
+                    Show = true,
+                    Color = "#e9e9e9",
+                },
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis // Define the first YAxis object
+                {
+                    Min = 35,
+                    Max = 65,
+                    StepSize = 5,
+                }
+            },
+        };
+        StatisticsSeriesConfigs = new List<SeriesConfig<Statistics>>
+        {
+            new SeriesConfig<Statistics>
+            {
+                SeriesType = SeriesType.Line,
+                Name="Last Year",
+                XValueSelector = e => e.Month ?? "unknown",
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.LastYear)
+            },
+            new SeriesConfig<Statistics>
+            {
+                SeriesType = SeriesType.Area,
+                Name="This Year",
+                XValueSelector = e => e.Month ?? "unknown",
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.ThisYear)
+            },
+        };
+    }
+}

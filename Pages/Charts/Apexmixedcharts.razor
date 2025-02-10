@@ -1,0 +1,593 @@
+@page "/apex-mixed-charts"
+@using System.Collections.Generic
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using ApexSeries
+@using ApexCharts
+@using MixedChartData
+@inject MixedChartService MixedChartService
+
+    <!-- Page Header -->
+    <SpkPageHeader PageItems="PageItems" />
+    <!-- Page Header Close -->
+
+    <!-- Start::row-1 -->
+    <div class="row">
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Line & Column Chart</div>
+                </div>
+                <div class="card-body">
+                    <div id="mixed-linecolumn">
+                        <SpkApex TItem="Mixedbasic" Items="Mixedbasics" Title="Traffic Sources" ChartOptions="MixedbasicOptions" XAxisType="XAxisType.Datetime" ApexHeight="320" Series="MixedbasicSeriesConfigs" Debug=true></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Multiple Y-Axis Chart</div>
+                </div>
+                <div class="card-body">
+                    <div id="mixed-multiple-y">
+                        <SpkApex TItem="MixedMultiple" Items="MixedMultiples" Title="XYZ - Stock Analysis (2009 - 2016)" ChartOptions="MixedMultipleOptions"  ApexHeight="320" Series="MixedMultipleSeriesConfigs"></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Line & Area Chart</div>
+                </div>
+                <div class="card-body">
+                    <div id="mixed-linearea">
+                        <SpkApex TItem="MixedLinearea" Items="MixedLineareas"  ChartOptions="MixedLineareaOptions"  ApexHeight="320" Series="MixedLineareaSeriesConfigs"></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Line,Column & Area Chart</div>
+                </div>
+                <div class="card-body">
+                    <div id="mixed-all">
+                        <SpkApex TItem="MixedAll" Items="MixedAlls"  ChartOptions="MixedAllOptions"  ApexHeight="320" Series="MixedAllSeriesConfigs"></SpkApex>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--End::row-1 -->
+
+@code {    
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Charts" },
+        new SpkPageHeader.PageItem { PageTitle = "Apex Charts" },
+        new SpkPageHeader.PageItem { PageTitle = "Apex Mixed Charts" },
+    };
+
+    // Basic Mixed Chart Start //
+    private List<Mixedbasic> Mixedbasics { get; set; } = MixedChartService.GetMixedbasics();
+    private ApexChartOptions<Mixedbasic> MixedbasicOptions { get; set; } = new();
+    private List<SeriesConfig<Mixedbasic>>? MixedbasicSeriesConfigs { get; set; }
+    //  Basic Mixed Chart End //
+
+    // Multiple Mixed Chart Start //
+    private List<MixedMultiple> MixedMultiples { get; set; } = MixedChartService.GetMixedMultiples();
+    private ApexChartOptions<MixedMultiple> MixedMultipleOptions { get; set; } = new();
+    private List<SeriesConfig<MixedMultiple>>? MixedMultipleSeriesConfigs { get; set; }
+    //  Multiple Mixed Chart End //
+
+    // Linearea Mixed Chart Start //
+    private List<MixedLinearea> MixedLineareas { get; set; } = MixedChartService.GetMixedLineareas();
+    private ApexChartOptions<MixedLinearea> MixedLineareaOptions { get; set; } = new();
+    private List<SeriesConfig<MixedLinearea>>? MixedLineareaSeriesConfigs { get; set; }
+    //  Linearea Mixed Chart End //
+
+    // All Mixed Chart Start //
+    private List<MixedAll> MixedAlls { get; set; } = MixedChartService.GetMixedAlls();
+    private ApexChartOptions<MixedAll> MixedAllOptions { get; set; } = new();
+    private List<SeriesConfig<MixedAll>>? MixedAllSeriesConfigs { get; set; }
+    //  All Mixed Chart End //
+
+
+    protected override void OnInitialized() {
+        
+        MixedbasicOptions = new ApexChartOptions<Mixedbasic> {
+            Title = new Title{
+                Style = new TitleStyle {
+                    FontSize= "13px",
+                    FontWeight= "bold",
+                    Color= "#8c9097"
+                },
+            },
+            Grid = new Grid {
+                BorderColor = "#f2f5f7",
+            },
+            DataLabels = new DataLabels {
+                Enabled=true,
+                EnabledOnSeries = [1],
+            }, 
+            Colors = new Color(new List<string> { "#5c67f7", "#e354d4" }),
+            Stroke = new Stroke { 
+                Width = [0, 4],
+            },
+            Xaxis =  new XAxis {  
+                Labels = new XAxisLabels {
+                    Show = true,
+                    Style = new() {
+                        Colors = "#8c9097",
+                        FontSize = "11px",
+                        FontWeight = 600,
+                        CssClass = "apexcharts-xaxis-label",
+                    },
+                }
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis // Define the first YAxis object
+                {
+                    Title = new () {
+                        Text ="Website Blog",
+                        Style = new() {
+                            Color = "#8c9097",
+                        },
+                    },
+                    Labels = new YAxisLabels
+                    {
+                        Show = true,
+                        Style = new() {
+                            Colors = "#8c9097",
+                            FontSize = "11px",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label",
+                        },
+                    },
+                    Min = 0,
+                    Max = 800,
+                    StepSize = 100,
+                },
+                new YAxis // Define the first YAxis object
+                {
+                    Opposite = true,
+                    Title = new () {
+                        Text ="Social Media",
+                        Style = new() {
+                            Color = "#8c9097",
+                        },
+                    },
+                    Labels = new YAxisLabels
+                    {
+                        Show = true,
+                        Style = new() {
+                            Colors = "#8c9097",
+                            FontSize = "11px",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label",
+                        },
+                    },
+                    Min = 0,
+                    Max = 45,
+                    StepSize = 5,
+                }
+            },
+        };
+        MixedbasicSeriesConfigs = new List<SeriesConfig<Mixedbasic>>
+        {
+            new SeriesConfig<Mixedbasic>
+            {
+                SeriesType = SeriesType.Bar,
+                Name = "Website Blo",
+                XValueSelector = e => e.TrafficDate ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.WebsiteValue)
+            },
+            new SeriesConfig<Mixedbasic>
+            {
+                SeriesType = SeriesType.Line,
+                Name = "Social Media",
+                XValueSelector = e => e.TrafficDate ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.MediaValue),
+                ShowDataLabels=true
+            },
+        };
+
+        MixedMultipleOptions = new ApexChartOptions<MixedMultiple> {
+            Title = new Title{
+                OffsetX = 110,
+                Style = new TitleStyle {
+                    FontSize= "13px",
+                    FontWeight= "bold",
+                    Color= "#8c9097"
+                },
+            },
+            Grid = new Grid {
+                BorderColor = "#f2f5f7",
+            },
+            Stroke = new Stroke { 
+                Width = [1, 1, 4],
+            },
+            Colors = new Color(new List<string> { "#5c67f7", "#e354d4", "#ff8e6f" }),
+            Xaxis =  new XAxis {  
+                Labels = new XAxisLabels {
+                    Show = true,
+                    Style = new() {
+                        Colors = "#8c9097",
+                        FontSize = "11px",
+                        FontWeight = 600,
+                        CssClass = "apexcharts-xaxis-label",
+                    },
+                }
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis // Define the first YAxis object
+                {
+                    Title = new () {
+                        Text ="Income (thousand crores)",
+                        Style = new() {
+                            Color = "#845adf",
+                        },
+                    },
+                    Labels = new YAxisLabels
+                    {
+                        Show = true,
+                        Style = new() {
+                            Colors = "#845adf",
+                            FontSize = "11px",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label",
+                        },
+                    },
+                    AxisBorder = new AxisBorder {
+                        Show = true,
+                        Color = "#845adf",
+                    },
+                    AxisTicks = new () {
+                        Show = true,
+                    },
+                    Min = 0.0M,
+                    Max = 10.0M,
+                    StepSize = 2.0M,
+                },
+                new YAxis // Define the first YAxis object
+                {
+                    Opposite = true,
+                    Title = new () {
+                        Text ="Operating Cashflow (thousand crores)",
+                        Style = new() {
+                            Color = "#23b7e5",
+                        },
+                    },
+                    AxisBorder = new AxisBorder {
+                        Show = true,
+                        Color = "#23b7e5",
+                    },
+                    AxisTicks = new () {
+                        Show = true,
+                    },
+                    Labels = new YAxisLabels
+                    {
+                        Show = true,
+                        Style = new() {
+                            Colors = "#23b7e5",
+                            FontSize = "11px",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label",
+                        },
+                    },
+                    Min = 0.0M,
+                    Max = 10.0M,
+                    StepSize = 2.0M,
+                },
+                new YAxis // Define the first YAxis object
+                {
+                    Opposite = true,
+                    Title = new () {
+                        Text ="Revenue (thousand crores)",
+                        Style = new() {
+                            Color = "#f5b849",
+                        },
+                    },
+                    AxisBorder = new AxisBorder {
+                        Show = true,
+                        Color = "#f5b849",
+                    },
+                    AxisTicks = new () {
+                        Show = true,
+                    },
+                    Labels = new YAxisLabels
+                    {
+                        Show = true,
+                        Style = new() {
+                            Colors = "#f5b849",
+                            FontSize = "11px",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label",
+                        },
+                    },
+                    Min = 0.0,
+                    Max = 60.0,
+                    StepSize = 10.0,
+                }
+            },
+            Tooltip =new() {
+                Fixed = new(){
+                    Enabled = true,
+                    Position = ApexCharts.TooltipPosition.TopLeft, // topRight, topLeft, bottomRight, bottomLeft
+                    OffsetY = 30,
+                    OffsetX = 60,
+                },
+            },
+            Legend = new Legend  { 
+                Show=true,
+                OffsetX = 40,
+                HorizontalAlign = Align.Left,
+            }, 
+        };
+        MixedMultipleSeriesConfigs = new List<SeriesConfig<MixedMultiple>>
+        {
+            new SeriesConfig<MixedMultiple>
+            {
+                SeriesType = SeriesType.Bar,
+                Name = "Income",
+                XValueSelector = e => e.StocksYear ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.IncomeValue)
+            },
+            new SeriesConfig<MixedMultiple>
+            {
+                SeriesType = SeriesType.Bar,
+                Name = "Cashflow",
+                XValueSelector = e => e.StocksYear ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.CashflowValue)
+            },
+            new SeriesConfig<MixedMultiple>
+            {
+                SeriesType = SeriesType.Line,
+                Name = "Revenue",
+                XValueSelector = e => e.StocksYear ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.RevenueValue),
+            },
+        };
+
+        MixedLineareaOptions = new ApexChartOptions<MixedLinearea> {
+            Title = new Title{
+                OffsetX = 110,
+                Style = new TitleStyle {
+                    FontSize= "13px",
+                    FontWeight= "bold",
+                    Color= "#8c9097"
+                },
+            },
+            Grid = new Grid {
+                BorderColor = "#f2f5f7",
+            },
+            Stroke = new Stroke { 
+                Curve = Curve.Smooth,
+            },
+            Colors = new Color(new List<string> { "#5c67f7", "#e354d4" }),
+            Fill = new Fill {
+                Type = new List<FillType> { FillType.Gradient, FillType.Solid }, 
+                Opacity = [0.35, 1],
+                Gradient = new ApexCharts.FillGradient {
+                    ShadeIntensity = 0,
+                    GradientToColors = new Color(new List<string> {"#5c67f7","#fff"}),
+                    Shade = ApexCharts.GradientShade.Light,
+                    OpacityFrom = 0.6,
+                    OpacityTo = 0.6,
+                    Stops = [0, 100],
+                }
+            },
+            Markers = new Markers {
+                Size = 0,
+            },
+            Xaxis =  new XAxis {  
+                Labels = new XAxisLabels {
+                    Show = true,
+                    Style = new() {
+                        Colors = "#8c9097",
+                        FontSize = "11px",
+                        FontWeight = 600,
+                        CssClass = "apexcharts-xaxis-label",
+                    },
+                }
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis // Define the first YAxis object
+                {
+                    Title = new () {
+                        Text ="Series A",
+                        Style = new() {
+                            Color = "#8c9097",
+                        },
+                    },
+                    Labels = new YAxisLabels
+                    {
+                        Show = true,
+                        Style = new() {
+                            Colors = "#8c9097",
+                            FontSize = "11px",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label",
+                        },
+                    },
+                    Min = 0,
+                    Max = 60,
+                    StepSize = 10,
+                },
+                new YAxis // Define the first YAxis object
+                {
+                    Opposite = true,
+                    Title = new () {
+                        Text ="Series B",
+                        Style = new() {
+                            Color = "#8c9097",
+                        },
+                    },
+                    Labels = new YAxisLabels
+                    {
+                        Show = true,
+                        Style = new() {
+                            Colors = "#8c9097",
+                            FontSize = "11px",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label",
+                        },
+                    },
+                    Min = 0,
+                    Max = 80,
+                    StepSize = 20,
+                },
+            },
+            Tooltip = new Tooltip
+            {
+                Shared = true,
+                Intersect = false,
+                Y = new TooltipY
+                {
+                    Formatter = @"function (y) {
+                        if (typeof y !== 'undefined') {
+                            return y.toFixed(0) + ' points';
+                        }
+                        return y;
+                    }"
+                }
+            },
+            Legend = new Legend  { 
+                Show=true,
+                OffsetX = 40,
+                HorizontalAlign = Align.Center,
+            }, 
+        };
+        MixedLineareaSeriesConfigs = new List<SeriesConfig<MixedLinearea>>
+        {
+            new SeriesConfig<MixedLinearea>
+            {
+                SeriesType = SeriesType.Area,
+                Name = "TEAM A",
+                XValueSelector = e => e.TeamValue ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.TeamAValue)
+            },
+            new SeriesConfig<MixedLinearea>
+            {
+                SeriesType = SeriesType.Line,
+                Name = "TEAM B",
+                XValueSelector = e => e.TeamValue ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.TeamBValue)
+            },
+        };
+        
+        MixedAllOptions = new ApexChartOptions<MixedAll> { 
+            Grid = new Grid {
+                BorderColor = "#f2f5f7",
+            },
+            Stroke = new Stroke { 
+                Width =[0, 2, 5],
+                Curve = Curve.Smooth,
+            },
+            PlotOptions = new PlotOptions
+            {
+                Bar = new PlotOptionsBar
+                {
+                    ColumnWidth = "50%",
+                }
+            },
+            Colors = new Color(new List<string> { "#5c67f7","#e354d4","#ff8e6f" }),
+            Fill = new Fill {
+                Type = new List<FillType> { FillType.Solid,FillType.Gradient, FillType.Solid }, 
+                Opacity= [0.85, 0.25, 1],
+                Gradient = new ApexCharts.FillGradient {
+                    InverseColors = false,
+                    Shade = ApexCharts.GradientShade.Light,
+                    Type = ApexCharts.GradientType.Vertical,
+                    OpacityFrom = 0.55,
+                    OpacityTo = 0.55,
+                    Stops = [0, 100, 100, 100],
+                }
+            },
+            Markers = new Markers {
+                Size = 0,
+            },
+            Xaxis =  new XAxis {  
+                Labels = new XAxisLabels {
+                    Show = true,
+                    Style = new() {
+                        Colors = "#8c9097",
+                        FontSize = "11px",
+                        FontWeight = 600,
+                        CssClass = "apexcharts-xaxis-label",
+                    },
+                }
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis // Define the first YAxis object
+                {
+                    Title = new () {
+                        Text ="Points",
+                        Style = new() {
+                            Color = "#8c9097",
+                        },
+                    },
+                    Labels = new YAxisLabels
+                    {
+                        Show = true,
+                        Style = new() {
+                            Colors = "#8c9097",
+                            FontSize = "11px",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label",
+                        },
+                    },
+                    Min = 0,
+                    Max = 67,
+                    StepSize = 7,
+                },
+            },
+            Tooltip = new Tooltip
+            {
+                Shared = true,
+                Intersect = false,
+                Y = new TooltipY
+                {
+                    Formatter = @"function (y) {
+                        if (typeof y !== 'undefined') {
+                            return y.toFixed(0) + ' points';
+                        }
+                        return y;
+                    }"
+                }
+            },
+            Legend = new Legend  { 
+                Show=true,
+                OffsetX = 40,
+                HorizontalAlign = Align.Center,
+            }, 
+        };
+        MixedAllSeriesConfigs = new List<SeriesConfig<MixedAll>>
+        {
+            new SeriesConfig<MixedAll>
+            {
+                SeriesType = SeriesType.Bar,
+                Name = "TEAM A",
+                XValueSelector = e => e.TEAMMixedValue ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.TEAMAMixedValue)
+            },
+            new SeriesConfig<MixedAll>
+            {
+                SeriesType = SeriesType.Area,
+                Name = "TEAM B",
+                XValueSelector = e => e.TEAMMixedValue ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.TEAMBMixedValue)
+            },
+            new SeriesConfig<MixedAll>
+            {
+                SeriesType = SeriesType.Line,
+                Name = "TEAM C",
+                XValueSelector = e => e.TEAMMixedValue ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.TEAMCMixedValue)
+            },
+        };
+    }
+}

@@ -1,0 +1,56 @@
+@using CardModel
+@using Sandbox._Spk
+
+@code {
+    [Parameter] public ProductCard? Product { get; set; } 
+}
+@if(Product != null){
+    <div class="card custom-card card-style-2">
+        <div class="card-body p-0">
+            <div class="top-left-badge">
+                @if(!string.IsNullOrEmpty(Product.Trendingtitle)){
+                    <SpkBadge BadgeClass="@($"bg-{Product.TrendingtitleClass} {"d-inline-flex gap-1 lh-1 align-items-center text-fixed-white mb-1"}")">
+                        <div class="badge-icon"><i class="ti ti-bolt"></i></div>
+                        <div class="badge-text">@Product.Trendingtitle</div>
+                    </SpkBadge>
+                }
+                <SpkBadge BadgeClass="@($"bg-{Product.OfferBadgeClass} {"d-inline-block"}")">@Product.OfferBadge</SpkBadge>
+            </div>
+            <div class="card-img-top border-bottom border-block-end-dashed">
+                <div class="btns-container-1 align-items-center gap-1">
+                    <SpkTooltip Tag="a" TooltipClass="btn btn-icon btn-primary rounded-circle" TooltipTitle="Quick View"><i class="bx bx-search"></i></SpkTooltip>
+                    <SpkTooltip Tag="a" href="/wishlist" TooltipClass="btn btn-icon btn-primary1 rounded-circle" TooltipTitle="Add to Wishlist"><i class="bx bx-heart align-center"></i></SpkTooltip>
+                    <SpkTooltip Tag="a" TooltipClass="btn btn-icon btn-info rounded-circle" TooltipTitle="Compare"><i class="bx bx-adjust"></i></SpkTooltip>
+                </div>
+                <div class="img-box-2 p-2">
+                    <img src="@Product.Img" alt="img" class="scale-img img-fluid w-100 bg-primary-transparent  rounded"> 
+                </div>
+                <SpkTooltip Tag="a" href="/cart" TooltipClass="btn btn-primary rounded-circle btn-style-1 btn-icon" TooltipTitle="Add to Cart"><i class="bx bxs-cart-add fs-18"></i></SpkTooltip>
+            </div>
+            <div class="p-3">
+                <h6 class="mb-1 fw-semibold fs-16"><a href="/product-details">@Product.Title</a></h6>
+                <div class="d-flex align-items-end justify-content-between flex-wrap">
+                    <div class="flex-grow-1">
+                        <div class="d-flex align-items-baseline fs-11">
+                            <div class="min-w-fit-content">
+                                <span class="text-warning"><i class="bi bi-star-fill"></i></span>
+                                <span class="text-warning"><i class="bi bi-star-fill"></i></span>
+                                <span class="text-warning"><i class="bi bi-star-fill"></i></span>
+                                <span class="text-warning"><i class="bi bi-star-half"></i></span>
+                            </div>
+                            <p class="mb-1 ms-1 min-w-fit-content text-muted">
+                                <span>@Product.Rating</span>
+                                <span>Ratings</span>
+                            </p>
+                        </div>
+                        <a href="javascript:void(0);" class="text-primary1 fs-13 fw-semibold">@Product.Subtitle</a>
+                    </div>
+                    <div class="min-w-fit-content">
+                        <h5 class="fw-semibold text-primary mb-0">@Product.DiscountPrice</h5>
+                        <span class="fs-13 ms-2 text-muted text-decoration-line-through">@Product.ActualPrice</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

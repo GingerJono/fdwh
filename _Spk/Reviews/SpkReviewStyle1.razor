@@ -1,0 +1,44 @@
+
+@using CardModel
+
+@code {
+    [Parameter] public Reviews? Review { get; set; }    
+}
+@if(Review != null) {
+    <div class="card custom-card text-fixed-white">
+        <div class="card-body">
+            <div class="d-flex justify-content-between gap-2 align-items-center mb-3">
+                <span class="avatar rounded-circle">
+                    <img src="@Review.UserImg" alt=""
+                        class="img-fluid rounded-circle">
+                </span>
+                <div class="text-end">
+                    <span class="text-info d-block ms-1">
+                        @for (int i = 0; i < Math.Floor(Review.Rating); i++)
+                        {
+                            <i class="ri-star-fill"></i>
+                        }
+
+                        @if (Review.Rating % 1 != 0)
+                        {
+                            <i class="ri-star-half-line"></i>
+                        }
+                    </span>
+                    <span class="op-8 d-block fs-12 fw-medium">@Review.Views</span>
+                </div>
+            </div>
+            <p class="fs-14">
+                @Review.Review<SpkTooltip Tag="a" TooltipClass="fw-semibold fs-11" TooltipPlacement="top" TooltipTitle="customer service at this company is outstanding. They were quick to respond to my inquiry and resolved my issue within hours." TooltipCustomClass="tooltip-primary">Read More</SpkTooltip>
+            </p>
+            <div class="d-flex align-items-center justify-content-between gap-3">
+                <div class="flex-fill">
+                    <p class="mb-0 fw-bold fs-14 text-primary">@Review.User</p>
+                    <p class="mb-0 fs-11 fw-normal op-8">@Review.Designation</p>
+                </div>
+                <div class="ms-auto fs-12 fw-semibold op-8 text-end">
+                    <SpkButtons ButtonClass="btn-icon btn-primary1-light" ButtonSize="btn-sm"><i class="ri-thumb-up-line"></i></SpkButtons>
+                </div>
+            </div>
+        </div>
+    </div>
+}

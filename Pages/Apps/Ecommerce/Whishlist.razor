@@ -1,0 +1,175 @@
+@page "/wishlist"
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager
+@using Sandbox._Spk
+@using ProductsData
+@inject ProductsService ProductsService
+@inject SweetAlertService Swal
+@using System.Collections.Generic
+@inject IJSRuntime JSRuntime
+
+<!-- Page Header -->
+<SpkPageHeader PageItems="PageItems" />
+<!-- Page Header Close -->
+
+
+    <!-- Start::row-1 -->
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-header justify-content-between">
+                    <div class="card-title">
+                        My Wishlists
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <div>
+                            <input class="form-control form-control-sm" type="text" placeholder="Search Here" aria-label=".form-control-sm example">
+                        </div>
+                        <SpkDropdowns Tag="a" DropdownClass="btn btn-primary btn-sm" DropdownText=" Sort By<i class='ri-arrow-down-s-line align-middle ms-1'></i>" DropdownToggle=false>
+                            <ChildContent2>
+                                <ul class="dropdown-menu" role="menu">
+                                    <li><a class="dropdown-item" href="javascript:void(0);">New</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">This Week</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">This Month</a></li>
+                                </ul>
+                            </ChildContent2>
+                        </SpkDropdowns>
+                    </div>
+                </div>
+                <div class="card-body card-body m-3 bg-light p-2 rounded mt-2">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 ps-2">
+                        <p class="mb-0 fs-15">Adding<span class="text-primary1 fw-semibold"> 12 items</span> in your wishlist</p>
+                        <SpkButtons Tag="a" ButtonClass="btn-secondary-light">Checkout All <i class="ti ti-arrow-right ms-1"></i></SpkButtons>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--End::row-1 -->
+
+    <!--start::row-2 -->
+    <div class="row">
+        @foreach (var WishList in ProductsService.GetWishLists())  {
+            <div class="col-lg-6">
+                <div class="card custom-card card-style-3 @WishList.CardClass">
+                    <div class="card-body p-3">
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="bg-primary-transparent rounded-2 mb-3 mb-md-0">
+                                    <a href="javascript:void(0);">
+                                        <img src="@WishList.Img" alt="img" class="img-fluid w-100">
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="col-md-10">
+                                <div class="d-flex align-items-start justify-content-between mb-2">
+                                    <div class="flex-grow-1">
+                                        <h6 class="fs-14 mb-1 fw-medium"><a href="/product-details">@WishList.Title</a></h6>
+                                        <div class="min-w-fit-content fw-normal mb-1 fs-13 fw-medium @WishList.StockColor">@WishList.Stock</div>
+                                        <div class="d-flex align-items-baseline gap-2 mb-1">
+                                            <h6 class="fs-22 mb-0">@WishList.DiscountPrice</h6>
+                                            <span class="fs-12 text-muted text-decoration-line-through op-7">@WishList.ActualPrice</span>
+                                            <SpkBadge BadgeClass="bg-primary1-transparent ms-2">@WishList.OfferBadge</SpkBadge>
+                                        </div>
+                                    </div>
+                                    <SpkButtons Tag="a" ButtonClass="btn-delete btn-primary2-light btn-icon" @onclick="@(async () => await ShowDeleteAlert(WishList.Id))"> <i class="ri-delete-bin-line"></i></SpkButtons>
+                                </div>
+                                <div class="d-flex align-items-center gap-2 flex-wrap">
+                                    <SpkButtons Tag="a" href="/cart" ButtonClass="btn-primary" ButtonWidth="btn-w-md"><i class="ri-shopping-cart-line me-1"></i> Add Cart</SpkButtons>
+                                    <SpkButtons Tag="a" ButtonClass="btn-primary-light" ButtonWidth="btn-w-md"><i class="ri-bookmark-line me-1"></i> Save for Later</SpkButtons>
+                                    <div class="d-flex align-items-baseline fs-13 ms-auto">
+                                        <div class="min-w-fit-content">
+                                            <span class="text-warning"><i class="bi bi-star-fill"></i></span>
+                                            <span class="text-warning"><i class="bi bi-star-fill"></i></span>
+                                            <span class="text-warning"><i class="bi bi-star-fill"></i></span>
+                                            <span class="text-warning"><i class="bi bi-star-fill"></i></span>
+                                            <span class="text-warning"><i class="bi bi-star"></i></span>
+                                        </div>
+                                        <p class="mb-0 ms-1 min-w-fit-content text-muted">
+                                            <span>@WishList.Rating</span>
+                                            <span>Ratings</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        <div class="col-xl-12">
+            <div class="d-flex align-items-center flex-wrap overflow-auto p-3 bg-white mb-3">
+                <div class="mb-2 mb-sm-0">
+                    Showing <b>1</b> to <b>6 </b> entries <i class="bi bi-arrow-right ms-2 fw-semibold"></i>
+                </div>
+                <div class="ms-auto">
+                    <ul class="pagination mb-0 overflow-auto">
+                        <li class="page-item disabled">
+                            <a class="page-link">Previous</a>
+                        </li>
+                        <li class="page-item active" aria-current="page"><a class="page-link" href="javascript:void(0)">1</a></li>
+                        <li class="page-item">
+                            <a class="page-link" href="javascript:void(0)">2</a>
+                        </li>
+                        <li class="page-item"><a class="page-link" href="javascript:void(0)">3</a></li>
+                        <li class="page-item"><a class="page-link" href="javascript:void(0)">4</a></li>
+                        <li class="page-item"><a class="page-link" href="javascript:void(0)">5</a></li>
+                        <li class="page-item">
+                            <a class="page-link" href="javascript:void(0)">Next</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--End::row-2 -->
+
+    <!-- Sweetalerts JS -->
+    <script src="_content/CurrieTechnologies.Razor.SweetAlert2/sweetAlert2.min.js"></script>
+
+
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Apps" },
+        new SpkPageHeader.PageItem { PageTitle = "Ecommerce" },
+        new SpkPageHeader.PageItem { PageTitle = "Wishlist" },
+    };
+    
+    private async Task ShowDeleteAlert(decimal Id)
+    {
+        var confirmResult = await Swal.FireAsync(new SweetAlertOptions
+        {
+            Title = "Are you sure?",
+            Text = "You won't be able to revert this!",
+            Icon = SweetAlertIcon.Warning,
+            ShowCancelButton = true,
+            ConfirmButtonColor = "#3085d6",
+            CancelButtonColor = "#d33",
+            ConfirmButtonText = "Yes, delete it!"
+        });
+
+        if (confirmResult.IsConfirmed)
+        {
+            await DeleteProductList(Id);
+        }
+    }
+    
+    protected async Task DeleteProductList(decimal Id)
+    {
+        var ProductListToDelete = ProductsService.GetWishLists().FirstOrDefault(i => i.Id == Id);
+
+        if (ProductListToDelete != null)
+        {
+            ProductsService.GetWishLists().Remove(ProductListToDelete);
+        }
+            await Swal.FireAsync(new SweetAlertOptions
+            {
+                Title = "Deleted!",
+                Text = "Your file has been deleted.",
+                Icon = SweetAlertIcon.Success,
+            });
+            NavigationManager.NavigateTo("/wishlist", forceLoad: false);
+
+    }
+    
+
+}

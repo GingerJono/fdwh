@@ -1,0 +1,36 @@
+
+
+@using CardModel
+
+@code {
+    [Parameter] public MainCard? MainCard { get; set; } 
+}
+    
+@if(MainCard != null){
+    <div class="card custom-card  @(MainCard?.MainBgImg == true ? "overflow-hidden main-content-card" : "") ">
+        <div class="card-body @(!string.IsNullOrEmpty(MainCard?.BadgeValue) == true ? "p-4" : "")">
+            <div class="d-flex align-items-start justify-content-between @(!string.IsNullOrEmpty(MainCard?.svg) == true ? "maincard" : "mb-2")  gap-1 flex-xxl-nowrap flex-wrap">
+                <div>
+                    <span class="@(!string.IsNullOrEmpty(MainCard?.svg) || !string.IsNullOrEmpty(MainCard?.BadgeValue) == true ? "fs-12 fw-medium" : "fs-13 text-muted") mb-1 d-block text-wrap">@MainCard?.title</span>
+                    <h4 class="@(!string.IsNullOrEmpty(MainCard?.svg) || !string.IsNullOrEmpty(MainCard?.BadgeValue) == true ? "" : "fs-23") fw-medium mb-0">@MainCard?.price</h4>
+                </div>
+                <div class="lh-1">
+                    <div class=" @(MainCard?.IsRounded == true ? "avatar-rounded" : "") @MainCard?.iconclass @(!string.IsNullOrEmpty(MainCard?.BadgeValue) == true ? $"main-card-icon {MainCard?.iconclass} border-3 border border-{MainCard?.iconclass} border-opacity-50 rounded-circle" : "avatar avatar-md")">
+                            @if(!string.IsNullOrEmpty(MainCard?.icon)) {
+                                <i class="@MainCard?.icon fs-5"></i>
+                            }
+                            else {
+                                <div class="@(!string.IsNullOrEmpty(MainCard?.BadgeValue) == true ? $"avatar avatar-md bg-{MainCard?.iconclass} border border-{MainCard?.iconclass} border-opacity-10 avatar-rounded svg-white" : "")">
+                                    @((MarkupString)(MainCard?.svg ?? string.Empty))
+                                </div>
+                            }
+                    </div>
+                </div>
+            </div>
+            @if(!string.IsNullOrEmpty(MainCard?.BadgeValue)){
+                <SpkBadge BadgeClass="@MainCard.Badge">@MainCard.BadgeValue</SpkBadge>
+            }
+            <div class="text-muted fs-13 @(!string.IsNullOrEmpty(MainCard?.BadgeValue) == true ? "mt-2" : "")">@MainCard?.status By <span class="@MainCard?.statusclass">@MainCard?.statusdata<i class="@MainCard?.statusicon fs-16"></i></span></div>
+        </div>
+    </div>
+}

@@ -1,0 +1,20 @@
+@using Sandbox._Spk
+@using CardModel
+
+@code {
+    [Parameter] public MedicalCard? MedicalCard { get; set; } 
+}
+
+@if(MedicalCard != null){
+    <div class="card custom-card position-relative rounded-md overflow-hidden">
+        <div class="card-body">
+            <h5 class="mb-1ld">@MedicalCard.Medicalprice</h5>
+            <div class="fw-medium op-7">@MedicalCard.Medicaltitle
+                <SpkBadge BadgeClass="@($"{"fw-normal ms-1 fs-9"} {(MedicalCard.IsIncreased  ? "bg-success-transparent":"bg-danger-transparent")}")">
+                    @MedicalCard.Medicalpercent <i class="@(MedicalCard.IsIncreased  ? "ri-arrow-up-s-fill":"ri-arrow-down-s-fill")"></i>
+                </SpkBadge>
+            </div>
+            @((MarkupString)(MedicalCard.MedicalsvgIcon ?? string.Empty))
+        </div>
+    </div>
+}

@@ -1,0 +1,53 @@
+@page "/gallery"
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+
+
+        <!-- GLightbox CSS -->
+        <link rel="stylesheet" href="@($"{NavigationManager.BaseUri}assets/libs/glightbox/dist/css/glightbox.min.css")">
+      
+
+            <!-- Page Header -->
+                <SpkPageHeader PageItems="PageItems" />
+            <!-- Page Header Close -->
+
+
+            <!-- Start::row-1 -->
+            <div class="row">
+                @foreach(var item in GetGalleryData() ){
+                    <div class="col-lg-3 col-md-3 col-sm-6 col-12">
+                        <a href="@item.Img" class="glightbox card" data-gallery="gallery1">
+                            <img src="@item.Img" alt="image" >
+                        </a>
+                    </div>
+                }
+            </div>
+            <!--End::row-1 -->
+
+
+        <!-- Gallery JS -->
+        <script src="@($"{NavigationManager.BaseUri}assets/libs/glightbox/dist/js/glightbox.min.js")"></script>
+        <script src="@($"{NavigationManager.BaseUri}assets/js/gallery.js")"></script>
+        
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Apps" },
+        new SpkPageHeader.PageItem { PageTitle = "Gallery" },
+    };
+
+    public class GalleryList {
+        public string? Img { get; set; }
+    }
+    private List<GalleryList> GalleryData = new List<GalleryList>()
+    {
+        new GalleryList { Img = "../assets/images/media/media-40.jpg",},
+        new GalleryList { Img = "../assets/images/media/media-41.jpg",},
+        new GalleryList { Img = "../assets/images/media/media-42.jpg",},
+        new GalleryList { Img = "../assets/images/media/media-43.jpg",},
+        new GalleryList { Img = "../assets/images/media/media-44.jpg",},
+        new GalleryList { Img = "../assets/images/media/media-45.jpg",},
+        new GalleryList { Img = "../assets/images/media/media-46.jpg",},
+        new GalleryList { Img = "../assets/images/media/media-47.jpg",},
+    };
+    public List<GalleryList> GetGalleryData() => GalleryData;
+}

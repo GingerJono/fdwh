@@ -1,0 +1,233 @@
+@page "/apex-radar-charts"
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using ApexSeries
+@using ApexCharts
+@using RadarChartData
+@inject RadarChartService RadarChartService
+
+    <!-- Page Header -->
+    <SpkPageHeader PageItems="PageItems" />
+    <!-- Page Header Close -->
+
+    <!-- Start::row-1 -->
+    <div class="row">
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Basic Radar Chart</div>
+                </div>
+                <div class="card-body">
+                    <SpkApex TItem="Radarbasic" ApexHeight="320" Title="Basic Radar Chart" Items="Radarbasics" Series="RadarbasicSeriesConfigs" ChartOptions="RadarbasicChartOptions"></SpkApex>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Radar Chart-Multiple Series</div>
+                </div>
+                <div class="card-body">
+                    <SpkApex TItem="RadarMulti" ApexHeight="320" Title="Radar Chart - Multi Series" Items="RadarMultis" Series="RadarMultiSeriesConfigs" ChartOptions="RadarMultiChartOptions"></SpkApex>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Radar Chart Polygon Fill</div>
+                </div>
+                <div class="card-body">
+                    <SpkApex TItem="RadarPoygon" ApexHeight="320" Title="Radar with Polygon Fill" Items="RadarPoygons" Series="RadarPoygonSeriesConfigs" ChartOptions="RadarPoygonChartOptions"></SpkApex>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--End::row-1 -->
+
+
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Charts" },
+        new SpkPageHeader.PageItem { PageTitle = "Apex Charts" },
+        new SpkPageHeader.PageItem { PageTitle = "Apex Radar Charts" },
+    };
+
+    // Basic Radar Chart Start //
+    private List<Radarbasic> Radarbasics { get; set; } = RadarChartService.Radarbasic();
+    private ApexChartOptions<Radarbasic> RadarbasicChartOptions { get; set; } = new();
+    private List<SeriesConfig<Radarbasic>>? RadarbasicSeriesConfigs { get; set; }
+
+    // Basic Radar Chart End //
+    
+    // Multi Radar Chart Start //
+    private List<RadarMulti> RadarMultis { get; set; } = RadarChartService.RadarMulti();
+    private ApexChartOptions<RadarMulti> RadarMultiChartOptions { get; set; } = new();
+    private List<SeriesConfig<RadarMulti>>? RadarMultiSeriesConfigs { get; set; }
+
+    // Multi Radar Chart End //
+
+    // Poygon Radar Chart Start //
+    private List<RadarPoygon> RadarPoygons { get; set; } = RadarChartService.RadarPoygon();
+    private ApexChartOptions<RadarPoygon> RadarPoygonChartOptions { get; set; } = new();
+    private List<SeriesConfig<RadarPoygon>>? RadarPoygonSeriesConfigs { get; set; }
+
+    // Poygon Radar Chart End //
+    protected override void OnInitialized() {
+        
+        RadarbasicChartOptions = new ApexChartOptions<Radarbasic>
+        {
+            Title = new Title{
+                Style = new TitleStyle {
+                    FontSize= "13px",
+                    FontWeight= "bold",
+                    Color= "#8c9097"
+                },
+            },
+            Colors = new Color(new List<string> { "#5c67f7" }),
+            Yaxis = new List<YAxis>() {
+                new YAxis
+                {
+                    AxisBorder = new AxisBorder {
+                        Show = false,
+                    },
+                    Min = 0,
+                    Max = 120,
+                    StepSize = 30,
+                },
+            },
+            Legend = new Legend
+            {
+                Position = LegendPosition.Bottom
+            }
+        };
+        RadarbasicSeriesConfigs = new List<SeriesConfig<Radarbasic>>
+        {
+            new SeriesConfig<Radarbasic>
+            {
+                SeriesType = SeriesType.Radar,
+                Name = "Series 1",
+                XValueSelector = e => e.Month ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.Value)
+            },
+        };
+
+        RadarMultiChartOptions = new ApexChartOptions<RadarMulti>
+        {
+            Title = new Title{
+                Style = new TitleStyle {
+                    FontSize= "13px",
+                    FontWeight= "bold",
+                    Color= "#8c9097"
+                },
+            },
+            Colors = new Color(new List<string> { "#5c67f7", "#e354d4", "#ff8e6f" }),
+            Yaxis = new List<YAxis>() {
+                new YAxis
+                {
+                    Min = 0,
+                    Max = 120,
+                    StepSize = 30,
+                },
+            },
+            Markers = new Markers {
+                 Size= 0
+            },
+            Stroke = new Stroke { 
+                Width = 2,
+            },
+            Legend = new Legend
+            {
+                Position = LegendPosition.Bottom
+            }
+        };
+        RadarMultiSeriesConfigs = new List<SeriesConfig<RadarMulti>>
+        {
+            new SeriesConfig<RadarMulti>
+            {
+                SeriesType = SeriesType.Radar,
+                Name = "Series 1",
+                XValueSelector = e => e.Year ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.Value)
+            },
+            new SeriesConfig<RadarMulti>
+            {
+                SeriesType = SeriesType.Radar,
+                Name = "Series 2",
+                XValueSelector = e => e.Year ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.Value1)
+            },
+            new SeriesConfig<RadarMulti>
+            {
+                SeriesType = SeriesType.Radar,
+                Name = "Series 3",
+                XValueSelector = e => e.Year ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.Value2)
+            },
+        };
+
+        RadarPoygonChartOptions = new ApexChartOptions<RadarPoygon>
+        {
+            Title = new Title{
+                Style = new TitleStyle {
+                    FontSize= "13px",
+                    FontWeight= "bold",
+                    Color= "#8c9097"
+                },
+            },
+            Colors = new Color(new List<string> {  "#e354d4"}),
+            Yaxis = new List<YAxis>() {
+                new YAxis
+                {
+                    Min = 0,
+                    Max = 100,
+                    StepSize = 20,
+                    TickAmount=7,
+                    Labels = new YAxisLabels {
+                        Formatter= @"function (val, i) {
+                        if (i % 2 === 0) {
+                        return val
+                        }
+                        }",
+                    }
+                },
+            },
+             PlotOptions = new PlotOptions 
+            {
+                Radar = new PlotOptionsRadar
+                {    
+                    Size= 80,
+                    Polygons= new () {
+                        StrokeColors= "#e9e9e9",
+                    }
+                }
+            },
+            Markers = new Markers {
+                Size= 4,
+                StrokeWidth=2,
+                Colors = "#fff",
+                StrokeColors= "#e354d4"
+            },
+            DataLabels = new DataLabels {
+                Enabled = true,
+            }, 
+            Stroke = new Stroke { 
+                Width = 2,
+            },
+            Legend = new Legend
+            {
+                Position = LegendPosition.Bottom
+            }
+        };
+        RadarPoygonSeriesConfigs = new List<SeriesConfig<RadarPoygon>>
+        {
+            new SeriesConfig<RadarPoygon>
+            {
+                SeriesType = SeriesType.Radar,
+                Name = "Series 1",
+                XValueSelector = e => e.Week ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.PoygonValue)
+            },
+        };
+     }
+}

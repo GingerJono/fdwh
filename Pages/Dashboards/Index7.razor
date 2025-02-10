@@ -1,0 +1,839 @@
+@page "/index7"
+@using ApexCharts
+@using WMBlazorSlickCarousel.WMBSC
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using ApexSeries
+@using CardModel
+@using Crypto
+@inject CryptoService CryptoService
+
+<!-- BlazorSlickCarousel CSS -->
+<link href="_content/WMBlazorSlickCarousel/WMBlazorSlickCarousel.bundle.scp.css" rel="stylesheet">
+
+            <!-- Start::page-header -->
+            <SpkPageHeader PageItems="PageItems" />
+            <!-- End::page-header -->
+
+            <!-- Start::row-1 -->
+            <div class="row">
+                <div class="col-xl-12">
+                    <div class="crypto-swiper">
+                        <BlazorSlickCarousel Configurations="CryptoConfigurations" @ref="theCarousel">
+                            <BlazorSlickCarouselContent>
+                                @foreach(var MainCard in CryptoService.GetCryptoMainChart()) {
+                                    var chartItems = CryptoService.GetCryptoChart(MainCard);
+                                    var dynamicChartOptions = GenerateDynamicChartOptions(MainCard);
+                                    var dynamicSeriesConfigs = GenerateDynamicSeriesConfigs();
+                                    <div class="Carousel-slide">
+                                        <SpkCryptoCard MainCard="MainCard" ChartOptions="dynamicChartOptions" ChartItems="@CryptoService.GetCryptoChart(MainCard)" SeriesConfigs="dynamicSeriesConfigs"/>
+                                    </div>
+                                }
+                            </BlazorSlickCarouselContent>
+                        </BlazorSlickCarousel>
+                    </div>
+                </div>
+            </div>
+            <!-- End::row-1 -->
+
+            <!-- Start:: row-2 -->
+            <div class="row">
+                <div class="col-xxl-8">
+                    <div class="card custom-card">
+                        <div class="card-header justify-content-between">
+                            <div class="card-title flex-fill">
+                                Crypto Analysis
+                            </div>
+                            <div class="btn-group" role="group" aria-label="Basic example">
+                                <SpkButtons ButtonSize="btn-sm" ButtonClass="btn-primary">1D</SpkButtons>
+                                <SpkButtons ButtonSize="btn-sm" ButtonClass="btn-primary-light">1W</SpkButtons>
+                                <SpkButtons ButtonSize="btn-sm" ButtonClass="btn-primary-light">1M</SpkButtons>
+                                <SpkButtons ButtonSize="btn-sm" ButtonClass="btn-primary-light">1Y</SpkButtons>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex flex-wrap p-3 bg-light rounded-2 mb-3 align-items-center">
+                                <div class="me-3">
+                                    <div class="btn-group ms-2">
+                                        <SpkDropdowns Tag="button" DropdownClass="btn-primary border" DropdownToggle=true>
+                                            <ChildContent>
+                                                <span class="avatar avatar-xs avatar-rounded me-2 align-middle"><img src="../assets/images/crypto-currencies/crypto-icons/bitcoin-btc-logo.svg" alt=""></span>Bitcoin
+                                            </ChildContent>
+                                            <ChildContent2>
+                                                <ul class="dropdown-menu">
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><span class="avatar avatar-xs avatar-rounded me-2 align-middle"><img src="../assets/images/crypto-currencies/crypto-icons/ethereum-eth-logo.svg" alt=""></span>Etherium</a></li>
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><span class="avatar avatar-xs avatar-rounded me-2 align-middle"><img src="../assets/images/crypto-currencies/crypto-icons/tether-usdt-logo.svg" alt=""></span>Tether</a></li>
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><span class="avatar avatar-xs avatar-rounded me-2 align-middle"><img src="../assets/images/crypto-currencies/crypto-icons/xrp-xrp-logo.svg" alt=""></span>XRP</a></li>
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><span class="avatar avatar-xs avatar-rounded me-2 align-middle"><img src="../assets/images/crypto-currencies/crypto-icons/tron-trx-logo.svg" alt=""></span>TRON</a></li>
+                                                </ul>
+                                            </ChildContent2>
+                                        </SpkDropdowns>
+                                    </div>
+                                </div>
+                                <div class="d-flex flex-wrap justify-content-sm-evenly flex-fill">
+                                    <div class="m-sm-0 m-2">
+                                        <span>Symbol</span>
+                                        <p class="mb-0">BTC</p>
+                                    </div>
+                                    <div class="m-sm-0 m-2">
+                                        <span>Price Benchmark</span>
+                                        <p class="mb-0">136.00%</p>
+                                    </div>
+                                    <div class="m-sm-0 m-2">
+                                        <span>Price (USD)</span>
+                                        <p class="text-success mb-0">$54,564.60</p>
+                                    </div>
+                                    <div class="m-sm-0 m-2">
+                                        <span>Change (24H)</span>
+                                        <p class="text-danger mb-0">-0.14%</p>
+                                    </div>
+                                    <div class="m-sm-0 m-2">
+                                        <span>Market Cap</span>
+                                        <p class="mb-0">$1.32T</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="crypto-analysis">
+                                <SpkApex TItem="CryptoCandlestickchart" ChartOptions="CryptoChartOptions" Items="CryptoCandlestickcharts" Series="CryptoCandlestickchartSeriesConfig"></SpkApex>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xxl-4">
+                    <div class="card custom-card">
+                        <div class="card-body p-0">
+                            <div class="p-4 m-2 rounded-2 bg-primary text-fixed-white bg-crypto-balance">
+                                <div class="d-flex align-items-center gap-2 justify-content-between">
+                                    <div>
+                                        <div class="mb-1 op-9">Total Balance</div>
+                                        <h4 class="text-fixed-white mb-1 fw-medium me-2">$262,933.05 USD</h4>
+                                        <span class="op-7 fs-12">Increased by </span>
+                                        <SpkBadge BadgeClass="bg-success mt-2 text-fixed-white p-1 text-end ms-1"><i class="ti ti-trending-up me-2"></i>12.2%</SpkBadge>
+                                    </div>
+                                    <div class="ms-auto text-end">
+                                        <div class="avatar avatar-lg bg-primary1 shadow">
+                                            <i class="ri-bank-line fs-4 lh-1"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row border-top border-block-start-dashed g-0">
+                                <div class="col border-end border-inline-end-dashed">
+                                    <div class="p-4">
+                                        <div class="d-flex align-items-center justify-content-center gap-3">
+                                            <span class="avatar avatar-md bg-primary2">
+                                                <i class="ri-arrow-left-down-fill fs-20"></i>
+                                            </span>
+                                            <div>
+                                                <div class="fw-medium text-muted">Deposit</div>
+                                                <h5 class="mb-0">$1,654 USD</h5>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="p-4">
+                                        <div class="d-flex align-items-center justify-content-center gap-3">
+                                            <span class="avatar avatar-md bg-primary3">
+                                                <i class="ri-arrow-right-up-fill fs-20"></i>
+                                            </span>
+                                            <div>
+                                                <div class="fw-medium text-muted">Withdraw</div>
+                                                <h5 class="mb-0">$654 USD</h5>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card custom-card">
+                        <div class="card-header justify-content-between">
+                            <div class="card-title">Currency Converter</div>
+                            <SpkDropdowns Tag="button" DropdownClass="smbtn-light border d-flex align-items-center text-muted show" DropdownId="dropdownMenuButton1" DropdownToggle=false DropdownText="View All <i class='bx bx-caret-down ms-1 fs-15'></i>">
+                                <ChildContent2>
+                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                        <li><a class="dropdown-item" href="javascript:void(0);">Yearly</a></li>
+                                        <li><a class="dropdown-item" href="javascript:void(0);">Monthly</a></li>
+                                        <li><a class="dropdown-item" href="javascript:void(0);">Weakly</a></li>
+                                    </ul>
+                                </ChildContent2>
+                            </SpkDropdowns>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-sm-flex gap-2 align-items-center buy-crypto index-crypto">
+                                <div class="input-group d-flex flex-nowrap align-items-center">
+                                    <input type="text" class="form-control crypto-buy-sell-input" aria-label="crypto buy select" placeholder="Enter">
+                                    <select class="form-control tomselect">
+                                        <option value="Choice 1">BTC</option>
+                                        <option value="Choice 2">ETH</option>
+                                        <option value="Choice 3">XRP</option>
+                                        <option value="Choice 4">DASH</option>
+                                        <option value="Choice 5">NEO</option>
+                                        <option value="Choice 6">LTC</option>
+                                        <option value="Choice 7">BSD</option>
+                                    </select>
+                                </div>
+                                <div class="text-center">
+                                    <SpkButtons Tag="a" ButtonSize="btn-sm" ButtonClass="btn-secondary btn-icon my-2" IsRounded=true><i class="ti ti-arrows-exchange fs-19 align-middle"></i></SpkButtons>
+                                </div>
+                                <div class="input-group d-flex flex-nowrap align-items-center">
+                                    <input type="text" class="form-control crypto-buy-sell-input" aria-label="crypto buy select" placeholder="25,784.00">
+                                    <select class="form-control tomselect">
+                                        <option value="Choice 1">USD</option>
+                                        <option value="Choice 2">AED</option>
+                                        <option value="Choice 3">AUD</option>
+                                        <option value="Choice 4">ARS</option>
+                                        <option value="Choice 5">AZN</option>
+                                        <option value="Choice 6">BGN</option>
+                                        <option value="Choice 7">BRL</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="bg-light p-3 rounded mt-2">
+                                <div class="pb-1"><span class="text-default">Transaction Fee</span><span class="text-muted ms-2 fs-14 d-inline-block float-end">$3.04</span></div>
+                                <div class="fs-14 py-1"><span class="text-default">Other Charges</span><span class="text-muted ms-2 fs-14 d-inline-block float-end">$6.55</span></div>
+                                <div class="fw-semibold fs-14 pt-1">Total: <span class="fs-14 d-inline-block float-end">$25,784.00</span></div>
+                            </div>
+                            <div class=" mt-2 pt-1 d-flex gap-1">
+                                <SpkButtons ButtonClass="btn-primary1-light flex-fill">History<i class="ms-2 ti ti-arrow-narrow-right align-middle"></i></SpkButtons>
+                                <SpkButtons ButtonClass="btn-primary flex-fill">Convert<i class="ms-2 ti ti-arrow-narrow-right align-middle"></i></SpkButtons>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- End:: row-2 -->
+
+            <!-- Start:: row-3 -->
+            <div class="row">
+                <div class="col-xxl-3 col-xl-6">
+                    <div class="card custom-card">
+                        <div class="card-header justify-content-between">
+                            <div class="card-title">
+                                Market Cap
+                            </div>
+                            <SpkButtons Tag="a" ButtonSize="btn-sm" ButtonClass="btn-light text-muted">View All<i class="ti ti-arrow-narrow-right ms-1"></i></SpkButtons>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled market-cap-list mb-1">
+                                @foreach (var marketcap in CryptoService.GetMarketCap()) {
+                                    <li>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div>
+                                                <span class="avatar bg-@marketcap.AvatarColor-transparent avatar-rounded svg-@marketcap.AvatarColor">
+                                                    @((MarkupString)(marketcap.AvatarIcon ?? string.Empty))
+                                                </span>
+                                            </div>
+                                            <div class="flex-fill">
+                                                <span class="fw-semibold d-block mb-1">@marketcap.Coin</span>
+                                                <div class="d-flex align-items-center text-muted gap-2 lh-1 fs-13">
+                                                    <span class="d-block">@marketcap.Coinvalue</span>
+                                                    <div class="vr"></div>
+                                                    <span class="text-nowrap">$@marketcap.Value B</span>
+                                                </div>
+                                            </div>
+                                            <div class="text-end">
+                                                <span class="d-block h6 mb-1 fw-semibold">$@marketcap.Amount</span>
+                                                <div class="d-flex align-items-center @(marketcap.IsIncreased ? "text-success" :"text-danger") gap-2 lh-1 fs-13">
+                                                    <span class="d-block">@marketcap.IncreasedValue</span>
+                                                    <div class="vr"></div>
+                                                    <span><i class="@(marketcap.IsIncreased ? "ti ti-arrow-narrow-up" :"ti ti-arrow-narrow-down")"></i>@marketcap.Increasedpercentage</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xxl-4 col-xl-6">
+                    <div class="card custom-card overflow-hidden">
+                        <div class="card-header justify-content-between">
+                            <div class="card-title">Assets Overview</div>
+                            <SpkDropdowns Tag="a" DropdownClass="btn btn-sm btn-icon btn-light" DropdownToggle=false DropdownText="<i class='fe fe-more-vertical'></i>">
+                                <ChildContent2>
+                                    <ul class="dropdown-menu" data-popper-placement="bottom-start">
+                                        <li><a class="dropdown-item" href="javascript:void(0);">Today </a></li>
+                                        <li><a class="dropdown-item" href="javascript:void(0);">This week</a></li>
+                                        <li><a class="dropdown-item" href="javascript:void(0);">Last Week</a></li>
+                                    </ul>
+                                </ChildContent2>
+                            </SpkDropdowns>
+                        </div>
+                        <div class="card-body p-0">
+                            <div id="balanceAnalysis">
+                                <SpkApex TItem="BalanceAnalysis" ChartOptions="BalanceAnalysisChartOptions" ApexHeight="290" Items="balanceanalysis" Series="BalanceAnalysisSeriesConfig"></SpkApex>
+                            </div>
+                            <div class="border-top border-block-start-dashed p-3">
+                                <div class="d-flex align-items-center gap-3 mb-3">
+                                    <span class="avatar avatar-md bg-primary">
+                                        <i class="ri-wallet-3-line fs-20"></i>
+                                    </span>
+                                    <div>
+                                        <div class="fw-medium text-muted op-7">Funding</div>
+                                        <h5 class="mb-0">$54,784 USD</h5>
+                                    </div>
+                                    <div class="ms-auto">
+                                        <div class="text-success fw-medium"><i class="ri-arrow-down-s-fill me-1 align-middle"></i>1.05%</div>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center justify-content-center gap-3 pt-1 mb-1">
+                                    <span class="avatar avatar-md bg-primary1">
+                                        <i class="ri-arrow-up-down-line fs-20"></i>
+                                    </span>
+                                    <div>
+                                        <div class="fw-medium text-muted op-7">Trading</div>
+                                        <h5 class="mb-0">$23,489 USD</h5>
+                                    </div>
+                                    <div class="ms-auto">
+                                        <div class="text-danger fw-medium"><i class="ri-arrow-down-s-fill me-1 align-middle"></i>1.05%</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xxl-5">
+                    <div class="card custom-card overflow-hidden">
+                        <div class="card-header justify-content-between">
+                            <div class="card-title">Transaction History</div>
+                            <a href="javascript:void(0);" class="text-muted text-decoration-underline link-offset-2">View All</a>
+                        </div>
+                        <div class="card-body p-0 pt-1">
+                            <SpkTables Items="CryptoService.GetCryptoTransactionHeadersData()">
+                                @foreach(var crypto in CryptoService.GetCryptoTransactionData()) {
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="lh-1">
+                                                    <span class="avatar avatar-rounded avatar-md p-2 @crypto.CoinColor">
+                                                        <img src="@crypto.CoinImg" alt="">
+                                                    </span>
+                                                </div>
+                                                <div class="flex-fill">
+                                                    <span class="d-block fw-medium">@crypto.Coin</span>
+                                                    <span class="d-block text-muted">@crypto.Coinvalue</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>@crypto.Transaction</td>
+                                        <td>@crypto.Transactiondate</td>
+                                        <td>
+                                            <span class="@(crypto.IsIncreased ?"text-success":"text-danger")">@crypto.IncreasedValue<i class="@(crypto.IsIncreased ?"ri-arrow-up-line text-success":"ri-arrow-down-line text-danger") fs-12 lh-1  ms-1"></i></span>
+                                        </td>
+                                    </tr>
+                                }
+                            </SpkTables>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- End:: row-3 -->
+
+            <!-- Start:: row-4 -->
+            <div class="row">
+                <div class="col-xl-12">
+                    <div class="card custom-card"> 
+                        <div class="card-header justify-content-between">
+                            <div class="card-title">My Portfolio</div>
+                            <div class="btn-group" role="group" aria-label="Basic example">
+                                <SpkButtons ButtonClass="btn-primary" ButtonSize="btn-sm">1D</SpkButtons>
+                                <SpkButtons ButtonClass="btn-primary-light" ButtonSize="btn-sm">1W</SpkButtons>
+                                <SpkButtons ButtonClass="btn-primary-light" ButtonSize="btn-sm">1M</SpkButtons>
+                                <SpkButtons ButtonClass="btn-primary-light" ButtonSize="btn-sm">1Y</SpkButtons>
+                            </div>
+                        </div>
+                        <div class="card-body p-0">
+                            <SpkTables Items="CryptoService.GetPortfolioHeadersData()" Tableclass="table-hover text-nowrap nft-table">
+                                @foreach(var MainCard in CryptoService.GetCryptoPortfolioData()) {
+                                    <tr>
+                                        <td>
+                                           @MainCard.Id
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="lh-1">
+                                                    <span class="avatar avatar-xs">
+                                                        <img src=" @MainCard.CoinImg" alt="">
+                                                    </span>
+                                                </div>
+                                                <div class="fs-14"> @MainCard.Coin</div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                          $@MainCard.Price
+                                        </td>
+                                        <td class="profolio-chart">
+                                            <SpkApex TItem="Crypto.PortfolioChart" ChartOptions="GeneratePortfolioOptions(MainCard)" Items="CryptoService.GetCryptoPortfolioChart(MainCard)" Series="GeneratePortfolioSeriesConfigs()" />
+                                        </td>
+                                        <td>
+                                              @MainCard.Volume
+                                        </td>
+                                        <td>
+                                            <span class="@(MainCard.IsIncreased ? "text-success" :"text-danger")"><i class="@(MainCard.IsIncreased ? "ri-arrow-up-s-fill" :"ri-arrow-down-s-fill") me-1 fs-15 align-middle"></i>@MainCard.Change</span>
+                                        </td>
+                                        <td>
+                                            $@MainCard.MarketCap
+                                        </td>
+                                        <td>
+                                            <div class="btn-grp">
+                                                <SpkButtons ButtonSize="btn-sm" ButtonClass="btn-primary-light me-2">Buy</SpkButtons>
+                                                <SpkButtons ButtonSize="btn-sm" ButtonClass="btn-primary1-light">Trade</SpkButtons>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </SpkTables>
+                        </div>
+                        <div class="card-footer border-top-0">
+                            <div class="d-flex align-items-center">
+                                <div>
+                                    Showing 5 Entries <i class="bi bi-arrow-right ms-2"></i>
+                                </div>
+                                <div class="ms-auto">
+                                    <nav aria-label="Page navigation" class="pagination-style-4">
+                                        <ul class="pagination mb-0">
+                                            <li class="page-item disabled">
+                                                <a class="page-link" href="javascript:void(0);">
+                                                    Prev
+                                                </a>
+                                            </li>
+                                            <li class="page-item active"><a class="page-link" href="javascript:void(0);">1</a></li>
+                                            <li class="page-item"><a class="page-link" href="javascript:void(0);">2</a></li>
+                                            <li class="page-item">
+                                                <a class="page-link text-primary" href="javascript:void(0);">
+                                                    next
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </nav>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- End:: row-4 -->
+
+            
+        <!-- TomSelect JS -->
+        <script src="@($"{NavigationManager.BaseUri}assets/libs/tom-select/dist/js/tom-select.complete.min.js")"></script>
+        <script src="@($"{NavigationManager.BaseUri}assets/js/tomselect.js")"></script>
+
+
+@code {   
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Dashboards" },
+        new SpkPageHeader.PageItem { PageTitle = "Crypto" },
+    };
+    public BlazorSlickCarousel? theCarousel;
+    public WMBSCInitialSettings? CryptoConfigurations;
+
+    // CryptoCard Start //
+    private ApexChartOptions<CryptoChart> GenerateDynamicChartOptions(CryptoMainChart MainCard) =>
+    MainCard.CryptoTitle switch
+    {
+        "Bitcoin" => BtcChartOptions,
+        "Binanace" => BinanaceChartOptions,
+        "Cardano" => ADAChartOptions,
+        "Ethereum" => ETHChartOptions,
+        "Tether" => USDTChartOptions,
+        "Ripple" => XRPChartOptions,
+        _ => SOLChartOptions
+    };
+    private List<SeriesConfig<CryptoChart>> GenerateDynamicSeriesConfigs() {
+        return new List<SeriesConfig<CryptoChart>>
+        {
+            new SeriesConfig<CryptoChart>
+            {
+                SeriesType = SeriesType.Line,  
+                XValueSelector = e => e.Series,  
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.Value)
+            },
+        };
+    } 
+    private ApexChartOptions<CryptoChart> BtcChartOptions { get; set; } = new();
+    private ApexChartOptions<CryptoChart> BinanaceChartOptions { get; set; } = new();
+    private ApexChartOptions<CryptoChart> ADAChartOptions { get; set; } = new();
+    private ApexChartOptions<CryptoChart> ETHChartOptions { get; set; } = new(); 
+    private ApexChartOptions<CryptoChart> USDTChartOptions { get; set; } = new();
+    private ApexChartOptions<CryptoChart> XRPChartOptions { get; set; } = new(); 
+    private ApexChartOptions<CryptoChart> SOLChartOptions { get; set; } = new();
+    //  CryptoCard End // 
+
+    // CryptoCard Start //
+    private ApexChartOptions<PortfolioChart> GeneratePortfolioOptions(Portfolio MainCard) =>
+    MainCard.Coin switch
+    {
+         "Bitcoin - BTC"=> BtcChangeChartOptions ,
+         "Etherium - ETH"=> ETHChangeChartOptions ,
+         "Tether - USDT"=> USDTChangeChartOptions  ,
+         "Solana - SOL"=> SOLChangeChartOptions  ,
+         "Cardano - ADA"=> ADAChangeChartOptions  ,
+         _ => BNBChangeChartOptions 
+    };
+    private List<SeriesConfig<PortfolioChart>> GeneratePortfolioSeriesConfigs()
+    {
+        return new List<SeriesConfig<PortfolioChart>>
+        {
+            new SeriesConfig<PortfolioChart>
+            {
+                SeriesType = SeriesType.Line,  
+                XValueSelector = e => e.Series,  
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.Value)
+            },
+        };
+    } 
+    private ApexChartOptions<PortfolioChart> BtcChangeChartOptions  { get; set; } = new();
+    private ApexChartOptions<PortfolioChart> ETHChangeChartOptions  { get; set; } = new();
+    private ApexChartOptions<PortfolioChart> USDTChangeChartOptions { get; set; } = new();
+    private ApexChartOptions<PortfolioChart> SOLChangeChartOptions { get; set; } = new(); 
+    private ApexChartOptions<PortfolioChart> ADAChangeChartOptions { get; set; } = new();
+    private ApexChartOptions<PortfolioChart> BNBChangeChartOptions { get; set; } = new(); 
+    //  CryptoCard End // 
+
+    // Coin Analysis Chart Start //
+    private List<CryptoCandlestickchart> CryptoCandlestickcharts { get; set; } = CryptoService.GetCryptoData();
+    private ApexChartOptions<CryptoCandlestickchart> CryptoChartOptions { get; set; } = new();
+    private List<SeriesConfig<CryptoCandlestickchart>>? CryptoCandlestickchartSeriesConfig { get; set; }
+    
+    // Coin Analysis Chart End //
+    
+    //  BalanceAnalysis Start //
+    private List<BalanceAnalysis> balanceanalysis { get; set; } = CryptoService.BalanceAnalysis();
+    private ApexChartOptions<BalanceAnalysis> BalanceAnalysisChartOptions { get; set; } = new();    
+    private List<SeriesConfig<BalanceAnalysis>>? BalanceAnalysisSeriesConfig { get; set; }
+    //  BalanceAnalysis End //
+    protected override void OnInitialized() { 
+
+        WMBSCSettings breakpoint1600Settings = new WMBSCSettings
+        {
+            slidesToShow = 4,
+            arrows = false,
+            dots = false,
+            slidesToScroll = 1,
+            infinite = true,
+            autoplay = true,
+            autoplaySpeed = 1500,
+        };
+        WMBSCResponsiveSettings breakpoint1600Responsive = new WMBSCResponsiveSettings
+        {
+            breakpoint = 1600,
+            settings = breakpoint1600Settings
+        };
+        WMBSCSettings breakpoint1200Settings = new WMBSCSettings
+        {
+            slidesToShow = 3,
+            arrows = false,
+            dots = false,
+            slidesToScroll = 1,
+            infinite = true,
+            autoplay = true,
+            autoplaySpeed = 1500,
+        };
+        WMBSCResponsiveSettings breakpoint1200Responsive = new WMBSCResponsiveSettings
+        {
+            breakpoint = 1200,
+            settings = breakpoint1200Settings
+        };
+        WMBSCSettings breakpoint768Settings = new WMBSCSettings
+        {
+            slidesToShow = 2,
+            arrows = false,
+            dots = false,
+            slidesToScroll = 1,
+            infinite = true,
+            autoplay = true,
+            autoplaySpeed = 1500,
+        };
+        WMBSCResponsiveSettings breakpoint768Responsive = new WMBSCResponsiveSettings
+        {
+            breakpoint = 768,
+            settings = breakpoint768Settings
+        };
+        WMBSCSettings breakpoint500Settings = new WMBSCSettings
+        {
+            slidesToShow = 1,
+            arrows = false,
+            dots = false,
+            slidesToScroll = 1,
+            infinite = true,
+            autoplay = true,
+            autoplaySpeed = 1500,
+        };
+        WMBSCResponsiveSettings breakpoint500Responsive = new WMBSCResponsiveSettings {
+            breakpoint = 500,
+            settings = breakpoint500Settings
+        };
+        List<WMBSCResponsiveSettings> responsiveSettingsList = new List<WMBSCResponsiveSettings>();
+        responsiveSettingsList.Add(breakpoint1600Responsive);
+        responsiveSettingsList.Add(breakpoint1200Responsive);
+        responsiveSettingsList.Add(breakpoint768Responsive);
+        responsiveSettingsList.Add(breakpoint500Responsive);
+        CryptoConfigurations = new WMBSCInitialSettings
+        {
+            arrows = false,
+            dots = false,
+            slidesToShow = 5,
+            slidesToScroll = 1,
+            infinite = true,
+            autoplay = true,
+            autoplaySpeed = 1500,
+            responsive = responsiveSettingsList,
+        };
+
+        // CryptoCard Start //
+        List<string> color1 = new List<string> { "rgb(227, 84, 212)"};
+        List<string> color2 = new List<string> { "rgb(255, 93, 159)"};
+        List<string> color3 = new List<string> { "rgb(255, 142, 111)"};
+        List<string> color4 = new List<string> { "var(--primary-color)"};
+        List<string> color5 = new List<string> { "rgb(158, 92, 247)"};
+        List<string> color6 = new List<string> { "rgb(14, 165, 232)"};
+        List<string> color7 = new List<string> { "rgb(255, 198, 88)"};
+            
+        BtcChartOptions  = InitializeChartOptions<CryptoChart>(color1);
+        BinanaceChartOptions  = InitializeChartOptions<CryptoChart>(color2);
+        ADAChartOptions  = InitializeChartOptions<CryptoChart>(color3);
+        ETHChartOptions  = InitializeChartOptions<CryptoChart>(color4); 
+        USDTChartOptions  = InitializeChartOptions<CryptoChart>(color5);
+        XRPChartOptions  = InitializeChartOptions<CryptoChart>(color6); 
+        SOLChartOptions  = InitializeChartOptions<CryptoChart>(color7);
+        //  CryptoCard End // 
+        
+        // CryptoCard Start //
+        List<string> Changecolor1 = new List<string> { "rgb(227, 84, 212)"};
+        List<string> Changecolor2 = new List<string> { "rgb(255, 93, 159)"};
+        List<string> Changecolor3 = new List<string> { "rgb(255, 142, 111)"};
+        List<string> Changecolor4 = new List<string> { "var(--primary-color)"};
+        List<string> Changecolor5 = new List<string> { "rgb(158, 92, 247)"};
+        List<string> Changecolor6 = new List<string> { "rgb(14, 165, 232)"};
+        List<string> Changecolor7 = new List<string> { "rgb(255, 198, 88)"};
+            
+        BtcChangeChartOptions   = Initialize1ChartOptions<PortfolioChart>(Changecolor1);
+        ETHChangeChartOptions   = Initialize1ChartOptions<PortfolioChart>(Changecolor2);
+        USDTChangeChartOptions    = Initialize1ChartOptions<PortfolioChart>(Changecolor3);
+        SOLChangeChartOptions    = Initialize1ChartOptions<PortfolioChart>(Changecolor4); 
+        ADAChangeChartOptions    = Initialize1ChartOptions<PortfolioChart>(Changecolor5);
+        BNBChangeChartOptions   = Initialize1ChartOptions<PortfolioChart>(Changecolor7); 
+        //  CryptoCard End // 
+
+        CryptoChartOptions = new ApexChartOptions<CryptoCandlestickchart> {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false, Pan = false, Reset = false,  Download = false},
+                }, 
+                Height = 365,
+            },  
+            Grid = new Grid {
+                BorderColor = "#f1f1f1",
+                StrokeDashArray = 3
+            },
+            Colors = new Color(new List<string> { "var(--primary-color)", "rgba(227, 84, 212)" }),
+            Stroke=new Stroke{
+                Width=2,
+            },
+            Legend =new Legend {
+                Show = false,
+            },
+            PlotOptions = new PlotOptions {
+                Candlestick = new PlotOptionsCandlestick  {
+                    Colors = new () {
+                        Upward = "rgb(227, 84, 212)",
+                        Downward = "var(--primary-color)"
+                    }
+                 },
+            },
+            Tooltip = new Tooltip { 
+                Enabled= true,
+                Theme = ApexCharts.Mode.Dark
+            },
+            Xaxis  =  new XAxis {
+                Type = XAxisType.Datetime,
+                AxisBorder = new AxisBorder {
+                    Show = false,
+                    Color = "rgba(119, 119, 142, 0.05)",
+                    OffsetX = 0,
+                    OffsetY = 0,
+                },
+                DecimalsInFloat = 0,
+                AxisTicks = new AxisTicks {
+                    Show = false,
+                    Color = "rgba(119, 119, 142, 0.05)",
+                    OffsetX = 0,
+                    OffsetY = 0,
+                }
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis {
+                    StepSize = 10.00M,
+                    Tooltip= new () {
+                        Enabled = true
+                    },
+                },
+            },
+        };
+ 
+        CryptoCandlestickchartSeriesConfig = new List<SeriesConfig<CryptoCandlestickchart>>
+        {
+            new SeriesConfig<CryptoCandlestickchart>
+            {
+                XValueSelector = e => e.Date,
+                OpenSelector = e => e.Open,
+                HighSelector = e => e.High,
+                LowSelector = e => e.Low,
+                CloseSelector = e => e.Close,
+                OrderByDescending = e => e.X 
+            },
+        };
+        
+        BalanceAnalysisChartOptions = new ApexChartOptions<BalanceAnalysis> {
+            Colors = new Color(new List<string> { "var(--primary-color)", "rgba(227, 84, 212, 0.7)" }),
+            PlotOptions = new PlotOptions {
+                RadialBar = new PlotOptionsRadialBar {
+                    OffsetY = 0,
+                    StartAngle = 0,
+                    EndAngle = 360,
+                    Hollow = new (){
+                        Margin = 5,
+                        Size = "45%",
+                        Background = "#000000",
+                    },
+                    DataLabels = new RadialBarDataLabels
+                    {
+                        Name = new (){
+                            Show = true,
+                            FontSize = "20px",
+                            FontFamily= "Poppins, sans-serif",
+                            OffsetY = 0,
+                        },
+                        Value = new (){
+                            Show = true,
+                            FontSize = "22px",
+                            Color = null,
+                            OffsetY = 12,
+                            FontWeight= 600,
+                            FontFamily= "Poppins, sans-serif",
+                            Formatter = @"function (val) {return val + '%'}"
+                        },
+                        Total = new RadialBarDataLabelsTotal
+                        {
+                            Show = true,
+                            FontSize = "14px",
+                            Label = "Balance",
+                            FontWeight= 400,
+                            Formatter = @"function (w) {
+                                return 254
+                            }"
+                        }
+                    },
+                }
+            },
+            Stroke = new Stroke { 
+                LineCap = ApexCharts.LineCap.Round,
+            },
+            Grid = new Grid {
+                Padding = new() {
+                    Bottom = -10,
+                    Top = -10
+                }
+            },
+        };
+
+        BalanceAnalysisSeriesConfig = new List<SeriesConfig<BalanceAnalysis>>
+        {
+            new SeriesConfig<BalanceAnalysis>
+            {
+                SeriesType =SeriesType.RadialBar,
+                XValueSelector = e => e.Analysis ?? "unknown",
+                YAggregateSelector = e => decimal.Round(e.Average(e => e.AnalysisValue))
+            },
+        };
+    }
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        { 
+            await Task.Delay(1000);
+            if (theCarousel != null)
+            {
+                await theCarousel.Destroy();
+                await theCarousel.Constroy(theCarousel.Configurations);
+            }
+        }
+    }
+    // CryptoCard Start //
+    private ApexChartOptions<T> InitializeChartOptions<T>(List<string> colors) where T : class, ILineGraph
+    {
+        return new ApexChartOptions<T>
+        {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = false},
+                }, 
+                Height =40,
+                Width =120,
+                Sparkline = new () {
+                    Enabled = true
+                },
+                DropShadow = new ApexCharts.DropShadow {
+                    Enabled = true,
+                    Color = new Color(colors),
+                    Top = 0,
+                    Left = 0,
+                    Blur = 3,
+                    Opacity = 0.3
+                }
+            }, 
+            Colors = new Color(colors),
+            Stroke = new Stroke { 
+                Curve = Curve.Smooth,
+                Width = 1.7,
+                LineCap = ApexCharts.LineCap.Butt,
+            },
+            Grid = new Grid {
+                BorderColor = "transparent",
+            },
+        };
+    }
+    //  CryptoCard End // 
+    
+    // CryptoCard Start //
+    private ApexChartOptions<T> Initialize1ChartOptions<T>(List<string> colors) where T : class, ILineGraph
+    {
+        return new ApexChartOptions<T>
+        {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = false},
+                }, 
+                Height =20,
+                Width =120,
+                Sparkline = new () {
+                    Enabled = true
+                },
+                DropShadow = new ApexCharts.DropShadow {
+                    Enabled = true,
+                    Color = new Color(colors),
+                    Top = 0,
+                    Left = 0,
+                    Blur = 3,
+                    Opacity = 0.3
+                }
+            }, 
+            Colors = new Color(colors),
+            Stroke = new Stroke { 
+                Curve = Curve.Smooth,
+                Width = 1.7,
+                LineCap = ApexCharts.LineCap.Butt,
+            },
+            Grid = new Grid {
+                BorderColor = "transparent",
+            },
+        };
+    }
+    //  CryptoCard End // 
+}
+

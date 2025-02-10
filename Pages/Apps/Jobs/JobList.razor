@@ -1,0 +1,142 @@
+@page "/job-list"
+@using Sandbox._Spk
+@using JobData
+@inject JobService JobService
+
+    <!-- Page Header -->
+    <SpkPageHeader PageItems="PageItems" />
+    <!-- Page Header Close -->
+
+    <!-- Start::row-1 -->
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card custom-card overflow-hidden">
+                <div class="card-header justify-content-between">
+                    <div class="card-title">
+                        All Jobs List
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <SpkButtons Tag="a" href="/job-post" ButtonClass="btn-primary" ButtonSize="btn-sm"><i class="ri-add-line me-1 align-middle"></i>Post Job</SpkButtons>
+                        <div>
+                            <input class="form-control form-control-sm" type="text" placeholder="Search Here" aria-label=".form-control-sm example">
+                        </div>
+                        <SpkDropdowns Tag="a" DropdownClass="btn btn-primary btn-sm" DropdownToggle=false DropdownText="Sort By<i class='ri-arrow-down-s-line align-middle ms-1 d-inline-block'></i>">
+                            <ChildContent2>
+                                <ul class="dropdown-menu" role="menu">
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Posted Date</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Status</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Department</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Job Type</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Newest</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Oldest</a></li>
+                                </ul>
+                            </ChildContent2>
+                        </SpkDropdowns>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <SpkTables Items="JobService.GetJobsListHeadersData()" Tableclass="table-hover text-nowrap" ShowCheckbox=true SelectAllClick="ToggleSelectAll">
+                        @foreach (var Joblist in JobService.GetJoblistData()){
+                            <tr class="joblist-list">
+                                <td class="ps-4 joblist-checkbox">
+                                    <input class="form-check-input" type="checkbox" id="@Joblist.Id" value="" @bind="@Joblist.Selected" aria-label="...">
+                                </td>
+                                <td>
+                                    <div class="d-flex">
+                                        <span class="avatar avatar-md border p-1 bg-light">
+                                            <img src="@Joblist.Img">
+                                        </span>
+                                        <div class="ms-2">
+                                            <p class="fw-medium mb-0 d-flex align-items-center"><a href="/job-details"> @Joblist.Title</a></p>
+                                            <p class="fs-12 text-muted mb-0">Remote/Onsite</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <span class="avatar avatar-sm p-1 me-1 bg-light avatar-rounded">
+                                            <img src="@Joblist.CompanyLogo" alt="">
+                                        </span>
+                                        <a href="javascript:void(0);" class="fw-medium mb-0">@Joblist.Company</a>
+                                    </div>
+                                </td>
+                                <td>
+                                    @Joblist.Department
+                                </td>
+                                <td>@Joblist.Applications</td>
+                                <td>
+                                    <SpkBadge BadgeClass="@($"bg-{Joblist.PostedDateColor}-transparent")"><i class="bi bi-clock me-1"></i>@Joblist.PostedDate</SpkBadge>
+                                </td>
+                                <td>@Joblist.Vacancies</td>
+                                <td>@Joblist.JobType</td>
+                                <td>
+                                    <SpkBadge BadgeClass="@(Joblist.Status == "Approved" ? "bg-success-transparent" : Joblist.Status == "Rejected" ? "bg-danger-transparent" : "bg-warning-transparent")">@Joblist.Status</SpkBadge>
+                                </td>
+                                <td>
+                                    @Joblist.Date
+                                </td>
+                                <td>
+                                    <SpkButtons Tag="a" href="/job-details" ButtonClass="btn-icon btn-primary-light" ButtonSize="btn-sm"><i class="ri-eye-line"></i></SpkButtons>
+                                    <SpkButtons Tag="a" ButtonClass="btn-icon btn-info-light" ButtonSize="btn-sm"><i class="ri-edit-line"></i></SpkButtons>
+                                    <SpkButtons Tag="a" ButtonClass="btn-icon btn-primary2-light" ButtonSize="btn-sm" @onclick="@(() => DeleteJoblist(Joblist.Id))"><i class="ri-delete-bin-line"></i></SpkButtons>
+                                </td>
+                            </tr>
+                        }
+                    </SpkTables>
+                </div>
+                <div class="card-footer border-top-0">
+                    <div class="d-flex align-items-center flex-wrap overflow-auto">
+                        <div class="mb-2 mb-sm-0">
+                            Showing <b>1</b> to <b>10</b> of <b>10</b> entries <i class="bi bi-arrow-right ms-2 fw-medium"></i>
+                        </div>
+                        <div class="ms-auto">
+                            <ul class="pagination mb-0 overflow-auto">
+                                <li class="page-item disabled">
+                                    <a class="page-link">Previous</a>
+                                </li>
+                                <li class="page-item active" aria-current="page"><a class="page-link" href="javascript:void(0);">1</a></li>
+                                <li class="page-item">
+                                    <a class="page-link" href="javascript:void(0);">2</a>
+                                </li>
+                                <li class="page-item"><a class="page-link" href="javascript:void(0);">3</a></li>
+                                <li class="page-item"><a class="page-link" href="javascript:void(0);">4</a></li>
+                                <li class="page-item"><a class="page-link" href="javascript:void(0);">5</a></li>
+                                <li class="page-item">
+                                    <a class="page-link" href="javascript:void(0);">Next</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--End::row-1 -->
+
+@code {      
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Apps" },
+        new SpkPageHeader.PageItem { PageTitle = "Jobs" },
+        new SpkPageHeader.PageItem { PageTitle = "Jobs List" },
+    };         
+}
+@code {
+    protected void DeleteJoblist(decimal Id)
+    {
+        var JobToRemove = JobService.GetJoblistData().FirstOrDefault(o => o.Id == Id);
+        if (JobToRemove != null)
+        {
+            JobService.GetJoblistData().Remove(JobToRemove);
+        }
+    }
+    
+    private bool selectAll;
+    private void ToggleSelectAll()
+    {
+        selectAll = !selectAll;
+        foreach (var Joblist in JobService.GetJoblistData())
+        {
+           Joblist.Selected = selectAll;
+        }
+    }
+}

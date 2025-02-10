@@ -1,0 +1,677 @@
+@page "/index5"
+@using ApexCharts
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using ApexSeries
+@using CardModel
+@using Hrm
+@inject HrmService HrmService
+
+                <!-- Start::page-header -->
+                <SpkPageHeader PageItems="PageItems" />
+                <!-- End::page-header -->
+
+                <!-- Start:: row-1 -->
+                <div class="row">
+                    @foreach(var Mainchart in HrmService.GetHrmMainCard()) {
+                        var chartItems = HrmService.GetHrmChart(Mainchart);
+                        var dynamicChartOptions = GenerateDynamicChartOptions(Mainchart);
+                        var dynamicSeriesConfigs = GenerateDynamicSeriesConfigs();
+                        <div class="col-xxl-3 col-xl-6">
+                            <SpkHrmCard MainCard="Mainchart" ChartOptions="dynamicChartOptions" ChartItems="@HrmService.GetHrmChart(Mainchart)"  SeriesConfigs="dynamicSeriesConfigs" />
+                        </div>
+                    }
+                </div>
+                <!-- End:: row-1 -->
+
+                <!-- Start:: row-2 -->
+                <div class="row">
+                    <div class="col-xxl-8">
+                        <div class="card custom-card">
+                            <div class="card-header justify-content-between">
+                                <div class="card-title">Project Analysis</div>
+                                <div class="d-flex gap-2">
+                                    <SpkButtons ButtonClass="btn-outline-light" ButtonSize="btn-sm">Today</SpkButtons>
+                                    <SpkButtons ButtonClass="btn-outline-light" ButtonSize="btn-sm">Weakly</SpkButtons>
+                                    <SpkButtons ButtonClass="btn-light" ButtonSize="btn-sm">Yearly</SpkButtons>
+                                </div>
+                            </div>
+                            <div class="card-body pb-1">
+                                <ul class="d-flex flex-wrap mb-0 list-unstyled gap-5 justify-content-around p-3 border rounded border-dashed">
+                                    <li>
+                                        <div class="d-flex align-items-start justify-content-between gap-2">
+                                            <div class="lh-1 me-1">
+                                                <span class="avatar avatar-lg avatar-rounded bg-primary-transparent">
+                                                    <i class="ri-stack-line fs-5"></i>
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <span class="d-block mb-1 fw-medium text-muted">New</span>
+                                                <h4 class="fw-medium mb-0">64,241</h4>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="">
+                                        <div class="d-flex align-items-start justify-content-between gap-2">
+                                            <div class="lh-1 me-1">
+                                                <span class="avatar avatar-lg avatar-rounded bg-primary1-transparent">
+                                                    <i class="ri-rocket-line fs-5"></i>
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <span class="d-block mb-1 fw-medium text-muted">Inprogress</span>
+                                                <h4 class="fw-medium mb-0">1,543</h4>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="">
+                                        <div class="d-flex align-items-start justify-content-between gap-2">
+                                            <div class="lh-1 me-1">
+                                                <span class="avatar avatar-lg avatar-rounded bg-primary2-transparent">
+                                                    <i class="ri-check-line fs-5"></i>
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <span class="d-block mb-1 fw-medium text-muted">Completed</span>
+                                                <h4 class="fw-medium mb-0">3,848</h4>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="">
+                                        <div class="d-flex align-items-start justify-content-between gap-2">
+                                            <div class="lh-1 me-1">
+                                                <span class="avatar avatar-lg avatar-rounded bg-primary3-transparent">
+                                                    <i class="ri-time-line fs-5"></i>
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <span class="d-block mb-1 fw-medium text-muted">Onhold</span>
+                                                <h4 class="fw-medium mb-0">938</h4>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                                <div id="project-analysis">
+                                    <SpkApex TItem="Project" ApexHeight="336" Items="project" ChartOptions="ProjectChartOptions" Series="ProjectSeriesConfigs"></SpkApex>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xxl-4">
+                        <div class="card custom-card">
+                            <div class="card-header justify-content-between">
+                                <div class="card-title">Upcoming Events</div>
+                                <SpkButtons Tag="a" ButtonClass="btn-primary-light" ButtonSize="btn-sm"> View All</SpkButtons>
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-unstyled timeline-widget1 mb-0">
+                                    @foreach (var Card in HrmService.GetUpcomingEvents()){
+                                        <li class="timeline-widget-list">
+                                            <div class="d-flex align-items-center flex-wrap">
+                                                <div class="avatar avatar-xl @Card.DateColor me-2 flex-shrink-0"> 
+                                                    <div class="text-center">
+                                                        <div class=" fw-medium lh-1 mb-1">@Card.Date</div>
+                                                        <div class="fs-12 text-default fw-medium lh-1">@Card.Day</div>
+                                                    </div>
+                                                </div>
+                                                <div class="d-flex flex-wrap flex-fill align-items-top justify-content-between flex-xl-nowrap">
+                                                    <div class="events-width">
+                                                        <p class="mb-1 timeline-widget-content">@Card.Title</p>
+                                                        <p class="mb-0 fs-12 lh-1 text-muted">@((MarkupString)(Card.Desc ?? string.Empty))</p>
+                                                    </div>
+                                                    <SpkDropdowns Tag="a" DropdownToggle=false DropdownClass="btn btn-light btn-icon" DropdownText="<i class='fe fe-more-vertical'></i>">
+                                                    <ChildContent2>
+                                                        <ul class="dropdown-menu">
+                                                            <li><a class="dropdown-item" href="javascript:void(0);">Action</a></li>
+                                                            <li><a class="dropdown-item" href="javascript:void(0);">Another action</a></li>
+                                                            <li><a class="dropdown-item" href="javascript:void(0);">Something else here</a></li>
+                                                        </ul>
+                                                    </ChildContent2>
+                                                    </SpkDropdowns>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- End:: row-2 -->
+
+                <!-- Start:: row-3 -->
+                <div class="row">
+                    <div class="col-xxl-5">
+                        <div class="card custom-card overflow-hidden">
+                            <div class="card-header justify-content-between">
+                                <div class="card-title">Employee's Leave</div>
+                                <SpkButtons Tag="a" ButtonClass="btn-light" ButtonSize="btn-sm">View All</SpkButtons>
+                            </div>
+                            <div class="card-body p-0">
+                                <SpkTables  Items="HrmService.GetEmployeesHeadersData()"Tableclass="text-nowrap mb-0">
+                                    @foreach (var Employee in  HrmService.GetEmployeeList()){
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-sm">
+                                                        <img src="@Employee.EmployeeImg" class="" alt="">
+                                                    </span>
+                                                    <div class="flex-1 ms-2">
+                                                        <p class="mb-0 fs-12 fw-medium">@Employee.Employee</p>
+                                                        <a href="javascript:void(0);" class="fs-11 text-muted">@Employee.Desig</a>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="">@Employee.Type</span>
+                                            </td>
+                                            <td>
+                                                <span class="">@Employee.Days</span>
+                                            </td>
+                                            <td>
+                                                <SpkBadge BadgeClass="@Employee.StatusColor">@Employee.Status</SpkBadge>
+                                            </td>
+                                            <td>
+                                                <span class="fs-12">@Employee.Date</span>
+                                            </td>
+                                            <td>
+                                                <div class="btn-list">
+                                                    <SpkTooltip Tag="a" TooltipClass="btn btn-icon btn-sm rounded-pill btn-info-light" TooltipPlacement="top" TooltipTitle="Edit"><i class="ti ti-pencil"></i></SpkTooltip>
+                                                    <SpkTooltip Tag="a" TooltipClass="btn btn-icon btn-sm rounded-pill btn-primary2-light" TooltipPlacement="top" TooltipTitle="Delete" @onclick="@(() => DeleteEmployee(Employee.Id))"><i class="ti ti-trash"></i></SpkTooltip>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </SpkTables>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xxl-4">
+                        <div class="card custom-card">
+                            <div class="card-header justify-content-between">
+                                <div class="card-title">
+                                   Today's Interviews 
+                                </div>
+                                <div>
+                                    <SpkButtons ButtonClass="btn-light" ButtonSize="btn-sm">View All</SpkButtons>
+                                </div>
+                            </div>
+                            <div class="card-body py-3">
+                                <ul class="list-unstyled mb-0 schedule-list">
+                                    @foreach (var Meeting in HrmService.GetMeetingList()) {
+                                        <li>
+                                            <div class="d-flex align-items-center flex-wrap flex-xl-nowrap gap-1">
+                                                <div class="lh-1">
+                                                    <span class="avatar avatar-md avatar-rounded p-1 @Meeting.ImgColor">
+                                                        <img src="@Meeting.EmployeeImg" alt="">
+                                                    </span>
+                                                </div>
+                                                <div class="flex-fill ms-2">
+                                                    <p class="fw-medium mb-0">@Meeting.Employee</p>
+                                                    <p class="fs-11 text-muted mb-0 text-nowrap text-truncate w-75"><i class="ri-time-line me-1"></i>@Meeting.Time</p>
+                                                </div>
+                                                <div class="ms-auto">
+                                                    <SpkButtons ButtonClass="btn-primary text-nowrap" ButtonSize="btn-sm">Call Now</SpkButtons>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xxl-3">
+                        <div class="card custom-card">
+                            <div class="card-header justify-content-between">
+                                <div class="card-title">
+                                    Gender Distribution
+                                </div>
+                                <div>
+                                    <SpkButtons Tag="a" ButtonClass="btn-light" ButtonSize="btn-sm">View All</SpkButtons>
+                                </div>
+                            </div>
+                            <div class="card-body text-center mx-auto">
+                                <div id="gender-chart">
+                                    <SpkApex TItem="Gender" ApexHeight="288" Items="gender" ChartOptions="GenderChartOptions" Series="GenderSeriesConfigs"></SpkApex>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card custom-card">
+                            <div class="card-body">
+                                <ul class="d-flex flex-wrap mb-0 list-unstyled justify-content-around text-center gap-2">
+                                    <li>
+                                        <div>
+                                            <div class="lh-1 me-1 mb-2">
+                                                <span class="avatar avatar-md bg-primary-transparent border border-primary border-3 border-opacity-25 avatar-rounded">
+                                                    <i class="ri-stack-line fs-17 lh-1"></i>
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <span class="d-block mb-0 text-muted fs-12">Attendance</span>
+                                                <h5 class="fw-medium mb-0">4,241</h5>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div>
+                                            <div class="lh-1 me-1 mb-2">
+                                                <span class="avatar avatar-md bg-primary1-transparent border border-primary1 border-3 border-opacity-25 avatar-rounded">
+                                                    <i class="ri-calendar-todo-line fs-17 lh-1"></i>
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <span class="d-block mb-0 text-muted fs-12">Absent</span>
+                                                <h5 class="fw-medium mb-0">485</h5>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div>
+                                            <div class="lh-1 me-1 mb-2">
+                                                <span class="avatar avatar-md bg-primary2-transparent border border-primary2 border-3 border-opacity-25 avatar-rounded">
+                                                    <i class="ri-time-line fs-17 lh-1"></i>
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <span class="d-block mb-0 text-muted fs-12">Late</span>
+                                                <h5 class="fw-medium mb-0">08</h5>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- End:: row-3 -->
+
+                <!-- Start:: row-4 -->
+                <div class="row">
+                    <div class="col-xxl-12">
+                        <div class="card custom-card">
+                            <div class="card-header justify-content-between">
+                                <div class="card-title">
+                                    Employee Directory
+                                </div>
+                                <div class="d-flex flex-wrap">
+                                    <div class="me-3 my-1">
+                                        <input class="form-control form-control-sm" type="text" placeholder="Search Here" aria-label=" example">
+                                    </div>
+                                    <SpkDropdowns DropdownMainClass="my-1" Tag="a" DropdownClass=" btn btn-sm btn-primary" DropdownText="Sort By<i class='ri-arrow-down-s-line align-middle ms-1'></i>" DropdownToggle=false>
+                                        <ul class="dropdown-menu" role="menu">
+                                            <li><a class="dropdown-item" href="javascript:void(0);">New</a></li>
+                                            <li><a class="dropdown-item" href="javascript:void(0);">Popular</a></li>
+                                            <li><a class="dropdown-item" href="javascript:void(0);">Relevant</a></li>
+                                        </ul>
+                                    </SpkDropdowns>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <SpkTables Tableclass="table-hover text-nowrap table-bordered text-center"  Items="HrmService.GetDirectoryHeadersData()">
+                                    @foreach(var Employee in HrmService.GetEmployeeDirectory()) {
+                                        <tr>
+                                            <td class="text-center">
+                                                @Employee.Id
+                                            </td>
+                                            <td>
+                                                <span class="text-primary fs-14">@Employee.EmployeeId</span>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <img src="@Employee.EmployeeImg" class="avatar avatar-sm" alt="">
+                                                    <div class="flex-1 flex-between pos-relative ms-2">
+                                                        <div class="">
+                                                            <a href="javascript:void(0);" class="fs-13 fw-medium">@Employee.Employee</a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="">@Employee.Desig</span>
+                                            </td>
+                                            <td>
+                                                <span class="">@Employee.Type</span>
+                                            </td>
+                                            <td>
+                                                <a href="javascript:void(0);">@Employee.Email</a>
+                                            </td>
+                                            <td>
+                                                <SpkBadge BadgeClass="@Employee.StatusColor">@Employee.Status</SpkBadge>
+                                            </td>
+                                            <td>
+                                                <span class="">@Employee.Contact</span>
+                                            </td>
+                                            <td>
+                                                <span class="fw-medium">@Employee.Salary</span>
+                                            </td>
+                                            <td>
+                                                <div class="g-2">
+                                                    <SpkTooltip Tag="a" TooltipClass="btn btn-primary-light btn-sm " TooltipTitle="Edit"><span class="ri-pencil-line fs-14"></span></SpkTooltip>
+                                                    <SpkTooltip Tag="a" TooltipClass="btn btn-danger-light btn-sm ms-2" TooltipTitle="Delete" @onclick="@(() => DeleteEmployeeList(Employee.Id))"><span class="ri-delete-bin-7-line fs-14"></span></SpkTooltip>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </SpkTables>
+                            </div>
+                            <div class="card-footer">
+                                <div class="d-flex align-items-center">
+                                    <div>
+                                        Showing 6 Entries <i class="bi bi-arrow-right ms-2 fw-medium"></i>
+                                    </div>
+                                    <div class="ms-auto">
+                                        <nav aria-label="Page navigation" class="pagination-style-4">
+                                            <ul class="pagination mb-0">
+                                                <li class="page-item disabled">
+                                                    <a class="page-link" href="javascript:void(0);">
+                                                        Prev
+                                                    </a>
+                                                </li>
+                                                <li class="page-item active"><a class="page-link" href="javascript:void(0);">1</a></li>
+                                                <li class="page-item"><a class="page-link" href="javascript:void(0);">2</a></li>
+                                                <li class="page-item">
+                                                    <a class="page-link text-primary" href="javascript:void(0);">
+                                                        next
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </nav>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- End:: row-4 -->
+        
+
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Dashboards" },
+        new SpkPageHeader.PageItem { PageTitle = "HRM" },
+    };
+    // HrmMainCard Start //
+    private ApexChartOptions<HrmChart> GenerateDynamicChartOptions(HrmMainCard mainChart) =>
+    mainChart.Title switch
+    {
+        "Total Employees" => employeesChartOptions,
+        "Total Job Applied" => AppliedChartOptions,
+        "Total Compensation" => CompensationChartOptions,
+        _ => AnnualCompensationChartOptions
+    };
+    private List<SeriesConfig<HrmChart>> GenerateDynamicSeriesConfigs()
+    {
+        return new List<SeriesConfig<HrmChart>>
+        {
+            new SeriesConfig<HrmChart>
+            {
+                SeriesType = SeriesType.Area,  
+                XValueSelector = e => e.Series,  
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.Value)
+            },
+        };
+    }
+    private ApexChartOptions<HrmChart> employeesChartOptions { get; set; } = new();
+    private ApexChartOptions<HrmChart> AppliedChartOptions { get; set; } = new();
+    private ApexChartOptions<HrmChart> CompensationChartOptions { get; set; } = new();
+    private ApexChartOptions<HrmChart> AnnualCompensationChartOptions { get; set; } = new();
+    //  HrmMainCard End // 
+    
+
+    // Project Analysis Start //
+    private List<Project> project { get; set; } = HrmService.GetProjectData();
+    private ApexChartOptions<Project> ProjectChartOptions { get; set; } = new();
+    private List<SeriesConfig<Project>>? ProjectSeriesConfigs { get; set; }
+    // Project Analysis End //
+    // Project Analysis Start //
+    private List<Gender> gender  { get; set; } = HrmService.GetGenderData();
+    private ApexChartOptions<Gender> GenderChartOptions { get; set; } = new();
+    private List<SeriesConfig<Gender>>? GenderSeriesConfigs { get; set; }
+    // Project Analysis End //
+
+    protected override void OnInitialized() {
+        // HrmMainCard Start //
+        List<string> color1 = new List<string> { "var(--primary-color)","var(--primary01)","var(--primary01)"};
+        List<string> color2 = new List<string> { "rgb(227, 84, 212)","rgba(227, 84, 212, 0.1)","rgba(227, 84, 212, 0.1)"};
+        List<string> color3 = new List<string> { "rgb(255, 93, 159)","rgba(255, 93, 159, 0.1)","rgba(255, 93, 159, 0.1)"};
+        List<string> color4 = new List<string> { "rgb(255, 142, 111)","rgba(255, 142, 111, 0.1)","rgba(255, 142, 111, 0.1)"};
+        employeesChartOptions = InitializeChartOptions<HrmChart>(color1);
+        AppliedChartOptions = InitializeChartOptions<HrmChart>(color2);
+        CompensationChartOptions = InitializeChartOptions<HrmChart>(color3);
+        AnnualCompensationChartOptions = InitializeChartOptions<HrmChart>(color4);
+        //  HrmMainCard End // 
+        
+        ProjectChartOptions = new ApexChartOptions<Project> {
+            Chart = new () {
+                RedrawOnWindowResize= true,
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = false},
+                }, 
+                DropShadow = new ApexCharts.DropShadow {
+                    Enabled = false,
+                },
+            }, 
+            PlotOptions = new PlotOptions {
+                Bar = new PlotOptionsBar {
+                    Horizontal = false,
+                    BorderRadius = 3,
+                    ColumnWidth = "33%",
+                    BorderRadiusApplication = BorderRadiusApplication.Around,
+                    BorderRadiusWhenStacked = BorderRadiusWhenStacked.All
+                }
+            },
+            Grid = new Grid {
+                BorderColor = "#f5f4f4",
+                StrokeDashArray = 5,
+                Yaxis = new(){
+                    Lines = new(){
+                        Show = true,
+                    },
+                },
+            },
+            Stroke = new Stroke { 
+                Curve = Curve.Smooth,
+                LineCap = ApexCharts.LineCap.Butt,
+                Width = [5, 5, 2, 2],
+                DashArray= [0, 0, 3, 3],
+                Show= true,
+            },
+            DataLabels = new DataLabels {
+                Enabled = false,
+            }, 
+            Colors = new Color(new List<string> { "var(--primary-color)", "rgba(227, 84, 212, 0.4)", "rgba(255, 93, 159, 0.2)", "rgba(255, 142, 111, 0.1)" }),
+            Legend = new Legend {
+                Show = false,
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis {
+                    Title = new AxisTitle {
+                        Style = new AxisTitleStyle {
+                            Color = "#adb5be",
+                            FontSize = "14px",
+                            FontFamily = "poppins, sans-serif",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label"
+                        }
+                    },
+                    Min = 0,
+                    Max = 60,
+                    StepSize = 10,
+                    Labels = new YAxisLabels {
+                        Formatter= @"function (y) {return y.toFixed(0) + '';}",
+                    },
+                    AxisBorder = new () {
+                        Show = true,
+                        Color = "rgba(119, 119, 142, 0.05)",
+                        OffsetX = 0,
+                        OffsetY = 0,
+                    },
+                    AxisTicks = new () {
+                        Show = true,
+                        Color = "rgba(119, 119, 142, 0.05)",
+                        BorderType = ApexCharts.BorderType.Solid,
+                        OffsetX = 0,
+                        OffsetY = 0,
+                    },
+                },
+            },
+            Xaxis =  new XAxis {
+                AxisBorder = new () {
+                    Show = true,
+                    Color = "rgba(119, 119, 142, 0.05)",
+                    OffsetX = 0,
+                    OffsetY = 0,
+                },
+                AxisTicks = new () {
+                    Show = true,
+                    Color = "rgba(119, 119, 142, 0.05)",
+                    BorderType = ApexCharts.BorderType.Solid,
+                    OffsetX = 0,
+                    OffsetY = 0,
+                },
+                Labels = new XAxisLabels {
+                    Rotate = -90,
+                    Show = true,
+                },
+            },
+        };
+        ProjectSeriesConfigs = new List<SeriesConfig<Project>>
+        {
+            new SeriesConfig<Project>
+            {
+                SeriesType = SeriesType.Bar,
+                Name = "New",
+                XValueSelector = e => e.Month ?? "unknown",
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.New)
+            },
+            new SeriesConfig<Project>
+            {
+                SeriesType = SeriesType.Bar,
+                Name = "Inprogress",
+                XValueSelector = e => e.Month ?? "unknown",
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.Inprogress)
+            },
+            new SeriesConfig<Project>
+            {
+                SeriesType = SeriesType.Line,
+                Name = "Completed",
+                XValueSelector = e => e.Month ?? "unknown",
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.Completed)
+            },
+            new SeriesConfig<Project>
+            {
+                SeriesType = SeriesType.Area,
+                Name = "Onhold",
+                XValueSelector = e => e.Month ?? "unknown",
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.Onhold)
+            }
+        };
+
+        GenderChartOptions = new ApexChartOptions<Gender> {
+            Colors = new Color(new List<string> { "var(--primary-color)", "rgb(227, 84, 212)", "rgb(255, 93, 159)" }),
+            Fill = new Fill {
+                Opacity = 0.9,
+            },
+            Stroke = new Stroke { 
+                Width = 1,
+                Colors = null,
+            },
+            Legend = new Legend
+            {
+                Position = LegendPosition.Bottom,
+            }
+        };
+        GenderSeriesConfigs = new List<SeriesConfig<Gender>>
+        {
+            new SeriesConfig<Gender>
+            {
+                SeriesType = SeriesType.PolarArea,
+                Name = "New",
+                XValueSelector = e => e.GenderSeries ?? "unknown",
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.GenderValue)
+            },
+        };
+    }
+    // HrmMainCard Start //
+    private ApexChartOptions<T> InitializeChartOptions<T>(List<string> colors) where T : class, ILineGraph
+    {
+        return new ApexChartOptions<T>
+        {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = false},
+                }, 
+                Height = 50,
+                Sparkline = new () {
+                    Enabled = true
+                },
+                DropShadow = new () {
+                    Enabled= true,
+                    Top= 0,
+                    Left= 0,
+                    Blur= 3,
+                    Color= colors,
+                    Opacity= 0.4
+                }
+            },  
+            Colors = new Color(colors),  // Use the passed color list here
+            Tooltip = new Tooltip { 
+                Enabled= true,
+                Fixed = new(){
+                    Enabled = false,
+                },
+                X = new(){
+                    Show = false,
+                },
+                Y = new(){
+                    Title = new(){
+                        Formatter = @"function (seriesName) {
+                        return '';
+                        }",
+                    },
+                },
+            },
+            Stroke = new Stroke { 
+                Show = true,
+                Curve = Curve.Straight,
+                LineCap = ApexCharts.LineCap.Butt,
+                Width = 1,
+                DashArray = 0,
+            },
+            Fill = new Fill {
+                Type = new List<FillType> { FillType.Gradient},
+                Gradient = new FillGradient {
+                    ShadeIntensity = 1,
+                    OpacityFrom = 0.5,
+                    OpacityTo = 0.2,
+                    Stops= [0, 60],
+                    ColorStops = new List<FillGradientStops> {
+                        new FillGradientStops { Offset = 0, Color = colors.Count > 1 ? colors[1] : colors[0], Opacity = 0.3 },
+                        new FillGradientStops { Offset = 60, Color = colors.Count > 2 ? colors[2] : colors[0], Opacity =0.3 },
+                    }
+                },
+            },
+        };
+    }
+    //  HrmMainCard End // 
+    
+    protected void DeleteEmployee(decimal Id)
+    {
+        var EmployeeToRemove = HrmService.GetEmployeeList().FirstOrDefault(o => o.Id == Id);
+        if (EmployeeToRemove != null)
+        {
+            HrmService.GetEmployeeList().Remove(EmployeeToRemove);
+        }
+    }
+    
+    protected void DeleteEmployeeList(decimal Id)
+    {
+        var EmployeeToRemove = HrmService.GetEmployeeDirectory().FirstOrDefault(o => o.Id == Id);
+        if (EmployeeToRemove != null)
+        {
+            HrmService.GetEmployeeDirectory().Remove(EmployeeToRemove);
+        }
+    }
+
+
+}

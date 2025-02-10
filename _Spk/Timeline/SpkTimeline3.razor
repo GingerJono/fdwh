@@ -1,0 +1,24 @@
+
+@using TimelineData
+@inject TimelineService TimelineService
+
+@code {
+    [Parameter] public ActivityDetails? activity { get; set; }    
+}
+
+@if(activity != null){
+   <div class="timeline-step">
+        <div class="timeline-content">
+            <div class="inner-circle"></div>
+            <div class="card custom-card mb-0 border border-opacity-25 border-@activity.Mainclass bg-@activity.Mainclass-transparent  @(activity.ImgPosition == "top" ? "content-top" :"")">
+                <div class="card-body">
+                    <span class="avatar avatar-sm avatar-rounded">
+                        <img src="@activity.User" alt="">
+                    </span>
+                    <p class="fw-medium mt-1 mb-1"> @activity.Date</p>
+                    <p class="mb-1 fw-semibold">@activity.Title : <span class="text-muted fw-normal mb-0 mb-lg-0">@activity.Description</span>  </p>
+                </div>
+            </div>
+        </div>
+    </div>
+}

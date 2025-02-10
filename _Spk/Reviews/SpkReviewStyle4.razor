@@ -1,0 +1,34 @@
+
+@using CardModel
+
+@code {
+    [Parameter] public Reviews? Review { get; set; }    
+}
+@if(Review != null) {
+
+   <div class="card custom-card border position-relative">
+        <div class="card-body text-center">
+                <div>
+                    <img src="@Review.UserImg" alt="img" class="mx-auto text-center avatar avatar-xl rounded-circle border-3 border border-white-1 mb-2 bg-primary">
+                </div>
+                <div class="">
+                    <div class="mb-0 fw-semibold fs-14">@Review.User</div>
+                    <div class="mb-2 text-warning fs-11">
+                        @for (int i = 0; i < Math.Floor(Review.Rating); i++)
+                        {
+                            <i class="lh-1 ri-star-fill"></i>
+                        }
+
+                        @if (Review.Rating % 1 != 0)
+                        {
+                            <i class="lh-1 ri-star-half-line"></i>
+                        }
+                    </div>
+                    <i class="bx bxs-quote-right fs-2 me-1 text-primary"></i>
+                    <p class="fs-14 mt-2 mb-1 px-3">
+                        "@Review.Review"
+                    </p>
+                </div>
+        </div>
+    </div>
+}

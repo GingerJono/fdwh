@@ -1,0 +1,19 @@
+
+@using CardModel
+@code {
+    [Parameter] public ProductList? product { get; set; }    
+}
+
+<div class="d-flex align-items-center flex-wrap">
+    <div class="avatar @product?.Productsize bg-gray-200 @(product?.IsRounded == true ? "avatar-rounded":"")">
+        <img src="@product?.Product" alt="">
+    </div>
+    <div class=" flex-fill">
+        <span class="Producttitle d-block mb-0 fw-medium">@product?.ProductTitle</span>
+        <span class="text-muted  ProductCategory">@product?.Category</span>
+    </div>
+    <div class="text-end">
+        <p class="mb-0 fw-medium">@product?.Amount</p>
+        <p class="mb-0 text-muted">@product?.Sales</p>
+    </div>
+</div>

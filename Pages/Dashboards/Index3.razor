@@ -1,0 +1,710 @@
+@page "/index3"
+@using ApexCharts
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using ApexSeries
+@using CardModel
+@using Ecommerce
+@inject EcommerceService EcommerceService
+@inject IJSRuntime JSRuntime
+
+    <!-- Start::page-header -->
+    <SpkPageHeader PageItems="PageItems" />
+    <!-- End::page-header -->
+
+    <!-- Start: row-1 -->
+    <div class="row">
+        <div class="col-xxl-9">
+            <div class="row">
+                <div class="col-xl-3"> 
+                    @foreach(var MainCard in EcommerceService.GetEcommerceMainCard()) {
+                        <SpkSalesCard MainCard="MainCard"></SpkSalesCard>
+                    }
+                </div>
+                <div class="col-xl-9">
+                    <div class="card custom-card">
+                        <div class="card-header justify-content-between">
+                            <div class="card-title">Sales Report</div>
+                            <div class="d-flex gap-2">
+                                <SpkButtons ButtonClass="btn-outline-light" ButtonWidth="sm">Today</SpkButtons>
+                                <SpkButtons ButtonClass="btn-outline-light" ButtonWidth="sm">Weakly</SpkButtons>
+                                <SpkButtons ButtonClass="btn-light" ButtonWidth="sm">Yearly</SpkButtons>
+                            </div>
+                        </div>
+                        <div class="card-body pb-2">
+                            <div id="sales-report">
+                                <SpkApex TItem="SalesReport" ApexHeight="404" ChartOptions="SalesReportChartOptions" Items="salesreport" Series="SalesReportSeriesConfig"></SpkApex>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xxl-8 col-xl-7">
+                    <div class="card custom-card overflow-hidden">
+                        <div class="card-header justify-content-between">
+                            <div class="card-title">Recent Orders</div>
+                            <SpkButtons Tag="a" ButtonClass="btn-outline-light border d-flex align-items-center text-muted" ButtonWidth="sm">View All</SpkButtons>
+                        </div>
+                        <div class="card-body p-0">
+                            <SpkTables Items="EcommerceService.GetOrdersHeadersData()" Tableclass="text-nowrap table-hover" ShowCheckbox=false>
+                                @foreach(var Orders in EcommerceService.GetEcommerceOrders() ) {
+                                <tr>
+                                    <td><a href="javascript:void(0);" class="text-primary">@Orders.OrderId</a></td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="me-2 lh-1">
+                                                <span class="avatar avatar-sm">
+                                                    <img src="@Orders.Customer" alt="">
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <a href="javascript:void(0)" class="fs-14 fw-medium">@Orders.CustomerName</a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="d-block text-muted">@Orders.Date</span>
+                                    </td>
+                                    <td>
+                                        <span class="d-block mb-1">@Orders.Amount</span>
+                                    </td>
+                                    <td>
+                                        <SpkBadge BadgeClass="@Orders.statusclass">@Orders.Status</SpkBadge></td>
+                                </tr>
+                                }
+                            </SpkTables>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xxl-4 col-xl-5">
+                    <div class="card custom-card">
+                        <div class="card-header justify-content-between">
+                            <div class="card-title">Total Orders</div>
+                            <SpkDropdowns Tag="button" DropdownClass="btn btn-outline-light btn-sm border d-flex align-items-center text-muted" DropdownToggle=false DropdownText="View All <i class='ri-arrow-down-s-line align-middle ms-1 d-inline-block'></i>">
+                                <ChildContent2>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Yearly</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Monthly</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Weakly</a></li>
+                                </ul>
+                                </ChildContent2>
+                            </SpkDropdowns>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center text-center bg-light p-3 rounded-1 order-content">
+                                <div>
+                                    <p class="mb-1">Total Orders</p>
+                                    <h4 class="text-primary mb-0">12,500</h4>
+                                </div>
+                                <div>
+                                    <p class="mb-1 text-center">Overall Growth from Last Year</p>
+                                    <h5 class="text-success mb-0 text-center">+15%</h5>
+                                </div>
+                            </div>
+                            <div id="total-orders">
+                                <SpkApex TItem="TotalOrders" ApexHeight="342" ChartOptions="TotalOrdersChartOptions" Items="totalorders" Series="TotalOrdersSeriesConfig"></SpkApex>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xxl-5 ">
+                    <div class="card custom-card">
+                        <div class="card-header justify-content-between flex-wrap pb-0">
+                            <div class="card-title">
+                                New Visitors
+                            </div>
+                            <SpkDropdowns Tag="a" DropdownClass="btn btn-outline-light btn-icons btn-sm text-muted" DropdownToggle=false DropdownText="<i class='fe fe-more-vertical'></i>">
+                                <ChildContent2>
+                                    <ul class="dropdown-menu dropdown-menu-end" role="menu">
+                                        <li class="border-bottom"><a class="dropdown-item" href="javascript:void(0);">Today</a></li>
+                                        <li class="border-bottom"><a class="dropdown-item" href="javascript:void(0);">This Week</a></li>
+                                        <li><a class="dropdown-item" href="javascript:void(0);">Last Week</a></li>
+                                    </ul>
+                                </ChildContent2>
+                            </SpkDropdowns>
+                        </div>
+                        <div class="card-body">
+                            <div class="row align-items-end mx-0">
+                                <div class="col-5">
+                                    <h3 class="fw-medium mb-0">5,642</h3>
+                                    <div><i class="ri-checkbox-blank-circle-fill text-primary lh-1 align-middle fs-10"></i> Total New Visitors</div>
+                                </div>
+                                <div class="col-7">
+                                    <div class="fw-medium">Percentage of New Visitors</div>
+                                    <div class="text-muted fs-12">Last 30 Days: Increased By <span class="text-success fw-medium">42.5%<i class="ti ti-arrow-narrow-up fs-16"></i></span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body p-0">
+                            <div id="websitedesign">
+                                <SpkApex TItem="WebsiteDesign" ApexHeight="190" ChartOptions="WebsiteDesignChartOptions" Items="websitedesign" Series="VisitorsSeriesConfig"></SpkApex>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xxl-3 col-md-6">
+                    <div class="card custom-card overflow-hidden">
+                        <div class="card-header justify-content-between">
+                            <div class="card-title">
+                                Payment Methods
+                            </div>
+                            <SpkDropdowns Tag="a" DropdownClass="btn btn-outline-light btn-icons btn-sm text-muted" DropdownToggle=false DropdownText="<i class='fe fe-more-vertical'></i>">
+                                <ChildContent2>
+                                    <ul class="dropdown-menu dropdown-menu-end" role="menu">
+                                        <li class="border-bottom"><a class="dropdown-item" href="javascript:void(0);">Today</a></li>
+                                        <li class="border-bottom"><a class="dropdown-item" href="javascript:void(0);">This Week</a></li>
+                                        <li><a class="dropdown-item" href="javascript:void(0);">Last Week</a></li>
+                                    </ul>
+                                </ChildContent2>
+                            </SpkDropdowns>
+                        </div>
+                        <div class="card-body p-0">
+                            <ul class="list-group list-group-flush">
+                                @foreach(var Payments in EcommerceService.GetEcommerceProductsPayments()){
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <i class="@Payments.Icon p-1 @Payments.Iconclass lh-1 me-2 fs-22 rounded-1"></i>
+                                            @Payments.Title
+                                        </div>
+                                        <SpkBadge BadgeClass=" bg-primary" IsRounded=true>@Payments.Percentage</SpkBadge>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xxl-4 col-md-6">
+                    <div class="card custom-card overflow-hidden">
+                        <div class="card-header justify-content-between pb-3">
+                            <div class="card-title">
+                                Traffic Sources
+                            </div>
+                            <SpkDropdowns Tag="a" DropdownClass="btn btn-light btn-sm text-muted" DropdownToggle=false DropdownText="View All<i class='ri-arrow-down-s-line align-middle ms-1 d-inline-block'></i>">
+                                <ChildContent2>
+                                    <ul class="dropdown-menu" role="menu">
+                                        <li><a class="dropdown-item" href="javascript:void(0);">Download</a></li>
+                                        <li><a class="dropdown-item" href="javascript:void(0);">Import</a></li>
+                                        <li><a class="dropdown-item" href="javascript:void(0);">Export</a></li>
+                                    </ul>
+                                </ChildContent2>
+                            </SpkDropdowns>
+                        </div>
+                        <div class="card-body p-0">
+                            <SpkTables Items="EcommerceService.GetSourcesHeadersData()" Tableclass="text-nowrap table-hover" ShowCheckbox=false>
+                                @foreach (var Sources in EcommerceService.GetEcommerceProductsSources()) {
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <span class="avatar  avatar-sm p-2 @Sources.Iconclass me-2">
+                                                    <i class="@Sources.Icon fs-18"></i>
+                                                </span>
+                                                <div class="fw-medium">@Sources.Title</div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <SpkProgress ProgressSize="progress-sm">
+                                                <div class="progress-bar progress-bar-striped progress-bar-animated @Sources.Progressbg" role="progressbar" style="width: @Sources.Percentage%" aria-valuenow="@Sources.Percentage" aria-valuemin="0" aria-valuemax="100">
+                                                </div>
+                                            </SpkProgress>
+                                        </td>
+                                        <td>
+                                            <span>@Sources.Value
+                                                @if(@Sources.IsIncreased == true){  
+                                                    <i class="ri-arrow-up-s-fill ms-1 text-success align-middle fs-18"></i>
+                                                }
+                                                else {
+                                                    <i class="ri-arrow-down-s-fill ms-1 text-danger align-middle fs-18"></i>
+                                                }
+                                                
+                                            </span>
+                                        </td>
+                                    </tr>
+                                }
+                            </SpkTables>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xxl-3">
+            <div class="card custom-card offer-card">
+                <div class="card-body p-4 pe-0">
+                    <div class="d-flex align-items-end gap-2">
+                        <div class="offer-card-details">
+                            <div class="offer-item">
+                                <div class="avatar avatar-xl mb-3">
+                                    <img src="../assets/images/ecommerce/png/17.png" alt="Product Image" class="img-fluid">
+                                </div>
+                                <div class="product-info">
+                                    <h4 class="mb-2 fw-medium text-fixed-white">Today's Sale</h4>
+                                    <span class="mb-1 text-success fw-semibold fs-12">Up to 20% Off on</span>
+                                    <span class="mb-3 text-fixed-white h6">HeadPhones</span>
+                                </div>
+                                <span class="text-fixed-white">Price: $9.99</span>
+                                <span class="text-fixed-white ps-2">Discount: 20%</span>
+                            </div>
+                            <SpkButtons ButtonClass="btn-primary1 mt-4 shadow">Add to Cart</SpkButtons>
+                        </div>
+                        <img src="../assets/images/media/media-90.png" alt="Product Image" class="img-fluid offer-item-img ms-auto">
+                    </div>
+                </div>
+            </div>
+            <div class="card custom-card">
+                <div class="card-header justify-content-between">
+                    <div class="card-title">Top-Selling Products</div>
+                    <SpkButtons Tag="a" ButtonClass="btn-outline-light border d-flex align-items-center text-muted" ButtonWidth="sm">View All</SpkButtons>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0" id="product-list">
+                        @foreach(var (List,index) in EcommerceService.GetEcommerceProductsList().Select((product, index) => (product, index))) {
+                            <li class="@(index == 0 ? "mt-0" : "mt-4")">
+                                <SpkProductCard product="List"></SpkProductCard>
+                            </li> 
+                        }
+                    </ul>
+                </div>
+            </div>
+            <div class="card custom-card">
+                <div class="card-header justify-content-between pb-0">
+                    <div class="card-title"> Recent Activity </div>
+                    <SpkDropdowns Tag="a" DropdownClass="fs-12 text-muted bg-light rounded btn btn-sm btn-light" DropdownToggle=false DropdownText="View All<i class='ri-arrow-down-s-line align-middle ms-1 d-inline-block'></i>">
+                        <ChildContent2>
+                            <ul class="dropdown-menu" role="menu">
+                            <li><a class="dropdown-item" href="javascript:void(0);">Today</a></li>
+                            <li><a class="dropdown-item" href="javascript:void(0);">This Week</a></li>
+                            <li><a class="dropdown-item" href="javascript:void(0);">Last Week</a></li>
+                            </ul>
+                        </ChildContent2>
+                    </SpkDropdowns>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0 ecommerce-recent-activity">
+                        @foreach (var activity in EcommerceService.GetEcommerceProductsActivity()){
+                            <li class="ecommerce-recent-activity-content">
+                                <SpkProductActivity productactivity="activity"></SpkProductActivity>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End:: row-1 -->
+
+    <!-- Start:: row-2 -->
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-header justify-content-between">
+                    <div class="card-title">
+                        Newly Added Products
+                    </div>
+                    <div class="d-sm-flex">
+                        <div class="me-3 mb-3 mb-sm-0">
+                            <input class="form-control form-control-sm" type="text" placeholder="Search" aria-label=".form-control-sm example">
+                        </div>
+                        <SpkDropdowns Tag="a" DropdownClass="btn btn-primary btn-sm " DropdownToggle=false DropdownText="Sort By<i class='ri-arrow-down-s-line align-middle ms-1 d-inline-block'></i>">
+                            <ChildContent2>
+                                <ul class="dropdown-menu" role="menu">
+                                    <li><a class="dropdown-item" href="javascript:void(0);">New</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Popular</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Relevant</a></li>
+                                </ul>
+                            </ChildContent2>
+                        </SpkDropdowns>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <SpkTables Items="EcommerceService.GetProductsHeadersData()" Tableclass="text-nowrap table-bordered" ShowCheckbox=false>
+                        @foreach (var orders in EcommerceService.GetEcommerceProducts()) {
+                            <tr>
+                                <td>
+                                    <span class="fw-medium">@orders.OrderId</span>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-2 lh-1">
+                                            <span class="avatar avatar-md bg-light">
+                                                <img src="@orders.Product" alt="">
+                                            </span>
+                                        </div>
+                                        <div class="fs-14">@orders.ProductName</div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="fw-medium">@orders.Category</span>
+                                </td>
+                                <td>
+                                    <SpkBadge BadgeClass=" bg-primary" IsRounded=true>@orders.Discount</SpkBadge>
+                                </td>
+                                <td>
+                                    @orders.Amount
+                                </td>
+                                <td>
+                                    <SpkBadge BadgeClass="@orders.statusclass" IsRounded=true>@orders.Status</SpkBadge>
+                                </td>
+                                <td>
+                                    <span class="fw-medium">@orders.Date</span>
+                                </td>
+                                <td>
+                                    <div class="btn-list">
+                                        <SpkTooltip Tag="a" TooltipClass="btn btn-icon btn-secondary-light" TooltipPlacement="top" TooltipTitle="View">
+                                        <i class="ti ti-eye"></i>
+                                        </SpkTooltip>
+                                        <SpkTooltip Tag="a" TooltipClass="btn btn-icon btn-info-light" TooltipPlacement="top" TooltipTitle="Edit">
+                                        <i class="ti ti-pencil"></i>
+                                        </SpkTooltip>
+                                        <SpkTooltip Tag="a" TooltipClass="btn btn-icon btn-primary2-light" TooltipPlacement="top" TooltipTitle="Delete"  @onclick="@(() => DeleteOrder(orders.Id))">
+                                        <i class="ti ti-trash"></i>
+                                        </SpkTooltip>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </SpkTables>
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            Showing 5 Entries <i class="bi bi-arrow-right ms-2 fw-medium"></i>
+                        </div>
+                        <div class="ms-auto">
+                            <nav aria-label="Page navigation" class="pagination-style-4">
+                                <ul class="pagination mb-0">
+                                    <li class="page-item disabled">
+                                        <a class="page-link" href="javascript:void(0);">
+                                            Prev
+                                        </a>
+                                    </li>
+                                    <li class="page-item active"><a class="page-link" href="javascript:void(0);">1</a></li>
+                                    <li class="page-item"><a class="page-link" href="javascript:void(0);">2</a></li>
+                                    <li class="page-item">
+                                        <a class="page-link text-primary" href="javascript:void(0);">
+                                            next
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End:: row-2 -->
+
+                
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Dashboards" },
+        new SpkPageHeader.PageItem { PageTitle = "Ecommerce" },
+    };
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("window.interop.initializeTooltips");
+        }
+    }
+
+    // SalesReport Start //
+    private List<SalesReport> salesreport { get; set; } = EcommerceService.GetSalesReportData();
+    private ApexChartOptions<SalesReport> SalesReportChartOptions { get; set; } = new();
+    private List<SeriesConfig<SalesReport>>? SalesReportSeriesConfig { get; set; }
+    // SalesReport End //
+
+    // Total Orders Chart Start //
+    private List<TotalOrders> totalorders { get; set; } = EcommerceService.TotalOrders();
+    private ApexChartOptions<TotalOrders> TotalOrdersChartOptions { get; set; } = new();
+    private List<SeriesConfig<TotalOrders>>? TotalOrdersSeriesConfig { get; set; } = new();
+    // Total Orders Chart End //
+
+    // WebsiteDesign Start //
+    private List<WebsiteDesign> websitedesign { get; set; } = EcommerceService.GetWebsiteDesign();
+    private ApexChartOptions<WebsiteDesign> WebsiteDesignChartOptions { get; set; } = new();
+    private List<SeriesConfig<WebsiteDesign>>? VisitorsSeriesConfig { get; set; } = new();
+    // WebsiteDesign End //
+
+    protected override void OnInitialized() {
+        // SalesReport Start //
+        SalesReportChartOptions = new ApexChartOptions<SalesReport> {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = false},
+                }, 
+                DropShadow = new ApexCharts.DropShadow {
+                    Enabled = true,
+                    Color = ["rgba(0, 0, 0, 0.1)","rgba(0, 0, 0, 0.9)","rgba(0, 0, 0, 0.9)"],
+                    Top = 10,
+                    Left = 0,
+                    Blur = 1,
+                    Opacity = 0.3
+                },
+            },
+            Grid = new Grid {
+                Show= true,
+                BorderColor = "rgba(119, 119, 142, 0.1)",
+                StrokeDashArray = 4
+            },
+            Stroke = new Stroke { 
+                Curve = [Curve.Smooth,Curve.Straight],
+                Width = [1.5, 1.5, 1],
+                DashArray= [ 4, 4, 0],
+                Show= true,
+            },
+            DataLabels = new DataLabels {
+                Enabled = false,
+            }, 
+            Legend = new Legend {
+                Show = true,
+                FontSize = "11px",
+                Position = LegendPosition.Top,
+                HorizontalAlign = Align.Center,
+                FontWeight = 600,
+                TooltipHoverFormatter = @"function (val, opts) {return (val +' - ' + opts.w.globals.series[opts.seriesIndex][opts.dataPointIndex] +'');}",
+                Labels = new() {
+                    Colors = "#74767c",
+                },
+                Markers = new() {
+                    Width = 4,
+                    Height = 4,
+                    StrokeWidth = 0,
+                    Radius = 12,
+                    OffsetX = 0,
+                    OffsetY = 0
+                },
+            },
+            PlotOptions = new PlotOptions {
+                Bar = new PlotOptionsBar {
+                    Horizontal = false,
+                    BorderRadius = 6,
+                    ColumnWidth = "15%",
+                    BorderRadiusApplication = BorderRadiusApplication.End,
+                    BorderRadiusWhenStacked = BorderRadiusWhenStacked.Last
+                }
+            },
+            Colors = new Color(new List<string> {"rgba(227, 84, 212, 1)", "rgba(255, 93, 159, 0.06)", "var(--primary-color)"}),
+            Fill = new Fill {
+                Type = new List<FillType> { FillType.Solid,FillType.Solid,FillType.Solid},
+                Gradient = new ApexCharts.FillGradient {
+                    OpacityFrom = 0.6,
+                    OpacityTo = 1,
+                }
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis {
+                    Title = new AxisTitle {
+                        Style = new AxisTitleStyle {
+                            Color = "#adb5be",
+                            FontSize = "14px",
+                            FontFamily = "poppins, sans-serif",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label"
+                        }
+                    },
+                    Min = 0,
+                    Max = 90,
+                    StepSize = 10,
+                },
+            },
+            Xaxis =  new XAxis {
+                AxisBorder = new () {
+                    Show = true,
+                    Color = "rgba(119, 119, 142, 0.05)",
+                    OffsetX = 0,
+                    OffsetY = 0,
+                },
+                AxisTicks = new () {
+                    Show = true,
+                    Color = "rgba(119, 119, 142, 0.05)",
+                    BorderType = ApexCharts.BorderType.Solid,
+                    OffsetX = 0,
+                    OffsetY = 0,
+                },
+                Labels = new XAxisLabels {
+                    Rotate = -90,
+                    Show = true,
+                    Style = new AxisLabelStyle {
+                        Colors= "#8c9097",
+                        FontSize = "11px",
+                        FontWeight = 600,
+                        CssClass = "apexcharts-xaxis-label"
+                    }
+                },
+            },
+        };
+        SalesReportSeriesConfig = new List<SeriesConfig<SalesReport>>
+        {
+            new SeriesConfig<SalesReport>
+            {
+                SeriesType = SeriesType.Line,
+                Name = "Sales",
+                XValueSelector = e => e.Month ?? "unknown",
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.Sales)
+            },
+            new SeriesConfig<SalesReport>
+            {
+                SeriesType = SeriesType.Area,
+                Name = "Profit",
+                XValueSelector = e => e.Month ?? "unknown",
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.Profit)
+            },
+            new SeriesConfig<SalesReport>
+            {
+                SeriesType = SeriesType.Bar,
+                Name = "Expenses",
+                XValueSelector = e => e.Month ?? "unknown",
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.Expenses)
+            }
+        };
+        // SalesReport End //
+        
+        // Total Orders Chart Start //
+        TotalOrdersChartOptions = new ApexChartOptions<TotalOrders> {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = false},
+                }, 
+                OffsetX = 0,
+                OffsetY = 10,
+                DropShadow = new() {
+                    Enabled = false,
+                    Top = 0,
+                    Left = 0,
+                    Blur = 3,
+                    Opacity = 0.5
+                },
+            }, 
+            Colors = new Color(new List<string> { "var(--primary-color)"}),
+            PlotOptions = new PlotOptions
+            {
+                RadialBar = new PlotOptionsRadialBar
+                {
+                    StartAngle = -135,
+                    EndAngle = 135,
+                    DataLabels = new RadialBarDataLabels
+                    {
+                        Show = true,
+                        Name = new (){
+                            Show = true,
+                            OffsetY = 30,
+                            Color = "var(--primary-color)",
+                            FontSize = "16px"
+                        },
+                        Value = new (){
+                           Show = true,
+                            OffsetY = -10,
+                            Formatter = @"function (val) {
+                                return val + '%';
+                            }",
+                            Color = "undefined",
+                            FontSize = "22px"
+                        },
+                    },
+                }
+            },
+            Fill = new Fill {
+                Type = new List<FillType> { FillType.Gradient},
+                Gradient = new ApexCharts.FillGradient {
+                    ShadeIntensity = 0.5,
+                    Shade = ApexCharts.GradientShade.Dark,
+                    Type = ApexCharts.GradientType.Horizontal,
+                    GradientToColors = new Color(new List<string> {"var(--primary-color)"}),
+                    InverseColors = false,
+                    OpacityFrom = 1,
+                    OpacityTo = 1,
+                    Stops = [0, 100],
+                }
+            },
+            Stroke = new Stroke { 
+                DashArray = 3
+            }, 
+        };
+        TotalOrdersSeriesConfig = new List<SeriesConfig<TotalOrders>>
+        {
+            new SeriesConfig<TotalOrders>
+            {
+                SeriesType = SeriesType.RadialBar,
+                Name = "Percenteage",
+                XValueSelector = e => e.CircularRadialLabel ?? "unknown",
+                YAggregateSelector = items => (decimal?)Math.Round(items.Average(e => e.Value)),
+            },
+        }; 
+        // Total Orders Chart End //
+
+        // WebsiteDesign Start //
+        WebsiteDesignChartOptions = new ApexChartOptions<WebsiteDesign> {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = false},
+                }, 
+                Stacked = true,
+            },
+            PlotOptions = new PlotOptions
+            {
+                Bar = new PlotOptionsBar
+                {
+                    Horizontal = false,
+                    ColumnWidth = "30%",
+                    BorderRadius = 2,
+                    BorderRadiusApplication = BorderRadiusApplication.End,
+                    BorderRadiusWhenStacked = BorderRadiusWhenStacked.All
+                }
+            },
+            Grid = new Grid {
+                Show = false,
+                BorderColor = "#f2f6f7",
+            },
+            Colors = new Color(new List<string> { "var(--primary-color)" }),
+            DataLabels = new DataLabels {
+                Enabled = false,
+            }, 
+            Yaxis = new List<YAxis>() {
+                new YAxis 
+                {
+                    Show = false,
+                }
+            },
+            Xaxis =  new XAxis {
+                Labels = new XAxisLabels {
+                    Show = true,
+                    Style = new AxisLabelStyle {
+                        Colors= "#8c9097",
+                        FontSize = "11px",
+                        CssClass = "apexcharts-xaxis-label"
+                    }
+                },
+                AxisBorder = new () {
+                    Show = true,
+                    Color = "rgba(119, 119, 142, 0.05)",
+                    OffsetX = 0,
+                    OffsetY = 0,
+                },
+            },
+            Legend = new Legend
+            {
+                Show = false,
+            },
+        };
+        VisitorsSeriesConfig = new List<SeriesConfig<WebsiteDesign>>
+        {
+            new SeriesConfig<WebsiteDesign>
+            {
+                SeriesType = SeriesType.Bar,
+                Name = "Total Projects",
+                XValueSelector = e => e.Series ?? "unknown",
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.Projects)
+            },
+        }; 
+        // WebsiteDesign End //
+    }
+    protected void DeleteOrder(decimal id)
+    {
+        var orderToRemove = EcommerceService.GetEcommerceProducts().FirstOrDefault(o => o.Id == id);
+        if (orderToRemove != null)
+        {
+            EcommerceService.GetEcommerceProducts().Remove(orderToRemove);
+        }
+    }
+}

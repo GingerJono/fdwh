@@ -1,0 +1,913 @@
+@page "/index11"
+@using WMBlazorSlickCarousel.WMBSC
+@using ApexCharts
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using ApexSeries
+@using CardModel
+@using Stocks
+@inject StocksService StocksService
+ 
+        <!-- BlazorSlickCarousel CSS -->
+        <link href="_content/WMBlazorSlickCarousel/WMBlazorSlickCarousel.bundle.scp.css" rel="stylesheet">
+
+        <!-- Start::page-header -->
+        <SpkPageHeader PageItems="PageItems" />
+        <!-- End::page-header -->
+
+        <!-- Start:: row-1 -->
+        <div class="row">
+            <div class="col-xl-12 stocks-slide px-sm-1">
+                <BlazorSlickCarousel Configurations="BasicConfigurations" @ref="theCarousel">
+                    <BlazorSlickCarouselContent>
+                        @foreach(var MainCard in StocksService.GetStocksMainChart()) {
+                            <div class="Carousel-slide">
+                                <SpkStocksCard MainCard="MainCard" ChartOptions="GenerateDynamicChartOptions(MainCard)" ChartItems="@StocksService.GetStocksChart(MainCard)" SeriesConfigs="GenerateDynamicSeriesConfigs()"/>
+                            </div>
+                        }
+                    </BlazorSlickCarouselContent>
+                </BlazorSlickCarousel>
+            </div>
+            <div class="col-xxl-9">
+                <div class="card custom-card overflow-hidden">
+                    <div class="card-header justify-content-between">
+                        <div class="card-title">Stock Market Value</div>
+                        <div class="d-flex gap-2">
+                            <SpkButtons ButtonClass="btn-outline-light border btn-full" ButtonSize="btn-sm">Today</SpkButtons>
+                            <SpkButtons ButtonClass="btn-outline-light border btn-full" ButtonSize="btn-sm">Weakly</SpkButtons>
+                            <SpkButtons ButtonClass="btn-light border btn-full" ButtonSize="btn-sm">Yearly</SpkButtons>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-sm-flex align-items-end  p-3 bg-light gap-5 flex-wrap">
+                            <div class="min-w-fit-content me-3">
+                                <p class="mb-1">Total Investment</p>
+                                <h4 class="fw-medium mb-0">$15,874.50
+                                    <SpkBadge BadgeClass="bg-success ms-2 fs-9"><i class="ti ti-trending-up me-1"></i>0.32%</SpkBadge>
+                                </h4>
+                            </div>
+                            <div class="min-w-fit-content">
+                                <p class="mb-1">Market Cap</p>
+                                <h4 class="fw-medium mb-0">$124,784.23
+                                    <SpkBadge BadgeClass="bg-danger ms-2 fs-9"><i class="ti ti-trending-down me-1"></i>0.12%</SpkBadge>
+                                </h4>
+                            </div>
+                            <div class="min-w-fit-content">
+                                <p class="mb-1 fs-12 text-muted">
+                                    <span class="text-success">+124.25</span>
+                                    <i class="mdi mdi-circle-small"></i>
+                                    <span>Yesterday</span>
+                                </p>
+                                <p class="mb-0 fs-11 text-muted">
+                                    <span>Jun 16, 2022</span>
+                                    <i class="mdi mdi-circle-small"></i>
+                                    <span>10:45 AM</span>
+                                    <i class="mdi mdi-circle-small"></i>
+                                    <span>UTC +5:30</span>
+                                </p>
+                            </div>
+                            <div class="flex-1 text-sm-end mt-2 mt-sm-0 ms-auto">
+                                <SpkButtons Tag="a" ButtonClass="btn-primary1-light" ButtonWidth="btn-w-lg"><i class="ti ti-plus me-1"></i>Compare</SpkButtons>
+                            </div>
+                        </div>
+                        <div id="stockCap-area">
+                            <SpkApex TItem="TimeSeries" ChartOptions="Brushoptions1" Items="@data" Series="TimeSeriesSeriesConfig" XAxisType="XAxisType.Datetime"></SpkApex>
+                        </div>
+                        <div id="stockCap">
+                            <SpkApex TItem="TimeSeries" ChartOptions="Brushoptions2" Items="@data" Series="TimeSeriesSeriesConfig2" XAxisType="XAxisType.Datetime"></SpkApex>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xxl-3">
+                <div class="card custom-card overflow-hidden">
+                    <div class="card-header justify-content-between">
+                        <div class="card-title">
+                            My Watchlist
+                        </div>
+                        <SpkButtons ButtonClass="btn-light" ButtonSize="btn-sm">View All<i class="ti ti-arrow-narrow-right ms-1"></i></SpkButtons>
+                    </div>
+                    <div class="card-body p-0">
+                        <SpkTables Tableclass="text-nowrap">
+                            @foreach(var Watchlist in StocksService.GetWatchlist()){
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="avatar avatar-md p-2 avatar-rounded border border-@Watchlist.SourceClass border-opacity-10 bg-@Watchlist.SourceClass-transparent">
+                                                <img src="@Watchlist.SourceIcon" alt="" class="invert-1">
+                                            </span>
+                                            <div>
+                                                <a href="javascript:void(0);" class="fw-medium">@Watchlist.Source</a>
+                                                <span class="d-block text-muted fs-12">@Watchlist.SourceSubTitle</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-end watchlist-table">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="flex-fill">
+                                                <div id="apple-change" class="overflow-hidden">
+                                                    <SpkApex TItem="Stocks.StocksChart" ChartOptions="GenerateDynamicWatchlistChartOptions(Watchlist)" Items="StocksService.GetWatchlistChart(Watchlist)" Series="GenerateDynamicWatchlistSeriesConfigs()" />
+                                                </div>
+                                            </div>
+                                            <div class="flex-fill">
+                                                <p class="mb-0"> @Watchlist.SourceValue</p>
+                                                <p class="@(Watchlist.IsIncreased ?"text-success":"text-danger") mb-0">@Watchlist.Percentage</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </SpkTables>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End:: row-1 -->
+
+        <!-- Start:: row-2 -->
+        <div class="row">
+            <div class="col-xxl-3 col-lg-6">
+                <div class="card custom-card overflow-hidden">
+                    <div class="card-header justify-content-between">
+                        <h6 class="card-title">Statistics</h6>
+                        <SpkButtons ButtonClass="btn-light" ButtonSize="btn-sm">View All<i class="ti ti-arrow-narrow-right ms-1"></i></SpkButtons>
+                    </div>
+                    <div class="card-body px-0">
+                        <div id="portfolio" class="">
+                            <SpkApex TItem="Statistics" ApexHeight="288" ChartOptions="StatisticsChartOptions" Items="statistics" Series="StatisticsSeriesConfig"></SpkApex>
+                        </div>
+                    </div>
+                    <div class="card-footer p-3 my-2">
+                        <div class="row row-cols-12">
+                            <div class="col p-0">
+                                <div class="text-center"> 
+                                    <i class="ri-circle-fill p-1 lh-1 fs-7 rounded-2 bg-primary-transparent text-primary"></i>
+                                    <span class="text-muted fs-12 mb-1 rounded-dot dot-primary d-inline-block ms-2">Stocks
+                                    </span>
+                                    <div><span class="fs-16 fw-medium">1,624</span> </div>
+                                </div>
+                            </div>
+                            <div class="col p-0">
+                                <div class="text-center"> 
+                                    <i class="ri-circle-fill p-1 lh-1 fs-7 rounded-2 bg-primary1-transparent text-primary1"></i>
+                                    <span class="text-muted fs-12 mb-1 rounded-dot dot-secondary d-inline-block ms-2">Funds
+                                    </span>
+                                    <div><span class="fs-16 fw-medium">1,267</span></div>
+                                </div>
+                            </div>
+                            <div class="col p-0">
+                                <div class="text-center"> 
+                                    <i class="ri-circle-fill p-1 lh-1 fs-7 rounded-2 bg-primary2-transparent text-primary2"></i>
+                                    <span class="text-muted fs-12 mb-1 rounded-dot dot-success d-inline-block ms-2">Bond
+                                    </span>
+                                    <div><span class="fs-16 fw-medium">1,153</span> </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xxl-6 col-lg-6">
+                <div class="card custom-card overflow-hidden">
+                    <div class="card-header  justify-content-between">
+                        <div class="card-title">My Stocks</div>
+                        <SpkDropdowns Tag="a" DropdownClass="btn btn-light btn-sm text-muted" DropdownToggle=false DropdownText="All Stocks<i class='ri-arrow-down-s-line align-middle ms-1 d-inline-block'></i>" >
+                            <ChildContent2>
+                                <ul class="dropdown-menu dropdown-menu-end" role="menu">
+                                    <li><a class="dropdown-item" href="javascript:void(0);"> All Stocks</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Wishlist</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Stocks</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Crypto</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">ETFs</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Bonds</a></li>
+                                </ul>
+                            </ChildContent2>
+                        </SpkDropdowns>
+                    </div>
+                    <div class="card-body p-0">
+                        <SpkTables Items="StocksService.GetStockslistHeadersData()" Tableclass="table-hover text-nowrap">
+                            @foreach( var stocks in StocksService.GetStockslist()){
+                                <tr>
+                                    <td>
+                                        <div class="d-flex gap-2">
+                                            <span class="avatar rounded-circle avatar-sm bg-@stocks.StockClass-transparent svg-@stocks.StockClass">
+                                                <i class="@stocks.StockIcon fs-16"></i>
+                                            </span>
+                                            <div class="flex-fill">
+                                                <div>@stocks.Stock</div>
+                                                <div class="text-muted">@stocks.StockSubTitle</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>@stocks.Quantity</td>
+                                    <td class="fw-medium">@stocks.Price</td>
+                                    <td><span class="@(stocks.IsIncreased ? "text-success":"text-danger")">@stocks.Change</span></td>
+                                    <td>@stocks.StockValue</td>
+                                    <td class="btn-list">
+                                        <SpkButtons Tag="a" ButtonClass="btn-primary-light" ButtonSize="btn-sm">Buy</SpkButtons>
+                                        <SpkButtons Tag="a" ButtonClass="btn-primary1-light" ButtonSize="btn-sm">Sell</SpkButtons>
+                                    </td>
+                                </tr>
+                            }
+                        </SpkTables>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xxl-3">
+                <div class="card custom-card overflow-hidden">
+                    <div class="card-header justify-content-between">
+                        <h6 class="card-title">Growth Analysis</h6>
+                        <SpkButtons ButtonClass="btn-light" ButtonSize="btn-sm">View All<i class="ti ti-arrow-narrow-right ms-1"></i></SpkButtons>
+                    </div>
+                    <div class="card-body pb-1">
+                        <div class="p-3 bg-light text-default rounded border border-dashed d-flex justify-content-between gap-2 align-items-end">
+                            <div>
+                                <span class="d-block mb-1">Tesla, Inc (TSLA)</span>
+                                <h5 class="fw-semibold lh-1 mb-0">$ 17,782.00</h5>
+                            </div>
+                            <SpkBadge BadgeClass="bg-success fw-semibold ms-2">0.64%<i class="ri-arrow-up-s-line ms-1"></i></SpkBadge>
+                        </div>
+                        <div id="visitors-report">
+                            <SpkApex TItem="Analysis" ApexHeight="267" ChartOptions="AnalysisChartOptions" Items="GrowthAnalysis" Series="AnalysisSeriesConfig"></SpkApex>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End:: row-2 -->
+
+        <!-- Start:: row-3 -->
+        <div class="row">
+            <div class="col-xl-6">
+                <div class="card custom-card overflow-hidden">
+                    <div class="card-header justify-content-between">
+                        <div class="card-title">
+                            Transaction History
+                        </div>
+                        <SpkDropdowns Tag="a" DropdownClass="btn btn-light btn-sm " DropdownToggle=false DropdownText="All<i class='ri-arrow-down-s-line align-middle ms-1 d-inline-block'></i>">
+                            <ChildContent2>
+                                <ul class="dropdown-menu dropdown-menu-end" role="menu">
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Buy</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Sell</a></li>
+                                </ul>
+                            </ChildContent2>
+                        </SpkDropdowns>
+                    </div>
+                    <div class="card-body p-0">
+                        <SpkTables Items="StocksService.GetTransactionHeadersData()" Tableclass="table-hover text-nowrap">
+                            @foreach(var Transactions in StocksService.GetTransactionlist()){
+                                <tr>
+                                    <td>@Transactions.Date</td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="avatar avatar-sm p-1 avatar-rounded border border-@Transactions.StockClass border-opacity-10 bg-@Transactions.StockClass-transparent">
+                                                @if(!string.IsNullOrEmpty(Transactions.StockImg)) {
+                                                    <img src="@Transactions.StockImg" alt="" class="invert-1">
+                                                }
+                                                else {
+                                                    <i class="@Transactions.StockIcon"></i>
+                                                }
+                                            </span>
+                                            <div>
+                                                <a href="javascript:void(0);" class="fw-medium">@Transactions.Stock</a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>@Transactions.Shares</td>
+                                    <td>
+                                        <SpkBadge BadgeClass="@(Transactions.TransactionType ? "bg-primary-transparent":"bg-primary1-transparent")">@(Transactions.TransactionType ? "Buy":"Sell")</SpkBadge>
+                                    </td>
+                                    <td>
+                                        <div class="fw-medium">@Transactions.Price</div>
+                                        <div class="text-muted">Value: @Transactions.PriceValue</div>
+                                    </td>
+                                    <td><span class="@(Transactions.IsIncreased ? "text-success":"text-danger")">@Transactions.Change</span></td>
+                                </tr>
+                            }
+                        </SpkTables>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-6">
+                <div class="card custom-card overflow-hidden">
+                    <div class="card-header justify-content-between">
+                        <div class="card-title">
+                            Market Movers
+                        </div>
+                        <SpkDropdowns Tag="a" DropdownClass="btn btn-light btn-sm " DropdownToggle=false DropdownText="All<i class='ri-arrow-down-s-line align-middle ms-1 d-inline-block'></i>">
+                            <ChildContent2>
+                                <ul class="dropdown-menu dropdown-menu-end" role="menu">
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Buy</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Sell</a></li>
+                                </ul>
+                            </ChildContent2>
+                        </SpkDropdowns>
+                    </div>
+                    <div class="card-body p-0">
+                        <SpkTables Items="StocksService.GetMarketHeadersData()" Tableclass="text-nowrap">
+                            @foreach(var Transactions in StocksService.GetMarketList()){
+                                <tr>
+                                    <td>@Transactions.Symbol</td>
+                                    <td>@Transactions.Market</td>
+                                    <td><span class="@(Transactions.IsIncreased? "text-success":"text-danger")">@Transactions.Change</span></td>
+                                    <td class="fw-medium fs-14">@Transactions.Price</td>
+                                    <td><span class="@(Transactions.IsIncreased? "text-success":"text-danger")">@Transactions.Changepercentage</span></td>
+                                    <td>@Transactions.Volume</td>
+                                </tr>
+                            }
+                        </SpkTables>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End:: row-3 -->
+
+
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Dashboards" },
+        new SpkPageHeader.PageItem { PageTitle = "Stocks" },
+    };
+
+    // SlickCarousel Start //
+    public BlazorSlickCarousel? theCarousel;
+    public WMBSCInitialSettings? BasicConfigurations;
+    // SlickCarousel Chart End //
+    
+    // CryptoCard Start //
+    private ApexChartOptions<StocksChart> GenerateDynamicChartOptions(CryptoMainChart MainCard) =>
+    MainCard.CryptoTitle switch
+    {
+        "Apple" => Stock1ChartOptions ,
+        "Bitcoin" => Stock2ChartOptions ,
+        "Tesla" => Stock3ChartOptions ,
+        "Amazon" => Stock4ChartOptions ,
+        "Aliexpress" => Stock5ChartOptions ,
+        "Samsung" => Stock6ChartOptions ,
+        _ => Stock7ChartOptions 
+    };
+    private List<SeriesConfig<StocksChart>> GenerateDynamicSeriesConfigs() {
+        return new List<SeriesConfig<StocksChart>>
+        {
+            new SeriesConfig<StocksChart>
+            {
+                SeriesType = SeriesType.Line,  
+                XValueSelector = e => e.Series,  
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.Value)
+            },
+        };
+    } 
+    private ApexChartOptions<StocksChart> Stock1ChartOptions  { get; set; } = new();
+    private ApexChartOptions<StocksChart> Stock2ChartOptions { get; set; } = new();
+    private ApexChartOptions<StocksChart> Stock3ChartOptions { get; set; } = new();
+    private ApexChartOptions<StocksChart> Stock4ChartOptions { get; set; } = new(); 
+    private ApexChartOptions<StocksChart> Stock5ChartOptions { get; set; } = new();
+    private ApexChartOptions<StocksChart> Stock6ChartOptions { get; set; } = new(); 
+    private ApexChartOptions<StocksChart> Stock7ChartOptions { get; set; } = new();
+    //  CryptoCard End // 
+
+    
+    // CryptoCard Start //
+    private ApexChartOptions<StocksChart> GenerateDynamicWatchlistChartOptions(Watchlist Watchlist) =>
+    Watchlist.Source switch
+    {
+        "Apple" => Watchlist1ChartOptions ,
+        "Google" => Watchlist2ChartOptions ,
+        "Microsoft" => Watchlist3ChartOptions ,
+        "Amazon" => Watchlist4ChartOptions ,
+        "Tesla" => Watchlist5ChartOptions ,
+        "Facebook" => Watchlist6ChartOptions ,
+        _ => Watchlist7ChartOptions 
+    };
+    private List<SeriesConfig<StocksChart>> GenerateDynamicWatchlistSeriesConfigs() {
+        return new List<SeriesConfig<StocksChart>>
+        {
+            new SeriesConfig<StocksChart>
+            {
+                SeriesType = SeriesType.Line,  
+                XValueSelector = e => e.Series,  
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.Value)
+            },
+        };
+    } 
+    private ApexChartOptions<StocksChart> Watchlist1ChartOptions  { get; set; } = new();
+    private ApexChartOptions<StocksChart> Watchlist2ChartOptions { get; set; } = new();
+    private ApexChartOptions<StocksChart> Watchlist3ChartOptions { get; set; } = new();
+    private ApexChartOptions<StocksChart> Watchlist4ChartOptions { get; set; } = new(); 
+    private ApexChartOptions<StocksChart> Watchlist5ChartOptions { get; set; } = new();
+    private ApexChartOptions<StocksChart> Watchlist6ChartOptions { get; set; } = new(); 
+    private ApexChartOptions<StocksChart> Watchlist7ChartOptions { get; set; } = new();
+    //  CryptoCard End // 
+    
+    // TimeSeries Start //
+    private List<TimeSeries>? data;
+    private ApexChartOptions<TimeSeries> Brushoptions1{ get; set; } = new();
+    private ApexChartOptions<TimeSeries> Brushoptions2{ get; set; } = new();
+    private List<SeriesConfig<TimeSeries>>? TimeSeriesSeriesConfig { get; set; }
+    private List<SeriesConfig<TimeSeries>>? TimeSeriesSeriesConfig2 { get; set; }
+    //  TimeSeries End //
+    
+    //  Statistics Start //
+    private List<Statistics> statistics { get; set; } = StocksService.GetStatisticss();    
+    private ApexChartOptions<Statistics> StatisticsChartOptions { get; set; } = new();
+    private List<SeriesConfig<Statistics>>? StatisticsSeriesConfig { get; set; }
+    //  Statistics End //
+    
+    // Analysis Start //
+    private List<Analysis> GrowthAnalysis { get; set; } = StocksService.GetAnalysis();
+    private ApexChartOptions<Analysis> AnalysisChartOptions { get; set; } = new(); 
+    private List<SeriesConfig<Analysis>>? AnalysisSeriesConfig { get; set; }
+    // Analysis End //
+    protected override void OnInitialized() {
+
+        data = StocksService.GenerateDayWiseTimeSeries(new DateTime(2024, 4, 22), 115, 30, 90);
+        WMBSCSettings breakpoint498Settings = new WMBSCSettings
+        {
+            slidesToShow = 1,
+            autoplay = true,
+            autoplaySpeed = 1500,
+            arrows = false,
+        };
+        WMBSCResponsiveSettings breakpoint498Responsive = new WMBSCResponsiveSettings
+        {
+            breakpoint = 498,
+            settings = breakpoint498Settings
+        };
+        WMBSCSettings breakpoint768Settings = new WMBSCSettings
+        {
+            slidesToShow = 2,
+            autoplay = true,
+            autoplaySpeed = 1500,
+            arrows = false,
+        };
+        WMBSCResponsiveSettings breakpoint768Responsive = new WMBSCResponsiveSettings
+        {
+            breakpoint = 768,
+            settings = breakpoint768Settings
+        };
+        WMBSCSettings breakpoint1400Settings = new WMBSCSettings
+        {
+            slidesToShow = 3,
+            autoplay = true,
+            autoplaySpeed = 1500,
+            arrows = false,
+        };
+        WMBSCResponsiveSettings breakpoint1400Responsive = new WMBSCResponsiveSettings
+        {
+            breakpoint = 1400,
+            settings = breakpoint1400Settings
+        };
+        WMBSCSettings breakpoint1830Settings = new WMBSCSettings
+        {
+            slidesToShow = 4,
+            autoplay = true,
+            autoplaySpeed = 1500,
+            arrows = false,
+        };
+        WMBSCResponsiveSettings breakpoint1830Responsive = new WMBSCResponsiveSettings
+        {
+            breakpoint = 1830,
+            settings = breakpoint1830Settings
+        };
+        List<WMBSCResponsiveSettings> responsiveSettingsList = new List<WMBSCResponsiveSettings>();
+        responsiveSettingsList.Add(breakpoint498Responsive);
+        responsiveSettingsList.Add(breakpoint768Responsive);
+        responsiveSettingsList.Add(breakpoint1400Responsive);
+        responsiveSettingsList.Add(breakpoint1830Responsive);
+        BasicConfigurations = new WMBSCInitialSettings
+        {
+            arrows = false,
+            dots = false,
+            slidesToShow = 5,
+            slidesToScroll = 1,
+            infinite = true,
+            draggable = false,
+            autoplay = true,
+            dotsClass = "slick-dots Dynamic-slick-dots2",
+            autoplaySpeed = 1500,
+            responsive = responsiveSettingsList,
+        };
+
+        // CryptoCard Start //
+        List<string> color1 = new List<string> { "rgba(33, 206, 158, 0.4)"};
+        List<string> color2 = new List<string> { "rgba(251, 66, 66, 0.4)"};
+        List<string> color3 = new List<string> { "rgba(33, 206, 158, 0.4)"};
+        List<string> color4 = new List<string> { "rgba(251, 66, 66, 0.4)"};
+        List<string> color5 = new List<string> { "rgba(33, 206, 158, 0.4)"};
+        List<string> color6 = new List<string> { "rgba(33, 206, 158, 0.4)"};
+        List<string> color7 = new List<string> { "rgba(251, 66, 66, 0.4)"};
+            
+        Stock1ChartOptions   = InitializeChartOptions<StocksChart>(color1);
+        Stock2ChartOptions   = InitializeChartOptions<StocksChart>(color2);
+        Stock3ChartOptions   = InitializeChartOptions<StocksChart>(color3);
+        Stock4ChartOptions   = InitializeChartOptions<StocksChart>(color4); 
+        Stock5ChartOptions   = InitializeChartOptions<StocksChart>(color5);
+        Stock6ChartOptions   = InitializeChartOptions<StocksChart>(color6); 
+        Stock7ChartOptions   = InitializeChartOptions<StocksChart>(color7);
+        //  CryptoCard End // 
+
+        // Watchlist Start //
+        List<string> Watchlistcolor1 = new List<string> { "rgba(227, 84, 212, 1)"};
+        List<string> Watchlistcolor2 = new List<string> { "rgba(255, 93, 159, 1)"};
+        List<string> Watchlistcolor3 = new List<string> { "rgba(14, 165, 232, 1)"};
+        List<string> Watchlistcolor4 = new List<string> { "rgba(255, 198, 8, 1)"};
+        List<string> Watchlistcolor5 = new List<string> { "rgba(158, 92, 247, 1)"};
+        List<string> Watchlistcolor6 = new List<string> { "rgba(255, 142, 111, 1)"};
+        List<string> Watchlistcolor7 = new List<string> { "rgba(33, 206, 158, 1)"};
+            
+        Watchlist1ChartOptions   = WatchlistInitializeChartOptions<StocksChart>(Watchlistcolor1);
+        Watchlist2ChartOptions   = WatchlistInitializeChartOptions<StocksChart>(Watchlistcolor2);
+        Watchlist3ChartOptions   = WatchlistInitializeChartOptions<StocksChart>(Watchlistcolor3);
+        Watchlist4ChartOptions   = WatchlistInitializeChartOptions<StocksChart>(Watchlistcolor4); 
+        Watchlist5ChartOptions   = WatchlistInitializeChartOptions<StocksChart>(Watchlistcolor5);
+        Watchlist6ChartOptions   = WatchlistInitializeChartOptions<StocksChart>(Watchlistcolor6); 
+        Watchlist7ChartOptions   = WatchlistInitializeChartOptions<StocksChart>(Watchlistcolor7);
+        //  Watchlist End // 
+
+        const string mainChartId = "mainChart";
+        Brushoptions1 = new ApexChartOptions<TimeSeries> {
+            Chart = new () {
+                Id = mainChartId,
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = false},
+                }, 
+                Height ="200px",
+                ForeColor = "#ccc",
+                DropShadow = new ApexCharts.DropShadow {
+                    Enabled = false,
+                },
+            },  
+            Colors = new Color(new List<string> { "var(--primary-color)" }),
+            Stroke = new Stroke { 
+                Show = true,
+                Width = 3,
+            },
+            Grid = new Grid {
+                Show= true,
+                BorderColor = "#555",
+                Yaxis = new() {
+                    Lines = new(){
+                        Show = false
+                    }
+                }
+            },
+            Fill = new Fill {
+                Gradient = new ApexCharts.FillGradient {
+                    OpacityFrom = 0.1,
+                    OpacityTo = 0
+                }
+            },
+            DataLabels = new DataLabels {
+                Enabled = false,
+            }, 
+            Markers = new Markers { 
+                Size = 3,
+                Colors = ["#fff"],
+                StrokeWidth = 2 ,
+                StrokeColors ="rgb(227, 84, 212)",
+            },
+            Tooltip = new Tooltip { 
+                Enabled= true,
+                Theme = ApexCharts.Mode.Dark
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis {
+                    Show = true,
+                    Min = 0,
+                    TickAmount = 4,
+                },
+            },
+            Xaxis =  new XAxis {
+                Tooltip = new() {
+                    Enabled = false
+                }
+            },
+        };
+         TimeSeriesSeriesConfig = new List<SeriesConfig<TimeSeries>>
+        {
+            new SeriesConfig<TimeSeries>
+            {
+                SeriesType = SeriesType.Area,
+                Name="Investment",
+                XValueSelector = x => x.X,
+                YValueSelector = y => (decimal?)y.Y!,
+            },
+        };
+
+        Brushoptions2 = new ApexChartOptions<TimeSeries> {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = false},
+                }, 
+                Height ="130px",
+                ForeColor = "#ccc",
+                Brush = new ApexCharts.Brush { Enabled = true, Target = mainChartId },
+                Selection = new Selection
+                {
+                    Enabled = true,
+                    Xaxis = new SelectionXaxis
+                    {
+                        Min = 1719203400000,
+                        Max = 1720585800000
+                    }
+                },
+                DropShadow = new ApexCharts.DropShadow {
+                    Enabled = false,
+                },
+            },  
+            Colors = new Color(new List<string> { "rgba(227, 84, 212, 0.7)" }),
+            Stroke = new Stroke { 
+                Show = true,
+                Width = 2,
+            },
+            Grid = new Grid {
+                Show= true,
+                BorderColor = "#444",
+            },
+            Markers = new Markers { 
+                Size = 0,
+            },
+            Xaxis =  new XAxis {
+                Tooltip = new() {
+                    Enabled = false
+                }
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis {
+                    TickAmount = 2,
+                },
+            },
+        };
+        
+        TimeSeriesSeriesConfig2 = new List<SeriesConfig<TimeSeries>>
+        {
+            new SeriesConfig<TimeSeries>
+            {
+                SeriesType = SeriesType.Bar,
+                Name="Market Cap",
+                XValueSelector = x => x.X,
+                YValueSelector = y => (decimal?)y.Y!,
+            },
+        };
+
+        StatisticsChartOptions = new ApexChartOptions<Statistics> {
+            Chart = new () {
+                DropShadow = new ApexCharts.DropShadow {
+                    Enabled = false,
+                },
+            }, 
+            DataLabels = new DataLabels {
+                Enabled = false,
+            }, 
+            Legend = new Legend  { 
+                Show=false,
+            }, 
+            Stroke = new Stroke { 
+                Curve = Curve.Smooth,
+                LineCap = ApexCharts.LineCap.Round,
+                Width = 0,
+                DashArray = 0,
+                Colors = new Color(new List<string> {"#fff"}),
+            },
+            Colors = new Color(new List<string> {"var(--primary-color)", "rgb(227, 84, 212)","rgb(255, 93, 159)"}),
+            PlotOptions = new PlotOptions {
+                Pie = new PlotOptionsPie { 
+                    Donut= new PlotOptionsDonut{
+                        Size = "78%",
+                        Background = "transparent",
+                        Labels = new() {
+                            Show = true,
+                            Name = new() {
+                                Show = true,
+                                FontSize = "20px",
+                                Color = "#495057",
+                                OffsetY = -4,
+                            },
+                            Value = new() {
+                                Show = true,
+                                FontSize = "18px",
+                                Color = null,
+                                OffsetY = 8,
+                                Formatter = @"function (val) {return val + '%';}",
+                            },
+                            Total = new() {
+                                Show = true,
+                                ShowAlways = true,
+                                Label = "Total",
+                                FontSize = "22px",
+                                FontWeight = 600,
+                                Color = "#495057",
+                            },
+                        },
+                    },
+                } 
+            },
+        };
+        StatisticsSeriesConfig = new List<SeriesConfig<Statistics>>
+        {
+            new SeriesConfig<Statistics>
+            {
+                SeriesType = SeriesType.Donut,
+                XValueSelector = e => e.Source ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.SourceValue),
+            },
+        };
+
+        AnalysisChartOptions = new ApexChartOptions<Analysis> {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = false},
+                }, 
+                DropShadow = new ApexCharts.DropShadow {
+                    Enabled = true,
+                    Color = ["transparent", "rgb(227, 84, 212)"],
+                    Top = 7,
+                    Left = 0,
+                    Blur = 1,
+                    Opacity = 0.05
+                },
+            },
+            Colors = new Color(new List<string> { "var(--primary-color)", "rgb(227, 84, 212)" }),
+            PlotOptions = new PlotOptions {
+                Bar = new PlotOptionsBar {
+                    BorderRadius = 2,
+                    ColumnWidth = "35%",
+                }
+            },
+            Grid = new Grid {
+                BorderColor = "#f1f1f1",
+                StrokeDashArray = 2,
+                Yaxis= new() {
+                    Lines = new() {
+                        Show = true,
+                    },
+                },
+                Xaxis= new() {
+                    Lines = new() {
+                        Show = true,
+                    },
+                },
+            },
+            DataLabels = new DataLabels {
+                Enabled = false,
+            }, 
+            Stroke = new Stroke { 
+                Curve = Curve.Smooth,
+                Width = 2,
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis {
+                    Show = false,
+                    AxisBorder = new () {
+                        Show = false,
+                    },
+                    AxisTicks = new () {
+                        Show = false,
+                    },
+                },
+            },
+            Xaxis =  new XAxis {
+                AxisBorder = new () {
+                    Show = false,
+                },
+                AxisTicks = new () {
+                    Show = false,
+                },
+                Labels = new XAxisLabels {
+                    Rotate = -90,
+                    Show = true,
+                },
+            },
+            Legend = new Legend {
+                Show = true,
+                Position = LegendPosition.Bottom,
+                HorizontalAlign = Align.Center,
+                OffsetX = 0,
+                OffsetY = 8,
+                Markers=  new(){
+                    Width =  5,
+                    Height = 5,
+                    OffsetX = 0,
+                    OffsetY = 0,
+                    StrokeWidth= 0,
+                    StrokeColor = "#fff",
+                    FillColors = null,
+                    Radius = 12,
+                    CustomHTML = null,
+                },
+            },
+            Tooltip = new Tooltip { 
+                Enabled= true,
+                Theme = ApexCharts.Mode.Dark
+            },
+        };
+        
+        AnalysisSeriesConfig = new List<SeriesConfig<Analysis>>
+        {
+            new SeriesConfig<Analysis>
+            {
+                Name="This  Week",
+                SeriesType = SeriesType.Bar,
+                XValueSelector = e => e.Week ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.ThisWeek),
+            },
+            new SeriesConfig<Analysis>
+            {
+                Name="Last Week",
+                SeriesType = SeriesType.Bar,
+                XValueSelector = e => e.Week ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.LastWeek),
+            },
+        };
+    }
+    // CryptoCard Start //
+    private ApexChartOptions<T> InitializeChartOptions<T>(List<string> colors) where T : class, ILineGraph
+    {
+        return new ApexChartOptions<T>
+        {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = false},
+                }, 
+                Width ="120px",
+                Height ="50px",
+                Sparkline = new () {
+                    Enabled = true
+                },
+                DropShadow = new ApexCharts.DropShadow {
+                    Enabled = false,
+                },
+            },  
+            Grid = new Grid {
+                Show= false
+            },
+            DataLabels = new DataLabels {
+                Enabled = false,
+            }, 
+            Colors = new Color(colors),
+            Stroke = new Stroke { 
+                Show = true,
+                Curve = Curve.Straight,
+                LineCap = ApexCharts.LineCap.Butt,
+                Colors = null,
+                Width = 1.5,
+                DashArray = 2,
+            },
+        };
+    }
+    //  CryptoCard End // 
+
+    // Watchlist Start //
+    private ApexChartOptions<T> WatchlistInitializeChartOptions<T>(List<string> colors) where T : class, ILineGraph
+    {
+        return new ApexChartOptions<T>
+        {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = false},
+                }, 
+                Width ="50",
+                Height ="30",
+                Sparkline = new () {
+                    Enabled = true
+                },
+                DropShadow = new ApexCharts.DropShadow {
+                    Enabled = true,
+                    Top = 0,
+                    Left = 0,
+                    Blur = 3,
+                    Color = new Color(colors),
+                    Opacity = 0.1,
+                },
+            },  
+            Stroke = new Stroke { 
+                Show = true,
+                Curve = Curve.Smooth,
+                LineCap = ApexCharts.LineCap.Butt,
+                Colors = null,
+                Width = 1.2,
+                DashArray = 0,
+            },
+            Fill = new Fill {
+                Opacity = 0.2,
+                Gradient = new ApexCharts.FillGradient {
+                    OpacityFrom = 0.05,
+                    OpacityTo = 0.05,
+                    ShadeIntensity = 0.1,
+                },
+            },
+            Tooltip = new Tooltip { 
+                Enabled= false,
+            },
+            Grid = new Grid {
+                Show= false
+            },
+            DataLabels = new DataLabels {
+                Enabled = false,
+            }, 
+            Colors = new Color(colors),
+        };
+    }
+    //  Watchlist End // 
+
+}

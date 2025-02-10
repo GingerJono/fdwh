@@ -1,0 +1,48 @@
+
+@using CardModel
+
+@code {
+    [Parameter] public Reviews? Review { get; set; }    
+    [Parameter] public bool IsLanding { get; set; } = false;
+}
+@if(Review != null) {
+
+    <div class="card custom-card @(IsLanding == true? "overflow-hidden" :"border mb-0")">
+        <div class="card-body">
+            <div>
+                <span class=""><sup><i class="bi bi-quote fs-1 @(IsLanding == true? "text-fixed-white" :"text-primary me-1 ")"></i></sup> @Review.Review -- 
+                   <SpkTooltip Tag="a" TooltipClass="@($"{(IsLanding == true ? "text-fixed-white" : "")} fw-semibold fs-11")" TooltipPlacement="top" TooltipTitle="customer service at this company is outstanding. They were quick to respond to my inquiry and resolved my issue within hours." TooltipCustomClass="tooltip-dark">Read More</SpkTooltip>
+                </span>
+            </div>
+            <div class="d-flex align-items-center text-end  justify-content-end">
+                <div class="text-warning d-block me-1 fs-10">
+                    @for (int i = 0; i < Math.Floor(Review.Rating); i++)
+                    {
+                        <i class="ri-star-fill"></i>
+                    }
+
+                    @if (Review.Rating % 1 != 0)
+                    {
+                        <i class="ri-star-half-line"></i>
+                    }
+                </div>
+                <span>@Review.Rating</span>
+            </div>
+        </div>
+        <div class="@(IsLanding == true? "p-3 bg-white-transparent" :"card-footer")">
+            <div class="d-flex align-items-center">
+                <span class="avatar rounded-circle me-2">
+                    <img src="@Review.UserImg" alt="" class="img-fluid rounded-circle border @(IsLanding == true? "border-primary1" :"border-primary") border-2">
+                </span>
+                <div>
+                    <p class="mb-0 fw-semibold">@Review.User</p>
+                    <p class="mb-0 fs-11 fw-normal op-8">@Review.Email</p>
+                </div>
+                <div class="ms-auto fs-12 fw-semibold op-8 text-end">
+                    <SpkButtons ButtonClass = "@($"{(IsLanding == true ? "btn-white" : "btn-primary-light")} btn-icon")" IsRounded=true ButtonSize="btn-sm"><i class="ri-twitter-x-line"></i></SpkButtons>
+                    <SpkButtons ButtonClass="@($"{(IsLanding == true ? "btn-primary1" : "btn-primary1-light")} btn-icon")" IsRounded=true ButtonSize="btn-sm"><i class="ri-share-line"></i></SpkButtons>
+                </div>
+            </div>
+        </div>
+    </div>
+}

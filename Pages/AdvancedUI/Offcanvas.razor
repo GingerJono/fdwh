@@ -1,0 +1,469 @@
+@page "/offcanvas"
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using OffcanvasData
+@inject OffcanvasService OffcanvasService
+
+    <!-- Prism CSS -->
+    <link rel="stylesheet" href="@($"{NavigationManager.BaseUri}assets/libs/prismjs/themes/prism-coy.min.css")">
+
+    <!-- Page Header -->
+    <SpkPageHeader PageItems="PageItems" />
+    <!-- Page Header Close -->
+
+    <!-- Start:: row-1 -->
+    <div class="row">
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header justify-content-between">
+                    <div class="card-title">
+                        Static backdrop
+                    </div>
+                    <div class="prism-toggle">
+                        <SpkButtons ButtonClass="btn-primary-light" ButtonSize="btn-sm">Show Code<i class="ri-code-line ms-2 d-inline-block align-middle"></i></SpkButtons>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <SpkButtons ButtonClass="btn-primary"data-bs-toggle="offcanvas" data-bs-target="#staticBackdrop" aria-controls="staticBackdrop">Toggle static offcanvas</SpkButtons>
+                    <div class="offcanvas offcanvas-start" data-bs-backdrop="static" tabindex="-1"
+                        id="staticBackdrop" aria-labelledby="staticBackdropLabel">
+                        <div class="offcanvas-header border-bottom border-block-end-dashed">
+                            <h5 class="offcanvas-title" id="staticBackdropLabel">Notifications</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"
+                                aria-label="Close"></button>
+                        </div>
+                        <div class="offcanvas-body p-0">
+                            <div>
+                                <ul class="list-group list-group-flush mb-0">
+                                    @foreach(var list in OffcanvasService.GetOffcanvasData()) {
+                                        <li class="list-group-item">
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-2">
+                                                    @if(!string.IsNullOrEmpty(list.Value)) {
+                                                        <span class="avatar avatar-md @list.ValueClass avatar-rounded">
+                                                            @list.Value
+                                                        </span>
+                                                    }
+                                                   @if(!string.IsNullOrEmpty(list.Img)) {
+                                                       <span class="avatar avatar-md avatar-rounded">
+                                                             <img src="@list.Img" alt="">
+                                                        </span>  
+                                                    }
+                                                </div>
+                                                <div class="flex-fill">
+                                                    <p class="fw-medium mb-0">@list.Title <SpkBadge BadgeClass="bg-light text-muted float-end">@list.Date</SpkBadge></p>
+                                                    <span class="fs-12 text-muted"><i class="ri-time-line align-middle me-1 d-inline-block"></i>@list.Time</span>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-none border-top-0">
+<!-- Prism Code -->
+<pre class="language-html"><code class="language-html">&lt;button class="btn btn-primary" type="button" data-bs-toggle="offcanvas"
+data-bs-target="#staticBackdrop" aria-controls="staticBackdrop"&gt;
+Toggle static offcanvas
+&lt;/button&gt;
+&lt;div class="offcanvas offcanvas-start" data-bs-backdrop="static" tabindex="-1"
+id="staticBackdrop" aria-labelledby="staticBackdropLabel"&gt;
+&lt;div class="offcanvas-header border-bottom border-block-end-dashed"&gt;
+&lt;h5 class="offcanvas-title" id="staticBackdropLabel"&gt;Notifications&lt;/h5&gt;
+&lt;button type="button" class="btn-close" data-bs-dismiss="offcanvas"
+aria-label="Close"&gt;&lt;/button&gt;
+&lt;/div&gt;
+&lt;div class="offcanvas-body p-0"&gt;
+--------
+&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+<!-- Prism Code -->
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header justify-content-between">
+                    <div class="card-title">
+                        Live demo
+                    </div>
+                    <div class="prism-toggle">
+                        <SpkButtons ButtonClass="btn-primary-light" ButtonSize="btn-sm">Show Code<i class="ri-code-line ms-2 d-inline-block align-middle"></i></SpkButtons>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <SpkButtons Tag="a" ButtonClass="btn-primary mb-1" data-bs-toggle="offcanvas" href="#offcanvasExample"
+                        role="button" aria-controls="offcanvasExample">Link with href</SpkButtons>
+                    <SpkButtons ButtonClass="btn-primary mb-1" data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample" aria-controls="offcanvasExample">Button with data-bs-target</SpkButtons>
+                    <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample"
+                        aria-labelledby="offcanvasExampleLabel">
+                        <div class="offcanvas-header border-bottom border-block-end-dashed">
+                            <h5 class="offcanvas-title" id="offcanvasExampleLabel">Notifications</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"
+                                aria-label="Close"></button>
+                        </div>
+                        <div class="offcanvas-body p-0">
+                            <div>
+                                <ul class="list-group list-group-flush mb-0">
+                                    @foreach(var list in OffcanvasService.GetOffcanvasData()) {
+                                        <li class="list-group-item">
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-2">
+                                                    @if(!string.IsNullOrEmpty(list.Value)) {
+                                                        <span class="avatar avatar-md @list.ValueClass avatar-rounded">
+                                                            @list.Value
+                                                        </span>
+                                                    }
+                                                   @if(!string.IsNullOrEmpty(list.Img)) {
+                                                       <span class="avatar avatar-md avatar-rounded">
+                                                             <img src="@list.Img" alt="">
+                                                        </span>  
+                                                    }
+                                                </div>
+                                                <div class="flex-fill">
+                                                    <p class="fw-medium mb-0">@list.Title <SpkBadge BadgeClass="bg-light text-muted float-end">@list.Date</SpkBadge></p>
+                                                    <span class="fs-12 text-muted"><i class="ri-time-line align-middle me-1 d-inline-block"></i>@list.Time</span>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-none border-top-0">
+<!-- Prism Code -->
+<pre class="language-html"><code class="language-html">&lt;a class="btn btn-primary mb-1" data-bs-toggle="offcanvas" href="#offcanvasExample"
+role="button" aria-controls="offcanvasExample"&gt;
+Link with href
+&lt;/a&gt;
+&lt;button class="btn btn-primary mb-1" type="button" data-bs-toggle="offcanvas"
+data-bs-target="#offcanvasExample" aria-controls="offcanvasExample"&gt;
+Button with data-bs-target
+&lt;/button&gt;
+&lt;div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample"
+aria-labelledby="offcanvasExampleLabel"&gt;
+&lt;div class="offcanvas-header border-bottom border-block-end-dashed"&gt;
+&lt;h5 class="offcanvas-title" id="offcanvasExampleLabel"&gt;Notifications&lt;/h5&gt;
+&lt;button type="button" class="btn-close" data-bs-dismiss="offcanvas"
+aria-label="Close"&gt;&lt;/button&gt;
+&lt;/div&gt;
+&lt;div class="offcanvas-body p-0"&gt;
+-------
+&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+<!-- Prism Code -->
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header justify-content-between">
+                    <div class="card-title">
+                        Body scrolling
+                    </div>
+                    <div class="prism-toggle">
+                        <SpkButtons ButtonClass="btn-primary-light" ButtonSize="btn-sm">Show Code<i class="ri-code-line ms-2 d-inline-block align-middle"></i></SpkButtons>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <SpkButtons ButtonClass="btn-primary" data-bs-toggle="offcanvas" data-bs-target="#offcanvasScrolling" aria-controls="offcanvasScrolling">Enable body scrolling</SpkButtons>
+                    <div class="offcanvas offcanvas-start" data-bs-scroll="true"
+                        data-bs-backdrop="false" tabindex="-1" id="offcanvasScrolling"
+                        aria-labelledby="offcanvasScrollingLabel">
+                        <div class="offcanvas-header border-bottom border-block-end-dashed">
+                            <h5 class="offcanvas-title" id="offcanvasScrollingLabel">Notifications</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"
+                                aria-label="Close"></button>
+                        </div>
+                        <div class="offcanvas-body p-0">
+                            <div>
+                                <ul class="list-group list-group-flush mb-0">
+                                    @foreach(var list in OffcanvasService.GetOffcanvasData()) {
+                                        <li class="list-group-item">
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-2">
+                                                    @if(!string.IsNullOrEmpty(list.Value)) {
+                                                        <span class="avatar avatar-md @list.ValueClass avatar-rounded">
+                                                            @list.Value
+                                                        </span>
+                                                    }
+                                                   @if(!string.IsNullOrEmpty(list.Img)) {
+                                                       <span class="avatar avatar-md avatar-rounded">
+                                                             <img src="@list.Img" alt="">
+                                                        </span>  
+                                                    }
+                                                </div>
+                                                <div class="flex-fill">
+                                                    <p class="fw-medium mb-0">@list.Title <SpkBadge BadgeClass="bg-light text-muted float-end">@list.Date</SpkBadge></p>
+                                                    <span class="fs-12 text-muted"><i class="ri-time-line align-middle me-1 d-inline-block"></i>@list.Time</span>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-none border-top-0">
+<!-- Prism Code -->
+<pre class="language-html"><code class="language-html">&lt;button class="btn btn-primary" type="button" data-bs-toggle="offcanvas"
+data-bs-target="#offcanvasScrolling" aria-controls="offcanvasScrolling">Enable
+body scrolling
+&lt;/button&gt;
+&lt;div class="offcanvas offcanvas-start" data-bs-scroll="true"
+data-bs-backdrop="false" tabindex="-1" id="offcanvasScrolling"
+aria-labelledby="offcanvasScrollingLabel"&gt;
+&lt;div class="offcanvas-header border-bottom border-block-end-dashed"&gt;
+&lt;h5 class="offcanvas-title" id="offcanvasScrollingLabel"&gt;Notifications&lt;/h5&gt;
+&lt;button type="button" class="btn-close" data-bs-dismiss="offcanvas"
+aria-label="Close"&gt;&lt;/button&gt;
+&lt;/div&gt;
+&lt;div class="offcanvas-body p-0"&gt;
+-----
+&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+<!-- Prism Code -->
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header justify-content-between">
+                    <div class="card-title">
+                        Body scrolling and backdrop
+                    </div>
+                    <div class="prism-toggle">
+                        <SpkButtons ButtonClass="btn-primary-light" ButtonSize="btn-sm">Show Code<i class="ri-code-line ms-2 d-inline-block align-middle"></i></SpkButtons>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <SpkButtons ButtonClass="btn-primary" data-bs-toggle="offcanvas" data-bs-target="#offcanvasWithBothOptions"
+                        aria-controls="offcanvasWithBothOptions">Enable both scrolling &amp; backdrop</SpkButtons>
+                    <div class="offcanvas offcanvas-start" data-bs-scroll="true" tabindex="-1"
+                        id="offcanvasWithBothOptions" aria-labelledby="offcanvasWithBothOptionsLabel">
+                        <div class="offcanvas-header border-bottom border-block-end-dashed">
+                            <h5 class="offcanvas-title" id="offcanvasWithBothOptionsLabel">Notifications</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"
+                                aria-label="Close"></button>
+                        </div>
+                        <div class="offcanvas-body p-0">
+                            <div>
+                                <ul class="list-group list-group-flush mb-0">
+                                    @foreach(var list in OffcanvasService.GetOffcanvasData()) {
+                                        <li class="list-group-item">
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-2">
+                                                    @if(!string.IsNullOrEmpty(list.Value)) {
+                                                        <span class="avatar avatar-md @list.ValueClass avatar-rounded">
+                                                            @list.Value
+                                                        </span>
+                                                    }
+                                                   @if(!string.IsNullOrEmpty(list.Img)) {
+                                                       <span class="avatar avatar-md avatar-rounded">
+                                                             <img src="@list.Img" alt="">
+                                                        </span>  
+                                                    }
+                                                </div>
+                                                <div class="flex-fill">
+                                                    <p class="fw-medium mb-0">@list.Title <SpkBadge BadgeClass="bg-light text-muted float-end">@list.Date</SpkBadge></p>
+                                                    <span class="fs-12 text-muted"><i class="ri-time-line align-middle me-1 d-inline-block"></i>@list.Time</span>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-none border-top-0">
+<!-- Prism Code -->
+<pre class="language-html"><code class="language-html">&lt;button class="btn btn-primary" type="button" data-bs-toggle="offcanvas"
+data-bs-target="#offcanvasWithBothOptions"
+aria-controls="offcanvasWithBothOptions">Enable both scrolling &amp;
+backdrop&lt;/button&gt;
+&lt;div class="offcanvas offcanvas-start" data-bs-scroll="true" tabindex="-1"
+id="offcanvasWithBothOptions" aria-labelledby="offcanvasWithBothOptionsLabel"&gt;
+&lt;div class="offcanvas-header border-bottom border-block-end-dashed"&gt;
+&lt;h5 class="offcanvas-title" id="offcanvasWithBothOptionsLabel"&gt;Notifications&lt;/h5&gt;
+&lt;button type="button" class="btn-close" data-bs-dismiss="offcanvas"
+aria-label="Close"&gt;&lt;/button&gt;
+&lt;/div&gt;
+&lt;div class="offcanvas-body p-0"&gt;
+-------
+&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+<!-- Prism Code -->
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-header justify-content-between">
+                    <div class="card-title">
+                        Placement
+                    </div>
+                    <div class="prism-toggle">
+                        <SpkButtons ButtonClass="btn-primary-light" ButtonSize="btn-sm">Show Code<i class="ri-code-line ms-2 d-inline-block align-middle"></i></SpkButtons>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <SpkButtons ButtonClass="btn-primary mb-1" data-bs-toggle="offcanvas" data-bs-target="#offcanvasTop" aria-controls="offcanvasTop">Toggle top offcanvas</SpkButtons>
+                    <div class="offcanvas offcanvas-top" tabindex="-1" id="offcanvasTop"
+                        aria-labelledby="offcanvasTopLabel">
+                        <div class="offcanvas-header">
+                            <h5 class="offcanvas-title" id="offcanvasTopLabel">Offcanvas top</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"
+                                aria-label="Close"></button>
+                        </div>
+                        <div class="offcanvas-body">
+                            ...
+                        </div>
+                    </div>
+                    <SpkButtons ButtonClass="btn-primary mb-1" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">Toggle right offcanvas</SpkButtons>
+                    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight"
+                        aria-labelledby="offcanvasRightLabel1">
+                        <div class="offcanvas-header border-bottom border-block-end-dashed">
+                            <h5 class="offcanvas-title" id="offcanvasRightLabel1">Notifications
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"
+                                aria-label="Close"></button>
+                        </div>
+                        <div class="offcanvas-body p-0">
+                            <div>
+                                <ul class="list-group list-group-flush mb-0">
+                                    @foreach(var list in OffcanvasService.GetOffcanvasData()) {
+                                        <li class="list-group-item">
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-2">
+                                                    @if(!string.IsNullOrEmpty(list.Value)) {
+                                                        <span class="avatar avatar-md @list.ValueClass avatar-rounded">
+                                                            @list.Value
+                                                        </span>
+                                                    }
+                                                   @if(!string.IsNullOrEmpty(list.Img)) {
+                                                       <span class="avatar avatar-md avatar-rounded">
+                                                             <img src="@list.Img" alt="">
+                                                        </span>  
+                                                    }
+                                                </div>
+                                                <div class="flex-fill">
+                                                    <p class="fw-medium mb-0">@list.Title <SpkBadge BadgeClass="bg-light text-muted float-end">@list.Date</SpkBadge></p>
+                                                    <span class="fs-12 text-muted"><i class="ri-time-line align-middle me-1 d-inline-block"></i>@list.Time</span>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                            <div>
+                                <ul class="list-group list-group-flush mb-0">
+                                    @foreach(var list in OffcanvasService.GetOffcanvasData()) {
+                                        <li class="list-group-item">
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-2">
+                                                    @if(!string.IsNullOrEmpty(list.Value)) {
+                                                        <span class="avatar avatar-md @list.ValueClass avatar-rounded">
+                                                            @list.Value
+                                                        </span>
+                                                    }
+                                                   @if(!string.IsNullOrEmpty(list.Img)) {
+                                                       <span class="avatar avatar-md avatar-rounded">
+                                                            <img src="@list.Img" alt="">
+                                                        </span>  
+                                                    }
+                                                </div>
+                                                <div class="flex-fill">
+                                                    <p class="fw-medium mb-0">@list.Title <SpkBadge BadgeClass="bg-light text-muted float-end">@list.Date</SpkBadge></p>
+                                                    <span class="fs-12 text-muted"><i class="ri-time-line align-middle me-1 d-inline-block"></i>@list.Time</span>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <SpkButtons ButtonClass="btn-primary mb-1" data-bs-toggle="offcanvas" data-bs-target="#offcanvasBottom" aria-controls="offcanvasBottom">Toggle  bottom offcanvas</SpkButtons>
+                    <div class="offcanvas offcanvas-bottom" tabindex="-1" id="offcanvasBottom"
+                        aria-labelledby="offcanvasBottomLabel">
+                        <div class="offcanvas-header">
+                            <h5 class="offcanvas-title" id="offcanvasBottomLabel">Offcanvas bottom
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"
+                                aria-label="Close"></button>
+                        </div>
+                        <div class="offcanvas-body small">
+                            ...
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-none border-top-0">
+<!-- Prism Code -->
+<pre class="language-html"><code class="language-html">&lt;button class="btn btn-primary mb-1" type="button" data-bs-toggle="offcanvas"
+data-bs-target="#offcanvasTop" aria-controls="offcanvasTop"&gt;Toggle top
+offcanvas&lt;/button&gt;
+&lt;div class="offcanvas offcanvas-top" tabindex="-1" id="offcanvasTop"
+aria-labelledby="offcanvasTopLabel"&gt;
+&lt;div class="offcanvas-header"&gt;
+&lt;h5 class="offcanvas-title" id="offcanvasTopLabel"&gt;Offcanvas top&lt;/h5&gt;
+&lt;button type="button" class="btn-close" data-bs-dismiss="offcanvas"
+aria-label="Close"&gt;&lt;/button&gt;
+&lt;/div&gt;
+&lt;div class="offcanvas-body"&gt;
+...
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;button class="btn btn-primary mb-1" type="button" data-bs-toggle="offcanvas"
+data-bs-target="#offcanvasRight" aria-controls="offcanvasRight"&gt;Toggle right
+offcanvas&lt;/button&gt;
+&lt;div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight"
+aria-labelledby="offcanvasRightLabel1"&gt;
+&lt;div class="offcanvas-header border-bottom border-block-end-dashed"&gt;
+&lt;h5 class="offcanvas-title" id="offcanvasRightLabel1"&gt;Notifications
+&lt;/h5&gt;
+&lt;button type="button" class="btn-close" data-bs-dismiss="offcanvas"
+aria-label="Close"&gt;&lt;/button&gt;
+&lt;/div&gt;
+&lt;div class="offcanvas-body p-0"&gt;
+----------
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;button class="btn btn-primary mb-1" type="button" data-bs-toggle="offcanvas"
+data-bs-target="#offcanvasBottom" aria-controls="offcanvasBottom"&gt;Toggle
+bottom
+offcanvas&lt;/button&gt;
+&lt;div class="offcanvas offcanvas-bottom" tabindex="-1" id="offcanvasBottom"
+aria-labelledby="offcanvasBottomLabel"&gt;
+&lt;div class="offcanvas-header"&gt;
+&lt;h5 class="offcanvas-title" id="offcanvasBottomLabel"&gt;Offcanvas bottom
+&lt;/h5&gt;
+&lt;button type="button" class="btn-close" data-bs-dismiss="offcanvas"
+aria-label="Close"&gt;&lt;/button&gt;
+&lt;/div&gt;
+&lt;div class="offcanvas-body small"&gt;
+...
+&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+<!-- Prism Code -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End:: row-1 -->
+
+    <!-- Prism JS -->
+    <script src="@($"{NavigationManager.BaseUri}assets/libs/prismjs/prism.js")"></script>
+    <script src="@($"{NavigationManager.BaseUri}assets/js/prism-custom.js")"></script>
+    
+@code {    
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Advanced UI" },
+        new SpkPageHeader.PageItem { PageTitle = "Offcanvas" },
+    };
+}

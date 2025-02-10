@@ -1,0 +1,219 @@
+@page "/job-details"
+@inject IJSRuntime JSRuntime
+@using Sandbox._Spk
+@using Sandbox._Spk.Jobs
+@using JobData
+@inject JobService JobService
+
+    <!-- BlazorSlickCarousel CSS -->
+    <link href="_content/WMBlazorSlickCarousel/WMBlazorSlickCarousel.bundle.scp.css" rel="stylesheet">
+
+    <!-- Page Header -->
+    <SpkPageHeader PageItems="PageItems" />
+    <!-- Page Header Close -->
+
+    <!-- Start::row-1 -->
+    <div class="row">
+        <div class="col-xxl-9">
+            <div class="card bg-primary-transparent">
+                <div class="card-body">
+                    <div class="card custom-card overflow-hidden job-info-banner">
+                    </div>
+                    <div class="card custom-card job-info-data mb-2">
+                        <div class="card-body">
+                            <div class="d-flex flex-wrap align-items-top justify-content-between gap-2">
+                                <div>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <div>
+                                            <span class="avatar avatar-lg border p-1">
+                                                <img src="../assets/images/media/jobs/2.png" alt="">
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <h5 class="fw-medium mb-0 d-flex align-items-center"><a href="javascript:void(0);" class="">Frontend Developer</a></h5>
+                                            <a href="javascript:void(0);" class="fs-12 text-muted"><i class="bi bi-building"></i> Spruko Technologies PRIVATE LIMITED</a>
+                                            <div class="d-flex mt-3">
+                                                <div>
+                                                    <p class="mb-1"><i class="bi bi-geo-alt me-1"></i>Bangalore, Karnataka</p>
+                                                    <p><i class="bi bi-briefcase me-1"></i>2 - 4 Yrs Exp.</p>
+                                                </div>
+                                                <div class="ms-4">
+                                                    <p class="mb-1"><i class="bi bi-coin me-1"></i><span class="fw-medium">25,000 - 35,000</span> / per month (+incentives)</p>
+                                                    <p><i class="bi bi-mortarboard  me-1"></i>Graduate and Above</p>
+                                                </div>
+                                            </div>
+                                            <div class="popular-tags">
+                                                <SpkBadge Tag="a" BadgeClass="bg-info-transparent" IsRounded=true><i class="bi bi-clock me-1"></i>Full Time</SpkBadge>
+                                                <SpkBadge Tag="a" BadgeClass="bg-primary2-transparent" IsRounded=true><i class="bi bi-briefcase me-1"></i>8 Openings</SpkBadge>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-end ms-auto">
+                                    <SpkTooltip Tag="a" TooltipClass="rounded-pill btn btn-icon btn-primary-light btn-wave btn-sm" TooltipPlacement="top" TooltipTitle="Save"><i class="ri-bookmark-line"></i></SpkTooltip>
+                                    
+                                    <p class="mb-0 mt-4 pt-3">
+                                        <SpkTooltip Tag="span" TooltipClass="" TooltipPlacement="top" TooltipTitle="20 days left"><i class="bi bi-info-circle text-info"></i></SpkTooltip>
+                                        <span class="fw-medium">20 days left </span> to apply for this job
+                                    </p>
+                                    <div class="d-flex gap-2 flex-wrap mt-3 justify-content-end">
+                                        <SpkButtons Tag="a" ButtonClass="mb-0 btn-primary">Apply Now</SpkButtons>
+                                        <SpkButtons Tag="a" ButtonClass="mb-0 btn-icon btn-primary1-light"><i class="ri-heart-line"></i></SpkButtons>
+                                        <SpkButtons Tag="a" ButtonClass="mb-0 btn-icon btn-primary2-light me-0"><i class="ri-share-line"></i></SpkButtons>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card custom-card">
+                <div class="card-body">
+                    <h6 class="fw-medium">Job Description</h6>
+                    <p class="op-9">We are seeking a skilled Frontend Developer to join our dynamic team. In this role, you will be responsible for implementing visual elements that users see and interact with in web applications. You will work closely with designers and backend developers to bridge the gap between graphical design and technical implementation, ensuring an optimized and responsive user experience.</p>
+                    <p class="mb-4 op-9">As a Frontend Developer, you will use your expertise in HTML, CSS, and JavaScript frameworks to translate UI/UX design wireframes into high-quality code. You will collaborate with cross-functional teams to deliver scalable and maintainable frontend solutions that meet business objectives and user needs.</p>
+                    
+                    <h6 class="fw-medium">Key Responsibilities</h6>
+                    <ol class="list-group border-0 list-unstyled list-group-numbered mb-3">
+                        <li class="list-group-item border-0 py-1">Develop responsive web pages and web applications based on provided designs and specifications.</li>
+                        <li class="list-group-item border-0 py-1">Collaborate with UX/UI designers and backend developers to deliver seamless user interfaces.</li>
+                        <li class="list-group-item border-0 py-1">Optimize application performance and ensure cross-browser compatibility.</li>
+                        <li class="list-group-item border-0 py-1">Implement front-end components and libraries using modern frameworks such as React, Angular, or Vue.js.</li>
+                        <li class="list-group-item border-0 py-1">Conduct thorough testing of user interfaces to identify and fix UI issues and bugs.</li>
+                    </ol>
+                    <h6 class="fw-medium">Requirements</h6>
+                    <ul class="list-group border-0 list-unstyled list-group-numbered mb-3">
+                        <li class="list-group-item border-0 py-1">Bachelor's degree in Computer Science, Engineering, or a related field, or equivalent practical experience.</li>
+                        <li class="list-group-item border-0 py-1">Proven experience as a Frontend Developer or similar role, with a strong portfolio demonstrating frontend development skills.</li>
+                        <li class="list-group-item border-0 py-1">Proficiency in HTML5, CSS3, JavaScript, and frontend frameworks/libraries (e.g., React, Angular, Vue.js).</li>
+                        <li class="list-group-item border-0 py-1">Experience with version control systems (e.g., Git) and modern development workflows.</li>
+                        <li class="list-group-item border-0 py-1">Understanding of responsive design principles and mobile-first approach.</li>
+                    </ul>
+                </div>  
+            </div>
+            <div class="card custom-card shadow-none bg-primary-transparent border border-primary border-opacity-10">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-lg-6">
+                            <h5 class="fw-medium mb-3"><i class="ri-briefcase-line me-2 p-2 bg-primary text-fixed-white fs-15 lh-1 align-middle rounded-circle"></i>Explore Job Opportunities</h5>
+                            <span class="text-muted mb-0 fs-14">Find exciting job opportunities that match your skills and interests. Join us to make a difference!</span>
+                        </div>
+                        <div class="col-lg-6 text-end">
+                            <SpkButtons Tag="a" ButtonClass="btn-primary" ButtonSize="btn-lg"><i class="ri-share-line me-2 align-middle d-inline-block"></i>Sign up Now</SpkButtons>
+                        </div>
+                    </div>
+                </div>                            
+            </div>  
+        </div>
+        <div class="col-xxl-3">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Job Highlights</div>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3 fs-14 d-flex align-items-center">
+                        <span class="avatar avatar-sm border lh-1 avatar-rounded me-2 bg-info-transparent">
+                            <i class="ri-map-pin-line"></i>
+                        </span>
+                        <span class="text-muted">Work Location</span>
+                        <span class="ms-auto fw-medium">
+                            Bangalore
+                        </span>
+                    </div>
+                    <div class="mb-3 d-flex align-items-center">
+                        <span class="avatar avatar-sm border lh-1 avatar-rounded me-2 bg-danger-transparent">
+                            <i class="ri-time-line"></i>
+                        </span>
+                        <span class="text-muted">Flexible Hours</span>
+                        <span class="ms-auto fw-medium">
+                            9:00AM -6:00PM
+                        </span>
+                        
+                    </div>
+                    <div class="mb-3 d-flex align-items-center">
+                        <span class="avatar avatar-sm border lh-1 avatar-rounded me-2 bg-success-transparent">
+                            <i class="ri-cash-line"></i>
+                        </span>
+                        <span class="text-muted">Competitive Salary</span>
+                        <span class="ms-auto fw-medium">
+                            35,000 +
+                        </span>
+                        
+                    </div>
+                    <div class="mb-0 d-flex align-items-center">
+                        <span class="avatar avatar-sm border lh-1 avatar-rounded me-2 bg-primary2-transparent">
+                            <i class="ri-award-line"></i>
+                        </span>
+                        <span class="text-muted">Employee Benefits</span>
+                        <span class="ms-auto fw-medium">
+                            Award
+                        </span>
+                        
+                    </div>
+                </div>
+            </div>
+            <div class="mb-1">
+                <h6 class="fw-medium mb-3">Related Jobs</h6>
+                <BlazorSlickCarousel Configurations="VerticalConfigurations">
+                    <BlazorSlickCarouselContent>
+                        @foreach(var jobs in JobService.GetJobs()) {
+                        <div class="Carousel-slide">
+                            <SpkJobsDetails Jobs="jobs"></SpkJobsDetails>
+                        </div>
+                        }
+                    </BlazorSlickCarouselContent>
+                </BlazorSlickCarousel>
+            </div>   
+            <div class="card custom-card">
+                <div class="card-body">
+                    <h6 class="fw-medium mb-3">Subscribe to Job Alerts</h6>
+                    <div class="input-group mb-3">
+                        <input type="email" class="form-control" placeholder="Your Email Address" aria-label="job-email" aria-describedby="job-subscribe">
+                        <SpkButtons ButtonClass="btn-primary" id="job-subscribe">Subscribe</SpkButtons>
+                    </div>
+                    <label class="form-check-label">
+                        By subscribing, you accept our <a href="javascript:void(0);" class="text-success"><u>privacy policy</u></a>.
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End::row-1 -->
+
+@code {
+    
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Apps" },
+        new SpkPageHeader.PageItem { PageTitle = "Jobs" },
+        new SpkPageHeader.PageItem { PageTitle = "Job Details" },
+    };
+    public WMBSCInitialSettings? VerticalConfigurations;
+
+    protected override void OnInitialized()
+    {
+         VerticalConfigurations = new WMBSCInitialSettings
+        {
+            vertical = true,
+            verticalSwiping = true,
+            arrows = false,
+            dots = false,
+            slidesToShow = 3,
+            slidesToScroll = 1,
+            infinite = true,
+            autoplay = true,
+            autoplaySpeed = 1500,
+            dotsClass = "slick-dots Vertical-slick-dots",
+        };
+    }   
+}
+
+
+@code {    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("window.interop.initializeTooltips");
+        }
+    }
+}

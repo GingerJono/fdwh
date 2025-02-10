@@ -1,0 +1,40 @@
+
+@using Sandbox._Spk
+@using ProfileData
+@inject ProfileService ProfileService
+
+@code {
+    [Parameter] public Profile? Details { get; set; } 
+}
+
+@if(Details != null){
+    <div class="card custom-card shadow-none border">
+        <div class="card-body">
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <span class="avatar avatar-xl avatar-rounded flex-shrink-0">
+                    <img src="@Details.UserImg" alt="">
+                </span>
+                <div class="text-truncate">
+                    <a href="javascript:void(0);" class="mb-0 fw-semibold">@Details.User</a>
+                    <p class="w-75 text-truncate fs-12 op-7 mb-1 text-muted">@Details.Email</p>
+                    <SpkBadge BadgeClass="@(Details.Role == "Product Designer" ? "bg-info-transparent" : Details.Role == "UI Designer" ? "bg-success-transparent" : "bg-warning-transparent")">@Details.Role</SpkBadge>
+                </div>
+                <SpkDropdowns DropdownMainClass="ms-auto" Tag="a" DropdownClass="btn btn-secondary-light btn-icon btn-sm" DropdownText="<i class='ri-more-2-fill'></i>" DropdownToggle=false>
+                <ChildContent2>
+                    <ul class="dropdown-menu dropdown-menu-end" role="menu"> 
+                        <li><a class="dropdown-item" href="javascript:void(0);">Message</a></li> 
+                        <li><a class="dropdown-item" href="javascript:void(0);">Block</a></li> 
+                        <li><a class="dropdown-item" href="javascript:void(0);">Remove</a></li> 
+                    </ul> 
+                </ChildContent2>
+                </SpkDropdowns>
+            </div>
+        </div>
+        <div class="card-footer text-center p-3">
+            <div class="d-flex gap-2 flex-wrap justify-content-center">
+                <SpkButtons ButtonClass="btn-primary-light me-0" ButtonSize="btn-sm">View Profile</SpkButtons>
+                <SpkButtons ButtonClass="btn-light me-0" ButtonSize="btn-sm">Unfollow</SpkButtons>
+            </div>
+        </div>
+    </div>
+}

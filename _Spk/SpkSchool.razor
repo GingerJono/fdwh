@@ -1,0 +1,20 @@
+@using CardModel
+
+@code {
+    [Parameter] public Schoolcard? Schoolcard { get; set; } 
+}
+@if(Schoolcard != null){
+    <div class="card custom-card school-card">
+        <div class="card-body d-flex gap-2 justify-content-between">
+            <div class="">
+                <span class="d-block mb-1">@Schoolcard.title</span>
+                <h5 class="mb-0 fw-semibold">@Schoolcard.Value</h5>
+            </div>
+            <div class="">
+                <span class="@Schoolcard.SvgClass">
+                    @((MarkupString)(Schoolcard.Svg ?? string.Empty))
+                </span>
+            </div>
+        </div>
+    </div>
+}

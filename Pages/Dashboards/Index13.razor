@@ -1,0 +1,302 @@
+@page "/index13"
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using ApexSeries
+@using CardModel
+@using POSSystem
+@inject POSSystemService POSSystemService
+
+        <!-- Start::page-header -->
+        <SpkPageHeader PageItems="PageItems" />
+        <!-- End::page-header -->
+
+        <!-- Start Row-1 -->
+        <div class="row">
+            <div class="col-xxl-9">
+                <div class="d-flex align-Items-center justify-content-between mb-3">
+                    <h6 class="fw-medium mb-0">Categories</h6>
+                    <div class="d-flex gap-2 align-items-center">
+                        <a class="categories-arrow left">
+                            <i class="ri-arrow-left-s-line"></i>
+                        </a>
+                        <a class="categories-arrow right">
+                            <i class="ri-arrow-right-s-line"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="row pos-category" id="filter">
+                    @foreach(var Categories in POSSystemService.GetCategoriesData()) {
+                        <div class="col-xxl col-xl-4 col-md-6">
+                            <div class="card custom-card @(Categories == POSSystemService.GetCategoriesData().ToList().First() ? "active":"")">
+                                <div class="card-body p-3">
+                                    <a href="javascript:void(0);" class="stretched-link categories" data-filter="@Categories.Category">
+                                        <div class="d-flex gap-2 categories-content">
+                                            <span class="avatar avatar-md menu-icon">
+                                                <img src="@Categories.imgSrc" alt="">
+                                            </span>
+                                            <div>
+                                                <span class="fw-medium">@Categories.title</span>
+                                                <span class="d-block op-7 fs-12">@Categories.item</span>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="row">
+                    <div class="col-xl-12">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <h6 class="fw-medium mb-0">Items List</h6>
+                            <SpkButtons Tag="a" href="#viewcart" ButtonClass="btn-primary" data-bs-toggle="offcanvas" aria-controls="viewcart">View Cart<i class="ti ti-arrow-narrow-right ms-1"></i></SpkButtons>
+                        </div>
+                        <div class="row list-wrapper">
+                            @foreach(var Card in POSSystemService.GetPoscardData()) {
+                                <SpkPosCard Poscard="Card"></SpkPosCard>
+                            }
+                        </div>
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination float-end mb-4">
+                                <li class="page-item disabled">
+                                    <a class="page-link">Previous</a>
+                                </li>
+                                <li class="page-item"><a class="page-link" href="javascript:void(0);">1</a></li>
+                                <li class="page-item active" aria-current="page">
+                                    <a class="page-link" href="javascript:void(0);">2</a>
+                                </li>
+                                <li class="page-item"><a class="page-link" href="javascript:void(0);">3</a></li>
+                                <li class="page-item">
+                                    <a class="page-link" href="javascript:void(0);">Next</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xxl-3">
+                <div class="card custom-card active">
+                    <div class="card-header justify-content-between">
+                        <div class="card-title">
+                            Orders List
+                        </div>
+                        <SpkBadge BadgeClass="bg-primary2-transparent rounded-pill"> 27 Items</SpkBadge>
+                    </div>
+                    <div class="card-body p-0">
+                        <ul class="list-group mb-0 border-0 rounded-0">
+                            @foreach (var order in POSSystemService.GetOrderlistData()) {
+                                <li class="list-group-item border-top-0 border-start-0 border-end-0 @(order == POSSystemService.GetOrderlistData().ToList().First() ? "" :"border-bottom border-block-end-dashed")">
+                                    <div class="d-flex align-items-center flex-wrap">
+                                        <div class="me-2 lh-1">
+                                            <span class="avatar avatar-md bg-light">
+                                                <img src="@order.imgSrc" alt="">
+                                            </span>
+                                        </div>
+                                        <div class="flex-fill">
+                                            <p class="mb-0 fw-medium">@order.title</p>
+                                            <p class="mb-0 text-muted fs-12">Quantity : @order.quantity  
+                                                <SpkBadge BadgeClass="bg-success-transparent ms-3">@order.discount</SpkBadge>
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <p class="mb-0 text-end">
+                                                <a aria-label="anchor" href="javascript:void(0)"  @onclick="@(() => DeleteOrderList(order.id))">
+                                                    <i class="ri-close-line fs-16 text-danger"></i>
+                                                </a>
+                                            </p>
+                                            <h6 class="mb-0 fw-medium">@order.price</h6>
+                                        </div>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                    <div class="card-footer border-top-0">
+                        <SpkButtons Tag="a" ButtonClass="btn-primary-light d-grid"> View All</SpkButtons>
+                    </div>
+                </div>
+                <div class="card custom-card">
+                    <div class="card-header justify-content-between align-items-center">
+                        <div class="card-title">Top Selling Items </div>
+                        <SpkButtons Tag="a" ButtonClass="btn-primary-light border d-flex align-items-center" ButtonSize="btn-sm"> View All</SpkButtons>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled mb-0" id="product-list">
+                            @foreach(var products in POSSystemService.GetProductlistData()){
+                                <li class="@(products == POSSystemService.GetProductlistData().ToList().First() ? "":"mt-4")">
+                                    <div class="d-flex align-items-center flex-wrap">
+                                        <div class="me-3 lh-1">
+                                            <span class="avatar avatar-lg bg-gray-200 avatar-rounded">
+                                                <img src="@products.imgSrc" alt="">
+                                            </span>
+                                        </div>
+                                        <div class="flex-fill">
+                                            <span class="d-block mb-0 fw-medium">@products.title
+                                                @if(!string.IsNullOrEmpty(products.discount)){
+                                                    <SpkBadge BadgeClass="@($"bg-{products.discountcolor}-transparent {"ms-1 fs-9"}")">@products.discount</SpkBadge>
+                                                }
+                                            </span>
+                                            <span class="text-muted fs-12">@products.category</span>
+                                        </div>
+                                        <div class="text-end">
+                                            <p class="mb-0 fs-14 fw-medium text-primary">@products.price</p>
+                                            <p class="mb-0 text-muted">@products.orders</p>
+                                        </div>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+                <div class="card custom-card p-3">
+                    <div class="text-center d-flex flex-row align-items-center flex-wrap bg-primary-transparent p-3 justify-content-between rounded gap-1">
+                        <div class="pos-card-image ps-1">
+                            <img src="../assets/images/pos-system/20.png" class="" alt="...">
+                        </div>
+                        <SpkButtons ButtonClass="btn-primary text-nowrap me-2 ms-auto" ButtonWidth="btn-w-md">Go Premium</SpkButtons>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End::Row-1 -->
+
+        <!-- Start::offcanvas viewcart -->
+        <div class="offcanvas offcanvas-end" tabindex="-1" id="viewcart" aria-labelledby="viewcartLabel">
+            <div class="offcanvas-header border-bottom">
+                <h6 class="offcanvas-title" id="viewcartLabel">Cart 
+                    <SpkBadge BadgeClass="bg-primary2-transparent fs-10" IsRounded=true>06 items</SpkBadge>
+                </h6>
+                <SpkButtons ButtonClass="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></SpkButtons>
+            </div>
+            <div class="offcanvas-body p-0">
+                <ul class="list-group mb-0 border-0 rounded-0">
+                    @foreach(var cart in POSSystemService.GetCartlistData()) {
+                        <li class="list-group-item border-top-0 border-start-0 border-end-0">
+                            <div class="d-flex align-items-start flex-wrap">
+                                <div class="me-2 lh-1">
+                                    <span class="avatar avatar-xl bg-light">
+                                        <img src="@cart.imgSrc" alt="">
+                                    </span>
+                                </div>
+                                <div class="flex-fill">
+                                    <p class="mb-1 fw-medium">@cart.title <span class="fs-11 text-muted"> @cart.subtitle</span></p>
+                                    <div class="product-quantity-container order-summ">
+                                        <div class="input-group flex-nowrap gap-1 border rounded-pill p-1">
+                                            <SpkButtons aria-label="button" ButtonClass="btn-icon btn-primary-light border product-quantity-minus border-end-0" ButtonSize="btn-sm" IsRounded=true @onclick="() => DecrementCount(cart)"><i class="ri-subtract-line"></i></SpkButtons>
+                                            <input type="number" class="form-control form-control-sm border-0 text-center p-0" aria-label="quantity" @bind="cart.Quantity" />
+                                            <SpkButtons aria-label="button" ButtonClass="btn-icon btn-primary-light border product-quantity-plus border-end-0" ButtonSize="btn-sm" IsRounded=true @onclick="() => IncrementCount(cart)"><i class="ri-add-line"></i></SpkButtons>
+                                        </div>
+                                    </div> 
+                                </div>
+                                <div>
+                                    <p class="text-end">
+                                        <a aria-label="anchor" href="javascript:void(0)"  @onclick="@(() => DeleteCartList(cart.id))">
+                                            <i class="ri-close-line fs-16 text-danger"></i>
+                                        </a>
+                                    </p>
+                                    <h6 class="mb-0 fw-medium mt-auto">
+                                        <SpkBadge BadgeClass="bg-success-transparent ms-3 fs-9">@cart.discount</SpkBadge>@cart.price
+                                    </h6>
+                                </div>
+                            </div>
+                        </li>
+                    }
+                </ul>
+                <div class="p-3 border-bottom border-block-end-dashed">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap">
+                        <SpkBadge BadgeClass="fs-12 fw-medium bg-primary-transparent p-1 px-2">SPRUKO1325</SpkBadge>
+                        <div class="text-success">COUPON APPLIED</div>
+                    </div>
+                </div>
+                <div class="p-3 border-bottom border-block-end-dashed">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="text-muted">Sub Total</div>
+                        <div class="fw-medium fs-14">$318.00</div>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="text-muted">Discount</div>
+                        <div class="fw-medium fs-14">10% - $31.08</div>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="text-muted">Delivery Charges</div>
+                        <div class="fw-medium fs-14">- $29.00</div>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="text-muted">GST (10%)</div>
+                        <div class="fw-medium fs-14">+ $2.00</div>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="text-muted">Service Tax (18%)</div>
+                        <div class="fw-medium fs-14">- $45.29</div>
+                    </div>
+                </div>
+                <div class="p-3">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="fs-15">Total :</div>
+                        <div class="fw-semibold fs-16 text-dark"> $1,387.00</div>
+                    </div>
+                    <div class="d-flex gap-3 mt-4">
+                        <SpkButtons Tag="a" ButtonClass="btn-primary1-light flex-fill">Save For Later</SpkButtons>
+                        <SpkButtons Tag="a" href="/checkout" ButtonClass="btn-primary flex-fill">Pay Now</SpkButtons>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End::offcanvas viewcart -->
+                    
+
+        <!-- Isotope-layout JS -->
+        <script src="@($"{NavigationManager.BaseUri}assets/libs/isotope-layout/dist/isotope.pkgd.min.js")"></script>
+
+        <!-- Internal POS-Dashboard JS -->
+        <script src="@($"{NavigationManager.BaseUri}assets/js/pos-dashboard.js")"></script>
+
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Dashboards" },
+        new SpkPageHeader.PageItem { PageTitle = "POS System" },
+    };
+    
+    protected void DeleteOrderList(decimal Id)
+    {
+        var OrderToRemove = POSSystemService.GetOrderlistData().FirstOrDefault(o => o.id == Id);
+        if (OrderToRemove != null)
+        {
+            POSSystemService.GetOrderlistData().Remove(OrderToRemove);
+        }
+    }
+    protected void DeleteCartList(decimal Id)
+    {
+        var CartToRemove = POSSystemService.GetCartlistData().FirstOrDefault(o => o.id == Id);
+        if (CartToRemove != null)
+        {
+            POSSystemService.GetCartlistData().Remove(CartToRemove);
+        }
+    }
+
+    private void IncrementCount(POSSystem.Orderlist cart)
+    {
+        if (cart != null)
+        {
+            if (int.TryParse(cart.Quantity.ToString(), out int quantity))  
+            {
+                cart.Quantity = quantity + 1;  
+            }
+        }
+    }
+
+    private void DecrementCount(POSSystem.Orderlist cart)
+    {
+        if (cart != null)
+        {
+            if (int.TryParse(cart.Quantity.ToString(), out int quantity)) 
+            {
+                if (quantity > 0)
+                {
+                    cart.Quantity = quantity - 1;  
+                }
+            }
+        }
+    }
+    
+}

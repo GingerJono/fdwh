@@ -1,0 +1,199 @@
+@page "/faqs"
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using FaqsData
+@inject FaqsService FaqsService
+
+    <!-- Page Header -->
+    <SpkPageHeader PageItems="PageItems" />
+    <!-- Page Header Close -->
+
+    <!-- Start:: row-2 -->
+    <div class="row justify-content-center">
+        <div class="col-xl-10">
+            <div class="card custom-card">
+                <div class="card-body">
+                    <div class="row justify-content-center border-bottom border-block-end-dashed mb-4">
+                        <div class="col-xl-7">
+                            <div class="py-2">
+                                <div class="text-center">
+                                    <h3 class="text-primary1 mb-3">FAQs</h3>
+                                    <h5 class="d-block">Require assistance? Here are some of our commonly asked questions!</h5>
+                                    <p class="text-muted mb-2 px-4">Discover answers to common queries and find solutions to your concerns with our comprehensive list of frequently asked questions.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <ul class="nav nav-tabs nav-tabs-header mb-4 d-flex justify-content-center faq-nav gap-2" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" data-bs-toggle="tab" role="tab" aria-current="page" href="#general-settings" aria-selected="false" tabindex="-1"><i class="ti ti-settings me-1 d-inline-block"></i>General Settings</a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link active" data-bs-toggle="tab" role="tab" aria-current="page" href="#theme-customization" aria-selected="true"><i class="ti ti-palette me-1 d-inline-block"></i>Theme Customization</a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" data-bs-toggle="tab" role="tab" aria-current="page" href="#user-management" aria-selected="false" tabindex="-1"><i class="ti ti-user-cog me-1 d-inline-block"></i>User Management</a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" data-bs-toggle="tab" role="tab" aria-current="page" href="#security-authentication" aria-selected="false" tabindex="-1"><i class="ti ti-shield-lock me-1 d-inline-block"></i>Security and Authentication</a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" data-bs-toggle="tab" role="tab" aria-current="page" href="#troubleshooting" aria-selected="false" tabindex="-1"><i class="ti ti-headset me-1 d-inline-block"></i>Troubleshooting and Support</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content mb-4 faq-accordions">
+                        <div class="tab-pane border-0 p-0" id="general-settings" role="tabpanel">
+                            <div class="accordion accordion-customicon1 faq-accordion accordion-primary accordions-items-seperate" id="accordionFAQ5">
+                                @foreach(var (list, index) in FaqsService.GetFaqsListsData().Take(5).Select((value, i) => (value, i))) {
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header" id="@($"headingcustomicon2{index}")">
+                                            <button class="@(index == 0 ? "accordion-button" : "accordion-button collapsed")" type="button" data-bs-toggle="collapse"
+                                                data-bs-target="@($"#collapsecustomicon2{index}")" aria-expanded="@(index == 0 ? "true" : "false")"
+                                                aria-controls="@($"collapsecustomicon2{index}")">
+                                            @list.title
+                                            </button>
+                                        </h2>
+                                        <div id="@($"collapsecustomicon2{index}")" class="accordion-collapse collapse @(index == 0 ? "show" : "")"
+                                            aria-labelledby="@($"headingcustomicon2{index}")"
+                                            data-bs-parent="#accordionFAQ5">
+                                            <div class="accordion-body">
+                                                @list.desc
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        <div class="tab-pane show active border-0 p-0" id="theme-customization" role="tabpanel">
+                            <div class="accordion accordion-customicon1 faq-accordion accordion-primary accordions-items-seperate" id="accordionFAQ1">
+                                @foreach(var (list, index) in FaqsService.GetFaqsListsData().Skip(5).Take(5).Select((value, i) => (value, i))) {
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header" id="@($"headingTheme{index}")">
+                                            <button class="@(index == 0 ? "accordion-button" : "accordion-button collapsed")" type="button" data-bs-toggle="collapse"
+                                                data-bs-target="@($"#collapseTheme{index}")" aria-expanded="@(index == 0 ? "true" : "false")"
+                                                aria-controls="@($"collapseTheme{index}")">
+                                            @list.title
+                                            </button>
+                                        </h2>
+                                        <div id="@($"collapseTheme{index}")" class="accordion-collapse collapse @(index == 0 ? "show" : "")"
+                                            aria-labelledby="@($"headingTheme{index}")"
+                                            data-bs-parent="#accordionFAQ1">
+                                            <div class="accordion-body">
+                                                @list.desc
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        <div class="tab-pane border-0 p-0" id="user-management" role="tabpanel">
+                            <div class="accordion accordion-customicon1 faq-accordion accordion-primary accordions-items-seperate" id="accordionFAQ2">
+                                @foreach(var (list, index) in FaqsService.GetFaqsListsData().Skip(10).Take(5).Select((value, i) => (value, i))) {
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header" id="@($"headingmanagement{index}")">
+                                            <button class="@(index == 0 ? "accordion-button" : "accordion-button collapsed")" type="button" data-bs-toggle="collapse"
+                                                data-bs-target="@($"#collapsemanagement{index}")" aria-expanded="@(index == 0 ? "true" : "false")"
+                                                aria-controls="@($"collapsemanagement{index}")">
+                                            @list.title
+                                            </button>
+                                        </h2>
+                                        <div id="@($"collapsemanagement{index}")" class="accordion-collapse collapse @(index == 0 ? "show" : "")"
+                                            aria-labelledby="@($"headingmanagement{index}")"
+                                            data-bs-parent="#accordionFAQ2">
+                                            <div class="accordion-body">
+                                                @list.desc
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        <div class="tab-pane border-0 p-0" id="security-authentication" role="tabpanel">
+                            <div class="accordion accordion-customicon1 faq-accordion accordion-primary accordions-items-seperate" id="accordionFAQ4">
+                                @foreach(var (list, index) in FaqsService.GetFaqsListsData().Skip(15).Take(5).Select((value, i) => (value, i))) {
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header" id="@($"headingauthentication{index}")">
+                                            <button class="@(index == 0 ? "accordion-button" : "accordion-button collapsed")" type="button" data-bs-toggle="collapse"
+                                                data-bs-target="@($"#collapseauthentication{index}")" aria-expanded="@(index == 0 ? "true" : "false")"
+                                                aria-controls="@($"collapseauthentication{index}")">
+                                            @list.title
+                                            </button>
+                                        </h2>
+                                        <div id="@($"collapseauthentication{index}")" class="accordion-collapse collapse @(index == 0 ? "show" : "")"
+                                            aria-labelledby="@($"headingauthentication{index}")"
+                                            data-bs-parent="#accordionFAQ4">
+                                            <div class="accordion-body">
+                                                @list.desc
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        <div class="tab-pane border-0 p-0" id="troubleshooting" role="tabpanel">
+                            <div class="accordion accordion-customicon1 faq-accordion accordion-primary accordions-items-seperate" id="accordionFAQ6">
+                                @foreach(var (list, index) in FaqsService.GetFaqsListsData().Skip(20).Take(5).Select((value, i) => (value, i))) {
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header" id="@($"headingtroubleshooting{index}")">
+                                            <button class="@(index == 0 ? "accordion-button" : "accordion-button collapsed")" type="button" data-bs-toggle="collapse"
+                                                data-bs-target="@($"#collapsetroubleshooting{index}")" aria-expanded="@(index == 0 ? "true" : "false")"
+                                                aria-controls="@($"collapsetroubleshooting{index}")">
+                                            @list.title
+                                            </button>
+                                        </h2>
+                                        <div id="@($"collapsetroubleshooting{index}")" class="accordion-collapse collapse @(index == 0 ? "show" : "")"
+                                            aria-labelledby="@($"headingtroubleshooting{index}")"
+                                            data-bs-parent="#accordionFAQ6">
+                                            <div class="accordion-body">
+                                                @list.desc
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row bg-light mx-0 justify-content-between align-items-center rounded">
+                        <div class="col-sm-3 d-md-block d-none px-0">
+                            <img src="../assets/images/media/media-65.png" alt="" class="img-fluid ps-3">
+                        </div>
+                        <div class="col-md-8 px-0">
+                            <div class="p-3">
+                                <div>
+                                    <h5 class="fw-semibold mb-2">Still Have Questions? We're Here to Help!</h5>
+                                    <span class="d-block fs-12 text-muted">
+                                        Contact our support team for personalized assistance. Your satisfaction is our priority!
+                                        Write your question below and we'll get back to you shortly.
+                                    </span>
+                                    <div class="row gy-3 mt-3"> 
+                                        <div class="col-xl-6"> 
+                                            <label for="user-name" class="form-label">Your Name</label> 
+                                            <input type="text" class="form-control" id="user-name" placeholder="Enter Your Name"> 
+                                        </div> 
+                                        <div class="col-xl-6"> 
+                                            <label for="user-email" class="form-label">Email Id</label> 
+                                            <input type="text" class="form-control" id="user-email" placeholder="Enter Email"> 
+                                        </div> 
+                                        <div class="col-xl-12"> 
+                                            <label for="text-area" class="form-label">Textarea</label>
+                                            <textarea class="form-control" placeholder="Enter your query here" id="text-area" rows="6"></textarea>
+                                        </div>
+                                        <div class="col-xl-12">
+                                            <SpkButtons ButtonClass="btn-primary" id="send">Send your question</SpkButtons>
+                                        </div> 
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End:: row-2 -->
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Pages" },
+        new SpkPageHeader.PageItem { PageTitle = "Faq's" },
+    };
+}

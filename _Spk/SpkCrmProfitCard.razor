@@ -1,0 +1,25 @@
+@using CardModel
+
+@code {
+    [Parameter] public Crmprofit? crmprofit { get; set; }
+}
+
+<div class="card border border-@crmprofit?.Cardclass border-opacity-25 custom-card">
+    <div class="card-body">
+        <div class="d-flex gap-2 align-items-center my-1">
+            <div>
+                <span class="mb-1 d-block">@crmprofit?.Title</span> 
+                <h4 class="mb-1">$@crmprofit?.Value</h4> 
+                @if(@crmprofit?.IsIncreased == true) {
+                    <div class="text-muted fs-13"> 
+                        <span class=""> Increased By </span>  
+                        <SpkBadge BadgeClass="@($"bg-{crmprofit?.Badge} {"align-middle"}")">@crmprofit?.BadgeValue<i class="ti ti-arrow-narrow-up"></i></SpkBadge>
+                    </div>
+                }
+            </div>
+            <div class="avatar avatar-lg bg-@crmprofit?.Cardclass-transparent svg-@crmprofit?.Cardclass ms-auto shadow-sm">
+                    @((MarkupString)(crmprofit?.Icon ?? string.Empty))
+            </div>
+        </div>
+    </div>
+</div>

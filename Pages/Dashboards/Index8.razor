@@ -1,0 +1,535 @@
+@page "/index8"
+@using ApexCharts
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using ApexSeries
+@using CardModel
+@using Jobs
+@inject JobsService JobsService
+
+            <!-- Start::page-header -->
+            <SpkPageHeader PageItems="PageItems" />
+            <!-- End::page-header -->
+
+                <!-- Start::row-1 -->
+                <div class="row row-cols row-cols-xl-5">
+                    @foreach (var maincard in JobsService.GetMainCard()) {
+                    <div class="col-xxl col-xl-6">
+                        <SpkJobsCard MainCard="maincard"></SpkJobsCard>
+                    </div>
+                    }
+                </div>
+                <!--End::row-1 -->
+
+                <!-- Start::row-2 -->
+                <div class="row">
+                    <div class="col-xxl-6">
+                        <div class="card custom-card">
+                            <div class="card-header justify-content-between">
+                                <div class="card-title">Job Statistics</div>
+                                <div class="d-flex gap-2">
+                                    <SpkButtons ButtonClass="btn-outline-light" ButtonSize="btn-sm">Today</SpkButtons>
+                                    <SpkButtons ButtonClass="btn-outline-light" ButtonSize="btn-sm">Weakly</SpkButtons>
+                                    <SpkButtons ButtonClass="btn-light" ButtonSize="btn-sm">Yearly</SpkButtons>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div id="jobs-statistics">
+                                    <SpkApex TItem="JobStatistics" ApexHeight="325" Items="jobsstatistics" ChartOptions="JobStatisticsChartOptions" Series="JobStatisticsSeriesConfig">
+                                    </SpkApex>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xxl-3">
+                        <div class="mb-4 d-flex align-items-center justify-content-between">
+                            <h6 class="mb-0">Need To Hire:</h6>
+                            <div>
+                                <SpkButtons ButtonClass="btn-primary-light" ButtonSize="btn-sm">View All</SpkButtons>
+                            </div>
+                        </div>
+                        <div class="card custom-card">
+                            <div class="card-body">
+                                <ul class="mb-0 list-unstyled">
+                                    @foreach(var Hire in JobsService.GetHireData().ToList()) {
+                                        <li class="@(Hire == JobsService.GetHireData().ToList().Last() ? "mb-1" : "mb-4")">
+                                            <div class="d-flex align-items-center">
+                                                <a aria-label="anchor" href="javascript:void(0);" class="me-2">
+                                                    <span class="avatar avatar-lg bg-@Hire.HireColor-transparent text-@Hire.HireColor">@Hire.HireIcon</span>
+                                                </a>
+                                                <div class="flex-fill text-truncate">
+                                                    <a href="javascript:void(0);" class="fw-medium fs-14 w-75 text-truncate d-block">@Hire.HireTile</a>
+                                                    <p class="text-muted mb-0 fs-12 w-75 text-truncate">Status: <span class="text-@Hire.StatusColor">@Hire.Status</span></p>
+                                                </div>
+                                                <div class=" text-end ms-auto">
+                                                    <div class="text-muted op-7 fs-12">Candidates</div>
+                                                    <div class="fw-medium">@Hire.Candidates</div>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xxl-3">
+                        <div class="card custom-card">
+                            <div class="card-header">
+                                <div class="card-title w-95 text-truncate">
+                                    Candidates By Gender
+                                </div>
+                            </div>
+                            <div class="card-body m-3 pb-4 px-0 bg-light">
+                                <div id="job-acceptance">
+                                    <SpkApex TItem="Candidate" ChartOptions="CandidateChartOptions" Items="Candidates" Series="CandidateSeriesConfig"></SpkApex>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <div class="row gy-4">
+                                    <div class="col-xl-12">
+                                        <div class="d-flex align-items-end gap-3 flex-wrap justify-content-between">
+                                            <div>
+                                                <h5 class="mb-0">15,754</h5>
+                                                <span class="text-muted fs-12 op-8">Male Candidates</span>
+                                            </div>
+                                            <div class="text-muted fs-13">
+                                                <span class="text-success"><i class="ri-arrow-up-s-fill"></i>1.6%<i class="ri-bar-chart-fill ms-2 text-muted"></i></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-xl-12">
+                                        <div class="d-flex align-items-end gap-3 flex-wrap justify-content-between">
+                                            <div>
+                                                <h5 class="mb-0">4,872</h5>
+                                                <span class="text-muted fs-12 op-8">Female Candidates</span>
+                                            </div>
+                                            <div class="text-muted fs-13">
+                                                <span class="text-danger"><i class="ri-arrow-down-s-fill"></i>1.3%<i class="ri-bar-chart-fill ms-2 text-muted"></i></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-xl-12">
+                                        <div class="d-flex align-items-end gap-3 flex-wrap justify-content-between">
+                                            <div>
+                                                <h5 class="mb-0">2.5k</h5>
+                                                <span class="text-muted fs-11 op-7">Total Candidates</span>
+                                            </div>
+                                            <div class="text-muted fs-13">
+                                                <span class="text-success"><i class="ri-arrow-up-s-fill"></i>0.6%<i class="ri-bar-chart-fill ms-2 text-muted"></i></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- End::row-2 -->
+
+                <!-- Start::row-3 -->
+                <div class="row">
+                    <div class="col-xxl-3 col-md-12">
+                        <div class="card custom-card">
+                            <div class="card-header justify-content-between">
+                                <div class="card-title">
+                                    New Applicants
+                                </div>
+                                <SpkDropdowns Tag="button" DropdownClass="btn-outline-light border btn-full btn-sm " DropdownText="View All<i class='ti ti-chevron-down ms-1'></i>" DropdownToggle=false>
+                                    <ChildContent2>
+                                        <ul class="dropdown-menu" role="menu">
+                                            <li><a class="dropdown-item" href="javascript:void(0);">Download</a></li>
+                                            <li><a class="dropdown-item" href="javascript:void(0);">Import</a></li>
+                                            <li><a class="dropdown-item" href="javascript:void(0);">Export</a></li>
+                                        </ul>
+                                    </ChildContent2>
+                                </SpkDropdowns>
+                            </div>
+                            <div class="card-body">
+                                <ul class="mb-0 list-unstyled">
+                                    @foreach(var Applicants in JobsService.GetApplicantsData().ToList()) {
+                                        <li class="@(Applicants == JobsService.GetApplicantsData().ToList().Last() ? "mb-1" : "mb-4")">
+                                            <div class="d-flex align-items-center">
+                                                <a aria-label="anchor" href="javascript:void(0);" class="me-2">
+                                                    <span class="avatar avatar-md bg-@Applicants.HireColor text-white">
+                                                        @if(!string.IsNullOrEmpty(Applicants.HireIMG)) {
+                                                            <img src="@Applicants.HireIMG" alt="">
+                                                        }else {
+                                                            @Applicants.HireIcon
+                                                        }
+                                                    </span>
+                                                </a>
+                                                <div class="flex-grow-1">
+                                                    <a href="javascript:void(0);" class="fs-13 fw-medium"> @Applicants.HireTile</a>
+                                                    <p class="text-muted mb-0 fw-normal fs-12"><span class="fw-medium">@Applicants.Status</span></p>
+                                                </div>
+                                                <div class="btn-list">
+                                                    <SpkTooltip Tag="a" TooltipClass="btn btn-icon btn-sm rounded-pill btn-info-light" TooltipTitle="Call">
+                                                        <i class="ti ti-phone align-middle"></i>
+                                                    </SpkTooltip>
+                                                    <SpkTooltip Tag="a" TooltipClass="btn btn-icon btn-sm rounded-pill btn-primary1-light" TooltipTitle="Mail">
+                                                        <i class="ti ti-at align-middle"></i>
+                                                    </SpkTooltip>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xxl-6 col-md-12">
+                        <div class="mb-3 d-flex align-items-center justify-content-between">
+                            <h6 class="mb-0">Recent Jobs:</h6>
+                            <div>
+                                <SpkButtons ButtonClass="btn-primary-light" ButtonSize="btn-sm">View All</SpkButtons>
+                            </div>
+                        </div>
+                        <div class="card custom-card overflow-hidden">
+                            <div class="card-body p-0">
+                                <SpkTables Items="JobsService.GetJobsHeadersData()" Tableclass="text-nowrap recent-job">
+                                    @foreach (var Jobs in JobsService.GetJobsData()){
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="me-3">
+                                                        <span class="avatar avatar-sm bg-@Jobs.JobColor-transparent">
+                                                            <i class="@Jobs.JobIcon fs-20"></i>
+                                                        </span>
+                                                    </div>
+                                                    <div>
+                                                        <p class="mb-0 fw-medium">@Jobs.JobTile</p>
+                                                        <p class=" mb-0 text-muted fs-11">posted: @Jobs.Posted</p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <p class="mb-0">@Jobs.Applicants Applicants</p>
+                                            </td>
+                                            <td>
+                                                <p class="mb-0 fw-medium">@Jobs.Openings</p>
+                                            </td>
+                                            <td>
+                                                <p class="mb-0 fs-12 text-muted"><i class="ri-map-pin-fill text-xs me-1"></i>@Jobs.Location</p>
+                                            </td>
+                                            <td>
+                                                <div class="btn-list">
+                                                    <SpkButtons Tag="a" ButtonClass="btn-icon btn-primary-light" ButtonSize="btn-sm"><i class="ti ti-edit"></i></SpkButtons>
+                                                    <SpkButtons Tag="a" ButtonClass="btn-icon btn-primary1-light" ButtonSize="btn-sm" @onclick="@(() => DeleteJobsList(Jobs.Id))"><i class="ti ti-trash"></i></SpkButtons>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </SpkTables>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xxl-3 col-md-12">
+                        <div class="card custom-card">
+                            <div class="card-header justify-content-between">
+                                <div class="card-title">
+                                    Activity Feed
+                                </div>
+                                <SpkDropdowns Tag="button" DropdownClass="btn-outline-light border btn-full btn-sm " DropdownText="View All<i class='ti ti-chevron-down ms-1'></i>" DropdownToggle=false>
+                                    <ChildContent2>
+                                        <ul class="dropdown-menu" role="menu">
+                                            <li><a class="dropdown-item" href="javascript:void(0);">Download</a></li>
+                                            <li><a class="dropdown-item" href="javascript:void(0);">Import</a></li>
+                                            <li><a class="dropdown-item" href="javascript:void(0);">Export</a></li>
+                                        </ul>
+                                    </ChildContent2>
+                                </SpkDropdowns>
+                            </div>
+                            <div class="card-body p-0">
+                                <ul class="list-group list-group-flush list-unstyled jobs-activity-list">
+                                    @foreach (var activity in JobsService.GetJobsActivity().ToList()){
+                                        <li class="list-group-item border-bottom-0  @(activity == JobsService.GetJobsActivity().ToList().Last() ? "mb-2" : "pb-2") ">
+                                            <SpkProductActivity productactivity="activity"></SpkProductActivity>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- End::row-3 -->
+
+                <!-- Start::row-4 -->
+                <div class="row">
+                    <div class="col-xl-12">
+                        <div class="card custom-card">
+                            <div class="card-header justify-content-between">
+                                <div class="card-title">
+                                    Recent Applicants
+                                </div>
+                                <div class="d-flex flex-wrap gap-1">
+                                    <div class="me-2">
+                                        <input class="form-control form-control-sm" type="text" placeholder="Search Here" aria-label=".form-control-sm example">
+                                    </div>
+                                    <SpkDropdowns Tag="a" DropdownClass="btn btn-primary btn-sm " DropdownText="Sort By<i class='ri-arrow-down-s-line align-middle ms-1 d-inline-block'></i>" DropdownToggle=false>
+                                        <ChildContent2>
+                                        <ul class="dropdown-menu" role="menu">
+                                            <li><a class="dropdown-item" href="javascript:void(0);">New</a></li>
+                                            <li><a class="dropdown-item" href="javascript:void(0);">Popular</a></li>
+                                            <li><a class="dropdown-item" href="javascript:void(0);">Relevant</a></li>
+                                        </ul>
+                                        </ChildContent2>
+                                    </SpkDropdowns>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <SpkTables Tableclass="text-nowrap table-hover border table-bordered" Items="JobsService.GetJobsApplicantsHeadersData()">
+                                    @foreach(var Applicant in JobsService.GetJobsApplicantsData()) {
+                                        <tr>
+                                            <th scope="row">@Applicant.Id</th>
+                                            <td>
+                                                <div class="d-flex align-items-center fw-medium">
+                                                    <span class="avatar avatar-sm me-2 avatar-rounded">
+                                                        <img src="@Applicant.CandidateIMG" alt="img">
+                                                    </span>@Applicant.Candidate
+                                                </div>
+                                            </td>
+                                            <td>@Applicant.Category</td>
+                                            <td><span class="@Applicant.DesigColor">@Applicant.Design</span></td>
+                                            <td>@Applicant.Mail</td>
+                                            <td>
+                                                <div class="d-inline-flex align-items-center">
+                                                    <i class="ri-map-pin-line text-muted"></i>
+                                                    <span class="ms-1">@Applicant.Location</span>
+                                                </div>
+                                            </td>
+                                            <td>@Applicant.Date</td>
+                                            <td><SpkBadge BadgeClass="@Applicant.StatusColor">@Applicant.Status</SpkBadge></td>
+                                            <td>
+                                                <div class="hstack gap-2 fs-15">
+                                                    <SpkButtons Tag="a" ButtonClass="btn btn-icon btn-sm btn-success-light"><i class="ri-download-2-line"></i></SpkButtons>
+                                                    <SpkButtons Tag="a" ButtonClass="btn btn-icon btn-sm btn-primary-light"><i class="ri-edit-line"></i></SpkButtons>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </SpkTables>
+                            </div>
+                            <div class="card-footer">
+                                <div class="d-flex align-items-center">
+                                    <div>
+                                        Showing 6 Entries <i class="bi bi-arrow-right ms-2 fw-medium"></i>
+                                    </div>
+                                    <div class="ms-auto">
+                                        <nav aria-label="Page navigation" class="pagination-style-4">
+                                            <ul class="pagination mb-0">
+                                                <li class="page-item disabled">
+                                                    <a class="page-link" href="javascript:void(0);">
+                                                        Prev
+                                                    </a>
+                                                </li>
+                                                <li class="page-item active"><a class="page-link" href="javascript:void(0);">1</a></li>
+                                                <li class="page-item"><a class="page-link" href="javascript:void(0);">2</a></li>
+                                                <li class="page-item">
+                                                    <a class="page-link text-primary" href="javascript:void(0);">
+                                                        next
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </nav>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- End::row-4 -->
+
+
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Dashboards" },
+        new SpkPageHeader.PageItem { PageTitle = "Jobs" },
+    };
+    // Job Statistics Start //
+    private List<JobStatistics> jobsstatistics { get; set; } = JobsService.GetJobStatisticss();
+    private ApexChartOptions<JobStatistics> JobStatisticsChartOptions { get; set; } = new();
+    private List<SeriesConfig<JobStatistics>>? JobStatisticsSeriesConfig { get; set; }
+    // Job Statistics End //
+
+    //  Candidate Start //
+    private List<Candidate> Candidates { get; set; } = JobsService.GetCandidates();    
+    private ApexChartOptions<Candidate> CandidateChartOptions { get; set; } = new();
+    private List<SeriesConfig<Candidate>>? CandidateSeriesConfig { get; set; }
+    //  Candidate End //
+     protected override void OnInitialized() {
+
+        JobStatisticsChartOptions = new ApexChartOptions<JobStatistics> {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false, Pan = false, Reset = false,  Download = false},
+                }, 
+                FontFamily = "Montserrat, sans-serif",
+                ForeColor= "#d4d7d9",
+                Stacked = true,
+            },
+            Grid = new Grid {
+                Show = true,
+                BorderColor = "#f1f1f1",
+                StrokeDashArray = 3
+            },
+            Colors = new Color(new List<string> {"var(--primary-color)", "rgba(227, 84, 212, 0.5)", "rgba(255, 93, 159, .4)", "rgba(255, 142, 111, .3)"}),
+            DataLabels = new DataLabels {
+                Enabled = false,
+            }, 
+            Legend = new Legend {
+                Show = true,
+                Position = LegendPosition.Top,
+                HorizontalAlign = Align.Center,
+                Markers=  new(){
+                    Width =  6,
+                    Height = 6,
+                    Radius=50,
+                    StrokeWidth= 0
+                },
+            },
+            Tooltip = new Tooltip { 
+                Enabled= true,
+                Theme = ApexCharts.Mode.Dark,
+                Shared= true,
+                Intersect= false,
+            },
+            PlotOptions = new PlotOptions {
+                Bar = new PlotOptionsBar {
+                    Horizontal = false,
+                    BorderRadius = 5,
+                    ColumnWidth = "25%",
+                }
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis {
+                    Show = true,
+                    Min = 0,
+                    Max = 200,
+                    StepSize = 20,
+                },
+            },
+            Xaxis =  new XAxis {
+                AxisBorder = new () {
+                    Show = false,
+                },
+                AxisTicks = new () {
+                    Show = false,
+                },
+            },
+        };
+        JobStatisticsSeriesConfig = new List<SeriesConfig<JobStatistics>>
+        {
+            new SeriesConfig<JobStatistics>
+            {
+                Name="Applications",
+                SeriesType =SeriesType.Bar,
+                XValueSelector = e => e.Week ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.ApplicationsValue)
+            },
+            new SeriesConfig<JobStatistics>
+            {
+                Name="Shortlisted",
+                SeriesType =SeriesType.Bar,
+                XValueSelector = e => e.Week ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.ShortlistedValue)
+            },
+            new SeriesConfig<JobStatistics>
+            {
+                Name="Rejected",
+                SeriesType =SeriesType.Bar,
+                XValueSelector = e => e.Week ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.RejectedValue)
+            },
+            new SeriesConfig<JobStatistics>
+            {
+                Name="On-Hold",
+                SeriesType = SeriesType.Bar,
+                XValueSelector = e => e.Week ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.OnHoldValue)
+            },
+        };
+
+        CandidateChartOptions = new ApexChartOptions<Candidate> {
+            Chart = new () {
+                Height =123,
+            }, 
+            DataLabels = new DataLabels {
+                Enabled = false,
+            }, 
+            Legend = new Legend  { 
+                Show= false,
+            }, 
+            Stroke = new Stroke { 
+                Show= true,
+                Curve = Curve.Smooth,
+                LineCap = ApexCharts.LineCap.Round,
+                Colors = ["#fff"],
+                Width = 1,
+                DashArray = 0,
+            },
+            Grid = new Grid {
+                Padding= new() {
+                    Bottom = -100
+                }
+            },
+            Colors = new Color(new List<string> {"var(--primary-color)", "rgb(227, 84, 212)"}),
+            PlotOptions = new PlotOptions {
+                Pie = new PlotOptionsPie { 
+                    StartAngle = -90,
+                    EndAngle = 90,
+                    OffsetY = 10,
+                    ExpandOnClick = false,
+                    Donut= new PlotOptionsDonut{
+                        Size = "70%",
+                        Background = "transparent",
+                        Labels = new() {
+                            Show = true,
+                            Name = new() {
+                                Show = true,
+                                FontSize = "20px",
+                                Color = "#495057",
+                                OffsetY = -25
+                            },
+                            Value = new(){
+                                Show = true,
+                                FontSize = "12px",
+                                OffsetY = -25,
+                                Formatter = @"function (val) {
+                                    return val + '%'
+                                }"
+                            },
+                            Total = new(){
+                                Show = true,
+                                ShowAlways = true,
+                                Label = "Total",
+                                FontSize = "14px",
+                                FontWeight = 600,
+                                Color = "#495057",
+                            }
+                        }
+                    },
+                } 
+            },
+        };
+        CandidateSeriesConfig = new List<SeriesConfig<Candidate>>
+        {
+            new SeriesConfig<Candidate>
+            {
+                SeriesType =SeriesType.Donut,
+                XValueSelector = e => e.CandidateSeries ?? "unknown",
+                YAggregateSelector = e => e.Sum(e => e.CandidateValue)
+            },
+        };
+
+    }
+    
+    protected void DeleteJobsList(decimal Id)
+    {
+        var JobsToRemove = JobsService.GetJobsData().FirstOrDefault(o => o.Id == Id);
+        if (JobsToRemove != null)
+        {
+            JobsService.GetJobsData().Remove(JobsToRemove);
+        }
+    }
+
+}

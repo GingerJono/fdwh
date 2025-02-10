@@ -1,0 +1,43 @@
+@using JobData
+
+@code {
+    [Parameter] public Jobs? Jobs { get; set; }    
+}
+
+@if(Jobs != null){
+    <div class="card custom-card featured-jobs shadow-none border">
+        <div class="card-body">
+            <div class="d-flex mb-3 flex-sm-wrap gap-2 flex-xxl-nowrap">
+                <div>
+                    @if (!string.IsNullOrEmpty(Jobs.Img)) {
+                        <span class="avatar avatar-md border p-1">
+                            <img src="@Jobs.Img" alt="">
+                        </span>
+                    }else {
+                        <span class="avatar avatar-md avatar-rounded bg-@Jobs.Iconcolor-transparent border">
+                            <i class="@Jobs.Icon"></i>
+                        </span>
+                    }
+                </div>
+                <div class="ms-1 flex-grow-1 w-sm-75 text-truncate">
+                    <h6 class="fw-medium mb-0 d-flex align-items-center text-truncate w-sm-75">
+                        <a href="javascript:void(0);" class="w-75 text-truncate"> @Jobs.Title</a>
+                    </h6>
+                    <a href="javascript:void(0);" class="fs-12 text-muted"><i class="bi bi-building"></i> @Jobs.Company</a>
+                </div>
+                <div class="ms-auto d-flex gap-1 flex-xxl-nowrap">
+                    <SpkTooltip Tag="a" TooltipClass="avatar avatar-sm avatar-rounded bg-primary1-transparent" TooltipTitle="Add to wishlist" TooltipPlacement="top"><span><i class="bi bi-heart"></i></span></SpkTooltip>
+                    <SpkTooltip Tag="a" TooltipClass="avatar avatar-sm avatar-rounded bg-warning-transparent" TooltipTitle="Featured Jobs" TooltipPlacement="top"><span><i class="bi bi-star-fill"></i></span></SpkTooltip>
+                </div>
+            </div>
+            <div class="mb-3">
+                <div class="popular-tags mb-3 d-flex gap-1 flex-wrap flex-xxl-nowrap">
+                    <SpkBadge BadgeClass="bg-info-transparent" IsRounded=true><i class="bi bi-geo-alt me-1"></i> @Jobs.Location</SpkBadge>
+                    <SpkBadge BadgeClass="bg-primary2-transparent" IsRounded=true><i class="bi bi-mortarboard me-1"></i> @Jobs.Experience</SpkBadge>
+                </div>
+                <h6 class="fw-medium mb-0">@Jobs.Salary</h6>
+            </div>
+            <SpkButtons ButtonClass="fw-medium btn-primary d-grid text-nowrap w-100" ButtonSize="btn-sm">Apply Now</SpkButtons>
+        </div>                                                    
+    </div>
+}

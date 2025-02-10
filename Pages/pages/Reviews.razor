@@ -1,0 +1,214 @@
+@page "/reviews"
+@inject IJSRuntime JSRuntime
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using Sandbox._Spk.Reviews
+@using ReviewsData
+@inject ReviewsService ReviewsService
+@using CardModel
+
+    <!-- BlazorSlickCarousel CSS -->
+    <link href="_content/WMBlazorSlickCarousel/WMBlazorSlickCarousel.bundle.scp.css" rel="stylesheet">
+
+    <!-- Page Header -->
+    <SpkPageHeader PageItems="PageItems" />
+    <!-- Page Header Close -->
+
+    <!-- Start::row-1 -->
+    <div class="row">
+        <div class="col-xl-12">
+            <h6 class="mb-3">Reviews Style 1 :</h6>
+            <BlazorSlickCarousel Configurations="ResponsiveConfigurations">
+                <BlazorSlickCarouselContent>
+                    @foreach(var rating in ReviewsService.GetReviewsData1()){
+                        <div class="Carousel-slide">
+                            <SpkReviewStyle1 Review="rating"></SpkReviewStyle1>
+                        </div>
+                    }
+                </BlazorSlickCarouselContent>
+            </BlazorSlickCarousel>
+        </div>
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        Reviews Style 2 :
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                <BlazorSlickCarousel Configurations="ResponsiveConfigurations1">
+                    <BlazorSlickCarouselContent>
+                        @foreach(var rating in ReviewsService.GetReviewsData2()){
+                            <div class="Carousel-slide">
+                                <SpkReviewStyle2 Review="rating"></SpkReviewStyle2>
+                            </div>
+                        }
+                    </BlazorSlickCarouselContent>
+                </BlazorSlickCarousel>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-12">
+            <h6 class="mb-3">Reviews Style 3 :</h6>
+            <div class="review-style-2 mb-3">
+                <BlazorSlickCarousel Configurations="ResponsiveConfigurations2">
+                    <BlazorSlickCarouselContent>
+                        @foreach(var rating in ReviewsService.GetReviewsData3()){
+                            <div class="Carousel-slide">
+                                <SpkReviewStyle3 Review="rating"></SpkReviewStyle3>
+                            </div>
+                        }
+                    </BlazorSlickCarouselContent>
+                </BlazorSlickCarousel>
+            </div>
+        </div>
+    </div>
+    <!--End::row-1 -->
+
+    <!-- Start::row-2 -->
+    <div class="row">
+        <div class="col-xl-12">
+            <h6 class="mb-3">Reviews Style 4 :</h6>
+            <BlazorSlickCarousel Configurations="ResponsiveConfigurations3">
+                <BlazorSlickCarouselContent>
+                    @foreach(var rating in ReviewsService.GetReviewsData4()){
+                        <div class="Carousel-slide">
+                            <SpkReviewStyle4 Review="rating"></SpkReviewStyle4>
+                        </div>
+                    }
+                </BlazorSlickCarouselContent>
+            </BlazorSlickCarousel>
+        </div>
+    </div>
+    <!-- End::row-2 -->
+
+    <!-- Start::row-3 -->
+    <div class="row">
+        <div class="col-xl-12">
+            <h6 class="mb-3">Reviews Style 5 :</h6>
+            <div class="">
+                <BlazorSlickCarousel Configurations="ResponsiveConfigurations4">
+                    <BlazorSlickCarouselContent>
+                       @foreach(var rating in ReviewsService.GetReviewsData5()){
+                        <div class="Carousel-slide">
+                            <SpkReviewStyle5 Review="rating"></SpkReviewStyle5>
+                        </div>
+                    }
+                    </BlazorSlickCarouselContent>
+                </BlazorSlickCarousel>
+            </div>
+        </div>
+    </div>
+    <!-- End::row-3 -->
+
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Pages" },
+        new SpkPageHeader.PageItem { PageTitle = "Reviews" },
+    };
+    public WMBSCInitialSettings? ResponsiveConfigurations;  
+    public WMBSCInitialSettings? ResponsiveConfigurations1;  
+    public WMBSCInitialSettings? ResponsiveConfigurations2;  
+    public WMBSCInitialSettings? ResponsiveConfigurations3;  
+    public WMBSCInitialSettings? ResponsiveConfigurations4;  
+
+    protected override void OnInitialized() {
+        WMBSCSettings breakpoint768Settings = new WMBSCSettings
+        {
+            slidesToShow = 1,
+        };
+        WMBSCResponsiveSettings breakpoint768Responsive = new WMBSCResponsiveSettings
+        {
+            breakpoint = 768,
+            settings = breakpoint768Settings
+        };
+        WMBSCSettings breakpoint1024Settings = new WMBSCSettings
+        {
+            slidesToShow = 2,
+        };
+        WMBSCResponsiveSettings breakpoint1024Responsive = new WMBSCResponsiveSettings
+        {
+            breakpoint = 1024,
+            settings = breakpoint1024Settings
+        };
+        WMBSCSettings breakpoint1400Settings = new WMBSCSettings
+        {
+            slidesToShow = 2,
+        };
+        WMBSCResponsiveSettings breakpoint1400Responsive = new WMBSCResponsiveSettings
+        {
+            breakpoint = 1400,
+            settings = breakpoint1400Settings
+        };
+        List<WMBSCResponsiveSettings> responsiveSettingsList = new List<WMBSCResponsiveSettings>();
+        responsiveSettingsList.Add(breakpoint768Responsive);
+        responsiveSettingsList.Add(breakpoint1024Responsive);
+        responsiveSettingsList.Add(breakpoint1400Responsive);
+
+        ResponsiveConfigurations = new WMBSCInitialSettings
+        {
+            arrows = false,
+            dots = false,
+            slidesToShow = 4,
+            slidesToScroll = 1,
+            infinite = true,
+            autoplay = true,
+            autoplaySpeed = 1500,
+            responsive = responsiveSettingsList,
+        };
+        ResponsiveConfigurations1 = new WMBSCInitialSettings
+        {
+            arrows = false,
+            dots = false,
+            slidesToShow = 3,
+            slidesToScroll = 1,
+            infinite = true,
+            autoplay = true,
+            autoplaySpeed = 1500,
+            responsive = responsiveSettingsList,
+        };
+        ResponsiveConfigurations2 = new WMBSCInitialSettings
+        {
+            arrows = false,
+            dots = false,
+            slidesToShow = 2,
+            slidesToScroll = 1,
+            infinite = true,
+            autoplay = true,
+            autoplaySpeed = 1500,
+            responsive = responsiveSettingsList,
+        };
+        ResponsiveConfigurations3 = new WMBSCInitialSettings
+        {
+            arrows = false,
+            dots = false,
+            slidesToShow = 4,
+            slidesToScroll = 1,
+            infinite = true,
+            autoplay = true,
+            autoplaySpeed = 1500,
+            responsive = responsiveSettingsList,
+        };
+        ResponsiveConfigurations4 = new WMBSCInitialSettings
+        {
+            arrows = false,
+            dots = false,
+            slidesToShow = 3,
+            slidesToScroll = 1,
+            infinite = true,
+            autoplay = true,
+            autoplaySpeed = 1500000,
+            responsive = responsiveSettingsList,
+        };
+    }
+}
+
+@code {    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("window.interop.initializeTooltips");
+        }
+    }
+}

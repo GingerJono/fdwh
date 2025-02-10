@@ -1,0 +1,365 @@
+@page "/Apex-heatmap-charts"
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using ApexSeries
+@using ApexCharts
+@using HeatmapData
+@inject HeatmapService HeatmapService
+
+
+    <!-- Page Header -->
+    <SpkPageHeader PageItems="PageItems" />
+    <!-- Page Header Close -->
+
+    <!-- Start::row-1 -->
+    <div class="row">
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Basic Heatmap Chart</div>
+                </div> 
+                <div class="card-body">
+                    <ApexChart TItem="Heatmapbasic" Title="HeatMap Chart (Single color)" Options="Heatmapbasicoptions" Height="350">
+                        @foreach (var source in incidents.GroupBy(e => e.Source))
+                        {
+                            <ApexPointSeries TItem="Heatmapbasic"
+                                        Items="source.OrderBy(e=>e.WeekNumber)"
+                                        Name="@source.Key!.ToString()"
+                                        SeriesType="SeriesType.Heatmap"
+                                        XValue="@(e => e.WeekName)"
+                                        YAggregate="@(e => (int)e.Average(a=>a.Severity))" />
+                        }
+                    </ApexChart>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Multi Series Heatmap Chart</div>
+                </div> 
+                <div class="card-body">
+                    <ApexChart TItem="HeatmapMulticolor" Title="HeatMap Chart (Different color shades for each series)" Options="HeatmapMulticoloroptions" Height="350">
+                            @foreach (var source in HeatmapMulticolorincidents.GroupBy(e => e.Source))
+                            {
+                                <ApexPointSeries TItem="HeatmapMulticolor"
+                                            Items="source.OrderBy(e=>e.WeekNumber)"
+                                            Name="@source.Key!.ToString()"
+                                            SeriesType="SeriesType.Heatmap"
+                                            XValue="@(e => e.WeekName)"
+                                            YAggregate="@(e => (int)e.Average(a=>a.Severity))" />
+                            }
+
+                        </ApexChart>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Color Range Heatmap Chart</div>
+                </div> 
+                <div class="card-body">
+                <ApexChart TItem="HeatmapColorRange" Title="HeatMap Chart with Color Range" Options="HeatmapColorRangeoptions" Debug="true" Height="350">
+
+                            @foreach (var source in HeatmapColorRangeincidents.GroupBy(e => e.Source))
+                            {
+                                <ApexPointSeries TItem="HeatmapColorRange"
+                                    Items="source.OrderBy(e=>e.WeekNumber)"
+                                    Name="@source.Key!.ToString()"
+                                    SeriesType="SeriesType.Heatmap"
+                                    XValue="@(e => e.WeekName)"
+                                    YAggregate="@(e => (int)e.Average(a=>a.Severity))" />
+                            }
+
+                        </ApexChart>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Heatmap Range Without Shades</div>
+                </div> 
+                <div class="card-body">
+                    <ApexChart TItem="HeatmapShades" Title="Rounded (Range without Shades)" Options="HeatmapShadesoptions" Height="350">
+
+                            @foreach (var source in HeatmapShadesincidents.GroupBy(e => e.Source).OrderBy(e => e.Key))
+                            {
+                                <ApexPointSeries TItem="HeatmapShades"
+                                            Items="source.OrderBy(e=>e.WeekNumber)"
+                                            Name="@source.Key!.ToString()"
+                                            SeriesType="SeriesType.Heatmap"
+                                            XValue="@(e => e.WeekName)"
+                                            YAggregate="@(e => (int)e.Average(a=>a.Severity))" ShowDataLabels />
+                            }
+
+                    </ApexChart>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End::row-1 -->
+
+
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Charts" },
+        new SpkPageHeader.PageItem { PageTitle = "Apex Charts" },
+        new SpkPageHeader.PageItem { PageTitle = "Apex Heatmap Charts" },
+    };
+
+    // Heatmapbasic Chart Start //
+    private List<Heatmapbasic> incidents { get; set; } = HeatmapService.GetHeatmapbasics();
+    private ApexChartOptions<Heatmapbasic> Heatmapbasicoptions { get; set; } = new();
+    //  Heatmapbasic Chart End //
+
+    // Heatmap Multi Chart Start //
+    private List<HeatmapMulticolor> HeatmapMulticolorincidents { get; set; } = HeatmapService.GetHeatmapMulticolors();
+    private ApexChartOptions<HeatmapMulticolor> HeatmapMulticoloroptions { get; set; } = new();
+    //  Heatmap Multi Chart End //
+
+    // Heatmap Color Range Chart Start //
+    private List<HeatmapColorRange> HeatmapColorRangeincidents { get; set; } = HeatmapService.GetHeatmapColorRanges();
+    private ApexChartOptions<HeatmapColorRange>? HeatmapColorRangeoptions;
+    //  Heatmap Color Range End //
+
+    //  Heatmap Without Shades Start //
+    private List<HeatmapShades> HeatmapShadesincidents { get; set; } = HeatmapService.GetHeatmapShadess();
+    private ApexChartOptions<HeatmapShades> HeatmapShadesoptions = new();
+    //  Heatmap Without Shades End //
+
+    protected override void OnInitialized()
+    {
+        Heatmapbasicoptions = new ApexChartOptions<Heatmapbasic> {
+            DataLabels = new ApexCharts.DataLabels {
+                Enabled = true,
+            }, 
+            Colors = new Color(new List<string> { "#5c67f7" }),
+            Grid = new Grid {
+                BorderColor = "#f2f5f7",
+            },
+            Title = new Title{
+                Style = new TitleStyle {
+                    FontSize= "13px",
+                    FontWeight= "bold",
+                    Color= "#8c9097"
+                },
+            },
+            Xaxis =  new XAxis {  
+                Labels = new XAxisLabels {
+                    Show = true,
+                    Style = new() {
+                        Colors = "#8c9097",
+                        FontSize = "11px",
+                        FontWeight = 600,
+                        CssClass = "apexcharts-xaxis-label",
+                    },
+                }
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis
+                {
+                    Labels = new YAxisLabels
+                    {
+                        Show = true,
+                        Style = new() {
+                            Colors = "#8c9097",
+                            FontSize = "11px",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label",
+                        },
+                    },
+                }
+            },
+        };
+
+        HeatmapMulticoloroptions = new ApexChartOptions<HeatmapMulticolor> {
+            DataLabels = new ApexCharts.DataLabels {
+                Enabled = true,
+            }, 
+            Colors = new Color(new List<string> {  "#7A918D", "#33A1FD", "#2176FF", "#8C5E58", "#A93F55", "#46AF78", "#A9D794", "#18D8D8", "#00A7C6", "#4E88B4", "#6A6E94", "#663F59", "#F27036", "#5c67f7", "#5c67f7" ,}),
+            Grid = new Grid {
+                BorderColor = "#f2f5f7",
+            },
+            Title = new Title{
+                Style = new TitleStyle {
+                    FontSize= "13px",
+                    FontWeight= "bold",
+                    Color= "#8c9097"
+                },
+            },
+            Xaxis =  new XAxis {  
+                Labels = new XAxisLabels {
+                    Show = true,
+                    Style = new() {
+                        Colors = "#8c9097",
+                        FontSize = "11px",
+                        FontWeight = 600,
+                        CssClass = "apexcharts-xaxis-label",
+                    },
+                }
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis
+                {
+                    Labels = new YAxisLabels
+                    {
+                        Show = true,
+                        Style = new() {
+                            Colors = "#8c9097",
+                            FontSize = "11px",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label",
+                        },
+                    },
+                }
+            },
+        };
+
+        HeatmapColorRangeoptions = new ApexChartOptions<HeatmapColorRange> {
+            DataLabels = new ApexCharts.DataLabels {
+                Enabled = false,
+            }, 
+            Grid = new Grid {
+                BorderColor = "",
+            },
+            Stroke =  new Stroke {
+                Width = 1
+            },
+            Title = new Title{
+                Style = new TitleStyle {
+                    FontSize= "13px",
+                    FontWeight= "bold",
+                    Color= "#8c9097"
+                },
+            },
+            PlotOptions = new PlotOptions{
+                Heatmap = new () {
+                    ShadeIntensity = 0.5,
+                    Radius = 0,
+                    UseFillColorAsStroke = true,
+                    ColorScale = new (){
+                        Ranges = new () {
+                            new (){
+                                From = -30,
+                                To = 5,
+                                Color = "#5c67f7",
+                                Name = "low",
+                            },
+                            new (){
+                                From = 6,
+                                To = 20,
+                                Color = "#e354d4",
+                                Name = "medium",
+                            },
+                            new (){
+                                From = 21,
+                                To = 45,
+                                Color = "#ff8e6f",
+                                Name = "high",
+                            },
+                            new (){
+                                From = 46,
+                                To = 55,
+                                Color = "#0ca3e7",
+                                Name = "extreme",
+                            }
+                        }
+                    }
+                }
+            },
+            Xaxis =  new XAxis {  
+                Labels = new XAxisLabels {
+                    Show = true,
+                    Style = new() {
+                        Colors = "#8c9097",
+                        FontSize = "11px",
+                        FontWeight = 600,
+                        CssClass = "apexcharts-xaxis-label",
+                    },
+                }
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis
+                {
+                    Labels = new YAxisLabels
+                    {
+                        Show = true,
+                        Style = new() {
+                            Colors = "#8c9097",
+                            FontSize = "11px",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label",
+                        },
+                    },
+                }
+            },
+        };
+
+        HeatmapShadesoptions = new ApexChartOptions<HeatmapShades> {
+            DataLabels = new ApexCharts.DataLabels {
+                Enabled = false,
+            }, 
+            Grid = new Grid {
+                BorderColor = "",
+            },
+            Stroke =  new Stroke {
+                Width = 0
+            },
+            Title = new Title{
+                Style = new TitleStyle {
+                    FontSize= "13px",
+                    FontWeight= "bold",
+                    Color= "#8c9097"
+                },
+            },
+            PlotOptions = new PlotOptions{
+                Heatmap = new () {
+                    Radius = 30,
+                    EnableShades = false,
+                    ColorScale = new (){
+                        Ranges = new () {
+                            new (){
+                                From = 0,
+                                To = 50,
+                                Color = "#5c67f7",
+                            },
+                            new (){
+                                From = 51,
+                                To = 100,
+                                Color = "#e354d4",
+                            },
+                        }
+                    }
+                }
+            },
+            Xaxis =  new XAxis {  
+                Labels = new XAxisLabels {
+                    Show = true,
+                    Style = new() {
+                        Colors = "#8c9097",
+                        FontSize = "11px",
+                        FontWeight = 600,
+                        CssClass = "apexcharts-xaxis-label",
+                    },
+                }
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis
+                {
+                    Labels = new YAxisLabels
+                    {
+                        Show = true,
+                        Style = new() {
+                            Colors = "#8c9097",
+                            FontSize = "11px",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label",
+                        },
+                    },
+                }
+            },
+        };
+    }
+}

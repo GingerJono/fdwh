@@ -1,0 +1,41 @@
+@using JobData
+
+@code {
+    [Parameter] public Jobs? Jobs { get; set; }    
+}
+
+@if(Jobs != null){
+    <div class="card custom-card featured-jobs shadow-none border">
+        <div class="card-body">
+            <SpkDropdowns Tag="a" DropdownMainClass="float-end ms-auto" DropdownClass="btn btn-white btn-icon btn-sm text-muted rounded-pill" DropdownToggle=false DropdownText="<i class='fe fe-more-vertical align-middle'></i>">
+                <ChildContent2>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="javascript:void(0);">Add To Favourite</a></li>
+                        <li><a class="dropdown-item" href="javascript:void(0);">Save</a></li>
+                    </ul>
+                </ChildContent2>
+            </SpkDropdowns>
+            <div class="d-flex mb-3 flex-wrap gap-2 align-items-center">
+                <span class="avatar avatar-md border p-1">
+                    <img src="@Jobs.Img" alt="">
+                </span>
+                <div>
+                    <h5 class="fw-medium mb-0 d-flex align-items-center"><a href="javascript:void(0);">@Jobs.Title</a></h5>
+                    <a href="javascript:void(0);" class="text-muted">@Jobs.Company</a>
+                </div>
+            </div> 
+            <div class="popular-tags mb-3 d-flex gap-2 flex-wrap">
+                @foreach (var badge in Jobs.JobBadge ?? Enumerable.Empty<JobBadge>())
+                {
+                    <SpkBadge Tag="a" BadgeClass=@($"fs-11 border border-opacity-10 border-{badge.BadgeColor} text-{badge.BadgeColor}") IsRounded="true">
+                        <i class="@badge.Icon me-1"></i> @badge.Badge
+                    </SpkBadge>
+                }
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+                <h6 class="fw-medium mb-0">@Jobs.Salary</h6>
+                <SpkButtons Tag="a" ButtonClass="btn-primary d-inline-flex" ButtonSize="btn-sm">Apply Now <i class="fe fe-arrow-right transform-arrow ms-2 lh-base"></i></SpkButtons>
+            </div>
+        </div>
+    </div>
+}

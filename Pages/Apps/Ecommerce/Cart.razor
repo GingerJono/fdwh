@@ -1,0 +1,271 @@
+@page "/cart"
+@using System.Collections.Generic
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager
+@using CurrieTechnologies.Razor.SweetAlert2;
+@inject SweetAlertService Swal
+@using Microsoft.JSInterop
+@inject IJSRuntime JSRuntime
+@using Sandbox._Spk
+@using CartData
+@inject CartService CartService
+
+
+        <!-- Page Header -->
+        <SpkPageHeader PageItems="PageItems" />
+        <!-- Page Header Close -->
+
+        <!-- Start::row-1 -->
+        <div class="row" >
+            <div class="col-xxl-9">
+                @if (CartService.GetCartData().Count < 1)
+                {
+                    <div class="card custom-card" id="cart-empty-cart" >
+                        <div class="card-header">
+                            <div class="card-title">
+                                Empty Cart
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="cart-empty text-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="svg-muted" width="24" height="24" viewbox="0 0 24 24"><path d="M18.6 16.5H8.9c-.9 0-1.6-.6-1.9-1.4L4.8 6.7c0-.1 0-.3.1-.4.1-.1.2-.1.4-.1h17.1c.1 0 .3.1.4.2.1.1.1.3.1.4L20.5 15c-.2.8-1 1.5-1.9 1.5zM5.9 7.1 8 14.8c.1.4.5.8 1 .8h9.7c.5 0 .9-.3 1-.8l2.1-7.7H5.9z"/><path d="M6 10.9 3.7 2.5H1.3v-.9H4c.2 0 .4.1.4.3l2.4 8.7-.8.3zM8.1 18.8 6 11l.9-.3L9 18.5z"/><path d="M20.8 20.4h-.9V20c0-.7-.6-1.3-1.3-1.3H8.9c-.7 0-1.3.6-1.3 1.3v.5h-.9V20c0-1.2 1-2.2 2.2-2.2h9.7c1.2 0 2.2 1 2.2 2.2v.4z"/><path d="M8.9 22.2c-1.2 0-2.2-1-2.2-2.2s1-2.2 2.2-2.2c1.2 0 2.2 1 2.2 2.2s-1 2.2-2.2 2.2zm0-3.5c-.7 0-1.3.6-1.3 1.3 0 .7.6 1.3 1.3 1.3.8 0 1.3-.6 1.3-1.3 0-.7-.5-1.3-1.3-1.3zM18.6 22.2c-1.2 0-2.2-1-2.2-2.2s1-2.2 2.2-2.2c1.2 0 2.2 1 2.2 2.2s-.9 2.2-2.2 2.2zm0-3.5c-.8 0-1.3.6-1.3 1.3 0 .7.6 1.3 1.3 1.3.7 0 1.3-.6 1.3-1.3 0-.7-.5-1.3-1.3-1.3z"/></svg>
+                                <h3 class="fw-bold mb-1">Your Cart is Empty</h3>
+                                <h5 class="mb-3">Add some items to make me happy :)</h5>
+                                <SpkButtons Tag="a" href="/products" ButtonClass="btn-primary  m-3">continue shopping <i class="bi bi-arrow-right ms-1"></i></SpkButtons>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else {
+                    <div class="card custom-card" id="cart-container-delete">
+                        <div class="card-header">
+                            <div class="card-title">
+                                Cart Items
+                            </div>
+                        </div>
+                        <div class="card-body p-0">
+                            <SpkTables Items="CartService.GetCartHeadersData()" Tableclass="text-nowrap">
+                                @foreach (var CartList in CartService.GetCartData()) {
+                                    <tr>
+                                        <td class="cart-items01">
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-3">
+                                                    <span class="avatar avatar-xxl bg-light">
+                                                        <img src="@CartList.Img" alt="">
+                                                    </span>
+                                                </div>
+                                                <div class="flex-fill">
+                                                    <div class="mb-1 fs-14 fw-semibold">
+                                                        <a href="javascript:void(0);">@CartList.Title 
+                                                            @if(!string.IsNullOrEmpty(CartList.OfferBadge)) {
+                                                                <SpkBadge BadgeClass="@($"{CartList.OfferBadgeClass} {"fs-9"}")"><i class="me-1 ri-discount-percent-line fs-10"></i>@CartList.OfferBadge</SpkBadge>
+                                                            }
+                                                        </a>
+                                                    </div>
+                                                    <div class="d-flex gap-4 flex-wrap mb-1 align-items-center">
+                                                        <div>
+                                                            <span class="me-1">Size:</span><span class="fw-normal text-muted">@CartList.Size</span>
+                                                        </div>
+                                                        <div>
+                                                            <span class="me-1">Color:</span><span class="fw-normal text-muted">@CartList.Color</span>
+                                                        </div>
+                                                    </div>
+                                                    <SpkBadge BadgeClass="@(CartList.Instock ? "bg-success-transparent" : "bg-danger-transparent")">@(CartList.Instock ? "In Stock" : "Out Of Stock")</SpkBadge>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="fw-semibold fs-14">
+                                                    @CartList.Price
+                                            </div>
+                                        </td>
+                                        <td class="product-quantity-container">
+                                            <div class="input-group flex-nowrap gap-1 rounded-pill cart-input-group">
+                                                <SpkButtons aria-label="button" ButtonClass="btn-icon btn-primary-light border product-quantity-minus border-end-0" ButtonSize="btn-sm" IsRounded=true @onclick="() => DecrementCount(CartList)"><i class="ri-subtract-line"></i></SpkButtons>
+                                                <input type="number" class="form-control form-control-sm rounded-pill text-center p-0" aria-label="quantity" @bind="CartList.Quantity" />
+                                                <SpkButtons aria-label="button" ButtonClass="btn-icon btn-primary-light border product-quantity-plus border-end-0" ButtonSize="btn-sm" IsRounded=true @onclick="() => IncrementCount(CartList)"><i class="ri-add-line"></i></SpkButtons>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="fs-14 fw-semibold">
+                                                @CartList.Total
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <SpkTooltip Tag="a" href="/wishlist" TooltipClass="btn btn-icon btn-primary btn-sm me-1" TooltipPlacement="top" TooltipTitle="Add To Wishlist"><i class="ri-heart-line"></i></SpkTooltip>
+                                            <SpkTooltip Tag="a" href="javascript:void(0);" TooltipClass="btn btn-icon btn-primary2 btn-sm btn-delete" TooltipPlacement="top" TooltipTitle="Remove From cart"  @onclick="@(async () => await ShowDeleteAlert(CartList.CartId))"><i class="ri-delete-bin-line"></i></SpkTooltip>
+                                        </td>
+                                    </tr>
+                                }
+                            </SpkTables>
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="col-xxl-3">	
+                <div class="card custom-card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            Order Summary
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="p-3 border-bottom border-block-end-dashed">
+                            <label for="promo-code" class="fw-medium mb-0">Have a Promo Code?</label>
+                            <div class="fs-11 text-muted mb-3">Apply Your Promo Code for an Instant Discount!</div>
+                            <div class="input-group mb-0">
+                                <input type="text" class="form-control form-control-sm" id="promo-code" name="promo-code" placeholder="Enter Promo Code" aria-label="Enter Promo Code" aria-describedby="coupons">
+                                <SpkButtons ButtonClass="btn-primary" id="coupons">Apply</SpkButtons>
+                            </div>
+                        </div>
+                        <div class="p-3 pb-2">
+                            <p class="mb-2 fw-semibold">Delivery:</p>
+                            <ul class="nav nav-tabs tab-style-8 scaleX rounded cart-summary-nav gap-2" id="myTab4" role="tablist">
+                                <li class="nav-item flex-fill me-0" role="presentation">
+                                    <SpkButtons ButtonClass="nav-link w-100 active" id="freeshipping" data-bs-toggle="tab" data-bs-target="#freeshipping-pane"role="tab" aria-controls="freeshipping-pane" aria-selected="true">Free Shipping</SpkButtons>
+                                </li>
+                                <li class="nav-item flex-fill" role="presentation">
+                                    <SpkButtons ButtonClass="nav-link w-100" id="expressshipping-tab" data-bs-toggle="tab" data-bs-target="#expressshipping-tab-pane"role="tab" aria-controls="expressshipping-tab-pane" aria-selected="true">Express Shipping</SpkButtons>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="p-3 border-bottom border-block-end-dashed tab-content">
+                            <div class="tab-pane show active overflow-hidden p-0 border-0" id="freeshipping-pane" role="tabpanel" aria-labelledby="freeshipping" tabindex="0">
+                                <div class="fs-12 text-muted mb-3"><i class="ri-information-fill"></i> Delivered Within 7 Days</div>
+                                <div class="d-flex align-items-center justify-content-between mb-3">
+                                    <div class="text-muted">Sub Total</div>
+                                    <div class="fw-medium fs-14">$2,547</div>
+                                </div>
+                                <div class="d-flex align-items-center justify-content-between mb-3">
+                                    <div class="text-muted">Discount</div>
+                                    <div class="fw-medium fs-14 text-success">20% - $124</div>
+                                </div>
+                                <div class="d-flex align-items-center justify-content-between mb-3">
+                                    <div class="text-muted">Delivery Charges</div>
+                                    <div class="fw-medium fs-14 text-danger">- $0</div>
+                                </div>
+                                <div class="d-flex align-items-center justify-content-between mb-3">
+                                    <div class="text-muted">Service Tax (18%)</div>
+                                    <div class="fw-medium fs-14">- $12</div>
+                                </div>
+                                <div class="d-flex align-items-center justify-content-between h5">
+                                    <div class="fs-16">Total :</div>
+                                    <div class="fw-semibold"> $2,254</div>
+                                </div>
+                                <div class="d-grid">
+                                    <SpkButtons Tag="a" href="/checkout" ButtonClass="btn-primary mb-2">Proceed To Checkout</SpkButtons>
+                                    <SpkButtons Tag="a" href="/products" ButtonClass="btn-primary1-light">Continue Shopping</SpkButtons>
+                                </div>
+                            </div>
+                            <div class="tab-pane overflow-hidden p-0 border-0" id="expressshipping-tab-pane" role="tabpanel" aria-labelledby="expressshipping-tab" tabindex="0">
+                                <div class="fs-12 text-muted mb-3"><i class="ri-information-fill"></i> Delivered by Tomorrow</div>
+                                <div class="d-flex align-items-center justify-content-between mb-3">
+                                    <div class="text-muted">Sub Total</div>
+                                    <div class="fw-medium fs-14">$2,547</div>
+                                </div>
+                                <div class="d-flex align-items-center justify-content-between mb-3">
+                                    <div class="text-muted">Discount</div>
+                                    <div class="fw-medium fs-14 text-success">20% - $124</div>
+                                </div>
+                                <div class="d-flex align-items-center justify-content-between mb-3">
+                                    <div class="text-muted">Delivery Charges</div>
+                                    <div class="fw-medium fs-14 text-danger">- $15</div>
+                                </div>
+                                <div class="d-flex align-items-center justify-content-between mb-3">
+                                    <div class="text-muted">Service Tax (18%)</div>
+                                    <div class="fw-medium fs-14">- $12</div>
+                                </div>
+                                <div class="d-flex align-items-center justify-content-between h5">
+                                    <div class="fs-16">Total :</div>
+                                    <div class="fw-semibold"> $2,546</div>
+                                </div>
+                                <div class="d-grid">
+                                    <SpkButtons Tag="a" href="/checkout" ButtonClass="btn-primary mb-2">Proceed To Checkout</SpkButtons>
+                                    <SpkButtons Tag="a" href="/products" ButtonClass="btn-primary1-light">Continue Shopping</SpkButtons>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--End::row-1 -->
+
+    <!-- Sweetalerts JS -->
+    <script src="_content/CurrieTechnologies.Razor.SweetAlert2/sweetAlert2.min.js"></script>
+    
+@code { 
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Apps" },
+        new SpkPageHeader.PageItem { PageTitle = "Ecommerce" },
+        new SpkPageHeader.PageItem { PageTitle = "Cart" },
+    };
+
+    private void IncrementCount(CartList cart)
+    {
+        if (cart != null)
+        {
+            if (int.TryParse(cart.Quantity.ToString(), out int quantity))  
+            {
+                cart.Quantity = quantity + 1;  
+            }
+        }
+    }
+
+    private void DecrementCount(CartList cart)
+    {
+        if (cart != null)
+        {
+            if (int.TryParse(cart.Quantity.ToString(), out int quantity)) 
+            {
+                if (quantity > 0)
+                {
+                    cart.Quantity = quantity - 1;  
+                }
+            }
+        }
+    }
+    private async Task ShowDeleteAlert(decimal CartId)
+    {
+        var confirmResult = await Swal.FireAsync(new SweetAlertOptions
+        {
+            Title = "Are you sure?",
+            Text = "You won't be able to revert this!",
+            Icon = SweetAlertIcon.Warning,
+            ShowCancelButton = true,
+            ConfirmButtonColor = "#3085d6",
+            CancelButtonColor = "#d33",
+            ConfirmButtonText = "Yes, delete it!"
+        });
+
+        if (confirmResult.IsConfirmed)
+        {
+            await DeleteCartList(CartId);
+        }
+    }
+    
+    protected async Task DeleteCartList(decimal CartId)
+    {
+        var CartListToDelete = CartService.GetCartData().FirstOrDefault(i => i.CartId == CartId);
+
+        if (CartListToDelete != null)
+        {
+            CartService.GetCartData().Remove(CartListToDelete);
+        }
+            await Swal.FireAsync(new SweetAlertOptions
+            {
+                Title = "Deleted!",
+                Text = "Your file has been deleted.",
+                Icon = SweetAlertIcon.Success,
+            });
+            NavigationManager.NavigateTo("/cart", forceLoad: false);
+    }
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("window.interop.initializeTooltips");
+        }
+    }
+
+}

@@ -1,0 +1,117 @@
+@page "/orders"
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager
+@using Sandbox._Spk
+@using OrdersData
+@inject OrdersService OrdersService
+
+    <!-- Page Header -->
+    <SpkPageHeader PageItems="PageItems" />
+    <!-- Page Header Close -->
+
+
+    <!-- Start::row-1 -->
+    <div class="card custom-card">
+        <div class="card-header justify-content-between">
+            <div class="card-title">
+                All Orders List
+            </div>
+            <div class="d-flex gap-3 align-items-center flex-wrap">
+                <div class="btn-group">
+                    <SpkDropdowns DropdownClass="btn-outline-light border" DropdownText="<i class='ti ti-sort-descending-2 me-1'></i> Sort By">
+                        <ChildContent2>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="javascript:void(0)">Created Date</a></li>
+                                <li><a class="dropdown-item" href="javascript:void(0)">Status</a></li>
+                                <li><a class="dropdown-item" href="javascript:void(0)">Orders</a></li>
+                                <li><a class="dropdown-item" href="javascript:void(0)">Product Name</a></li>
+                                <li><a class="dropdown-item" href="javascript:void(0)">Newest</a></li>
+                                <li><a class="dropdown-item" href="javascript:void(0)">Oldest</a></li>
+                            </ul>
+                        </ChildContent2>
+                    </SpkDropdowns>
+                </div>
+                <div class="custom-form-group flex-grow-1">
+                    <input type="text" class="form-control" placeholder="Search Orders.." aria-label="Recipient's username" aria-describedby="button-addon2">
+                    <a href="javascript:void(0);" class="text-muted custom-form-btn"><i class="ti ti-search"></i></a>
+                </div> 
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <SpkTables Items="OrdersService.GetOrdersHeadersData()" Tableclass="table-hover text-nowrap">
+                @foreach (var Order in OrdersService.GetOrdersData()){
+                    <tr class="order-list">
+                        <td>@Order.OrderId</td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <span class="avatar avatar-sm avatar-square bg-gray-300"><img src="@Order.ProductImg" class="w-100 h-100" alt="..."></span>
+                                <div class="ms-2">
+                                    <p class="fw-semibold mb-0 d-flex align-items-center"><a href="/order-details">@Order.ProductName</a></p>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <span class="avatar avatar-sm me-2 avatar-rounded">
+                                    <img src="@Order.ClientImg" alt="">
+                                </span>@Order.ClientName
+                            </div>
+                        </td>
+                        <td>@Order.Mobilenumber</td>
+                        <td>@Order.OrderedDate</td>
+                        <td><SpkBadge BadgeClass="@($"bg-{Order.StatusColor}-transparent")">@Order.Status</SpkBadge></td>
+                        <td>@Order.Paymentmode</td>
+                        <td class="fw-semibold">@Order.Cost</td> 
+                        <td>
+                            <SpkButtons Tag="a" href="/order-details" ButtonClass="btn-icon btn-primary-light" ButtonSize="btn-sm"> <i class="ri-eye-line"></i></SpkButtons>
+                            <SpkButtons Tag="a" href="javascript:void(0);" ButtonClass="btn-icon btn-info-light" ButtonSize="btn-sm"> <i class="ri-download-line"></i></SpkButtons>
+                            <SpkButtons Tag="a" href="javascript:void(0);" ButtonClass="order-delete-btn btn-icon btn-primary2-light" ButtonSize="btn-sm" @onclick="@(() => DeleteOrder(Order.Id))"> <i class="ri-delete-bin-line"></i></SpkButtons>
+                        </td>
+                    </tr>
+                }
+            </SpkTables>
+        </div>
+        <div class="card-footer border-top-0">
+            <div class="d-flex align-items-center flex-wrap overflow-auto">
+                <div class="mb-2 mb-sm-0">
+                    Showing <b>1</b> to <b>10</b> entries <i class="bi bi-arrow-right ms-2 fw-semibold"></i>
+                </div>
+                <div class="ms-auto">
+                    <ul class="pagination mb-0 overflow-auto">
+                        <li class="page-item disabled">
+                            <a class="page-link">Previous</a>
+                        </li>
+                        <li class="page-item active" aria-current="page"><a class="page-link" href="javascript:void(0)">1</a></li>
+                        <li class="page-item">
+                            <a class="page-link" href="javascript:void(0)">2</a>
+                        </li>
+                        <li class="page-item"><a class="page-link" href="javascript:void(0)">3</a></li>
+                        <li class="page-item"><a class="page-link" href="javascript:void(0)">4</a></li>
+                        <li class="page-item"><a class="page-link" href="javascript:void(0)">5</a></li>
+                        <li class="page-item">
+                            <a class="page-link" href="javascript:void(0)">Next</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--End::row-1 -->
+        
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Apps" },
+        new SpkPageHeader.PageItem { PageTitle = "Ecommerce" },
+        new SpkPageHeader.PageItem { PageTitle = "Orders" },
+    };
+
+    protected void DeleteOrder(decimal Id)
+    {
+        var orderToRemove = OrdersService.GetOrdersData().FirstOrDefault(o => o.Id == Id);
+        if (orderToRemove != null)
+        {
+            OrdersService.GetOrdersData().Remove(orderToRemove);
+        }
+    }
+    
+
+}

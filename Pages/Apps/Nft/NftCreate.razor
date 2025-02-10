@@ -1,0 +1,124 @@
+@page "/nft-create"
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+
+    <!-- Filepond CSS -->
+    <link rel="stylesheet" href="@($"{NavigationManager.BaseUri}assets/libs/filepond/dist/filepond.min.css")">
+    <link rel="stylesheet" href="@($"{NavigationManager.BaseUri}assets/libs/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.css")">
+    <link rel="stylesheet" href="@($"{NavigationManager.BaseUri}assets/libs/filepond-plugin-image-edit/dist/filepond-plugin-image-edit.min.css")">
+      
+    <!-- Start::page-header -->
+    <SpkPageHeader PageItems="PageItems" />
+    <!-- End::page-header -->
+
+    <!-- Start::row-1 -->
+    <div class="row">
+        <div class="col-xxl-9 col-xl-8">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Create NFT</div>
+                </div>
+                <div class="card-body">
+                    <div class="row gy-3 justify-content-between">
+                        <div class="col-xxl-6 col-xl-12">
+                            <label class="form-label">Upload NFT</label>
+                            <div class="create-nft-item bg-light py-3 rounded">
+                                <input type="file" class="single-fileupload" name="filepond" accept="image/png, image/jpeg, image/gif">
+                            </div>
+                        </div>
+                        <div class="col-xxl-6 col-xl-12">
+                            <div class="row gy-3">
+                                <div class="col-xl-12">
+                                    <label for="input-placeholder" class="form-label">NFT Title</label>
+                                    <input type="text" class="form-control" id="input-placeholder" placeholder="eg:Abstract Digital Art">
+                                </div>
+                                <div class="col-xl-12">
+                                    <label for="nft-description" class="form-label">NFT Description</label>
+                                    <textarea class="form-control" id="nft-description" rows="3" placeholder="Enter Description"></textarea>
+                                </div>
+                                <div class="col-xl-12">
+                                    <label for="nft-link" class="form-label">External Link</label>
+                                    <input type="text" class="form-control" id="nft-link" placeholder="External Link Here">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-12">
+                            <div class="row gy-3">
+                                <div class="col-xl-6">
+                                    <label for="nft-creator-name" class="form-label">Creator Name</label>
+                                    <input type="text" class="form-control" id="nft-creator-name" placeholder="Enter Name">
+                                </div>
+                                <div class="col-xl-6">
+                                    <label for="nft-price" class="form-label">NFT Price</label>
+                                    <input type="text" class="form-control" id="nft-price" placeholder="Enter Price">
+                                </div>
+                                <div class="col-xl-4">
+                                    <label for="nft-size" class="form-label">NFT Size</label>
+                                    <input type="text" class="form-control" id="nft-size" placeholder="Enter Size">
+                                </div>
+                                <div class="col-xl-4">
+                                    <label for="nft-royality" class="form-label">Royality</label>
+                                    <select class="form-control tomselect">
+                                        <option value="">Choose Royalities</option>
+                                        <option value="Choice 1">Flat Royalty</option>
+                                        <option value="Choice 2">Graduated Royalty</option>
+                                        <option value="Choice 3">Tiered Royalty</option>
+                                        <option value="Choice 3">Time-Limited Royalty</option>
+                                        <option value="Choice 3">Customized Royalty</option>
+                                    </select>
+                                </div>
+                                <div class="col-xl-4">
+                                    <label for="nft-property" class="form-label">Property</label>
+                                    <input type="text" class="form-control" id="nft-property" placeholder="Enter Property">
+                                </div>
+                                <div class="col-xl-12">
+                                    <label class="form-label d-block">Method</label>
+                                    <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+                                        <input type="radio" class="btn-check" name="strap-material" id="strap1" checked>
+                                        <label class="btn btn-sm btn-outline-primary text-default z-0" for="strap1"><i class="ti ti-tag me-1 align-middle fs-15 d-inline-block"></i>Fixed Price</label>
+                                        <input type="radio" class="btn-check" name="strap-material" id="strap2">
+                                        <label class="btn btn-sm btn-outline-primary text-default z-0" for="strap2"><i class="ti ti-users fs-15 me-1 align-middle d-inline-block"></i>Open For Bids</label>
+                                        <input type="radio" class="btn-check" name="strap-material" id="strap3">
+                                        <label class="btn btn-sm btn-outline-primary text-default z-0" for="strap3"><i class="ti ti-hourglass-low fs-15 me-1 align-middle d-inline-block"></i>Timed Auction</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer text-end">
+                    <SpkButtons Tag="a" ButtonClass="btn-primary">Create NFT</SpkButtons>
+                </div>
+            </div>
+        </div>
+        <div class="col-xxl-3 col-xl-4">
+            <SpkNftCard NftImg="../assets/images/nft-images/2.jpg" Duration=" 04hrs : 24m : 38s " Title="Abstract Digital Art" Likes="1.43k" BidAmount="0.015ETH" User="Manistics NFT " UserId="manistics454" UserImg="../assets/images/faces/14.jpg" UserImgSize="avatar-sm"></SpkNftCard>
+        </div>
+    </div>
+    <!--End::row-1 -->
+
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Apps" },
+        new SpkPageHeader.PageItem { PageTitle = "NFT" },
+        new SpkPageHeader.PageItem { PageTitle = "Create NFT" },
+    };
+}
+
+<!-- TomSelect JS -->
+<script src="@($"{NavigationManager.BaseUri}assets/libs/tom-select/dist/js/tom-select.complete.min.js")"></script>
+<script src="@($"{NavigationManager.BaseUri}assets/js/tomselect.js")"></script>
+
+<!-- Filepond JS -->
+<script src="@($"{NavigationManager.BaseUri}assets/libs/filepond/dist/filepond.min.js")"></script>
+<script src="@($"{NavigationManager.BaseUri}assets/libs/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.js")"></script>
+<script src="@($"{NavigationManager.BaseUri}assets/libs/filepond-plugin-image-exif-orientation/dist/filepond-plugin-image-exif-orientation.min.js")"></script>
+<script src="@($"{NavigationManager.BaseUri}assets/libs/filepond-plugin-file-validate-size/dist/filepond-plugin-file-validate-size.min.js")"></script>
+<script src="@($"{NavigationManager.BaseUri}assets/libs/filepond-plugin-file-encode/dist/filepond-plugin-file-encode.min.js")"></script>
+<script src="@($"{NavigationManager.BaseUri}assets/libs/filepond-plugin-image-edit/dist/filepond-plugin-image-edit.min.js")"></script>
+<script src="@($"{NavigationManager.BaseUri}assets/libs/filepond-plugin-file-validate-type/dist/filepond-plugin-file-validate-type.min.js")"></script>
+<script src="@($"{NavigationManager.BaseUri}assets/libs/filepond-plugin-file-validate-type/dist/filepond-plugin-file-validate-type.min.js")"></script>
+<script src="@($"{NavigationManager.BaseUri}assets/libs/filepond-plugin-image-crop/dist/filepond-plugin-image-crop.min.js")"></script>
+<script src="@($"{NavigationManager.BaseUri}assets/libs/filepond-plugin-image-resize/dist/filepond-plugin-image-resize.min.js")"></script>
+<script src="@($"{NavigationManager.BaseUri}assets/libs/filepond-plugin-image-transform/dist/filepond-plugin-image-transform.min.js")"></script>
+<script src="@($"{NavigationManager.BaseUri}assets/js/filepond.js")"></script>

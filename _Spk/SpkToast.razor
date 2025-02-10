@@ -1,0 +1,48 @@
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager 
+
+@code {
+    [Parameter] public string? ToastClass {get; set;}    
+    [Parameter] public string? ToastTitle {get; set;}  = "Xintra" ;
+    [Parameter] public string? ToastTime {get; set;} 
+    [Parameter] public string? ToastHeaderclass {get; set;} = "text-default" ;
+    [Parameter] public bool Show {get; set;}           
+    [Parameter] public bool ToastHeader {get; set;}    
+    [Parameter] public bool ToastBtn {get; set;} = false;   
+    [Parameter] public RenderFragment? ChildContent { get; set; }       
+    // Capture additional attributes passed to the component
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+}
+
+<div class="toast @ToastClass @(Show == true ?"fade show":"")" role="alert" aria-live="assertive" aria-atomic="true"  @attributes="AdditionalAttributes">
+    @if (ToastHeader == true ) {
+        <div class="toast-header @ToastHeaderclass">
+            <img class="bd-placeholder-img rounded me-2" src="@($"{NavigationManager.BaseUri}assets/images/brand-logos/favicon.ico")" alt="...">
+            <strong class="me-auto">@ToastTitle</strong>
+            <small>@ToastTime</small>
+            <SpkButtons ButtonClass="btn-close" data-bs-dismiss="toast" aria-label="Close"></SpkButtons>
+        </div>
+        <div class="toast-body">
+            @if (ChildContent != null)
+            {
+
+                @ChildContent
+            }
+        </div>
+    }
+    else {
+        <div class="d-flex">
+            <div class="toast-body w-100">
+                @if (ChildContent != null)
+                {
+
+                    @ChildContent
+                }
+            </div>
+            @if (ToastBtn == true ) {
+                <SpkButtons ButtonClass="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></SpkButtons>
+            }
+        </div>
+    }
+</div>
+        

@@ -1,0 +1,148 @@
+@page "/ratings"
+@inject IJSRuntime JSRuntime
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+
+    <!-- Page Header -->
+    <SpkPageHeader PageItems="PageItems" />
+    <!-- Page Header Close -->
+
+    <!-- Start::row-1 -->
+    <div class="row">
+        <div class="col-xxl-6 col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        Basic Rater
+                    </div> 
+                </div>
+                <div class="card-body">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between">
+                        <p class="fs-14 mb-0 fw-medium">Show Some <span class="text-danger">&#10084;</span> with rating :</p>
+                        <div id="rater-basic"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xxl-6 col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        5 star rater with steps
+                    </div> 
+                    </div>
+                <div class="card-body">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between">
+                        <p class="fs-14 mb-0 fw-medium">Dont forget to rate the product :</p>
+                        <div id="rater-steps"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xxl-6 col-xl-12">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        Custom messages
+                    </div> 
+                    </div>
+                <div class="card-body">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between">
+                        <p class="fs-14 mb-0 fw-medium">Your rating is much appreciated&#128079; :</p>
+                        <div id="custom-messages"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xxl-6 col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        Unlimited number of stars readOnly
+                    </div> 
+                    </div>
+                <div class="card-body">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between">
+                        <p class="fs-14 mb-0 fw-medium">Thanks for rating :</p>
+                        <div id="stars-unlimited"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xxl-6 col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        On hover event
+                    </div> 
+                    </div>
+                <div class="card-body">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between">
+                        <p class="fs-14 mb-0 fw-medium">Please give your valuable rating :</p>
+                        <div class="d-flex flex-wrap align-items-center">
+                            <div id="stars-hover"></div>
+                            <SpkBadge BadgeClass="live-rating bg-success-transparent ms-3">1</SpkBadge>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xxl-6 col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        Clear/reset rater
+                    </div> 
+                    </div>
+                <div class="card-body">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between">
+                        <p class="fs-14 mb-0 fw-medium">Thank You so much for your support :</p>
+                        <div class="d-flex flex-wrap align-items-center">
+                            <div id="rater-reset"></div>
+                            <SpkTooltip Tag="button" TooltipClass="btn btn-icon btn-sm btn-danger-light ms-3" id="rater-reset-button" TooltipPlacement="top" TooltipTitle="Reset"> <i class="ri-restart-line"></i></SpkTooltip>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xxl-12 col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        5 Star rater with custom isBusyText and simulated backend
+                    </div> 
+                    </div>
+                <div class="card-body">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between">
+                        <p class="fs-14 mb-0 fw-medium">Thanks for rating :</p>
+                        <div id="stars-busytext"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--End::row-1 -->
+
+    
+    <!-- Rater JS -->
+    <script src="@($"{NavigationManager.BaseUri}assets/libs/rater-js/dist/index.js")"></script>
+
+    <!-- Internal Ratings JS -->
+    <script src="@($"{NavigationManager.BaseUri}assets/js/ratings.js")"></script>
+        
+
+@code {    
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Advanced UI" },
+        new SpkPageHeader.PageItem { PageTitle = "Ratings" },
+    };
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("window.interop.initializeTooltips");
+        }
+    }
+
+}

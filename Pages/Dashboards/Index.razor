@@ -1,0 +1,878 @@
+@page "/"
+@page "/index"
+@using ApexCharts
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager
+@using Sandbox._Spk
+@using ApexSeries
+@using CardModel
+@using Index1
+@inject Index1Service Index1Service
+
+        <!-- Flatpickr Css -->
+        <link href="_content/FlatpickrBlazor/flatpickr.min.css" rel="stylesheet" />
+        <link href="_content/FlatpickrBlazor/plugins/monthSelect/style.css" rel="stylesheet" />
+
+        <!-- Start::page-header -->
+        <SpkPageHeader PageItems="PageItems" />
+        <!-- End::page-header -->
+
+        <!-- Start:: row-1 -->
+        <div class="row"> 
+            <div class="col-xl-8">
+                <div class="row">
+                    @foreach(var MainCard in Index1Service.GetMainCard()) {
+                        <div class="col-xxl-3 col-xl-6">
+                            <SpkSalesCard MainCard="MainCard"></SpkSalesCard>
+                        </div>
+                    }
+                    <div class="col-xxl-8 col-xl-6">
+                        <div class="card custom-card">
+                            <div class="card-header justify-content-between">
+                                <div class="card-title">
+                                    Sales Overview
+                                </div>
+                                <SpkDropdowns Tag="a" DropdownClass="btn btn-sm btn-light text-muted" DropdownText="Sort By">
+                                    <ChildContent2>
+                                        <ul class="dropdown-menu" role="menu" data-popper-placement="bottom-end"> 
+                                            <li><a class="dropdown-item" href="javascript:void(0);">This Week</a></li>
+                                            <li><a class="dropdown-item" href="javascript:void(0);">Last Week</a></li> 
+                                            <li><a class="dropdown-item" href="javascript:void(0);">This Month</a></li> 
+                                        </ul> 
+                                    </ChildContent2>
+                                </SpkDropdowns>
+                            </div>
+                            <div class="card-body">
+                                <div id="sales-overview">
+                                    <SpkApex TItem="SalesOverview" ApexHeight="315" ChartOptions="SalesOverviewChartOptions" Items="salesoverview" Series="SalesSeriesConfigs" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xxl-4 col-xl-6">
+                        <div class="card custom-card overflow-hidden">
+                            <div class="card-header pb-0 justify-content-between">
+                                <div class="card-title">
+                                    Order Statistics
+                                </div>
+                                <SpkDropdowns Tag="a" DropdownClass="btn btn-sm btn-light text-muted" DropdownToggle=false DropdownText="<i class='fe fe-more-vertical'></i>">
+                                    <ChildContent2>
+                                        <ul class="dropdown-menu" role="menu" data-popper-placement="bottom-end"> 
+                                            <li><a class="dropdown-item" href="javascript:void(0);">This Week</a></li>
+                                                <li><a class="dropdown-item" href="javascript:void(0);">Last Week</a></li> 
+                                                <li><a class="dropdown-item" href="javascript:void(0);">This Month</a></li> 
+                                        </ul> 
+                                    </ChildContent2>
+                                </SpkDropdowns>
+                            </div>
+                            <div class="card-body py-4 px-3">
+                                <div class="d-flex gap-3 mb-3 flex-wrap">
+                                    <div class="avatar avatar-md bg-primary-transparent">
+                                        <i class="ti ti-trending-up fs-5"></i>
+                                    </div>
+                                    <div class="flex-fill d-flex align-items-start justify-content-between flex-wrap">
+                                        <div>
+                                            <span class="fs-11 mb-1 d-block fw-medium">TOTAL ORDERS</span> 
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <h4 class="mb-0 d-flex align-items-center flex-wrap">3,736<span class="text-success fs-12 ms-2 op-1"><i class="ti ti-trending-up align-middle me-1"></i>0.57%</span></h4>
+                                            </div>
+                                        </div>
+                                        <a href="javascript:void(0);" class="text-success fs-12 text-decoration-underline">Earnings ?</a>
+                                    </div>
+                                </div>
+                                <div id="orders" class="my-2">
+                                    <SpkApex TItem="TotalOrders" ApexHeight="199" ChartOptions="TotalOrdersChartOptions" Items="TotalOrderss" Series="TotalSeriesConfigs" />
+                                </div>
+                            </div>
+                            <div class="card-footer border-top border-block-start-dashed">
+                                <div class="d-grid">
+                                    <SpkButtons ButtonClass="btn-primary-ghost fw-medium table-icon">Complete Statistics<i class="ti ti-arrow-narrow-right ms-2 fs-16 d-inline-block"></i></SpkButtons>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-4">
+                <div class="card custom-card main-dashboard-banner overflow-hidden">
+                    <div class="card-body p-4">
+                        <div class="row justify-content-between">
+                            <div class="col-xxl-7 col-xl-5 col-lg-5 col-md-5 col-sm-5">
+                                <h4 class="mb-3 fw-medium text-fixed-white">Upgrade to get more</h4>
+                                <p class="mb-4 text-fixed-white">Maximize sales insights. Optimize performance. Achieve success with pro.</p>
+                                <a href="javascript:void(0);" class="fw-medium text-fixed-white text-decoration-underline">Upgrade To Pro<i class="ti ti-arrow-narrow-right"></i></a>
+                            </div>
+                            <div class="col-xxl-4 col-xl-7 col-lg-7 col-md-7 col-sm-7 d-sm-block d-none text-end my-auto">
+                                <img src="../assets/images/media/media-86.png" alt="" class="img-fluid">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card custom-card overflow-hidden">
+                    <div class="card-header justify-content-between">
+                        <div class="card-title">
+                            Top Selling Categories
+                        </div>
+                        <SpkDropdowns Tag="a" DropdownClass="btn btn-sm btn-light text-muted" DropdownText="Sort By">
+                            <ChildContent2>
+                                <ul class="dropdown-menu" role="menu" data-popper-placement="bottom-end"> 
+                                    <li><a class="dropdown-item" href="javascript:void(0);">This Week</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Last Week</a></li> 
+                                    <li><a class="dropdown-item" href="javascript:void(0);">This Month</a></li> 
+                                </ul> 
+                            </ChildContent2>
+                        </SpkDropdowns>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="p-3 pb-0">
+                            <SpkProgress ProgressClass="progress-stacked mb-2 gap-1" ProgressSize="progress-sm">
+                                <div class="progress-bar" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                                <div class="progress-bar bg-primary1" role="progressbar" style="width: 15%" aria-valuenow="15" aria-valuemin="0" aria-valuemax="100"></div>
+                                <div class="progress-bar bg-primary2" role="progressbar" style="width: 15%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                                <div class="progress-bar bg-primary3" role="progressbar" style="width: 25%" aria-valuenow="35" aria-valuemin="0" aria-valuemax="100"></div>
+                                <div class="progress-bar bg-secondary" role="progressbar" style="width: 20%" aria-valuenow="35" aria-valuemin="0" aria-valuemax="100"></div>
+                            </SpkProgress>
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <div>Overall Sales</div>
+                                <div class="h6 mb-0"><span class="text-success me-2 fs-11">2.74%<i class="ti ti-arrow-narrow-up"></i></span>1,25,875</div>
+                            </div>
+                        </div>
+                        <SpkTables Tableclass="text-nowrap">
+                            @foreach(var Index1Table in Index1Service.GetCategory()) {
+                                <tr>
+                                    <td>
+                                        <span class="fw-medium top-category-name @Index1Table.categoryclass">@Index1Table.title</span>
+                                    </td>
+                                    <td>
+                                        <span class="fw-medium">@Index1Table.price</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="text-muted fs-12">@Index1Table.Percentage% Gross</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <SpkBadge BadgeClass="@Index1Table.badgeclass">@Index1Table.badge% <i class="ti ti-trending-up"></i></SpkBadge>
+                                    </td>
+                                </tr>
+                            }
+                        </SpkTables>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End:: row-1 -->
+
+        <!-- Start:: row-2 -->
+        <div class="row">
+            <div class="col-xxl-3 col-xl-6">
+                <div class="card custom-card overflow-hidden">
+                    <div class="card-header justify-content-between">
+                        <div class="card-title">
+                            Latest Transactions
+                        </div>
+                        <SpkButtons Tag="a" ButtonClass="btn-light text-muted" ButtonSize="btn-sm">View All<i class="ti ti-arrow-narrow-right ms-1"></i></SpkButtons>
+                    </div>
+                    <div class="card-body p-0 pt-1">
+                        <SpkTables Items="Index1Service.GetTransactionsHeaderData()" Tableclass="text-nowrap">
+                            @foreach(var Index1Table in Index1Service.GetTransactions()) 
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="lh-1">
+                                                <span class="avatar avatar-sm">
+                                                    <img src="@Index1Table.img" alt="">
+                                                </span>
+                                            </div>
+                                            <div class="fw-medium">@Index1Table.title</div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="fw-medium">$@Index1Table.price</span>
+                                    </td>
+                                    <td>
+                                        
+                                        <SpkBadge BadgeClass="@($"bg-{Index1Table.badgeclass}")">@Index1Table.badge</SpkBadge>
+                                    </td>
+                                </tr>
+                            }
+                        </SpkTables>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xxl-3 col-xl-6">
+                <div class="card custom-card">
+                    <div class="card-header justify-content-between">
+                        <div class="card-title">
+                            Recent Activity
+                        </div>
+                        <SpkButtons Tag="a" ButtonClass="btn-light text-muted" ButtonSize="btn-sm">View All</SpkButtons>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled recent-activity-list">
+                            @foreach (var activity in Index1Service.GetActivity()) 
+                            {
+                                <SpkSalesActivityCard ActivityCard="activity"></SpkSalesActivityCard>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xxl-3 col-xl-6">
+                <div class="card custom-card">
+                    <div class="card-header justify-content-between">
+                        <div class="card-title">
+                            Sales Statistics
+                        </div>
+                        <SpkDropdowns Tag="a" DropdownClass="btn btn-sm btn-light text-muted" DropdownText="Sort By">
+                            <ChildContent2>
+                                <ul class="dropdown-menu" role="menu" data-popper-placement="bottom-end"> 
+                                    <li><a class="dropdown-item" href="javascript:void(0);">This Week</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Last Week</a></li> 
+                                    <li><a class="dropdown-item" href="javascript:void(0);">This Month</a></li> 
+                                </ul> 
+                            </ChildContent2>
+                        </SpkDropdowns>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap gap-2 justify-content-between flex-fill pb-3">
+                            <div class="py-3 px-4 rounded border border-dashed bg-light">
+                                <span>Total Sales</span>
+                                <p class="fw-medium fs-14 mb-0">$3.478B</p>
+                            </div>
+                            <div class="py-3 px-4 rounded border border-dashed bg-light">
+                                <span>This Year</span>
+                                <p class="text-success fw-medium fs-14 mb-0">4,25,349</p>
+                            </div>
+                            <div class="py-3 px-4 rounded border border-dashed bg-light">
+                                <span>Last Year</span>
+                                <p class="text-danger fw-medium fs-14 mb-0">3,41,622</p>
+                            </div>
+                        </div>
+                        <div id="sales-statistics">
+                            <SpkApex TItem="SalesStatistics" ApexHeight="265" ChartOptions="SalesStatisticsOptions" Items="Statistics" Series="SalesStatisticsSeriesConfigs" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xxl-3 col-xl-6">
+                <div class="card custom-card overflow-hidden">
+                    <div class="card-header pb-0 justify-content-between">
+                        <div class="card-title">
+                            Overall Statistics
+                        </div>
+                        <SpkButtons Tag="a" ButtonClass="btn-light text-muted" ButtonSize="btn-sm">View All</SpkButtons>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group activity-feed">
+                            @foreach(var Stats in Index1Service.GetOverallStatistics()){
+                                var chartItems = Index1Service.GetLineGraphChart(Stats);
+                                var dynamicChartOptions = GenerateDynamicChartOptions(Stats);
+                                var dynamicSeriesConfigs = GenerateDynamicSeriesConfigs();
+                                <li class="list-group-item">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="lh-1">
+                                            <p class="mb-2 fs-13 text-muted">@Stats.Title</p>
+                                            <h6 class="fw-medium mb-0">@Stats.TotalValue<span class="fs-12 @(Stats?.IsIncreased == true ? "text-success" : "text-danger") ms-2 fw-normal d-inline-block">@Stats?.Percentage
+                                                @((MarkupString)(Stats?.IsIncreased == true ? "<i class='ti ti-trending-up ms-1'></i>" : "<i class='ti ti-trending-down ms-1'></i>"))
+                                                </span>
+                                            </h6>
+                                        </div>
+                                        <div class="text-end">
+                                            <div id="line-graph1">
+                                                <SpkApex TItem="LineGraphChart" ChartOptions="dynamicChartOptions" Items="chartItems" Series="dynamicSeriesConfigs" />
+                                            </div>
+                                            <a href="javascript:void(0);" class="fs-12">
+                                                <span>See more</span>
+                                                <span class="table-icon"><i class="ms-1 d-inline-block ri-arrow-right-line"></i></span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End:: row-2 -->
+
+        <!-- Start:: row-3 -->
+        <div class="row">
+            <div class="col-xl-9">
+                <div class="card custom-card overflow-hidden">
+                    <div class="card-header justify-content-between">
+                        <div class="card-title">
+                            Recent Orders
+                        </div>
+                        <SpkButtons Tag="a" ButtonClass="btn-light text-muted" ButtonSize="btn-sm">View All</SpkButtons>
+                    </div>
+                    <div class="card-body p-0">
+                            <SpkTables Items="Index1Service.GetOrdersHeadersData()" Tableclass="text-nowrap" ShowCheckbox=true SelectAllClick="ToggleSelectAll">
+                                @foreach(var OrdersList in Index1Service.GetOrders()) {
+                                    <tr>
+                                        <td class="text-center">
+                                            <input class="form-check-input" type="checkbox" id="checkboxNoLabel02" value="" aria-label="..." @bind="@OrdersList.Selected">
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-3">
+                                                <div class="lh-1">
+                                                    <span class="avatar avatar-sm">
+                                                        <img src="@OrdersList.img" alt="">
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <span class="d-block fw-medium">@OrdersList.customer</span>
+                                                    <span class="d-block fs-11 text-muted">@OrdersList.email</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @OrdersList.Product
+                                        </td>
+                                        <td class="text-center">
+                                            @OrdersList.Quantity
+                                        </td>
+                                        <td class="text-center">
+                                                @OrdersList.price
+                                        </td>
+                                        <td>
+                                            <SpkBadge BadgeClass="@OrdersList.badgeclass">@OrdersList.badge</SpkBadge>
+                                        </td>
+                                        <td>
+                                            @OrdersList.date
+                                        </td>
+                                        <td>
+                                            <div class="btn-list">
+                                                <SpkButtons ButtonClass="btn-success-light btn-icon" ButtonSize="btn-sm"><i class="ri-pencil-line"></i></SpkButtons>
+                                                <SpkButtons ButtonClass="btn-danger-light btn-icon" ButtonSize="btn-sm" @onclick="@(() => DeleteOrder(OrdersList.id))"><i class="ri-delete-bin-line"></i></SpkButtons>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </SpkTables>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3">
+                <div class="card custom-card">
+                    <div class="card-header justify-content-between">
+                        <div class="card-title">
+                            Sales By Country
+                        </div>
+                        <SpkButtons Tag="a" ButtonClass="btn-light text-muted" ButtonSize="btn-sm">View All</SpkButtons>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled sales-country-list">
+                            @foreach (var Salescard in Index1Service.GetCountryData()) {
+                                <SpkCountry CountryCard="Salescard" />
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End:: row-3 -->
+@code {
+    
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Dashboards" },
+        new SpkPageHeader.PageItem { PageTitle = "Sales Dashboard" },
+    };
+    
+    // Sales Overview Start //
+    private List<SalesOverview> salesoverview { get; set; } = Index1Service.GetSalesOverview();
+    private ApexChartOptions<SalesOverview> SalesOverviewChartOptions { get; set; } = new();
+    private List<SeriesConfig<SalesOverview>>? SalesSeriesConfigs { get; set; }
+    // Sales Overview End //
+    
+    //  Total Orders Start //
+    private List<TotalOrders> TotalOrderss { get; set; } = Index1Service.GetTotalOrders();
+    private ApexChartOptions<TotalOrders> TotalOrdersChartOptions { get; set; } = new();
+    private List<SeriesConfig<TotalOrders>>? TotalSeriesConfigs { get; set; }
+    //  Total Orders END //
+    
+    // Sales Statistics Start //
+    private List<SalesStatistics> Statistics { get; set; } = Index1Service.GetSalesStatistics();
+    private ApexChartOptions<SalesStatistics> SalesStatisticsOptions { get; set; } = new();
+    private List<SeriesConfig<SalesStatistics>>? SalesStatisticsSeriesConfigs { get; set; }
+    // Sales Statistics End //
+    
+    // Expenses Line Chart  Start //
+    private ApexChartOptions<LineGraphChart>? GraphChartOptions { get; set; }
+    private ApexChartOptions<LineGraphChart>? LineGraphChart2Options { get; set; }
+    private ApexChartOptions<LineGraphChart>? LineGraphChart3Options { get; set; }
+    private ApexChartOptions<LineGraphChart>? LineGraphChart4Options { get; set; }
+    private ApexChartOptions<LineGraphChart>? LineGraphChart5Options { get; set; }
+    private List<SeriesConfig<LineGraphChart>>? GraphSeriesConfigs { get; set; } 
+    //  Expenses Line Chart End //
+    protected override void OnInitialized()
+    {   
+        // Sales Overview Start //
+        SalesOverviewChartOptions = new ApexChartOptions<SalesOverview> {
+            Chart = new () {
+                RedrawOnWindowResize= true,
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = false},
+                }, 
+                Stacked = true,
+                DropShadow = new ApexCharts.DropShadow {
+                    Enabled = true,
+                    Color = ["transparent", "transparent", "rgb(227, 84, 212)"],
+                    Top = 7,
+                    Left = 0,
+                    Blur = 1,
+                    Opacity = 0.05
+                },
+            },
+            Grid = new Grid {
+                BorderColor = "#f1f1f1",
+                StrokeDashArray = 3
+            },
+            Stroke = new Stroke { 
+                Curve = [Curve.Smooth],
+                Width = [0, 2, 2],
+                Show= true,
+            },
+            DataLabels = new DataLabels {
+                Enabled = false,
+            }, 
+            Legend = new Legend {
+                Show = true,
+                FontSize = "12px",
+                Position = LegendPosition.Bottom,
+                HorizontalAlign = Align.Center,
+                FontWeight = 500,
+                Height = 40,
+                OffsetX = 0,
+                OffsetY = 10,
+                Labels = new() {
+                    Colors = "#9ba5b7",
+                },
+                Markers = new() {
+                    Width = 7,
+                    Height = 7,
+                    StrokeWidth = 0,
+                    StrokeColor = "#fff",
+                    FillColors = null,
+                    Radius = 12,
+                    OffsetX = 0,
+                    OffsetY = 0
+                },
+            },
+            PlotOptions = new PlotOptions {
+                Bar = new PlotOptionsBar {
+                    Horizontal = false,
+                    BorderRadius = 2,
+                    ColumnWidth = "18%",
+                    BorderRadiusApplication = BorderRadiusApplication.Around,
+                    BorderRadiusWhenStacked = BorderRadiusWhenStacked.All
+                }
+            },
+            Colors = new Color(new List<string> {"var(--primary-color)", "rgba(119, 119, 142, 0.05)", "rgb(227, 84, 212)"}),
+            Yaxis = new List<YAxis>() {
+                new YAxis {
+                    Title = new AxisTitle {
+                        Style = new AxisTitleStyle {
+                            Color = "#adb5be",
+                            FontSize = "14px",
+                            FontFamily = "poppins, sans-serif",
+                            FontWeight = 600,
+                            CssClass = "apexcharts-yaxis-label"
+                        }
+                    },
+                    Min = 0,
+                    Max = 700,
+                    StepSize = 100,
+                    Labels = new YAxisLabels {
+                        Formatter= @"function (y) {
+                            return y.toFixed(0) + '';
+                            }",
+                        Show = true,
+                        Style = new AxisLabelStyle {
+                            FontSize = "11px",
+                            FontWeight = 400,
+                            CssClass = "apexcharts-xaxis-label"
+                        }
+                    },
+                },
+            },
+            Fill = new Fill {
+                Colors = null,
+                Opacity = 0.025,
+                Type = new List<FillType> { FillType.Solid,FillType.Solid},
+                Gradient = new ApexCharts.FillGradient {
+                    Shade = ApexCharts.GradientShade.Light,
+                    Type = ApexCharts.GradientType.Horizontal,
+                    ShadeIntensity = 0.5,
+                    GradientToColors = new Color(new List<string> {"#fdc530"}),
+                    InverseColors = true,
+                    OpacityFrom = 0.35,
+                    OpacityTo = 0.05,
+                    Stops = [0, 50, 100],
+                    ColorStops = new List<FillGradientStops> {
+                        new FillGradientStops { Offset = 0, Color = "#fdc530", Opacity = 1 },
+                    }
+                }
+            },
+            Tooltip = new() {
+                Shared = true,
+                Intersect = false,
+                Y = new() {
+                    Formatter = @"function (y) {
+                    if (typeof y !== 'undefined') {
+                        return y.toFixed(0) + '%';
+                    }
+                    return y;
+                }",
+                    },
+            },
+            Xaxis =  new XAxis {
+                AxisBorder = new () {
+                    Show = true,
+                    Color = "rgba(119, 119, 142, 0.05)",
+                    OffsetX = 0,
+                    OffsetY = 0,
+                },
+                AxisTicks = new () {
+                    Show = true,
+                    Color = "rgba(119, 119, 142, 0.05)",
+                    BorderType = ApexCharts.BorderType.Solid,
+                    OffsetX = 0,
+                    OffsetY = 0,
+                },
+                Labels = new XAxisLabels {
+                    Rotate = -90,
+                    Show = true,
+                    Style = new AxisLabelStyle {
+                        Colors= "#8c9097",
+                        FontSize = "11px",
+                        FontWeight = 600,
+                        CssClass = "apexcharts-xaxis-label"
+                    }
+                },
+            },
+        };
+        
+        SalesSeriesConfigs = new List<SeriesConfig<SalesOverview>>
+        {
+            new SeriesConfig<SalesOverview>
+            {
+                SeriesType = SeriesType.Bar,
+                Name = "Growth",
+                XValueSelector = e => e.Month ?? "unknown",
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.growth)
+            },
+            new SeriesConfig<SalesOverview>
+            {
+                SeriesType = SeriesType.Area,
+                Name = "Profit",
+                XValueSelector = e => e.Month ?? "unknown",
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.profit)
+            },
+            new SeriesConfig<SalesOverview>
+            {
+                SeriesType = SeriesType.Line,
+                Name = "Sales",
+                XValueSelector = e => e.Month ?? "unknown",
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.sales)
+            }
+        };
+        // Sales Overview End //
+
+        //  Total Orders Start //
+        TotalOrdersChartOptions = new ApexChartOptions<TotalOrders> {
+            DataLabels = new DataLabels {
+                Enabled = false,
+            }, 
+            Stroke = new Stroke { 
+                Show= true,
+                Curve = Curve.Smooth,
+                LineCap = ApexCharts.LineCap.Round,
+                Width = 0,
+                Colors = new Color(new List<string> {"#fff"}),
+            },
+            Legend = new Legend  { 
+                Show= true,
+                Position = LegendPosition.Bottom,
+                HorizontalAlign = Align.Center,
+                Height = 52,
+                Markers = new() {
+                    Width= 8,
+                    Height= 8,
+                    Radius= 2,
+                    StrokeWidth= 0
+                },
+                OffsetY= 10,
+            }, 
+            Grid = new Grid {
+                Padding= new() {
+                    Bottom = -100
+                }
+            },
+            Colors = new Color(new List<string> {"var(--primary-color)", "rgba(227, 84, 212, 1)", "rgba(255, 93, 159, 1)", "rgba(255, 142, 111, 1)"}),
+            PlotOptions = new PlotOptions {
+                Pie = new PlotOptionsPie { 
+                    StartAngle = -90,
+                    EndAngle = 90,
+                    OffsetY = 10,
+                    ExpandOnClick = false,
+                    Donut= new PlotOptionsDonut{
+                        Size = "80%",
+                        Background = "transparent",
+                        Labels = new(){
+                            Show = true,
+                            Name = new(){
+                                Show = true,
+                                FontSize = "20px",
+                                Color = "#495057",
+                                OffsetY = -25
+                            },
+                            Value = new(){
+                                Show = true,
+                                FontSize = "15px",
+                                OffsetY = -20,
+                                Formatter = @"function (val) {
+                                    return val + '%'
+                                }"
+                            },
+                            Total = new(){
+                                Show = true,
+                                ShowAlways = true,
+                                Label = "Total",
+                                FontSize = "22px",
+                                FontWeight = 600,
+                                Color = "#495057",
+                            }
+                        }
+                    },
+                } 
+            },
+        };
+
+        TotalSeriesConfigs = new List<SeriesConfig<TotalOrders>>
+        {
+            new SeriesConfig<TotalOrders>
+            {
+                SeriesType = SeriesType.Donut,
+                Name = "Growth",
+                XValueSelector = e => e.Source ?? "unknown",
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.SourceValue)
+            },
+        };
+        //  Total Orders END //
+
+        // Sales Statistics Start //
+        SalesStatisticsOptions = new ApexChartOptions<SalesStatistics> {
+            Chart = new () {
+                Toolbar = new ApexCharts.Toolbar {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false,Pan = false, Reset = false,  Download = false},
+                }, 
+                Stacked = true,
+            },
+            Grid = new Grid {
+                BorderColor = "#f1f1f1",
+                StrokeDashArray = 3,
+            },
+            Colors = new Color(new List<string> {"var(--primary-color)", "rgba(227, 84, 212, 1)", "rgba(255, 142, 111, 1)"}),
+            Stroke = new Stroke { 
+                Width = [0, 0],
+            },
+            DataLabels = new DataLabels {
+                Enabled = false,
+            }, 
+            Legend = new Legend {
+                Show = true,
+                Position = LegendPosition.Bottom,
+                HorizontalAlign = Align.Center,
+            },
+            PlotOptions = new PlotOptions {
+                Bar = new PlotOptionsBar {
+                    Horizontal = false,
+                    BorderRadius = 3,
+                    ColumnWidth = "30%",
+                    BorderRadiusApplication = BorderRadiusApplication.Around,
+                    BorderRadiusWhenStacked = BorderRadiusWhenStacked.All
+                }
+            },
+            Yaxis = new List<YAxis>() {
+                new YAxis {
+                    Show = true,
+                    Labels = new YAxisLabels {
+                        Style = new AxisLabelStyle {
+                            Colors = new Color("#4eb6d0")
+                        }
+                    },
+                    Max = 0,
+                    Min = 350,
+                    StepSize = 50,
+                },
+            },
+            Xaxis =  new XAxis {
+                AxisBorder = new () {
+                    Show = false,
+                },
+                AxisTicks = new () {
+                    Show = false,
+                },
+                Labels = new XAxisLabels {
+                    Show = true,
+                    Style = new AxisLabelStyle {
+                        CssClass = "apexcharts-xaxis-label"
+                    }
+                },
+            },
+            Tooltip = new Tooltip { 
+                Enabled= true,
+                Theme = ApexCharts.Mode.Dark
+            },
+        };
+
+        SalesStatisticsSeriesConfigs = new List<SeriesConfig<SalesStatistics>>
+        {
+            new SeriesConfig<SalesStatistics>
+            {
+                SeriesType = SeriesType.Bar,
+                Name = "Total",
+                XValueSelector = e => e.Week  ?? "unknown",
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.Total )
+            },
+            new SeriesConfig<SalesStatistics>
+            {
+                SeriesType = SeriesType.Bar,
+                Name = "This Year",
+                XValueSelector = e => e.Week  ?? "unknown",
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.ThisYear )
+            },
+            new SeriesConfig<SalesStatistics>
+            {
+                SeriesType = SeriesType.Bar,
+                Name = "Last Year",
+                XValueSelector = e => e.Week  ?? "unknown",
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.LastYear )
+            },
+        };
+        // Sales Statistics End //
+
+        List<string> expensesChartColors = new List<string> { "var(--primary-color)"};
+        List<string> leadsChartColors = new List<string> { "rgb(227, 84, 212)"};
+        List<string> RateChartColors = new List<string> { "rgb(255, 93, 159)"};
+        List<string> UsersChartColors = new List<string> { "rgb(255, 142, 111)"};
+        List<string> ReturningUsersColors = new List<string> { "rgb(158, 92, 247)"};
+
+        // Line Chart Start //
+        GraphChartOptions = InitializeChartOptions<LineGraphChart>(expensesChartColors);
+        //  Line Chart End // 
+        
+        // Line Chart2 Start //
+        LineGraphChart2Options = InitializeChartOptions<LineGraphChart>(leadsChartColors);
+        //  Line Chart2 End // 
+
+        // Line Chart3 Start //
+        LineGraphChart3Options = InitializeChartOptions<LineGraphChart>(RateChartColors);
+        //  Line Chart3 End // 
+
+        // Line Chart4 Start //
+        LineGraphChart4Options = InitializeChartOptions<LineGraphChart>(UsersChartColors);
+        //  Line Chart4 End // 
+
+        // Line Chart5 Start //
+        LineGraphChart5Options = InitializeChartOptions<LineGraphChart>(ReturningUsersColors);
+        //  Line Chart5 End // 
+    }
+
+    // Generic method to initialize chart options
+
+    private ApexChartOptions<LineGraphChart> GenerateDynamicChartOptions(OverallStats overallStats)
+    {
+        var optionsMap = new Dictionary<string, ApexChartOptions<LineGraphChart>>
+        {
+            { "Total Expenses", GraphChartOptions ?? new ApexChartOptions<LineGraphChart>() },
+            { "General Leads", LineGraphChart2Options ?? new ApexChartOptions<LineGraphChart>() },
+            { "Churn Rate", LineGraphChart3Options ?? new ApexChartOptions<LineGraphChart>() },
+            { "New Users", LineGraphChart4Options ?? new ApexChartOptions<LineGraphChart>() },
+            { "Returning Users", LineGraphChart5Options ?? new ApexChartOptions<LineGraphChart>() },
+        };
+
+        return optionsMap.TryGetValue(overallStats?.Title ?? string.Empty, out var selectedOptions) ? 
+        new ApexChartOptions<LineGraphChart>
+        {
+            Chart = selectedOptions?.Chart,
+            Tooltip = selectedOptions?.Tooltip,
+            Colors = selectedOptions?.Colors,
+            Stroke = selectedOptions?.Stroke,
+        }
+        : new ApexChartOptions<LineGraphChart>
+        {
+            Chart = LineGraphChart5Options?.Chart,
+            Tooltip = LineGraphChart5Options?.Tooltip,
+            Colors = LineGraphChart5Options?.Colors,
+            Stroke = LineGraphChart5Options?.Stroke,
+        };
+    }
+    
+   private List<SeriesConfig<LineGraphChart>> GenerateDynamicSeriesConfigs()
+    {
+        return new List<SeriesConfig<LineGraphChart>>
+        {
+            new SeriesConfig<LineGraphChart>
+            {
+                SeriesType = SeriesType.Line,
+                XValueSelector = e => e.Series,
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.Value)
+            }
+        };
+    }
+    private ApexChartOptions<T> InitializeChartOptions<T>(List<string> colors) where T : class, ILineGraph
+    {
+        return new ApexChartOptions<T>
+        {
+            Chart = new ()
+            {
+                Toolbar = new ApexCharts.Toolbar
+                {
+                    Tools = new Tools { Zoom = false, Zoomin = false, Zoomout = false, Pan = false, Reset = false, Download = false },
+                },
+                Width = "100px",
+                Height = "30px",
+                Sparkline = new () { Enabled = true },
+                DropShadow = new ApexCharts.DropShadow { Enabled = false },
+            },
+            Tooltip = new Tooltip { Enabled = false },
+            Colors = new Color(colors),  // Use the passed color list here
+            Stroke = new Stroke { Curve = Curve.Smooth, LineCap = ApexCharts.LineCap.Butt, Width = 2 },
+        };
+    }
+
+    // Generic method to initialize series configuration
+    private List<SeriesConfig<T>> InitializeSeriesConfig<T>() where T : class, ILineGraph
+    {
+        return new List<SeriesConfig<T>>
+        {
+            new SeriesConfig<T>
+            {
+                SeriesType = SeriesType.Line,
+                XValueSelector = e => e.Series,
+                YAggregateSelector = items => (decimal?)items.Sum(e => e.Value)
+            },
+        };
+    }
+
+    private bool selectAll;
+    private void ToggleSelectAll()
+    {
+        selectAll = !selectAll;
+        foreach (var OrdersList in Index1Service.GetOrders())
+        {
+            OrdersList.Selected = selectAll;
+        }
+    }
+    
+    protected void DeleteOrder(decimal id)
+    {
+        var orderToRemove = Index1Service.GetOrders().FirstOrDefault(o => o.id == id);
+        if (orderToRemove != null)
+        {
+            Index1Service.GetOrders().Remove(orderToRemove);
+        }
+    }
+    
+}

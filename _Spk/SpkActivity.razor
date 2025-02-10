@@ -1,0 +1,79 @@
+
+@using CardModel
+
+@code {
+    [Parameter] public Activity? activity { get; set; }    
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}
+
+@if(activity != null){
+<li>
+    <div>
+        <span class="avatar avatar-sm shadow-sm @activity.Avatarcolor avatar-rounded profile-timeline-avatar">
+            @if(!string.IsNullOrEmpty(activity.Img)){
+                <img src="@activity.Img" alt="">
+            }else {
+                @activity.Value
+            }
+        </span>
+        <div class="mb-2 d-flex align-items-start gap-2 flex-wrap">
+            <div>
+              @((MarkupString)(activity.Title ?? string.Empty))
+            </div>
+            @if(!string.IsNullOrEmpty(activity.Comment)) {
+                <span class="text-end ms-auto fs-11 text-muted">@activity.Duration</span>
+            }
+            else {
+                <SpkBadge BadgeClass="ms-auto bg-light text-muted">@activity.Duration</SpkBadge>
+            }
+        </div>
+        @if(!string.IsNullOrEmpty(activity.Desc)){
+            <p class="text-muted @(activity.Media?.Any() == true ? "":"mb-0")">
+             @activity.Desc
+            </p>
+        }
+        @if(activity.Media?.Any() == true){
+            <p class="profile-activity-media @(activity.AssignedTo?.Any() == true ? "mb-2":"mb-0 ")">
+                @foreach (var medialist in activity.Media?.Take(3) ?? Enumerable.Empty<Media>())
+                {
+                    <a href="javascript:void(0);">
+                        <img src="@medialist.Img" alt="">
+                    </a>  
+                    @if(!string.IsNullOrEmpty(medialist.Desc)) {
+                        <span class="fs-11 text-muted">@medialist.Desc</span>
+                    }
+                }
+            </p>
+        }
+        @if(activity.AssignedTo?.Any() == true){
+            <div>
+                <div class="avatar-list-stacked">
+                    @foreach (var assignedTo in activity.AssignedTo)
+                    {
+                        <span class="avatar avatar-xs avatar-rounded">
+                            <img src="@assignedTo.Img" alt="img">
+                        </span>
+                    }
+                </div>
+            </div>
+        }
+        @if(activity.Tags?.Any() == true){
+            <div class="d-flex align-items-end justify-content-between gap-2 flex-wrap">
+                <div>  
+                    @foreach (var Taglist in activity.Tags)
+                    {
+                        <a href="javascript:void(0);">
+                            <SpkBadge BadgeClass="bg-light text-muted m-1 border">@Taglist.Tag</SpkBadge>
+                        </a>
+                    }
+                </div>
+                <div class="btn-list text-end">
+                    <SpkButtons ButtonClass="btn-primary-light" ButtonSize="btn-sm"><i class="ri-message-3-line"></i>@activity.Comment</SpkButtons>
+                    <SpkButtons ButtonClass="btn-primary1-light" ButtonSize="btn-sm"><i class="ri-thumb-up-line"></i> @activity.Like</SpkButtons>
+                    <SpkButtons ButtonClass="btn-primary2-light" ButtonSize="btn-sm"><i class="ri-heart-line"></i> @activity.Like1</SpkButtons>
+                </div>
+            </div>
+        }
+    </div>
+</li>
+}

@@ -1,0 +1,63 @@
+
+@using TimelineData
+@inject TimelineService TimelineService
+
+@code {
+    [Parameter] public ActivityDetails? activity { get; set; }    
+}
+
+@if(activity != null){
+    <li>
+        <div class="row"> 
+            @if(activity.ImgPosition == "left"){
+                <div class="col-xl-6">
+                    <div class="notification-body border border-@activity.Mainclass border-opacity-50">
+                        <div class="d-flex align-items-start gap-3 flex-wrap">
+                            <div>
+                                <span class="avatar avatar-lg online">
+                                    <img src="@activity.User" alt="">
+                                </span>
+                            </div>
+                            <div class="flex-fill w-50">
+                                <h5 class="mb-1 fs-15 fw-medium text-dark">@activity.Title </h5>
+                                <p class="mb-0 text-muted">@activity.Description</p>
+                            </div>
+                            <div>
+                                <SpkBadge BadgeClass="@($"bg-{activity.Mainclass}-transparent")"> @activity.Date</SpkBadge>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            <div class="col-xl-6">
+                <div class="notification-time d-flex align-items-center gap-2 @(activity.ImgPosition == "left" ? "" :"content-end")">
+                    <span class="date">@activity.Day</span>
+                    <span class="time">@activity.Time</span>
+                </div>
+                <div class="notification-icon">
+                    <a href="javascript:void(0);" class="@activity.Mainclass"></a>
+                </div>
+            </div>
+            @if(activity.ImgPosition == "right"){
+                <div class="col-xl-6">
+                    <div class="notification-body border border-@activity.Mainclass border-opacity-50">
+                        <div class="d-flex align-items-start gap-3 flex-wrap">
+                            <div>
+                                <span class="avatar avatar-lg online">
+                                    <img src="@activity.User" alt="">
+                                </span>
+                            </div>
+                            <div class="flex-fill w-50">
+                                <h5 class="mb-1 fs-15 fw-medium text-dark">@activity.Title </h5>
+                                <p class="mb-0 text-muted">@activity.Description</p>
+                            </div>
+                            <div>
+                                <SpkBadge BadgeClass="@($"bg-{activity.Mainclass}-transparent")"> @activity.Date</SpkBadge>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </li>
+}

@@ -1,0 +1,341 @@
+@page "/pricing"
+@inject IJSRuntime JSRuntime
+@using Sandbox._Spk
+@using PricingData
+@inject PricingService PricingService
+
+    <!-- Page Header -->
+    <SpkPageHeader PageItems="PageItems" />
+    <!-- Page Header Close -->
+
+    <!-- Start:: row-1 -->
+    <div class="row justify-content-center">
+        <div class="col-xl-9" id="convertable-pricing">
+            <div class="p-3 pt-0">
+                <div class="text-center">
+                    <h3 class="text-primary1">Pricing</h3>
+                    <h5 class="d-block">Plans that flex with your needs.</h5>
+                    <p class="text-muted mb-4">Stay agile with plans that seamlessly adjust to your changing requirements, ensuring you always have the flexibility you need.</p>
+                </div>
+            </div>
+            <div class="d-flex justify-content-center mb-4">
+                <div class="switcher-box">
+                    <span class="pricing-time-span">Monthly</span>
+                    <div class="switcher-pricing text-center">
+                        <input type="checkbox" class="pricing-toggle" @bind="isChecked">
+                    </div>
+                    <span class="pricing-time-span">Annually
+                        <SpkBadge BadgeClass="bg-primary2 ms-1" IsRounded=true>20% off</SpkBadge></span>
+                </div>
+            </div>
+            <div class="tab-content @(isChecked ? "" : "show")" id="monthly1">
+                <div class="row d-flex align-items-center justify-content-center mb-5">
+                    @foreach(var list in PricingService.GetPricingData().Take(3)){
+                        <div class="col-lg-8 col-xl-4 col-xxl-4 col-md-8 col-sm-12">
+                            <SpkPricingCard Pricing="list"></SpkPricingCard>
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="tab-content @(isChecked ? "show" : "")" id="yearly1">
+                <div class="row d-flex align-items-center justify-content-center mb-5">
+                    @foreach(var list in PricingService.GetPricingData().Skip(3).Take(3)){
+                        <div class="col-lg-8 col-xl-4 col-xxl-4 col-md-8 col-sm-12">
+                            <SpkPricingCard Pricing="list"></SpkPricingCard>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End:: row-1 -->
+
+    <!-- Start:: row-2 -->
+    <div class="row justify-content-center">
+        <div class="col-xl-9">
+            <div class="text-center mb-5 mt-4">
+                <div class="tab-style-1 border p-1 bg-white shadow-sm rounded-pill d-inline-block">
+                    <ul class="nav nav-pills">
+                        <li class="nav-item">
+                            <button type="button" class="nav-link rounded-pill active fw-medium" data-bs-toggle="tab" data-bs-target="#pills-monthly">Monthly</button>
+                        </li>
+                        <li class="nav-item">
+                            <button type="button" class="nav-link rounded-pill fw-medium" data-bs-toggle="tab" data-bs-target="#pills-yearly">Annually 
+                                <SpkBadge BadgeClass="bg-primary2 ms-1" IsRounded=true>Save 10%</SpkBadge>
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="tab-content">
+                <div class="tab-pane show active p-0 border-0" id="pills-monthly">
+                    <div class="card shadow-none overflow-hidden border-0">
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-bordered pricing-table mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th scope="row" class="">
+                                                <div class="flex-grow-1 text-start">
+                                                    <div class="mb-0 fw-medium fs-16">Plans with tailored features.</div>
+                                                    <span class="op-8 fs-11">Unlock personalized features within your plans, designed specifically to suit your needs.</span>
+                                                </div>
+                                            </th>
+                                            <th scope="row" class="">
+                                                <div class="mb-0 fw-medium fs-16">Basic</div>
+                                                <div class="mb-4 fs-28 fw-medium">$3<span class="fs-13 op-5 ms-1">/ month</span></div>
+                                                <SpkButtons ButtonClass="btn-primary3-light d-grid w-100"><span class="ms-4 me-4">Sign Up</span></SpkButtons>
+                                            </th>
+                                            <th scope="row" class="">
+                                                <div class="mb-0 fw-medium fs-16">Growth</div>
+                                                <div class="mb-4 fs-28 fw-medium">$19<span class="fs-13 op-5 ms-1">/ month</span></div>
+                                                <SpkButtons ButtonClass="btn-primary3-light d-grid w-100"><span class="ms-4 me-4">Sign Up</span></SpkButtons>
+                                            </th>
+                                            <th scope="row" class="position-relative bg-primary-transparent">
+                                                <SpkBadge BadgeClass="badge-lg bg-primary1 rounded fw-semibold position-absolute end-0 me-2 mb-0">Popular</SpkBadge>
+                                                <div class="mb-0 fw-medium fs-16">Pro</div>
+                                                <div class="mb-4 fs-28 fw-medium">$25<span class="fs-13 op-5 ms-1">/ month</span></div>
+                                                <SpkButtons ButtonClass="btn-primary d-grid w-100"><span class="ms-4 me-4">Sign Up</span></SpkButtons>
+                                            </th>
+                                            <th scope="row" class="">
+                                                <div class="mb-0 fw-medium fs-16">Professional</div>
+                                                <div class="mb-4 fs-28 fw-medium">$39<span class="fs-13 op-5 ms-1">/ month</span></div>
+                                                <SpkButtons ButtonClass="btn-primary3-light d-grid w-100"><span class="ms-4 me-4">Sign Up</span></SpkButtons>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="border">
+                                            <td colspan="5" class="pricing-feature fw-semibold text-primary2">Offered Features :</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="pricing-feature fw-semibold">Storage Space</td>
+                                            <td>5 GB</td>
+                                            <td>20 GB</td>
+                                            <td class="bg-primary-transparent">Unlimited</td>
+                                            <td>30GB</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="pricing-feature fw-semibold">Number of Users</td>
+                                            <td>Up to 5</td>
+                                            <td>Up to 5</td>
+                                            <td class="bg-primary-transparent">Unlimited</td>
+                                            <td>Customizable</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="pricing-feature fw-semibold">Customer Support</td>
+                                            <td>Email Support</td>
+                                            <td>Email and Phone Support</td>
+                                            <td class="bg-primary-transparent">Priority Email, Phone, and On-site Support</td>
+                                            <td>Email and Phone Support</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="pricing-feature fw-semibold">Advanced Analytics</td>
+                                            <td>Basic Analytics</td>
+                                            <td>Enhanced Analytics</td>
+                                            <td class="bg-primary-transparent">Custom Analytics Solutions</td>
+                                            <td>Enhanced Analytics</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="pricing-feature fw-semibold">Integrations</td>
+                                            <td>Limited Integrations</td>
+                                            <td>Custom Integrations</td>
+                                            <td class="bg-primary-transparent">More Integrations</td>
+                                            <td>None</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="pricing-feature fw-semibold">Security Features</td>
+                                            <td>Basic Security Measures	</td>
+                                            <td>Enterprise-level Security Measures</td>
+                                            <td class="bg-primary-transparent">Advanced Security Features</td>
+                                            <td>Enterprise-level Security Measures</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="pricing-feature fw-semibold">Customization</td>
+                                            <td>Limited Customization Options</td>
+                                            <td>Limited Customization Options</td>
+                                            <td class="bg-primary-transparent">More Customization Options</td>
+                                            <td>Tailored Solutions</td>
+                                        </tr>
+                                        <tr class="border">
+                                            <td colspan="5" class="pricing-feature fw-semibold text-primary2">Functionality :</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="pricing-feature fw-semibold">User Management</td>
+                                            <td>Basic User Management</td>
+                                            <td>Comprehensive User Management</td>
+                                            <td class="bg-primary-transparent">Advanced User Management</td>
+                                            <td>Comprehensive User Management</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="pricing-feature fw-semibold">Reporting Tools</td>
+                                            <td>Standard Reporting Tools</td>
+                                            <td>-</td>
+                                            <td class="bg-primary-transparent">Advanced Reporting Tools</td>
+                                            <td>Customized Reporting Solutions</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="pricing-feature fw-semibold">API Access</td>
+                                            <td>Limited API Access</td>
+                                            <td>Limited API Access</td>
+                                            <td class="bg-primary-transparent">Full API Access</td>
+                                            <td>Extended API Access</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane p-0 border-0" id="pills-yearly">
+                    <div class="card shadow-none border-0 reveal">
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-bordered pricing-table mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th scope="row" class="">
+                                                <div class="flex-grow-1 text-start">
+                                                    <div class="mb-0 fw-medium fs-16">Plans with tailored features.</div>
+                                                    <span class="op-8 fs-11">Unlock personalized features within your plans, designed specifically to suit your needs.</span>
+                                                </div>
+                                            </th>
+                                            <th scope="row" class="">
+                                                <div class="mb-0 fw-medium fs-16">Basic</div>
+                                                <div class="mb-4 fs-28 fw-medium">$50<span class="fs-13 op-5 ms-1">/ Annum</span></div>
+                                                <SpkButtons ButtonClass="btn-primary3-light d-grid w-100"><span class="ms-4 me-4">Sign Up</span></SpkButtons>
+                                            </th>
+                                            <th scope="row" class="">
+                                                <div class="mb-0 fw-medium fs-16">Growth</div>
+                                                <div class="mb-4 fs-28 fw-medium">$239<span class="fs-13 op-5 ms-1">/ Annum</span></div>
+                                                <SpkButtons ButtonClass="btn-primary3-light d-grid w-100"><span class="ms-4 me-4">Sign Up</span></SpkButtons>
+                                            </th>
+                                            <th scope="row" class="position-relative bg-primary-transparent">
+                                                <SpkBadge BadgeClass="badge-lg bg-primary1 rounded fw-semibold position-absolute end-0 me-2 mb-0">Popular</SpkBadge>
+                                                <div class="mb-0 fw-medium fs-16">Pro</div>
+                                                <div class="mb-4 fs-28 fw-medium">$899<span class="fs-13 op-5 ms-1">/ Annum</span></div>
+                                                <SpkButtons ButtonClass="btn-primary d-grid w-100"><span class="ms-4 me-4">Sign Up</span></SpkButtons>
+                                            </th>
+                                            <th scope="row" class="">
+                                                <div class="mb-0 fw-medium fs-16">Professional</div>
+                                                <div class="mb-4 fs-28 fw-medium">$799<span class="fs-13 op-5 ms-1">/ Annum</span></div>
+                                                <SpkButtons ButtonClass="btn-primary3-light d-grid w-100"><span class="ms-4 me-4">Sign Up</span></SpkButtons>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="border">
+                                            <td colspan="5" class="pricing-feature fw-semibold text-primary2">Offered Features :</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="pricing-feature fw-semibold">Storage Space</td>
+                                            <td>15 GB</td>
+                                            <td>30 GB</td>
+                                            <td class="bg-primary-transparent">Unlimited</td>
+                                            <td>50GB</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="pricing-feature fw-semibold">Number of Users</td>
+                                            <td>Up to 10</td>
+                                            <td>Up to 10</td>
+                                            <td class="bg-primary-transparent">Unlimited</td>
+                                            <td>Unlimited</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="pricing-feature fw-semibold">Customer Support</td>
+                                            <td>Email Support</td>
+                                            <td>Email and Phone Support</td>
+                                            <td class="bg-primary-transparent">Priority Email, Phone, and On-site Support</td>
+                                            <td>Email and Phone Support</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="pricing-feature fw-semibold">Advanced Analytics</td>
+                                            <td>Basic Analytics</td>
+                                            <td>Enhanced Analytics</td>
+                                            <td class="bg-primary-transparent">Custom Analytics Solutions</td>
+                                            <td>Enhanced Analytics</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="pricing-feature fw-semibold">Integrations</td>
+                                            <td>Limited Integrations</td>
+                                            <td>-</td>
+                                            <td class="bg-primary-transparent">More Integrations</td>
+                                            <td>More Integrations</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="pricing-feature fw-semibold">Security Features</td>
+                                            <td>Basic Security Measures	</td>
+                                            <td>Enterprise-level Security Measures</td>
+                                            <td class="bg-primary-transparent">Advanced Security Features</td>
+                                            <td>Enterprise-level Security Measures</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="pricing-feature fw-semibold">Customization</td>
+                                            <td>Unlimited Customization Options</td>
+                                            <td>Unlimited Customization Options</td>
+                                            <td class="bg-primary-transparent">More Customization Options</td>
+                                            <td>Tailored Solutions</td>
+                                        </tr>
+                                        <tr class="border">
+                                            <td colspan="5" class="pricing-feature fw-semibold text-primary2">Functionality :</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="pricing-feature fw-semibold">User Management</td>
+                                            <td>Basic User Management</td>
+                                            <td>Comprehensive User Management</td>
+                                            <td class="bg-primary-transparent">Advanced User Management</td>
+                                            <td>Comprehensive User Management</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="pricing-feature fw-semibold">Reporting Tools</td>
+                                            <td>Standard Reporting Tools</td>
+                                            <td>-</td>
+                                            <td class="bg-primary-transparent">Advanced Reporting Tools</td>
+                                            <td>Customized Reporting Solutions</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="pricing-feature fw-semibold">API Access</td>
+                                            <td>Limited API Access</td>
+                                            <td>Limited API Access</td>
+                                            <td class="bg-primary-transparent">Full API Access</td>
+                                            <td>Extended API Access</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End:: row-2 -->
+
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Pages" },
+        new SpkPageHeader.PageItem { PageTitle = "Pricing" },
+    };
+    private bool isChecked;
+
+    private void OnCheckboxChanged(ChangeEventArgs e)
+    {
+       
+        if (e.Value is bool value)
+        {
+            isChecked = value;
+        }
+    }
+
+}
+
+
+@code {    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("window.interop.initializeTooltips");
+        }
+    }
+}

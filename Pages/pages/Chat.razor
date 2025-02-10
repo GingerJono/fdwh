@@ -1,0 +1,692 @@
+@page "/chat"
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using ChatData
+@inject ChatService ChatService
+
+@{
+    var groupedChats = ChatService.GetContactsData().OrderBy(chat => chat.name) // Optional: Sort the chats by name
+                                    .GroupBy(chat => chat.name?[0]); // Group chats by the first character of name if name is not null
+}
+
+    <!-- GLightbox CSS -->
+    <link rel="stylesheet" href="@($"{NavigationManager.BaseUri}assets/libs/glightbox/dist/css/glightbox.min.css")">
+
+    <!-- Page Header -->
+    <SpkPageHeader PageItems="PageItems" />
+    <!-- Page Header Close -->
+
+    <div class="main-chart-wrapper gap-lg-2 gap-0 mb-2 d-lg-flex @mainChartWrapperRef">
+        <div class="chat-info border">
+            <div class="chat-search p-3 border-bottom"> 
+                <div class="input-group"> 
+                    <input type="text" class="form-control" placeholder="Search Chat" aria-describedby="button-addon01">
+                    <SpkButtons ButtonClass="btn-primary-light" id="button-addon01"><i class="ri-search-line"></i></SpkButtons> 
+                </div> 
+            </div>
+            <ul class="nav nav-tabs tab-style-6 nav-justified mb-0 border-bottom d-flex gap-1 gap-sm-2 flex-wrap" id="myTab1" role="tablist">
+                <li class="nav-item me-0" role="presentation">
+                    <button class="nav-link active" id="users-tab" data-bs-toggle="tab" data-bs-target="#users-tab-pane" type="button" role="tab" aria-controls="users-tab-pane" aria-selected="true">Recent
+                        <SpkBadge BadgeClass="bg-primary1 float-end shadow-sm" IsRounded=true>1</SpkBadge>
+                    </button>
+                </li>
+                <li class="nav-item me-0" role="presentation">
+                    <button class="nav-link" id="groups-tab" data-bs-toggle="tab" data-bs-target="#groups-tab-pane" type="button" role="tab" aria-controls="groups-tab-pane" aria-selected="false" tabindex="-1">Groups
+                        <SpkBadge BadgeClass="bg-primary3 float-end shadow-sm" IsRounded=true>2</SpkBadge>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="contacts-tab" data-bs-toggle="tab" data-bs-target="#contacts-tab-pane" type="button" role="tab" aria-controls="contacts-tab-pane" aria-selected="false" tabindex="-1">Contacts
+                    </button>
+                </li>
+            </ul>
+            <div class="tab-content" id="myTabContent">
+                <div class="tab-pane show active border-0 chat-users-tab" id="users-tab-pane" role="tabpanel" aria-labelledby="users-tab" tabindex="0">
+                    <ul class="list-unstyled mb-0 mt-2 chat-users-tab overflow-auto" id="chat-msg-scroll">
+                        <li class="pb-0">
+                            <p class="text-muted fs-11 fw-medium mb-2 op-7">ACTIVE CHATS</p>
+                        </li>
+                        @foreach (var ChatList in ChatService.GetActiveChatsData())
+                        { 
+                            <li @onclick="@(() => ShowChat(ChatList))" class="@(ChatList.seen ? "" : "chat-msg-unread") @(ChatList.active ? "active" : "") @(ChatList == ActiveUser ? "active" : "") checkforactive">
+                                <a href="javascript:void(0);">
+                                    <div class="d-flex align-items-top">
+                                        <div class="me-1 lh-1">
+                                            <span class="avatar avatar-md online me-2">
+                                                <img  src="@ChatList.img" alt="img">
+                                            </span>
+                                        </div>
+                                        <div class="flex-fill">
+                                            <p class="mb-0 fw-medium">
+                                                @ChatList.name <span class="float-end text-muted fw-normal fs-11">@ChatList.lastMessageTime</span>
+                                            </p>
+                                            <p class="fs-12 mb-0 @(ChatList.isTyping ? "chat-msg-typing" : "")">
+                                                @if(!string.IsNullOrEmpty(ChatList.lastMsg))
+                                                {
+                                                    <span class="chat-msg text-truncate">@((MarkupString)ChatList.lastMsg)</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="chat-msg text-truncate">Typing...</span>
+                                                }
+                                                @if(!string.IsNullOrEmpty(ChatList.unReadMessages))
+                                                {
+                                                    <SpkBadge BadgeClass="bg-primary2 float-end" IsRounded=true>@ChatList.unReadMessages</SpkBadge>
+                                                }
+                                                else
+                                                {
+                                                    <span class="chat-read-icon float-end align-middle"><i
+                                                    class="ri-check-double-fill"></i></span>
+                                                }
+                                            </p>
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+                        }
+                        <li class="pb-0">
+                            <p class="text-muted fs-11 fw-medium mb-2 op-7">ALL CHATS</p>
+                        </li>
+                         @foreach (var ChatList in ChatService.GetAllChatsData())
+                        {
+                            <li @onclick="@(() => ShowChat(ChatList))" class="@(ChatList.seen ? "" : "chat-msg-unread") @(ChatList == ActiveUser ? "active" : "") chat-inactive checkforactive" >
+                                <a href="javascript:void(0);">
+                                    <div class="d-flex align-items-top">
+                                        <div class="me-1 lh-1">
+                                            <span class="avatar avatar-md offline me-2" >
+                                                <img  src="@ChatList.img" alt="img">
+                                            </span>
+                                        </div>
+                                        <div class="flex-fill">
+                                            <p class="mb-0 fw-medium">
+                                                @ChatList.name  
+                                                <span class="float-end text-muted fw-normal fs-11" v-if="!inactive.isTyping">@ChatList.lastMessageTime</span>
+                                            </p>
+                                            <p class="fs-12 mb-0">
+                                                <span class="chat-msg text-truncate">@((MarkupString)(ChatList.lastMsg ?? "Last Message"))</span>
+                                                @if (!string.IsNullOrEmpty(ChatList.unReadMessages))
+                                                {
+                                                <span class="chat-read-icon float-end align-middle"><i
+                                                        class="ri-check-double-fill"></i></span>
+                                                }
+                                                else {
+                                                    <SpkBadge BadgeClass="chat-read-icon bg-success-transparent float-end" IsRounded=true>2</SpkBadge>
+                                                }
+                                            </p>
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+                <div class="tab-pane border-0 chat-groups-tab overflow-auto" id="groups-tab-pane" role="tabpanel" aria-labelledby="groups-tab" tabindex="0">
+                    <ul class="list-unstyled mb-0 mt-2 ">
+                        <li class="pb-0">
+                            <p class="text-muted fs-11 fw-medium mb-1 op-7">MY CHAT GROUPS</p>
+                        </li>
+                        <li>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <p class="mb-0 fw-medium"><i class="ri-checkbox-blank-circle-fill lh-1 text-primary me-1 fs-8 align-middle"></i>Huge Rocks </p>
+                                    <p class="mb-0"><SpkBadge BadgeClass="bg-primary3-transparent">4 Online</SpkBadge></p>
+                                </div>
+                                <div class="avatar-list-stacked my-auto">
+                                    <span class="avatar avatar-sm avatar-rounded">
+                                        <img src="../assets/images/faces/2.jpg" alt="img">
+                                    </span>
+                                    <span class="avatar avatar-sm avatar-rounded">
+                                        <img src="../assets/images/faces/8.jpg" alt="img">
+                                    </span>
+                                    <span class="avatar avatar-sm avatar-rounded">
+                                        <img src="../assets/images/faces/2.jpg" alt="img">
+                                    </span>
+                                    <span class="avatar avatar-sm avatar-rounded">
+                                        <img src="../assets/images/faces/10.jpg" alt="img">
+                                    </span>
+                                    <a class="avatar avatar-sm bg-primary text-fixed-white avatar-rounded"
+                                        href="javascript:void(0);">
+                                        +19
+                                    </a>
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <p class="mb-0 fw-medium"><i class="ri-checkbox-blank-circle-fill lh-1 text-primary2 me-1 fs-8 align-middle"></i>Creative Group </p>
+                                    <p class="mb-0"><SpkBadge BadgeClass="bg-primary2-transparent">32 Online</SpkBadge></p>
+                                </div>
+                                <div class="avatar-list-stacked my-auto">
+                                    <span class="avatar avatar-sm avatar-rounded">
+                                        <img src="../assets/images/faces/1.jpg" alt="img">
+                                    </span>
+                                    <span class="avatar avatar-sm avatar-rounded">
+                                        <img src="../assets/images/faces/7.jpg" alt="img">
+                                    </span>
+                                    <span class="avatar avatar-sm avatar-rounded">
+                                        <img src="../assets/images/faces/3.jpg" alt="img">
+                                    </span>
+                                    <span class="avatar avatar-sm avatar-rounded">
+                                        <img src="../assets/images/faces/9.jpg" alt="img">
+                                    </span>
+                                    <span class="avatar avatar-sm avatar-rounded">
+                                        <img src="../assets/images/faces/12.jpg" alt="img">
+                                    </span>
+                                    <a class="avatar avatar-sm bg-primary text-fixed-white avatar-rounded"
+                                        href="javascript:void(0);">
+                                        +123
+                                    </a>
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <p class="mb-0 fw-medium"><i class="ri-checkbox-blank-circle-fill lh-1 text-primary3 me-1 fs-8 align-middle"></i>Anyside Spriritual</p>
+                                    <p class="mb-0"><SpkBadge BadgeClass="bg-primary1-transparent">3 Online</SpkBadge></p>
+                                </div>
+                                <div class="avatar-list-stacked my-auto">
+                                    <span class="avatar avatar-sm avatar-rounded">
+                                        <img src="../assets/images/faces/4.jpg" alt="img">
+                                    </span>
+                                    <span class="avatar avatar-sm avatar-rounded">
+                                        <img src="../assets/images/faces/8.jpg" alt="img">
+                                    </span>
+                                    <span class="avatar avatar-sm avatar-rounded">
+                                        <img src="../assets/images/faces/13.jpg" alt="img">
+                                    </span>
+                                    <a class="avatar avatar-sm bg-primary text-fixed-white avatar-rounded"
+                                        href="javascript:void(0);">
+                                        +15
+                                    </a>
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <p class="mb-0 fw-medium"><i class="ri-checkbox-blank-circle-fill lh-1 text-secondary me-1 fs-8 align-middle"></i>Fun Time</p>
+                                    <p class="mb-0"><SpkBadge BadgeClass="bg-secondary-transparent">5 Online</SpkBadge></p>
+                                </div>
+                                <div class="avatar-list-stacked my-auto">
+                                    <span class="avatar avatar-sm avatar-rounded">
+                                        <img src="../assets/images/faces/1.jpg" alt="img">
+                                    </span>
+                                    <span class="avatar avatar-sm avatar-rounded">
+                                        <img src="../assets/images/faces/7.jpg" alt="img">
+                                    </span>
+                                    <span class="avatar avatar-sm avatar-rounded">
+                                        <img src="../assets/images/faces/14.jpg" alt="img">
+                                    </span>
+                                    <a class="avatar avatar-sm bg-primary text-fixed-white avatar-rounded"
+                                        href="javascript:void(0);">
+                                        +28
+                                    </a>
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <p class="mb-0 fw-medium"><i class="ri-checkbox-blank-circle-fill lh-1 text-warning me-1 fs-8 align-middle"></i>Latest News</p>
+                                    <p class="mb-0"><SpkBadge BadgeClass="bg-warning-transparent">2 Online</SpkBadge></p>
+                                </div>
+                                <div class="avatar-list-stacked my-auto">
+                                    <span class="avatar avatar-sm avatar-rounded">
+                                        <img src="../assets/images/faces/5.jpg" alt="img">
+                                    </span>
+                                    <span class="avatar avatar-sm avatar-rounded">
+                                        <img src="../assets/images/faces/6.jpg" alt="img">
+                                    </span>
+                                    <span class="avatar avatar-sm avatar-rounded">
+                                        <img src="../assets/images/faces/12.jpg" alt="img">
+                                    </span>
+                                    <span class="avatar avatar-sm avatar-rounded">
+                                        <img src="../assets/images/faces/3.jpg" alt="img">
+                                    </span>
+                                    <a class="avatar avatar-sm bg-primary text-fixed-white avatar-rounded"
+                                        href="javascript:void(0);">
+                                        +53
+                                    </a>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                    <ul class="list-unstyled mb-0 mt-2 ">
+                        <li class="pb-0">
+                            <p class="text-muted fs-11 fw-medium mb-1 op-7">GROUP CHATS</p>
+                        </li>
+                        @foreach (var ChatList in ChatService.GetGroupData())
+                        {
+                            <li @onclick="@(() => ShowChat(ChatList))" class="@(ChatList.seen ? "" : "chat-msg-unread") @(ChatList == ActiveUser ? "active" : "") checkforactive">
+                                <a href="javascript:void(0);">
+                                    <div class="d-flex align-items-top">
+                                        <div class="me-1 lh-1">
+                                            <span class="avatar avatar-md me-2 @(ChatList.isOnline ? "online" : "offline")">
+                                                <img src="@ChatList.img" alt="img">
+                                            </span>
+                                        </div>
+                                        <div class="flex-fill">
+                                            <p class="mb-0 fw-medium" >
+                                                    @((MarkupString)(ChatList.name ?? "name")) 
+                                                    <span class="float-end text-muted fw-normal fs-11">@ChatList.lastMessageTime</span>
+                                            </p>
+                                            <p class="fs-12 mb-0 @(ChatList.isTyping ? "chat-msg-typing" : "")">
+                                                <span class="chat-msg text-truncate">
+                                                    @if(!string.IsNullOrEmpty(ChatList.lastMsg))
+                                                    {
+                                                        @($"{ChatList.whoslastMsg}  {ChatList.lastMsg}")
+                                                    }
+                                                    else
+                                                    {
+                                                        @($"{ChatList.howisTyping} Typing...")
+                                                    }
+                                                </span>
+                                                @if (ChatList.allSeen)
+                                                {
+                                                    <span class="chat-read-icon float-end align-middle"><i
+                                                                    class="ri-check-double-fill"></i></span>
+                                                }
+                                                @if (int.TryParse(ChatList.unReadMessages, out int unReadMessages) && unReadMessages > 0)
+                                                {
+                                                <SpkBadge BadgeClass="bg-primary3" IsRounded=true>@unReadMessages</SpkBadge>
+                                                }
+                                            </p>
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+                <div class="tab-pane border-0 chat-contacts-tab overflow-auto" id="contacts-tab-pane" role="tabpanel" aria-labelledby="contacts-tab" tabindex="0">
+                    <ul class="list-unstyled mb-0 chat-contacts-tab">
+                        @foreach (var group in groupedChats)
+                        {  
+                            <li>
+                                <span class="text-default fw-semibold">@group.Key</span>
+                            </li>   
+                            @foreach(var ContactsList in group) {  
+                                <li>    
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="lh-1">
+                                        @if(ContactsList?.imgavatar == true) {
+                                            <span class="@ContactsList?.avatarBackgroundColor">
+                                                @ContactsList?.avatarname?.Substring(0, 2).ToUpper()
+                                            </span>
+                                        } else {
+                                            <span class="avatar avatar-sm">
+                                                <img src="@ContactsList?.img" alt="">
+                                            </span>
+                                        }
+                                        </div>
+                                        <div class="flex-fill">
+                                            <span class="d-block fw-semibold">
+                                                @ContactsList?.name
+                                            </span>
+                                        </div>
+                                        <SpkDropdowns Tag="a" DropdownClass="btn btn-icon btn-sm btn-outline-light" DropdownText="<i class='ri-more-2-fill'></i>" DropdownToggle=false>
+                                            <ChildContent2>
+                                            <ul class="dropdown-menu" role="menu"> 
+                                                <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-message-2-line me-2"></i>Chat</a></li> 
+                                                <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-phone-line me-2"></i>Audio Call</a></li> 
+                                                <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-live-line me-2"></i>Video Call</a></li> 
+                                                <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-edit-line me-2"></i>Edit</a></li> 
+                                                <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-spam-2-line me-2"></i>Block</a></li> 
+                                                <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-delete-bin-line me-2"></i>Delete</a></li> 
+                                            </ul> 
+                                            </ChildContent2>
+                                        </SpkDropdowns>
+                                    </div>
+                                </li>
+                            }
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="main-chat-area border">
+            <div class="d-flex align-items-center border-bottom main-chat-head flex-wrap">
+                <span class="avatar avatar-md online chatstatusperson me-2 lh-1">
+                        <img class="chatimageperson" src="@ActiveUser?.img" alt="img">
+                    </span>
+                <div class="flex-fill">
+                    <p class="mb-0 fw-medium fs-14 lh-1">
+                        <a href="javascript:void(0);" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight" class="chatnameperson responsive-userinfo-open" @onclick="ShowChatUser">@((MarkupString)(ActiveUser?.name ?? "name"))</a>
+                    </p>
+                    <p class="text-muted mb-0 chatpersonstatus">@(ActiveUser?.isOnline == true ? "online" : "offline")</p>
+                </div>
+                <div class="d-flex flex-wrap rightIcons gap-2">
+                    <SpkButtons ButtonClass="btn-icon btn-primary1-light my-0" ButtonSize="btn-sm"><i class="ti ti-phone"></i></SpkButtons>
+                    <SpkButtons ButtonClass="btn-icon btn-primary2-light my-0 d-none d-sm-block" ButtonSize="btn-sm"><i class="ti ti-video"></i></SpkButtons>
+                    <SpkButtons ButtonClass="btn-icon btn-outline-light my-0 responsive-userinfo-open" ButtonSize="btn-sm"><i class="ti ti-user-circle" id="responsive-chat-close"></i></SpkButtons>
+                    <SpkDropdowns DropdownClass="btn btn-icon btn-primary3-light btn-wave btn-sm " DropdownText="<i class='ti ti-dots-vertical'></i>" DropdownToggle=false>
+                        <ChildContent2>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-user-3-line me-1"></i>Profile</a></li>
+                                <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-format-clear me-1"></i>Clear Chat</a></li>
+                                <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-user-unfollow-line me-1"></i>Delete User</a></li>
+                                <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-user-forbid-line me-1"></i>Block User</a></li>
+                                <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-error-warning-line me-1"></i>Report</a></li>
+                            </ul>
+                        </ChildContent2>
+                    </SpkDropdowns>
+                    <SpkButtons ButtonClass="btn-icon btn-primary-light my-0 responsive-chat-close" ButtonSize="btn-sm" @onclick="removeChat"><i class="ri-close-line"></i></SpkButtons>
+                </div>
+            </div>
+            <div class="chat-content overflow-auto" id="main-chat-content">
+                <ul class="list-unstyled">
+                    <li class="chat-day-label">
+                        <span>Today</span>
+                    </li>
+                    <li class="chat-item-start">
+                        <div class="chat-list-inner">
+                            <div class="chat-user-profile">
+                                <span class="avatar avatar-md @(ActiveUser?.isOnline == true ? "online" : "offline") chatstatusperson">
+                                    <img class="chatimageperson" src="@ActiveUser?.img" alt="img">
+                                </span>
+                            </div>
+                            <div class="ms-3">
+                                <div class="main-chat-msg">
+                                    <div>
+                                        <p class="mb-0">Hey!&#128522; How are you? What have you been up to lately?</p>
+                                    </div>
+                                </div>
+                                <span class="chatting-user-info">
+                                    <span class="chatnameperson">@((MarkupString)(ActiveUser?.name ?? "name"))</span> <span class="msg-sent-time">10:20PM</span>
+                                </span>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="chat-item-end">
+                        <div class="chat-list-inner">
+                            <div class="me-3">
+                                <div class="main-chat-msg">
+                                    <div>
+                                        <p class="mb-0">Oh, hey! &#128516; I'm doing pretty well, thanks! Just been catching up on some reading and enjoying the nice weather. How about you?</p>
+                                    </div>
+                                </div>
+                                <span class="chatting-user-info">
+                                    <span class="msg-sent-time"><span class="chat-read-mark align-middle d-inline-flex"><i
+                                                class="ri-check-double-line"></i></span>11:50PM</span> You
+                                </span>
+                            </div>
+                            <div class="chat-user-profile">
+                                <span class="avatar avatar-md online">
+                                    <img src="../assets/images/faces/15.jpg" alt="img">
+                                </span>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="chat-item-start">
+                        <div class="chat-list-inner">
+                            <div class="chat-user-profile">
+                                <span class="avatar avatar-md online @(ActiveUser?.isOnline == true ? "online" : "offline") chatstatusperson">
+                                    <img class="chatimageperson" src="@ActiveUser?.img" alt="img">
+                                </span>
+                            </div>
+                            <div class="ms-3">
+                                <div class="main-chat-msg">
+                                    <div>
+                                        <p class="mb-0">That sounds lovely! I've been keeping busy with work, but I'm looking forward to the weekend. Thinking of heading out for a hike if the weather holds up.</p>
+                                    </div>
+                                </div>
+                                <span class="chatting-user-info">
+                                    <span class="chatnameperson">@((MarkupString)(ActiveUser?.name ?? "name"))</span> <span class="msg-sent-time">11:51PM</span>
+                                </span>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="chat-item-end">
+                        <div class="chat-list-inner">
+                            <div class="me-3">
+                                <div class="main-chat-msg">
+                                    <div>
+                                        <p class="mb-0">Nice! Hiking sounds like a great way to unwind. Which trail are you thinking of exploring?</p>
+                                    </div>
+                                </div>
+                                <span class="chatting-user-info">
+                                    <span class="msg-sent-time"><span class="chat-read-mark align-middle d-inline-flex"><i
+                                                class="ri-check-double-line"></i></span>11:52PM</span> You
+                                </span>
+                            </div>
+                            <div class="chat-user-profile">
+                                <span class="avatar avatar-md online">
+                                    <img src="../assets/images/faces/15.jpg" alt="img">
+                                </span>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="chat-item-start">
+                        <div class="chat-list-inner">
+                            <div class="chat-user-profile">
+                                <span class="avatar avatar-md online @(ActiveUser?.isOnline == true ? "online" : "offline") chatstatusperson">
+                                    <img class="chatimageperson" src="@ActiveUser?.img" alt="img">
+                                </span>
+                            </div>
+                            <div class="ms-3">
+                                <div class="main-chat-msg">
+                                    <div>
+                                        <p class="mb-0">I'm thinking of checking out the one up at Pine Ridge. It's got some amazing views of the valley. Would you be interested in joining?</p>
+                                    </div>
+                                </div>
+                                <span class="chatting-user-info">
+                                    <span class="chatnameperson">@((MarkupString)(ActiveUser?.name ?? "name"))</span> <span class="msg-sent-time">11:55PM</span>
+                                </span>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="chat-item-end">
+                        <div class="chat-list-inner">
+                            <div class="me-3">
+                                <div class="main-chat-msg">
+                                    <div class="">
+                                        <p class="mb-0">That sounds fantastic! I'd like to come along. Let me know what time you're planning to head out, and I'll make sure to pack some snacks for the trail.</p>
+                                    </div>
+                                </div>
+                                <span class="chatting-user-info">
+                                    <span class="msg-sent-time"><span class="chat-read-mark align-middle d-inline-flex"><i
+                                                class="ri-check-double-line"></i></span>11:52PM</span> You
+                                </span>
+                            </div>
+                            <div class="chat-user-profile">
+                                <span class="avatar avatar-md online">
+                                    <img src="../assets/images/faces/15.jpg" alt="img">
+                                </span>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="chat-item-start">
+                        <div class="chat-list-inner">
+                            <div class="chat-user-profile">
+                                <span class="avatar avatar-md online @(ActiveUser?.isOnline == true ? "online" : "offline")">
+                                    <img class="chatimageperson" src="@ActiveUser?.img" alt="img">
+                                </span>
+                            </div>
+                            <div class="ms-3">
+                                <div class="main-chat-msg">
+                                    <div>
+                                        <p class="mb-0">okay. &#128516;</p>
+                                    </div>
+                                </div>
+                                <span class="chatting-user-info chatnameperson">
+                                    @((MarkupString)(ActiveUser?.name ?? "name")) <span class="msg-sent-time">11:45PM</span>
+                                </span>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="chat-footer">
+                <SpkButtons ButtonClass="btn-primary1-light me-2 btn-icon btn-send" Tag="a"><i class="ri-attachment-2"></i></SpkButtons>
+                <SpkButtons ButtonClass="btn-primary2 me-2 btn-icon emoji-picker" Tag="a"><i class="ri-emotion-line"></i></SpkButtons>
+                <input class="form-control chat-message-space" placeholder="Type your message here..." type="text">
+                <SpkButtons ButtonClass="btn-primary ms-2 btn-icon btn-send" Tag="a"><i class="ri-send-plane-2-line"></i></SpkButtons>
+            </div>
+        </div>
+    </div>
+
+    <!-- Start::chat user details offcanvas -->
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight">
+        <div class="offcanvas-body">
+            <SpkButtons ButtonClass="btn-icon btn-outline-light border" ButtonSize="btn-sm" data-bs-dismiss="offcanvas" aria-label="Close"><i class="ri-close-line lh-1 align-center"></i></SpkButtons>
+            <div class="chat-user-details @chatUserDetailsRef" id="chat-user-details">
+                <div class="text-center mb-4">
+                    <span class="avatar avatar-rounded @(ActiveUser?.isOnline == true ? "online" : "offline") avatar-xxl me-2 mb-3 chatstatusperson">
+                        <img class="chatimageperson" src="@ActiveUser?.img" alt="img">
+                    </span>
+                    <p class="mb-1 fs-15 fw-medium text-dark lh-1 chatnameperson">@((MarkupString)(ActiveUser?.name ?? "Name"))</p>
+                    <p class="fs-12 text-muted"><span class="chatnameperson">@ActiveUser?.email</span></p>
+                    <p class="text-center mb-0 d-flex gap-2 flex-wrap">
+                        <SpkButtons ButtonClass="btn-primary-light flex-fill"><i class="ri-phone-line me-2 align-middle"></i>Call</SpkButtons>
+                        <SpkButtons ButtonClass="btn-primary1-light flex-fill"><i class="ri-video-add-line me-2 align-middle"></i>Video Call</SpkButtons>
+                        <SpkButtons ButtonClass="btn-info-light flex-fill"><i class="ri-chat-1-line me-2 align-middle"></i>Message</SpkButtons>
+                    </p>
+                </div>
+                <div class="mb-4 pt-2">
+                    <div class="fw-medium mb-4">Shared Files
+                        <SpkBadge BadgeClass="bg-primary2 ms-1" IsRounded=true>17</SpkBadge>
+                        <span class="float-end fs-11">
+                            <a href="javascript:void(0);" class="fs-12 text-muted"> View All<i class="ti ti-arrow-narrow-right ms-1"></i> </a>
+                        </span>
+                    </div>
+                    <ul class="shared-files list-unstyled">
+                        <li>
+                            <div class="d-flex align-items-center">
+                                <div class="me-2 bg-primary-transparent rounded-circle">
+                                    <span class="shared-file-icon">
+                                        <i class="ti ti-file-text text-primary"></i>
+                                    </span>
+                                </div>
+                                <div class="flex-fill">
+                                    <p class="fs-12 fw-medium mb-0">notification.pdf</p>
+                                    <p class="mb-0 text-muted fs-11">15,Dec 2024 - 12:45PM</p>
+                                </div>
+                                <div class="fs-18">
+                                    <a aria-label="anchor" href="javascript:void(0)"><i class="ri-download-2-line text-muted"></i></a>
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="d-flex align-items-center">
+                                <div class="me-2 bg-secondary-transparent rounded-circle">
+                                    <span class="shared-file-icon">
+                                        <i class="ri-image-line text-secondary"></i>
+                                    </span>
+                                </div>
+                                <div class="flex-fill">
+                                    <p class="fs-12 fw-medium mb-0">Image_file1.Jpg</p>
+                                    <p class="mb-0 text-muted fs-11">03,Oct 2024 - 03:20AM</p>
+                                </div>
+                                <div class="fs-18">
+                                    <a aria-label="anchor" href="javascript:void(0)"><i class="ri-download-2-line text-muted"></i></a>
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="d-flex align-items-center">
+                                <div class="me-2 bg-success-transparent rounded-circle">
+                                    <span class="shared-file-icon">
+                                        <i class="ri-image-line text-success"></i>
+                                    </span>
+                                </div>
+                                <div class="flex-fill">
+                                    <p class="fs-12 fw-medium mb-0">Imagefile_12.Jpg</p>
+                                    <p class="mb-0 text-muted fs-11">19,Oct 2024 - 01:23PM</p>
+                                </div>
+                                <div class="fs-18">
+                                    <a aria-label="anchor" href="javascript:void(0)"><i class="ri-download-2-line text-muted"></i></a>
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="d-flex align-items-center">
+                                <div class="me-2 bg-orange-transparent rounded-circle">
+                                    <span class="shared-file-icon">
+                                        <i class="ri-video-line text-orange"></i>
+                                    </span>
+                                </div>
+                                <div class="flex-fill">
+                                    <p class="fs-12 fw-medium mb-0">Video-rec-20-10-2021.MP4</p>
+                                    <p class="mb-0 text-muted fs-11">13,May 2024 - 16:25AM</p>
+                                </div>
+                                <div class="fs-18">
+                                    <a href="javascript:void(0)"><i class="ri-download-2-line text-muted"></i></a>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="mb-0 pt-2">
+                    <div class="fw-medium mb-4">Photos & Media
+                        <SpkBadge BadgeClass="bg-primary3 ms-1" IsRounded=true>15</SpkBadge>
+                        <span class="float-end fs-11"><a href="javascript:void(0);" class="fs-12 text-muted"> View All<i class="ti ti-arrow-narrow-right ms-1"></i> </a></span>
+                    </div>
+                    <div class="row gy-3">
+                        @foreach(var item in ChatService.GetGalleryData() ){
+                            <div class="col-lg-4 col-md-4 col-sm-6 col-12">
+                                <a href="@item.Img" class="glightbox card mb-0" data-gallery="gallery1">
+                                    <img src="@item.Img" alt="image" >
+                                </a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End::chat user details offcanvas -->
+
+    <!-- Gallery JS -->
+    <script src="@($"{NavigationManager.BaseUri}assets/libs/glightbox/dist/js/glightbox.min.js")"></script>
+    <script src="@($"{NavigationManager.BaseUri}assets/js/gallery.js")"></script>
+
+    <script>
+     if (typeof window.FgEmojiPicker === "undefined") {
+        setTimeout(() => {
+             window.FgEmojiPicker = new FgEmojiPicker({
+                trigger: [".emoji-picker"],
+                insertInto: document.querySelector(".chat-message-space"),
+                closeButton: true,
+                position: ['top', 'right'],
+                preFetch: true,
+                dir: "../assets/libs/fg-emoji-picker/"
+            });
+        }, 3000); 
+    }
+    </script>
+
+@code {
+    private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+        new SpkPageHeader.PageItem { PageTitle = "Pages" },
+        new SpkPageHeader.PageItem { PageTitle = "Chat" },
+    };
+
+    ChatList? ActiveUser { get; set; }
+    string? chatUserDetailsRef = "";
+    string? mainChartWrapperRef;
+    protected override void OnInitialized()
+    {
+        ActiveUser = ChatService.GetActiveChatsData().FirstOrDefault();
+    }
+    private void ShowChat(ChatList Selected)
+    {
+       ActiveUser = Selected;
+       mainChartWrapperRef = "responsive-chat-open";
+
+    }    
+    private void removeChat()
+    {
+        mainChartWrapperRef = "";
+    }
+    private void ShowChatUser()
+    {
+        chatUserDetailsRef = "open";
+    }
+    private void CloseChatUser()
+    {
+        chatUserDetailsRef = "";
+    }
+    
+}
