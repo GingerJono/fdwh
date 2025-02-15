@@ -116,6 +116,7 @@ builder.Services.AddTomSelect();
 builder.Services.AddWMBSC(); 
 builder.Services.AddSweetAlert2();
 builder.Services.AddScoped<MenuDataService>();
+builder.Services.AddScoped<MenuDataServiceSandbox>();
 builder.Services.AddScoped<LandingMenuDataService>();
 builder.Services.AddScoped<NavScrollService>();
 builder.Services.AddSession();

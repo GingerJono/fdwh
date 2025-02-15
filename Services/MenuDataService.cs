@@ -51,6 +51,14 @@ public class MenuDataService
 					dirChange: false
 				),
 				new MainMenuItems (
+					path: "/index18",
+					type: "link",
+					title: "NavHist",
+					selected: false,
+					active: false,
+					dirChange: false
+				),
+				new MainMenuItems (
                     path: "/index4",
                     type: "link",
                     title: "CRM",
