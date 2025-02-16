@@ -1,0 +1,10 @@
+﻿/*
+	Page-specific styles to take priority over app CSS
+*/
+
+.bd-indigo {
+	background-color: #4d5ddb;
+	color: #fff;
+}
+body {
+}

@@ -1,0 +1,203 @@
+@page "/ViewORIPolicy/{ORIPolicyReference}"
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager
+@using Sandbox._Spk
+@using CardModel
+@inject IJSRuntime JSRuntime
+@using Sandbox.Models.ORI
+@using Sandbox.Services
+@inject ORIService ORIService
+
+<link href="ViewORIPolicy.razor.css" rel="stylesheet" />
+<!-- Start::page-header -->
+<SpkPageHeader PageItems="PageItems" />
+<!-- End::page-header -->
+@if (IsLoading)
+{
+	<p>Loading policy details...</p>
+}
+else if (!string.IsNullOrEmpty(ErrorMessage))
+{
+	<p class="text-danger">@ErrorMessage</p>
+}
+else if (PolicyDetails != null)
+{
+	<nav aria-label="breadcrumb">
+		<ol class="breadcrumb">
+			<li class="breadcrumb-item"><a href="/ORI/Policies">ORI POLICIES</a></li>
+			<li class="breadcrumb-item active" aria-current="page">VIEW ORI POLICY @PolicyDetails.ORIPolicyReference</li>
+		</ol>
+	</nav>
+
+	<div class="d-flex justify-content-between align-items-center mb-4">
+		<h1 class="page-header m-0">
+			ORI Policy Reference: @PolicyDetails.ORIPolicyReference
+		</h1>
+		<a href="/EditORIPolicy/@PolicyDetails.ORIPolicyReference" class="btn btn-primary">
+			Edit Policy
+		</a>
+	</div>
+
+	<!-- Policy Details -->
+	<div class="row">
+		<div class="col-12">
+			<div class="card mb-4">
+				<div class="card-header">Policy Details</div>
+				<div class="card-body">
+					<table class="table">
+						<thead>
+							<tr>
+								<th>ORIPillar</th>
+								<th>FX Rate Application Date</th>
+								<th>FX Treatment</th>
+								<th>Allow Blocks</th>
+								<th>Policy Reference</th>
+								<th>Policy Description</th>
+								<th>Contract Currency</th>
+								<th>Inception</th>
+								<th>Expiry</th>
+								<th>Basis Of Cover Code</th>
+								<th>Basis Of Cover</th>
+								<th>Order Percent</th>
+								<th>Of Whole Or Order</th>
+								<th>Limit</th>
+								<th>Deductible Retention</th>
+								<th>Aggregate</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>@PolicyDetails.ORIPillar</td>
+								<td>@PolicyDetails.FXRateApplicationDate?.ToString("yyyy-MM-dd")</td>
+								<td>@PolicyDetails.FXTreatment</td>
+								<td>@PolicyDetails.AllowBlocks</td>
+								<td>@PolicyDetails.ORIPolicyReference</td>
+								<td>@PolicyDetails.PolicyDescription</td>
+								<td>@PolicyDetails.ContractCurrency</td>
+								<td>@PolicyDetails.Inception?.ToString("yyyy-MM-dd")</td>
+								<td>@PolicyDetails.Expiry?.ToString("yyyy-MM-dd")</td>
+								<td>@PolicyDetails.BasisOfCoverCode</td>
+								<td>@PolicyDetails.BasisOfCover</td>
+								<td>@PolicyDetails.OrderPercent</td>
+								<td>@PolicyDetails.OfWholeOrOrder</td>
+								<td>@PolicyDetails.Limit</td>
+								<td>@PolicyDetails.DeductibleRetention</td>
+								<td>@PolicyDetails.Aggregate</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Policy Term Metadata -->
+	<div class="card mb-4">
+		<div class="card-header">Policy Term Metadata</div>
+		<div class="card-body">
+			<h6>The terms below are used to determine which policies, premiums and claims are applicable to the reinsurance contract.</h6>
+			<p>"Excluded" means that the particular business item will not be applicable. "Included" means that <strong>only those particular business items will</strong> be applicable.</p>
+
+			@for (int i = 0; i < MetadataSections.Count; i += 3)
+			{
+				<div class="row">
+					@for (int j = i; j < i + 3 && j < MetadataSections.Count; j++)
+					{
+						var metadataSection = MetadataSections[j];
+						<div class="col-md-4">
+							<div class="card mb-4">
+								<div class="card-header @(metadataSection.Data != null && metadataSection.Data.Any() ? "bd-indigo" : "bg-light")">
+									@metadataSection.Title
+								</div>
+								<div class="card-body">
+									@if (metadataSection.Data != null && metadataSection.Data.Any())
+									{
+										<table class="table">
+											<tbody>
+												@foreach (var item in metadataSection.Data)
+												{
+													<tr>
+														<td>
+															@metadataSection.GetValue(item)
+														</td>
+													</tr>
+												}
+											</tbody>
+										</table>
+									}
+									else
+									{
+										<p class="text-muted">This filter is not present.</p>
+									}
+								</div>
+							</div>
+						</div>
+					}
+				</div>
+			}
+		</div>
+	</div>
+}
+
+@code {
+	[Parameter] public string ORIPolicyReference { get; set; }
+
+	private ORIPolicyModel PolicyDetails { get; set; }
+	private bool IsLoading { get; set; } = true;
+	private string ErrorMessage { get; set; }
+
+	private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+		new SpkPageHeader.PageItem { PageTitle = "Dashboards" },
+		new SpkPageHeader.PageItem { PageTitle = "JonoTest" },
+	};
+
+	private List<(string Title, IEnumerable<dynamic> Data, Func<dynamic, string> GetValue)> MetadataSections;
+
+	protected override async Task OnInitializedAsync()
+	{
+		if (string.IsNullOrWhiteSpace(ORIPolicyReference))
+		{
+			ErrorMessage = "Policy reference is required.";
+			IsLoading = false;
+			return;
+		}
+
+		try
+		{
+			PolicyDetails = await ORIService.GetORIPolicyDetails(ORIPolicyReference);
+			if (PolicyDetails == null)
+			{
+				ErrorMessage = $"No policy details found for reference: {ORIPolicyReference}";
+			}
+			else
+			{
+				// Populate Metadata Sections
+				MetadataSections = new List<(string, IEnumerable<dynamic>, Func<dynamic, string>)>
+				{
+					("Excluded Domicile Countries", PolicyDetails.ExcludedDomicileCountries.Current, item => item.DomicileCountry),
+					("Excluded Inward Policy References", PolicyDetails.ExcludedInwardPolicyReferences.Current, item => item.InwardPolicyReference),
+					("Excluded Placement UMRs", PolicyDetails.ExcludedPlacementUMRs.Current, item => item.PlacementUMR),
+					("Excluded Reserving Classes", PolicyDetails.ExcludedReservingClasses.Current, item => item.ReservingClass),
+					("Excluded Risk Codes", PolicyDetails.ExcludedRiskCodes.Current, item => item.PolicyMainRiskCode),
+					("Excluded Stat Code 2", PolicyDetails.ExcludedStatCode2s.Current, item => item.StatCode2),
+					("Included Classes", PolicyDetails.IncludedClasses.Current, item => item.Class),
+					("Included Domicile Countries", PolicyDetails.IncludedDomicileCountries.Current, item => item.DomicileCountry),
+					("Included Inward Policy References", PolicyDetails.IncludedInwardPolicyReferences.Current, item => item.InwardPolicyReference),
+					("Included Perils", PolicyDetails.IncludedPerils.Current, item => item.Peril),
+					("Included Placement UMRs", PolicyDetails.IncludedPlacementUMRs.Current, item => item.PlacementUMR),
+					("Included Reserving Classes", PolicyDetails.IncludedReservingClasses.Current, item => item.ReservingClass),
+					("Included Risk Codes", PolicyDetails.IncludedRiskCodes.Current, item => item.PolicyMainRiskCode),
+					("Included Stat Code 1", PolicyDetails.IncludedStatCode1s.Current, item => item.StatCode1),
+					("Included Stat Code 2", PolicyDetails.IncludedStatCode2s.Current, item => item.StatCode2)
+				};
+			}
+		}
+		catch (Exception)
+		{
+			ErrorMessage = "An error occurred while fetching policy details.";
+		}
+		finally
+		{
+			IsLoading = false;
+		}
+	}
+}

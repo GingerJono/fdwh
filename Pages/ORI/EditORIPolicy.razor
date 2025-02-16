@@ -1,0 +1,219 @@
+@page "/EditORIPolicy/{ORIPolicyReference}"
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager
+@using Sandbox._Spk
+@using CardModel
+@inject IJSRuntime JSRuntime
+@using Sandbox.Models.ORI
+@using Sandbox.Services
+@inject ORIService ORIService
+
+@if (IsLoading)
+{
+	<p>Loading policy details...</p>
+}
+else if (!string.IsNullOrEmpty(ErrorMessage))
+{
+	<p class="text-danger">@ErrorMessage</p>
+}
+else if (PolicyDetails != null)
+{
+	<nav aria-label="breadcrumb">
+		<ol class="breadcrumb">
+			<li class="breadcrumb-item"><a href="/ORI/Policies">ORI POLICIES</a></li>
+			<li class="breadcrumb-item"><a href="/ViewORIPolicy/@PolicyDetails.ORIPolicyReference">VIEW ORI POLICY</a></li>
+			<li class="breadcrumb-item active" aria-current="page">EDIT ORI POLICY</li>
+		</ol>
+	</nav>
+
+	<h1>Editing ORI Policy Reference: @PolicyDetails.ORIPolicyReference</h1>
+
+	<EditForm Model="PolicyDetails" OnValidSubmit="HandleValidSubmit">
+		<DataAnnotationsValidator />
+		<ValidationSummary />
+
+
+		<!-- Policy Details -->
+		<div class="row">
+			<div class="col-12">
+				<div class="card mb-4">
+					<div class="card-header">Policy Details</div>
+					<div class="card-body">
+						<table class="table">
+							<thead>
+								<tr>
+									<th>ORIPillar</th>
+									<th>FX Rate Application Date</th>
+									<th>FX Treatment</th>
+									<th>Allow Blocks</th>
+									<th>Policy Reference</th>
+									<th>Policy Description</th>
+									<th>Contract Currency</th>
+									<th>Inception</th>
+									<th>Expiry</th>
+									<th>Basis Of Cover Code</th>
+									<th>Basis Of Cover</th>
+									<th>Order Percent</th>
+									<th>Of Whole Or Order</th>
+									<th>Limit</th>
+									<th>Deductible Retention</th>
+									<th>Aggregate</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>@PolicyDetails.ORIPillar</td>
+									<td>@PolicyDetails.FXRateApplicationDate?.ToString("yyyy-MM-dd")</td>
+									<td>@PolicyDetails.FXTreatment</td>
+									<td>@PolicyDetails.AllowBlocks</td>
+									<td>@PolicyDetails.ORIPolicyReference</td>
+									<td>@PolicyDetails.PolicyDescription</td>
+									<td>@PolicyDetails.ContractCurrency</td>
+									<td>@PolicyDetails.Inception?.ToString("yyyy-MM-dd")</td>
+									<td>@PolicyDetails.Expiry?.ToString("yyyy-MM-dd")</td>
+									<td>@PolicyDetails.BasisOfCoverCode</td>
+									<td>@PolicyDetails.BasisOfCover</td>
+									<td>@PolicyDetails.OrderPercent</td>
+									<td>@PolicyDetails.OfWholeOrOrder</td>
+									<td>@PolicyDetails.Limit</td>
+									<td>@PolicyDetails.DeductibleRetention</td>
+									<td>@PolicyDetails.Aggregate</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+
+
+		<!-- Editable List of Excluded Domicile Countries -->
+		<div class="card mb-4">
+			<div class="card-header">Excluded Domicile Countries</div>
+			<div class="card-body">
+				<table class="table">
+					<thead>
+						<tr>
+							<th>Country</th>
+							<th>Notes</th>
+							<th>Actions</th>
+						</tr>
+					</thead>
+					<tbody>
+						@foreach (var country in PolicyDetails.ExcludedDomicileCountries.Current)
+						{
+							<tr>
+								<td>@country.DomicileCountry</td>
+								<td><InputText class="form-control" @bind-Value="country.Note" /></td>
+								<td>
+									<button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveExcludedDomicileCountry(country)">Remove</button>
+								</td>
+							</tr>
+						}
+						<tr>
+							<td>
+								<InputSelect class="form-control" @bind-Value="selectedExcludedDomicileCountry">
+									<option value="">Select a country</option>
+									@foreach (var country in PolicyDetails.DomicileCountries)
+									{
+										<option value="@country.Code">@country.Name</option>
+									}
+								</InputSelect>
+							</td>
+							<td>
+								<InputText class="form-control" @bind-Value="newExcludedDomicileCountryNote" placeholder="Add a note" />
+							</td>
+							<td>
+								<button type="button" class="btn btn-primary btn-sm" @onclick="AddExcludedDomicileCountry">Add</button>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+
+		<div class="text-right">
+			<button type="submit" class="btn btn-success">Save Changes</button>
+			<button type="button" class="btn btn-secondary" @onclick="NavigateBack">Cancel</button>
+		</div>
+	</EditForm>
+}
+
+@code {
+	[Inject] private NavigationManager Navigation { get; set; }
+	[Parameter] public string ORIPolicyReference { get; set; }
+
+	private ORIPolicyModel PolicyDetails { get; set; }
+	private bool IsLoading = true;
+	private string ErrorMessage;
+	private string selectedExcludedDomicileCountry;
+	private string newExcludedDomicileCountryNote;
+
+	protected override async Task OnInitializedAsync()
+	{
+		if (string.IsNullOrWhiteSpace(ORIPolicyReference))
+		{
+			ErrorMessage = "Policy reference is required.";
+			IsLoading = false;
+			return;
+		}
+
+		try
+		{
+			PolicyDetails = await ORIService.GetORIPolicyDetails(ORIPolicyReference);
+			if (PolicyDetails == null)
+			{
+				ErrorMessage = $"No policy details found for reference: {ORIPolicyReference}";
+			}
+		}
+		catch (Exception)
+		{
+			ErrorMessage = "An error occurred while fetching policy details.";
+		}
+		finally
+		{
+			IsLoading = false;
+		}
+	}
+
+	private async Task HandleValidSubmit()
+	{
+		IsLoading = true;
+		try
+		{
+			await ORIService.SaveORIPolicyMetadata(PolicyDetails);
+			Navigation.NavigateTo($"/ViewORIPolicy/{PolicyDetails.ORIPolicyReference}", forceLoad: true);
+		}
+		catch (Exception ex)
+		{
+			ErrorMessage = ex.Message;
+		}
+		finally
+		{
+			IsLoading = false;
+		}
+	}
+
+	private async Task NavigateBack()
+	{
+		Navigation.NavigateTo($"/ViewORIPolicy/{PolicyDetails.ORIPolicyReference}", forceLoad: true);
+	}
+
+	private void AddExcludedDomicileCountry()
+	{
+		if (!string.IsNullOrWhiteSpace(selectedExcludedDomicileCountry))
+		{
+			PolicyDetails.ExcludedDomicileCountries.Current.Add(new ExcludedDomicileCountry
+				{
+					DomicileCountry = selectedExcludedDomicileCountry,
+					Note = newExcludedDomicileCountryNote
+				});
+			selectedExcludedDomicileCountry = string.Empty;
+			newExcludedDomicileCountryNote = string.Empty;
+		}
+	}
+
+	private void RemoveExcludedDomicileCountry(ExcludedDomicileCountry country)
+	{
+		PolicyDetails.ExcludedDomicileCountries.Current.Remove(country);
+	}
+}

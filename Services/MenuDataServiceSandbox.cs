@@ -19,15 +19,15 @@ public class MenuDataServiceSandbox
             children: new MainMenuItems[]
             {
 				new MainMenuItems (
-					path: "/index17",
+					path: "/ORIPolicies",
 					type: "link",
-					title: "JonoTest",
+					title: "ORI Policies",
 					selected: false,
 					active: false,
 					dirChange: false
 				),
 				new MainMenuItems (
-					path: "/index18",
+					path: "/NavHist",
 					type: "link",
 					title: "NavHist",
 					selected: false,

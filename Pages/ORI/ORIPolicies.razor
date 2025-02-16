@@ -1,8 +1,6 @@
-@page "/index17"
-@using ApexCharts
+@page "/ORIPolicies"
 @inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
 @using Sandbox._Spk
-@using ApexSeries
 @using CardModel
 @* @using JonoTest *@
 @* @inject JonoTestService JonoTestService *@
@@ -54,7 +52,7 @@
 				{
 					<tr>
 						<td>
-							<a href="@NavigationManager.ToAbsoluteUri($"/ori-policy-details/{policy.ORIPolicyReference}")">
+							<a href="@NavigationManager.ToAbsoluteUri($"/ViewORIPolicy/{policy.ORIPolicyReference}")" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover text-decoration-underline">
 								@* Use NavigationManager *@
 								@policy.ORIPolicyReference
 							</a>
@@ -67,7 +65,11 @@
 						<td>@policy.PolicyType</td>
 						<td>@policy.Broker</td>
 						<td>@policy.Status</td>
-						<td>@policy.MetaDataStatus</td>
+						<td>
+							<span class="@($"badge {(policy.MetaDataStatus == "Entered" ? "bg-outline-primary" : "bg-danger")}")">
+								@policy.MetaDataStatus
+							</span>
+						</td>
 					</tr>
 				}
 			</tbody>
@@ -77,7 +79,7 @@
 
 
 <!-- jquery Cdn -->
-<script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
 <!-- Datatables Cdn -->
 <script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
@@ -96,25 +98,31 @@
 <script>
 	var options = {
 		paging: true,
-		pageLength: 20, // Set the default number of rows visible
+		pageLength: 10, // Set the default number of rows visible
 		fixedHeader: true, // Keep the header fixed
 		lengthChange: false, // Disable the length change dropdown
 		order: [], // No default ordering
 		columnDefs: [], // Customize columns if needed
 		buttons: [], // Add buttons if required
 		initComplete: function () {
-			// Ensure footer exists and add search boxes for each column
-			this.api().columns().every(function () {
-				var column = this;
-				var footerCell = $(column.footer());
-				if (footerCell.length > 0) {
-					$('<input type="text" placeholder="Search..." style="width: 100%;">')
-						.appendTo(footerCell.empty())
-						.on('keyup change clear', function () {
-							var val = $.fn.dataTable.util.escapeRegex($(this).val());
-							column.search(val ? val : '', true, false).draw();
-						});
-				}
+		// Ensure footer exists and add search boxes for each column
+		this.api()
+			.columns()
+				.every(function () {
+					let column = this;
+					let title = column.footer().textContent;
+
+					// Create input element
+					let input = document.createElement('input');
+					input.placeholder = title;
+					column.footer().replaceChildren(input);
+
+					// Event listener for user input
+					input.addEventListener('keyup', () => {
+						if (column.search() !== this.value) {
+							column.search(input.value).draw();
+					}
+				});
 			});
 		}
 	};
