@@ -7,7 +7,6 @@ using Sandbox.Helpers;
 
 namespace Sandbox.Models.ORI
 {
-
 	public class ORIPolicyModel
 	{
 		public string ORIPillar { get; set; }
@@ -26,34 +25,18 @@ namespace Sandbox.Models.ORI
 		public decimal? Limit { get; set; }
 		public decimal? DeductibleRetention { get; set; }
 		public decimal? Aggregate { get; set; }
-		public IEnumerable<Narrative> Narratives { get; set; }
 
-		public EditableORIMetadataList<ExcludedDomicileCountry> ExcludedDomicileCountries { get; set; }
-		public EditableORIMetadataList<ExcludedInwardPolicyReference> ExcludedInwardPolicyReferences { get; set; }
-		public EditableORIMetadataList<ExcludedPlacementUMR> ExcludedPlacementUMRs { get; set; }
-		public EditableORIMetadataList<ExcludedReservingClass> ExcludedReservingClasses { get; set; }
-		public EditableORIMetadataList<ExcludedRiskCode> ExcludedRiskCodes { get; set; }
-		public EditableORIMetadataList<ExcludedStatCode2> ExcludedStatCode2s { get; set; }
-		public EditableORIMetadataList<IncludedClass> IncludedClasses { get; set; }
-		public EditableORIMetadataList<IncludedDomicileCountry> IncludedDomicileCountries { get; set; }
-		public EditableORIMetadataList<IncludedInwardPolicyReference> IncludedInwardPolicyReferences { get; set; }
-		public EditableORIMetadataList<IncludedPeril> IncludedPerils { get; set; }
-		public EditableORIMetadataList<IncludedPlacementUMR> IncludedPlacementUMRs { get; set; }
-		public EditableORIMetadataList<IncludedReservingClass> IncludedReservingClasses { get; set; }
-		public EditableORIMetadataList<IncludedRiskCodes> IncludedRiskCodes { get; set; }
-		public EditableORIMetadataList<IncludedStatCode1> IncludedStatCode1s { get; set; }
-		public EditableORIMetadataList<IncludedStatCode2> IncludedStatCode2s { get; set; }
+		// Single List for inclusions and exclusions
+		public List<ORIFilterItem> Filters { get; set; } = new();
+	}
 
-		// Securities
-		public IEnumerable<PolicySecurity> Securities { get; set; }
-
-		public List<ClassItem> Classes { get; set; } = new();
-		public List<DomicileCountry> DomicileCountries { get; set; } = new();
-		public List<Peril> Perils { get; set; } = new();
-		public List<ReservingClass> ReservingClasses { get; set; } = new();
-		public List<RiskCode> RiskCodes { get; set; } = new();
-		public List<StatCode> StatCode1s { get; set; } = new();
-		public List<StatCode> StatCode2s { get; set; } = new();
+	// New Model to represent a row in the new Filters table
+	public class ORIFilterItem
+	{
+		public string InclusionExclusion { get; set; }  // "Inclusion" or "Exclusion"
+		public string IncludedOrExcludedItem { get; set; } // "DomicileCountry", "InwardPolicyReference", etc.
+		public string IncludedOrExcludedValue { get; set; } // Actual value e.g., "US", "001810H19AA"
+		public string Note { get; set; }
 	}
 
 	public class Narrative

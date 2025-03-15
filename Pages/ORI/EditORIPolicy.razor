@@ -27,115 +27,78 @@ else if (PolicyDetails != null)
 
 	<h1>Editing ORI Policy Reference: @PolicyDetails.ORIPolicyReference</h1>
 
+
 	<EditForm Model="PolicyDetails" OnValidSubmit="HandleValidSubmit">
 		<DataAnnotationsValidator />
 		<ValidationSummary />
 
-
-		<!-- Policy Details -->
-		<div class="row">
-			<div class="col-12">
-				<div class="card mb-4">
-					<div class="card-header">Policy Details</div>
-					<div class="card-body">
-						<table class="table">
-							<thead>
-								<tr>
-									<th>ORIPillar</th>
-									<th>FX Rate Application Date</th>
-									<th>FX Treatment</th>
-									<th>Allow Blocks</th>
-									<th>Policy Reference</th>
-									<th>Policy Description</th>
-									<th>Contract Currency</th>
-									<th>Inception</th>
-									<th>Expiry</th>
-									<th>Basis Of Cover Code</th>
-									<th>Basis Of Cover</th>
-									<th>Order Percent</th>
-									<th>Of Whole Or Order</th>
-									<th>Limit</th>
-									<th>Deductible Retention</th>
-									<th>Aggregate</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>@PolicyDetails.ORIPillar</td>
-									<td>@PolicyDetails.FXRateApplicationDate?.ToString("yyyy-MM-dd")</td>
-									<td>@PolicyDetails.FXTreatment</td>
-									<td>@PolicyDetails.AllowBlocks</td>
-									<td>@PolicyDetails.ORIPolicyReference</td>
-									<td>@PolicyDetails.PolicyDescription</td>
-									<td>@PolicyDetails.ContractCurrency</td>
-									<td>@PolicyDetails.Inception?.ToString("yyyy-MM-dd")</td>
-									<td>@PolicyDetails.Expiry?.ToString("yyyy-MM-dd")</td>
-									<td>@PolicyDetails.BasisOfCoverCode</td>
-									<td>@PolicyDetails.BasisOfCover</td>
-									<td>@PolicyDetails.OrderPercent</td>
-									<td>@PolicyDetails.OfWholeOrOrder</td>
-									<td>@PolicyDetails.Limit</td>
-									<td>@PolicyDetails.DeductibleRetention</td>
-									<td>@PolicyDetails.Aggregate</td>
-								</tr>
-							</tbody>
-						</table>
-					</div>
-				</div>
-			</div>
-		</div>
-
-
-		<!-- Editable List of Excluded Domicile Countries -->
+		<!-- Editable List of Filters -->
 		<div class="card mb-4">
-			<div class="card-header">Excluded Domicile Countries</div>
+			<div class="card-header">Policy Inclusions/Exclusions</div>
 			<div class="card-body">
 				<table class="table">
 					<thead>
 						<tr>
-							<th>Country</th>
-							<th>Notes</th>
+							<th>Type</th>
+							<th>Item</th>
+							<th>Value</th>
+							<th>Note</th>
 							<th>Actions</th>
 						</tr>
 					</thead>
 					<tbody>
-						@foreach (var country in PolicyDetails.ExcludedDomicileCountries.Current)
+						@foreach (var filter in PolicyDetails.Filters)
 						{
 							<tr>
-								<td>@country.DomicileCountry</td>
-								<td><InputText class="form-control" @bind-Value="country.Note" /></td>
+								<td>@filter.InclusionExclusion</td>
+								<td>@filter.IncludedOrExcludedItem</td>
+								<td>@filter.IncludedOrExcludedValue</td>
+								<td><InputText class="form-control" @bind-Value="filter.Note" /></td>
 								<td>
-									<button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveExcludedDomicileCountry(country)">Remove</button>
+									<button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveFilter(filter)">Remove</button>
 								</td>
 							</tr>
 						}
 						<tr>
 							<td>
-								<InputSelect class="form-control" @bind-Value="selectedExcludedDomicileCountry">
-									<option value="">Select a country</option>
-									@foreach (var country in PolicyDetails.DomicileCountries)
-									{
-										<option value="@country.Code">@country.Name</option>
-									}
+								<InputSelect class="form-control" @bind-Value="newFilter.InclusionExclusion">
+									<option value="Inclusion">Inclusion</option>
+									<option value="Exclusion">Exclusion</option>
 								</InputSelect>
 							</td>
 							<td>
-								<InputText class="form-control" @bind-Value="newExcludedDomicileCountryNote" placeholder="Add a note" />
+								<InputText class="form-control" @bind-Value="newFilter.IncludedOrExcludedItem" placeholder="Item (e.g., DomicileCountry)" />
 							</td>
 							<td>
-								<button type="button" class="btn btn-primary btn-sm" @onclick="AddExcludedDomicileCountry">Add</button>
+								<InputText class="form-control" @bind-Value="newFilter.IncludedOrExcludedValue" placeholder="Value (e.g., US)" />
+							</td>
+							<td>
+								<InputText class="form-control" @bind-Value="newFilter.Note" placeholder="Note (optional)" />
+							</td>
+							<td>
+								<button type="button" class="btn btn-primary btn-sm" @onclick="AddFilter" preventdefault="onclick">Add</button>
 							</td>
 						</tr>
 					</tbody>
 				</table>
 			</div>
 		</div>
+		<button type="button" class="btn btn-warning" @onclick="() => DebugTestClick()">
+			Test Click
+		</button>
 
-		<div class="text-right">
-			<button type="submit" class="btn btn-success">Save Changes</button>
-			<button type="button" class="btn btn-secondary" @onclick="NavigateBack">Cancel</button>
-		</div>
-	</EditForm>
+		@code {
+		private void DebugTestClick()
+		{
+		Console.WriteLine("Test Button Clicked");
+		}
+	}
+
+	<div class="text-right">
+		<button type="submit" class="btn btn-success">Save Changes</button>
+		<button type="button" class="btn btn-secondary" @onclick="NavigateBack">Cancel</button>
+	</div>
+</EditForm>
 }
 
 @code {
@@ -145,8 +108,13 @@ else if (PolicyDetails != null)
 	private ORIPolicyModel PolicyDetails { get; set; }
 	private bool IsLoading = true;
 	private string ErrorMessage;
-	private string selectedExcludedDomicileCountry;
-	private string newExcludedDomicileCountryNote;
+	private ORIFilterItem newFilter = new ORIFilterItem
+		{
+			InclusionExclusion = "Inclusion", // Default value
+			IncludedOrExcludedItem = "",
+			IncludedOrExcludedValue = "",
+			Note = ""
+		};
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -198,22 +166,49 @@ else if (PolicyDetails != null)
 		Navigation.NavigateTo($"/ViewORIPolicy/{PolicyDetails.ORIPolicyReference}", forceLoad: true);
 	}
 
-	private void AddExcludedDomicileCountry()
+
+	private void AddFilter()
 	{
-		if (!string.IsNullOrWhiteSpace(selectedExcludedDomicileCountry))
+		if (string.IsNullOrWhiteSpace(newFilter.IncludedOrExcludedItem) ||
+			string.IsNullOrWhiteSpace(newFilter.IncludedOrExcludedValue))
 		{
-			PolicyDetails.ExcludedDomicileCountries.Current.Add(new ExcludedDomicileCountry
-				{
-					DomicileCountry = selectedExcludedDomicileCountry,
-					Note = newExcludedDomicileCountryNote
-				});
-			selectedExcludedDomicileCountry = string.Empty;
-			newExcludedDomicileCountryNote = string.Empty;
+			Console.WriteLine("Cannot add an empty filter.");
+			return;
 		}
+
+		// Ensure PolicyDetails.Filters is not null
+		if (PolicyDetails.Filters == null)
+		{
+			PolicyDetails.Filters = new List<ORIFilterItem>();
+		}
+
+		// Add new filter item
+		PolicyDetails.Filters.Add(new ORIFilterItem
+			{
+				InclusionExclusion = newFilter.InclusionExclusion,
+				IncludedOrExcludedItem = newFilter.IncludedOrExcludedItem,
+				IncludedOrExcludedValue = newFilter.IncludedOrExcludedValue,
+				Note = newFilter.Note
+			});
+
+		Console.WriteLine($"Added Filter: {newFilter.InclusionExclusion} - {newFilter.IncludedOrExcludedItem} - {newFilter.IncludedOrExcludedValue}");
+
+		// Reset the input fields
+		newFilter = new ORIFilterItem
+			{
+				InclusionExclusion = "Inclusion",
+				IncludedOrExcludedItem = "",
+				IncludedOrExcludedValue = "",
+				Note = ""
+			};
+
+		// Force UI update
+		StateHasChanged();
 	}
 
-	private void RemoveExcludedDomicileCountry(ExcludedDomicileCountry country)
+	private void RemoveFilter(ORIFilterItem filter)
 	{
-		PolicyDetails.ExcludedDomicileCountries.Current.Remove(country);
+		PolicyDetails.Filters.Remove(filter);
+		StateHasChanged();
 	}
 }

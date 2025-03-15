@@ -52,11 +52,13 @@
 				{
 					<tr>
 						<td>
-							<a href="@NavigationManager.ToAbsoluteUri($"/ViewORIPolicy/{policy.ORIPolicyReference}")" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover text-decoration-underline">
-								@* Use NavigationManager *@
+							<button class="btn btn-link text-decoration-underline"
+									@onclick="@(() => NavigationManager.NavigateTo($"/ViewORIPolicy/{policy.ORIPolicyReference}"))">
 								@policy.ORIPolicyReference
-							</a>
+							</button>
 						</td>
+
+
 						<td>@policy.InceptionDate?.ToString("yyyy-MM-dd")</td>
 						<td>@policy.ExpiryDate?.ToString("yyyy-MM-dd")</td>
 						<td>@(policy.Limit ?? 0)</td>
@@ -73,6 +75,20 @@
 					</tr>
 				}
 			</tbody>
+			<tfoot>
+				<tr>
+					<th>ORI Policy Reference</th>
+					<th>Inception Date</th>
+					<th>Expiry Date</th>
+					<th>Limit</th>
+					<th>Retention</th>
+					<th>Description</th>
+					<th>Policy Type</th>
+					<th>Broker</th>
+					<th>Status</th>
+					<th>Meta Data Status</th>
+				</tr>
+			</tfoot>
 		</table>
 	}
 </div>

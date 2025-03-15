@@ -1,0 +1,45 @@
+# Ignore build and publish artifacts
+bin/
+obj/
+out/
+publish/
+dist/
+.vs/
+
+# User-specific files
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.rsuser
+
+# Debugging
+*.pdb
+*.tlog
+*.log
+*.cache
+*.csproj.user
+*.sqlite
+*.sqlite3
+*.db
+
+# .NET dependency cache
+.nuget/
+packages/
+project.lock.json
+project.assets.json
+
+# Rider / JetBrains
+.idea/
+*.sln.iml
+
+# ASP.NET / Blazor specific
+appsettings.Development.json
+secrets.json
+wwwroot/css/**/*.map
+wwwroot/dist/
+
+# Docker
+docker-compose.override.yml
+.env

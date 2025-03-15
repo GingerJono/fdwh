@@ -8,3 +8,24 @@
 }
 body {
 }
+.badge-success {
+	background-color: #28a745; /* Green */
+	color: white;
+}
+
+.badge-danger {
+	background-color: #dc3545; /* Red */
+	color: white;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+	background-color: #f9f9f9;
+}
+
+.text-primary {
+	color: #007bff !important;
+}
+
+.text-danger {
+	color: #dc3545 !important;
+}
