@@ -22,7 +22,7 @@ else if (PolicyDetails != null)
 {
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="/ORI/Policies">ORI POLICIES</a></li>
+            <li class="breadcrumb-item"><a href="/ORIPolicies">ORI POLICIES</a></li>
             <li class="breadcrumb-item active" aria-current="page">VIEW ORI POLICY @PolicyDetails.ORIPolicyReference</li>
         </ol>
     </nav>
@@ -66,7 +66,6 @@ else if (PolicyDetails != null)
             </div>
         </div>
     </div>
-
     <!-- Unified Inclusions & Exclusions Table -->
     <div class="card mb-4">
         <div class="card-header">Inclusions & Exclusions</div>
@@ -82,6 +81,8 @@ else if (PolicyDetails != null)
                             <th>Item</th>
                             <th>Value</th>
                             <th>Note</th>
+                            <th>Last Updated</th>
+                            <th>Updated By</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -89,17 +90,23 @@ else if (PolicyDetails != null)
                         {
                             <tr>
                                 <td>
-                                    <span class="badge @(filter.InclusionExclusion == "Inclusion" ? "badge-success" : "badge-danger")">
+                                    <span class="btn btn-@(filter.InclusionExclusion == "Inclusion" ? "success" : "danger")-gradient rounded-pill btn-wave">
                                         @filter.InclusionExclusion
                                     </span>
                                 </td>
-                                <td><strong>@filter.IncludedOrExcludedItem</strong></td>
+                                <td>
+                                    <button type="button" class="btn btn-@GetGhostButtonClass(filter.IncludedOrExcludedItem) btn-wave">
+                                        @filter.IncludedOrExcludedItem
+                                    </button>
+                                </td>
                                 <td>
                                     <span class="text-@(filter.InclusionExclusion == "Inclusion" ? "primary" : "danger")">
                                         @filter.IncludedOrExcludedValue
                                     </span>
                                 </td>
                                 <td>@filter.Note</td>
+                                <td>@filter.LastUpdated?.ToString("yyyy-MM-dd HH:mm")</td>
+                                <td>@filter.LastUpdatedBy</td>
                             </tr>
                         }
                     </tbody>
@@ -143,13 +150,32 @@ else if (PolicyDetails != null)
                 ErrorMessage = $"No policy details found for reference: {ORIPolicyReference}";
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             ErrorMessage = "An error occurred while fetching policy details.";
+            Console.WriteLine($"[ERROR] Failed to fetch policy details: {ex}");
         }
         finally
         {
             IsLoading = false;
+            Console.WriteLine($"[INFO] Data loading complete for {ORIPolicyReference}");
         }
+    }
+
+    // Map IncludedOrExcludedItem to a consistent ghost button class
+    private string GetGhostButtonClass(string item)
+    {
+        return item switch
+        {
+            "DomicileCountry" => "primary-ghost",
+            "InwardPolicyReference" => "secondary-ghost",
+            "Peril" => "success-ghost",
+            "PlacementUMR" => "danger-ghost",
+            "PolicyMainRiskCode" => "warning-ghost",
+            "ReservingClass" => "info-ghost",
+            "StatCode1" => "purple-ghost",
+            "StatCode2" => "teal-ghost",
+            _ => "orange-ghost" // Default fallback
+        };
     }
 }

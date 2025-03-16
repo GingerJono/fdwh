@@ -163,11 +163,6 @@
 	{
 		policies = await ORIService.GetORIPolicies();
 
-		foreach (var policy in policies)
-		{
-			Console.WriteLine($"PolicyRef: {policy.ORIPolicyReference}, Limit: {policy.Limit}, Retention: {policy.Retention}");
-		}
-
 		isDataLoaded = true; // Mark data as loaded
 		StateHasChanged(); // Trigger UI refresh
 	}

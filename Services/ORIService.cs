@@ -20,7 +20,6 @@ namespace Sandbox.Services
 	{
 		private readonly IHttpContextAccessor _httpContextAccessor;
 		private readonly IConfiguration _configuration;
-
 		public ORIService(IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
 		{
 			_configuration = configuration;
@@ -70,16 +69,15 @@ namespace Sandbox.Services
 				{
 					// Fetch all inclusions and exclusions in one query
 					policyDetails.Filters = (await connection.QueryAsync<ORIFilterItem>(
-						"SELECT InclusionExclusion, IncludedOrExcludedItem, IncludedOrExcludedValue, Note FROM ORI.FiltersInclusionsAndExclusions WHERE ORI_Policy_Reference = @ORIPolicyReference",
-						parameters
+						"ORI.spGetORIFiltersMaster",
+						parameters,
+						commandType: CommandType.StoredProcedure
 					)).ToList();
 				}
 
 				return policyDetails;
 			}
 		}
-
-
 		public async Task<IEnumerable<ORIUSMListModel>> GetORIUSMs()
 		{
 			using (var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection")))
@@ -153,7 +151,6 @@ namespace Sandbox.Services
 				return usmDetails;
 			}
 		}
-
 		public async Task SaveORIPolicyMetadata(ORIPolicyModel model)
 		{
 			using var db = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
@@ -170,7 +167,20 @@ namespace Sandbox.Services
 			{
 				Console.WriteLine($"[INFO] Saving ORI Policy Metadata for {model.ORIPolicyReference}");
 
-				// Process Added Filters
+				// Step 1: Process Removed Filters
+				foreach (var filter in model.RemovedFilters)
+				{
+					var parameters = new DynamicParameters();
+					parameters.Add("@ORIPolicyReference", model.ORIPolicyReference);
+					parameters.Add("@InclusionExclusion", filter.InclusionExclusion);
+					parameters.Add("@IncludedOrExcludedItem", filter.IncludedOrExcludedItem);
+					parameters.Add("@IncludedOrExcludedValue", filter.IncludedOrExcludedValue);
+					parameters.Add("@LastUpdatedBy", userNameFinal);
+
+					await db.ExecuteAsync("ORI.spRemoveORIFiltersMaster", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
+				}
+
+				// Step 2: Process Added Filters
 				foreach (var filter in model.Filters)
 				{
 					var parameters = new DynamicParameters();
@@ -194,6 +204,17 @@ namespace Sandbox.Services
 				throw;
 			}
 		}
+		public async Task<List<ORIFilterItemDefinition>> GetIncludedOrExcludedItems()
+		{
+			using var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
+			await connection.OpenAsync();
 
+			var results = await connection.QueryAsync<ORIFilterItemDefinition>(
+				"ORI.spGetIncludedOrExcludedItems",
+				commandType: CommandType.StoredProcedure
+			);
+
+			return results.ToList();
+		}
 	}
 }

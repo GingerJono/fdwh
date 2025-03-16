@@ -28,16 +28,27 @@ namespace Sandbox.Models.ORI
 
 		// Single List for inclusions and exclusions
 		public List<ORIFilterItem> Filters { get; set; } = new();
+		public List<ORIFilterItem> RemovedFilters { get; set; } = new(); // Track deleted filters
+	}
+
+	public class ORIFilterItemDefinition
+	{
+		public string Code { get; set; }  // "DomicileCountry", "InwardPolicyReference", etc.
+		public string DisplayName { get; set; }  // "Domicile Country", "Inward Policy Reference"
 	}
 
 	// New Model to represent a row in the new Filters table
 	public class ORIFilterItem
 	{
 		public string InclusionExclusion { get; set; }  // "Inclusion" or "Exclusion"
-		public string IncludedOrExcludedItem { get; set; } // "DomicileCountry", "InwardPolicyReference", etc.
+		public string IncludedOrExcludedItem { get; set; } // Predefined object
 		public string IncludedOrExcludedValue { get; set; } // Actual value e.g., "US", "001810H19AA"
 		public string Note { get; set; }
+		public DateTime? LastUpdated { get; set; }
+		public string LastUpdatedBy { get; set; }
+
 	}
+
 
 	public class Narrative
 	{
@@ -45,96 +56,6 @@ namespace Sandbox.Models.ORI
 		public string Notes { get; set; } // Add this for the note
 		public DateTime? Date_entered { get; set; }
 		public string underwriter_initials { get; set; } // Add this for the note
-	}
-
-	public class ExcludedDomicileCountry
-	{
-		public string DomicileCountry { get; set; }
-		public string? Note { get; set; } // Add this for the note
-	}
-
-	public class ExcludedInwardPolicyReference
-	{
-		public string InwardPolicyReference { get; set; }
-		public string? Note { get; set; } // Add this for the note
-	}
-
-	public class ExcludedPlacementUMR
-	{
-		public string PlacementUMR { get; set; }
-		public string? Note { get; set; } // Add this for the note
-	}
-
-	public class ExcludedReservingClass
-	{
-		public string ReservingClass { get; set; }
-		public string? Note { get; set; } // Add this for the note
-	}
-
-	public class ExcludedRiskCode
-	{
-		public string RiskCode { get; set; }
-		public string? Note { get; set; } // Add this for the note
-	}
-
-	public class ExcludedStatCode2
-	{
-		public string StatCode2 { get; set; }
-		public string? Note { get; set; } // Add this for the note
-	}
-
-	public class IncludedClass
-	{
-		public string Class { get; set; }
-		public string? Note { get; set; } // Add this for the note
-	}
-
-	public class IncludedDomicileCountry
-	{
-		public string DomicileCountry { get; set; }
-		public string? Note { get; set; } // Add this for the note
-	}
-
-	public class IncludedInwardPolicyReference
-	{
-		public string InwardPolicyReference { get; set; }
-		public string? Note { get; set; } // Add this for the note
-	}
-
-	public class IncludedPeril
-	{
-		public string Peril { get; set; }
-		public string? Note { get; set; } // Add this for the note
-	}
-
-	public class IncludedPlacementUMR
-	{
-		public string PlacementUMR { get; set; }
-		public string? Note { get; set; } // Add this for the note
-	}
-
-	public class IncludedReservingClass
-	{
-		public string ReservingClass { get; set; }
-		public string? Note { get; set; } // Add this for the note
-	}
-
-	public class IncludedRiskCodes
-	{
-		public string PolicyMainRiskCode { get; set; }
-		public string? Note { get; set; } // Add this for the note
-	}
-
-	public class IncludedStatCode1
-	{
-		public string StatCode1 { get; set; }
-		public string? Note { get; set; } // Add this for the note
-	}
-
-	public class IncludedStatCode2
-	{
-		public string StatCode2 { get; set; }
-		public string? Note { get; set; } // Add this for the note
 	}
 
 	public class PolicySecurity
@@ -161,9 +82,9 @@ namespace Sandbox.Models.ORI
 
 	public class ReservingClass
 	{
-		public string ClassCode { get; set; }       
-		public string ReservingClassCode { get; set; } 
-		public string ReservingClassName { get; set; }          
+		public string ClassCode { get; set; }
+		public string ReservingClassCode { get; set; }
+		public string ReservingClassName { get; set; }
 	}
 
 	public class RiskCode
@@ -177,6 +98,5 @@ namespace Sandbox.Models.ORI
 		public string Code { get; set; }
 		public string Description { get; set; }
 	}
-
 
 }

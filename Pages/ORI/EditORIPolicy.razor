@@ -67,7 +67,14 @@ else if (PolicyDetails != null)
 								</InputSelect>
 							</td>
 							<td>
-								<InputText class="form-control" @bind-Value="newFilter.IncludedOrExcludedItem" placeholder="Item (e.g., DomicileCountry)" />
+
+								<InputSelect class="form-control" @bind-Value="newFilter.IncludedOrExcludedItem">
+									<option value="">Select a filter type</option>
+									@foreach (var item in FilterItemsList)
+									{
+										<option value="@item.Code">@item.DisplayName</option>
+									}
+								</InputSelect>
 							</td>
 							<td>
 								<InputText class="form-control" @bind-Value="newFilter.IncludedOrExcludedValue" placeholder="Value (e.g., US)" />
@@ -111,13 +118,15 @@ else if (PolicyDetails != null)
 	private ORIFilterItem newFilter = new ORIFilterItem
 		{
 			InclusionExclusion = "Inclusion", // Default value
-			IncludedOrExcludedItem = "",
+			IncludedOrExcludedItem = null,    // Use object, not a string
 			IncludedOrExcludedValue = "",
 			Note = ""
 		};
 
+	private List<ORIFilterItemDefinition> FilterItemsList = new();
 	protected override async Task OnInitializedAsync()
 	{
+
 		if (string.IsNullOrWhiteSpace(ORIPolicyReference))
 		{
 			ErrorMessage = "Policy reference is required.";
@@ -128,6 +137,7 @@ else if (PolicyDetails != null)
 		try
 		{
 			PolicyDetails = await ORIService.GetORIPolicyDetails(ORIPolicyReference);
+			FilterItemsList = await ORIService.GetIncludedOrExcludedItems();
 			if (PolicyDetails == null)
 			{
 				ErrorMessage = $"No policy details found for reference: {ORIPolicyReference}";
@@ -169,10 +179,10 @@ else if (PolicyDetails != null)
 
 	private void AddFilter()
 	{
-		if (string.IsNullOrWhiteSpace(newFilter.IncludedOrExcludedItem) ||
+		if (newFilter.IncludedOrExcludedItem == null ||
 			string.IsNullOrWhiteSpace(newFilter.IncludedOrExcludedValue))
 		{
-			Console.WriteLine("Cannot add an empty filter.");
+			Console.WriteLine("Cannot add a filter without a valid type and value.");
 			return;
 		}
 
@@ -182,11 +192,11 @@ else if (PolicyDetails != null)
 			PolicyDetails.Filters = new List<ORIFilterItem>();
 		}
 
-		// Add new filter item
+		// Add the filter to the policy
 		PolicyDetails.Filters.Add(new ORIFilterItem
 			{
 				InclusionExclusion = newFilter.InclusionExclusion,
-				IncludedOrExcludedItem = newFilter.IncludedOrExcludedItem,
+				IncludedOrExcludedItem = newFilter.IncludedOrExcludedItem, // Object reference
 				IncludedOrExcludedValue = newFilter.IncludedOrExcludedValue,
 				Note = newFilter.Note
 			});
@@ -197,7 +207,7 @@ else if (PolicyDetails != null)
 		newFilter = new ORIFilterItem
 			{
 				InclusionExclusion = "Inclusion",
-				IncludedOrExcludedItem = "",
+				IncludedOrExcludedItem = null,    // Use object, not a string
 				IncludedOrExcludedValue = "",
 				Note = ""
 			};
@@ -205,10 +215,12 @@ else if (PolicyDetails != null)
 		// Force UI update
 		StateHasChanged();
 	}
-
 	private void RemoveFilter(ORIFilterItem filter)
 	{
-		PolicyDetails.Filters.Remove(filter);
-		StateHasChanged();
+		if (PolicyDetails.Filters.Contains(filter))
+		{
+			PolicyDetails.Filters.Remove(filter);
+			PolicyDetails.RemovedFilters.Add(filter); // Track deleted filters
+		}
 	}
 }
