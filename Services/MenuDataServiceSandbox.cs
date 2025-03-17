@@ -17,11 +17,19 @@ public class MenuDataServiceSandbox
             active: false,
             dirChange: false,
             children: new MainMenuItems[]
-            {
+			{
 				new MainMenuItems (
 					path: "/ORIPolicies",
 					type: "link",
 					title: "ORI Policies",
+					selected: false,
+					active: false,
+					dirChange: false
+				),
+				new MainMenuItems (
+					path: "/ORIUSMs",
+					type: "link",
+					title: "ORI USMs",
 					selected: false,
 					active: false,
 					dirChange: false

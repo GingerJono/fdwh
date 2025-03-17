@@ -70,7 +70,17 @@ else if (PolicyDetails != null)
     <div class="card mb-4">
         <div class="card-header">Inclusions & Exclusions</div>
         <div class="card-body">
-            <p class="text-muted">This table lists all policy inclusions and exclusions.</p>
+            <blockquote class="blockquote custom-blockquote primary mb-0">
+                <h6>The terms below are used to determine which policies, premiums and claims are applicable to the reinsurance contract.</h6>					
+                <ul>
+                    <li>"Excluded" means that the particular business item will not be applicable. </li>
+                    <li>"Included" means that <strong>only those stated business values will</strong> be applicable (and any other value for that "item" will be excluded).</li>
+                    <li>Outside of the terms below, the only other data point used to determine applicability of this ORI Contact to Inwards Policies/Claims is the "risk basis"(e.g.RAD, LOD) and inception/ expiry date.</li>
+                </ul>
+                <span class="quote-icon"><i class="ri-information-line"></i></span>
+            </blockquote>
+
+
 
             @if (PolicyDetails.Filters?.Any() == true)
             {

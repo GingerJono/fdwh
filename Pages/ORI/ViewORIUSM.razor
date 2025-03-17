@@ -1,0 +1,234 @@
+﻿@page "/ViewORIUSM/{USMID}"
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@using Sandbox.Models.ORI
+@using Sandbox.Services
+@inject ORIService ORIService
+
+@if (IsLoading)
+{
+    <p>Loading USM details...</p>
+}
+else if (!string.IsNullOrEmpty(ErrorMessage))
+{
+    <p class="text-danger">@ErrorMessage</p>
+}
+else if (USMDetails != null)
+{
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/ORIUSMs">ORI USMs</a></li>
+            <li class="breadcrumb-item active" aria-current="page">View USM @USMDetails.USMID</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="page-header m-0">
+            ORI USM ID: @USMDetails.USMID
+        </h1>
+        <button class="btn btn-warning" @onclick="NavigateToEdit">Edit USM</button>
+    </div>
+
+    <!-- Two-column layout for USM Details & Narratives -->
+    <div class="row">
+        <!-- USM Details -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">USM Details</div>
+                <div class="card-body">
+                    <table class="table table-bordered">
+                        <tbody>
+                            <tr><th>ORI Policy Reference</th><td>@USMDetails.ORIPolicyReference</td></tr>
+                            <tr><th>LPSO No</th><td>@USMDetails.LPSONo</td></tr>
+                            <tr><th>LPSO Date</th><td>@USMDetails.LPSODate?.ToString("yyyy-MM-dd")</td></tr>
+                            <tr><th>LPSO Version</th><td>@USMDetails.LPSOVersionNo</td></tr>
+                            <tr><th>User Sequence No</th><td>@USMDetails.UserSequenceNo</td></tr>
+                            <tr><th>Syndicate No</th><td>@USMDetails.SyndicateNo</td></tr>
+                            <tr><th>Instalment No</th><td>@USMDetails.InstalmentNo</td></tr>
+                            <tr><th>Closing Currency</th><td>@USMDetails.ClosingCcy</td></tr>
+                            <tr><th>Settlement Currency</th><td>@USMDetails.SettCcy</td></tr>
+                            <tr><th>Line Amount (SCC)</th><td>@USMDetails.LineAmountSCC</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Narratives -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">Narratives</div>
+                <div class="card-body">
+                    @if (USMDetails.Narratives.Any())
+                    {
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Line No</th>
+                                    <th>Occurrence</th>
+                                    <th>Narrative</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var narrative in USMDetails.Narratives)
+                                {
+                                    <tr>
+                                        <td>@narrative.LineNo</td>
+                                        <td>@narrative.LineNoOccurrence</td>
+                                        <td>@narrative.NarrativeLine</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No narratives available.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2x2 Grid for Allocations -->
+    <div class="row">
+        <!-- YOA Allocation -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">YOA Allocation</div>
+                <div class="card-body">
+                    @if (USMDetails.YOAAllocations.Any())
+                    {
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr><th>YOA</th><th>Allocation</th></tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var yoa in USMDetails.YOAAllocations)
+                                {
+                                    <tr><td>@yoa.YOA</td><td>@yoa.Allocation</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No YOA allocations available.</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- COB Allocation -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">COB Allocation</div>
+                <div class="card-body">
+                    @if (USMDetails.COBAllocations.Any())
+                    {
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr><th>COB</th><th>Allocation</th></tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var cob in USMDetails.COBAllocations)
+                                {
+                                    <tr><td>@cob.COB</td><td>@cob.Allocation</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No COB allocations available.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Security Allocation -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">Security Allocation</div>
+                <div class="card-body">
+                    @if (USMDetails.SecurityAllocations.Any())
+                    {
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr><th>Security</th><th>Allocation</th></tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var sec in USMDetails.SecurityAllocations)
+                                {
+                                    <tr><td>@sec.Security</td><td>@sec.Allocation</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No security allocations available.</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Event Allocation -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">Event Allocation</div>
+                <div class="card-body">
+                    @if (USMDetails.EventAllocations.Any())
+                    {
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr><th>Event</th><th>Allocation</th></tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var eventAlloc in USMDetails.EventAllocations)
+                                {
+                                    <tr><td>@eventAlloc.Event</td><td>@eventAlloc.Allocation</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No event allocations available.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public string USMID { get; set; }
+    private ORIUSMModel USMDetails { get; set; }
+    private bool IsLoading = true;
+    private string ErrorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            USMDetails = await ORIService.GetORIUSMDetails(USMID);
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = "Error fetching USM details.";
+            Console.WriteLine($"[ERROR] {ex}");
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+    private void NavigateToEdit()
+    {
+        NavigationManager.NavigateTo($"/EditORIUSM/{USMDetails.USMID}");
+    }
+
+}

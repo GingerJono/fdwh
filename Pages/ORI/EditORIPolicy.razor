@@ -36,13 +36,24 @@ else if (PolicyDetails != null)
 		<div class="card mb-4">
 			<div class="card-header">Policy Inclusions/Exclusions</div>
 			<div class="card-body">
-				<table class="table">
+				<blockquote class="blockquote custom-blockquote primary mb-0">
+					<h6>The terms below are used to determine which policies, premiums and claims are applicable to the reinsurance contract.</h6>
+					<ul>
+						<li>"Excluded" means that the particular business item will not be applicable. </li>
+						<li>"Included" means that <strong>only those stated business values will</strong> be applicable (and any other value for that "item" will be excluded).</li>
+						<li>Outside of the terms below, the only other data point used to determine applicability of this ORI Contact to Inwards Policies/Claims is the "risk basis"(e.g.RAD, LOD) and inception/ expiry date.</li>
+					</ul>
+					<span class="quote-icon"><i class="ri-information-line"></i></span>
+				</blockquote>
+				<table class="table table-striped">
 					<thead>
 						<tr>
 							<th>Type</th>
 							<th>Item</th>
 							<th>Value</th>
 							<th>Note</th>
+							<th>Last Updated</th>
+							<th>Updated By</th>
 							<th>Actions</th>
 						</tr>
 					</thead>
@@ -50,15 +61,42 @@ else if (PolicyDetails != null)
 						@foreach (var filter in PolicyDetails.Filters)
 						{
 							<tr>
-								<td>@filter.InclusionExclusion</td>
-								<td>@filter.IncludedOrExcludedItem</td>
-								<td>@filter.IncludedOrExcludedValue</td>
+								<td>
+									<span class="btn btn-@(filter.InclusionExclusion == "Inclusion" ? "success" : "danger")-gradient rounded-pill btn-wave">
+										@filter.InclusionExclusion
+									</span>
+								</td>
+								<td>
+									<button type="button" class="btn btn-@GetGhostButtonClass(filter.IncludedOrExcludedItem) btn-wave">
+										@filter.IncludedOrExcludedItem
+									</button>
+								</td>
+								<td>
+									@if (DropdownValues.ContainsKey(filter.IncludedOrExcludedItem))
+									{
+										<InputSelect class="form-control" @bind-Value="filter.IncludedOrExcludedValue">
+											<option value="">Select...</option>
+											@foreach (var item in DropdownValues[filter.IncludedOrExcludedItem])
+											{
+												<option value="@item.Code">@item.Name</option>
+											}
+										</InputSelect>
+									}
+									else
+									{
+										<InputText class="form-control" @bind-Value="filter.IncludedOrExcludedValue" />
+									}
+								</td>
 								<td><InputText class="form-control" @bind-Value="filter.Note" /></td>
+								<td>@filter.LastUpdated?.ToString("yyyy-MM-dd HH:mm")</td>
+								<td>@filter.LastUpdatedBy</td>
 								<td>
 									<button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveFilter(filter)">Remove</button>
 								</td>
 							</tr>
 						}
+
+						<!-- Add New Filter Row -->
 						<tr>
 							<td>
 								<InputSelect class="form-control" @bind-Value="newFilter.InclusionExclusion">
@@ -67,8 +105,10 @@ else if (PolicyDetails != null)
 								</InputSelect>
 							</td>
 							<td>
-
-								<InputSelect class="form-control" @bind-Value="newFilter.IncludedOrExcludedItem">
+								<InputSelect class="form-control"
+											 @bind-Value="newFilter.IncludedOrExcludedItem"
+											 @onchange="OnFilterTypeChanged"
+											 TValue="string">
 									<option value="">Select a filter type</option>
 									@foreach (var item in FilterItemsList)
 									{
@@ -77,22 +117,34 @@ else if (PolicyDetails != null)
 								</InputSelect>
 							</td>
 							<td>
-								<InputText class="form-control" @bind-Value="newFilter.IncludedOrExcludedValue" placeholder="Value (e.g., US)" />
+								@if (!string.IsNullOrWhiteSpace(newFilter.IncludedOrExcludedItem) && DropdownValues.ContainsKey(newFilter.IncludedOrExcludedItem))
+								{
+									<InputSelect class="form-control" @bind-Value="newFilter.IncludedOrExcludedValue">
+										<option value="">Select...</option>
+										@foreach (var item in DropdownValues[newFilter.IncludedOrExcludedItem])
+										{
+											<option value="@item.Code">@item.Name</option>
+										}
+									</InputSelect>
+								}
+								else
+								{
+									<InputText class="form-control" @bind-Value="newFilter.IncludedOrExcludedValue" placeholder="Enter value" />
+								}
 							</td>
 							<td>
 								<InputText class="form-control" @bind-Value="newFilter.Note" placeholder="Note (optional)" />
 							</td>
+							<td colspan="2"></td>
 							<td>
-								<button type="button" class="btn btn-primary btn-sm" @onclick="AddFilter" preventdefault="onclick">Add</button>
+								<button type="button" class="btn btn-primary btn-sm" @onclick="AddFilter">Add</button>
 							</td>
 						</tr>
 					</tbody>
 				</table>
 			</div>
 		</div>
-		<button type="button" class="btn btn-warning" @onclick="() => DebugTestClick()">
-			Test Click
-		</button>
+
 
 		@code {
 		private void DebugTestClick()
@@ -112,6 +164,7 @@ else if (PolicyDetails != null)
 	[Inject] private NavigationManager Navigation { get; set; }
 	[Parameter] public string ORIPolicyReference { get; set; }
 
+	private Dictionary<string, List<DropdownItem>> DropdownValues = new();
 	private ORIPolicyModel PolicyDetails { get; set; }
 	private bool IsLoading = true;
 	private string ErrorMessage;
@@ -150,6 +203,35 @@ else if (PolicyDetails != null)
 		finally
 		{
 			IsLoading = false;
+		}
+	}
+
+	private async Task OnFilterTypeChanged(ChangeEventArgs e)
+	{
+		var selectedType = e.Value?.ToString();
+
+		if (!string.IsNullOrWhiteSpace(selectedType))
+		{
+			Console.WriteLine($"[DEBUG] Filter type changed to: {selectedType}");
+
+			newFilter.IncludedOrExcludedItem = selectedType; // Explicitly set value
+
+			// Fetch dropdown values if not already cached
+			if (!DropdownValues.ContainsKey(selectedType))
+			{
+				Console.WriteLine($"[DEBUG] Fetching dropdown values for: {selectedType}");
+				DropdownValues[selectedType] = await ORIService.GetDropdownValues(selectedType);
+			}
+
+			// Reset value so user must reselect
+			newFilter.IncludedOrExcludedValue = "";
+
+			// **Force UI Update**
+			StateHasChanged();
+		}
+		else
+		{
+			Console.WriteLine("[DEBUG] Selected filter type is null or empty.");
 		}
 	}
 
@@ -222,5 +304,22 @@ else if (PolicyDetails != null)
 			PolicyDetails.Filters.Remove(filter);
 			PolicyDetails.RemovedFilters.Add(filter); // Track deleted filters
 		}
+	}
+
+
+	private string GetGhostButtonClass(string item)
+	{
+		return item switch
+		{
+			"DomicileCountry" => "primary-ghost",
+			"InwardPolicyReference" => "secondary-ghost",
+			"Peril" => "success-ghost",
+			"PlacementUMR" => "danger-ghost",
+			"PolicyMainRiskCode" => "warning-ghost",
+			"ReservingClass" => "info-ghost",
+			"StatCode1" => "purple-ghost",
+			"StatCode2" => "teal-ghost",
+			_ => "orange-ghost"
+		};
 	}
 }

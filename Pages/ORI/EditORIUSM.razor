@@ -1,0 +1,319 @@
+﻿@page "/EditORIUSM/{USMID}"
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager
+@using Sandbox.Models.ORI
+@using Sandbox.Services
+@inject ORIService ORIService
+@inject IJSRuntime JSRuntime
+
+@if (IsLoading)
+{
+	<p>Loading USM details...</p>
+}
+else if (!string.IsNullOrEmpty(ErrorMessage))
+{
+	<p class="text-danger">@ErrorMessage</p>
+}
+else if (USMDetails != null)
+{
+	<nav aria-label="breadcrumb">
+		<ol class="breadcrumb">
+			<li class="breadcrumb-item"><a href="/ORIUSMs">ORI USMs</a></li>
+			<li class="breadcrumb-item"><a href="/ViewORIUSM/@USMDetails.USMID">VIEW USM</a></li>
+			<li class="breadcrumb-item active" aria-current="page">EDIT USM</li>
+		</ol>
+	</nav>
+
+	<h1>Editing USM: @USMDetails.USMID</h1>
+
+	<EditForm Model="USMDetails" OnValidSubmit="HandleValidSubmit">
+		<DataAnnotationsValidator />
+		<ValidationSummary />
+
+		<!-- YOA Allocations -->
+		<div class="row">
+			<div class="col-md-6">
+				<div class="card mb-4">
+					<div class="card-header">YOA Allocations</div>
+					<div class="card-body">
+						<table class="table">
+							<thead>
+								<tr><th>YOA</th><th>Allocation</th><th>Actions</th></tr>
+							</thead>
+							<tbody>
+								@foreach (var allocation in USMDetails.YOAAllocations)
+								{
+									<tr>
+										<td>@allocation.YOA</td>
+										<td><InputNumber class="form-control" @bind-Value="allocation.Allocation" /></td>
+										<td>
+											<button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveYOAAllocation(allocation)">Remove</button>
+										</td>
+									</tr>
+								}
+								<tr>
+									<td><InputNumber class="form-control" @bind-Value="newYOA.YOA" /></td>
+									<td><InputNumber class="form-control" @bind-Value="newYOA.Allocation" /></td>
+									<td><button type="button" class="btn btn-primary btn-sm" @onclick="AddYOAAllocation">Add</button></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+
+			<!-- COB Allocations -->
+			<div class="col-md-6">
+				<div class="card mb-4">
+					<div class="card-header">COB Allocations</div>
+					<div class="card-body">
+						<table class="table">
+							<thead>
+								<tr><th>COB</th><th>Allocation</th><th>Actions</th></tr>
+							</thead>
+							<tbody>
+								@foreach (var allocation in USMDetails.COBAllocations)
+								{
+									<tr>
+										<td>@allocation.COB</td>
+										<td><InputNumber class="form-control" @bind-Value="allocation.Allocation" /></td>
+										<td>
+											<button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveCOBAllocation(allocation)">Remove</button>
+										</td>
+									</tr>
+								}
+								<tr>
+									<td><InputText class="form-control" @bind-Value="newCOB.COB" /></td>
+									<td><InputNumber class="form-control" @bind-Value="newCOB.Allocation" /></td>
+									<td><button type="button" class="btn btn-primary btn-sm" @onclick="AddCOBAllocation">Add</button></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Security & Event Allocations -->
+		<div class="row">
+			<div class="col-md-6">
+				<div class="card mb-4">
+					<div class="card-header">Security Allocations</div>
+					<div class="card-body">
+						<table class="table">
+							<thead>
+								<tr><th>Security</th><th>Allocation</th><th>Actions</th></tr>
+							</thead>
+							<tbody>
+								@foreach (var allocation in USMDetails.SecurityAllocations)
+								{
+									<tr>
+										<td>@allocation.Security</td>
+										<td><InputNumber class="form-control" @bind-Value="allocation.Allocation" /></td>
+										<td>
+											<button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveSecurityAllocation(allocation)">Remove</button>
+										</td>
+									</tr>
+								}
+								<tr>
+									<td><InputText class="form-control" @bind-Value="newSecurity.Security" /></td>
+									<td><InputNumber class="form-control" @bind-Value="newSecurity.Allocation" /></td>
+									<td><button type="button" class="btn btn-primary btn-sm" @onclick="AddSecurityAllocation">Add</button></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-md-6">
+				<div class="card mb-4">
+					<div class="card-header">Event Allocations</div>
+					<div class="card-body">
+						<table class="table">
+							<thead>
+								<tr><th>Event</th><th>Allocation</th><th>Actions</th></tr>
+							</thead>
+							<tbody>
+								@foreach (var allocation in USMDetails.EventAllocations)
+								{
+									<tr>
+										<td>@allocation.Event</td>
+										<td><InputNumber class="form-control" @bind-Value="allocation.Allocation" /></td>
+										<td>
+											<button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveEventAllocation(allocation)">Remove</button>
+										</td>
+									</tr>
+								}
+								<tr>
+									<td><InputText class="form-control" @bind-Value="newEvent.Event" /></td>
+									<td><InputNumber class="form-control" @bind-Value="newEvent.Allocation" /></td>
+									<td><button type="button" class="btn btn-primary btn-sm" @onclick="AddEventAllocation">Add</button></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="text-right">
+			<button type="submit" class="btn btn-success">Save Changes</button>
+			<button type="button" class="btn btn-secondary" @onclick="NavigateBack">Cancel</button>
+		</div>
+	</EditForm>
+}
+
+@code {
+	[Parameter] public string USMID { get; set; }
+	private ORIUSMModel USMDetails { get; set; }
+	private bool IsLoading = true;
+	private string ErrorMessage;
+
+	protected override async Task OnInitializedAsync()
+	{
+		try
+		{
+			USMDetails = await ORIService.GetORIUSMDetails(USMID);
+
+			// Ensure lists are initialized to avoid null reference issues
+			USMDetails.YOAAllocations ??= new List<YOAAllocation>();
+			USMDetails.COBAllocations ??= new List<COBAllocation>();
+			USMDetails.SecurityAllocations ??= new List<SecurityAllocation>();
+			USMDetails.EventAllocations ??= new List<EventAllocation>();
+		}
+		catch (Exception ex)
+		{
+			ErrorMessage = ex.Message;
+		}
+		finally
+		{
+			IsLoading = false;
+		}
+	}
+	
+	private bool HasUnsavedChanges()
+	{
+		// Check if any new allocations have values but haven't been added
+		bool hasUncommittedChanges =
+			(newYOA.YOA != 0 || newYOA.Allocation != 0) ||
+			(!string.IsNullOrWhiteSpace(newCOB.COB) || newCOB.Allocation != 0) ||
+			(!string.IsNullOrWhiteSpace(newSecurity.Security) || newSecurity.Allocation != 0) ||
+			(!string.IsNullOrWhiteSpace(newEvent.Event) || newEvent.Allocation != 0);
+
+		return hasUncommittedChanges;
+	}
+
+
+	private async Task HandleValidSubmit()
+	{
+		await ORIService.SaveORIUSM(USMDetails);
+		NavigationManager.NavigateTo($"/ViewORIUSM/{USMDetails.USMID}");
+	}
+	private async Task NavigateBack()
+	{
+		if (HasUnsavedChanges())
+		{
+			bool confirmLeave = await JSRuntime.InvokeAsync<bool>("confirm",
+				"You have unsaved changes that haven’t been added. Are you sure you want to leave?");
+			if (!confirmLeave) return;
+		}
+		NavigationManager.NavigateTo($"/ViewORIUSM/{USMDetails.USMID}");
+	}
+
+	private YOAAllocation newYOA = new YOAAllocation();
+	private COBAllocation newCOB = new COBAllocation();
+	private SecurityAllocation newSecurity = new SecurityAllocation();
+	private EventAllocation newEvent = new EventAllocation();
+
+	private void AddYOAAllocation()
+	{
+		if (newYOA.YOA == 0 || newYOA.Allocation == 0)
+		{
+			Console.WriteLine("Invalid YOA allocation entry.");
+			return;
+		}
+
+		USMDetails.YOAAllocations.Add(new YOAAllocation
+			{
+				YOA = newYOA.YOA,
+				Allocation = newYOA.Allocation
+			});
+
+		newYOA = new YOAAllocation(); // Reset input
+	}
+
+	private void RemoveYOAAllocation(YOAAllocation allocation)
+	{
+		USMDetails.YOAAllocations.Remove(allocation);
+		USMDetails.RemovedYOAAllocations.Add(allocation);
+	}
+
+	private void AddCOBAllocation()
+	{
+		if (string.IsNullOrWhiteSpace(newCOB.COB) || newCOB.Allocation == 0)
+		{
+			Console.WriteLine("Invalid COB allocation entry.");
+			return;
+		}
+
+		USMDetails.COBAllocations.Add(new COBAllocation
+			{
+				COB = newCOB.COB,
+				Allocation = newCOB.Allocation
+			});
+
+		newCOB = new COBAllocation(); // Reset input
+	}
+
+	private void RemoveCOBAllocation(COBAllocation allocation)
+	{
+		USMDetails.COBAllocations.Remove(allocation);
+		USMDetails.RemovedCOBAllocations.Add(allocation);
+	}
+
+	private void AddSecurityAllocation()
+	{
+		if (string.IsNullOrWhiteSpace(newSecurity.Security) || newSecurity.Allocation == 0)
+		{
+			Console.WriteLine("Invalid Security allocation entry.");
+			return;
+		}
+
+		USMDetails.SecurityAllocations.Add(new SecurityAllocation
+			{
+				Security = newSecurity.Security,
+				Allocation = newSecurity.Allocation
+			});
+
+		newSecurity = new SecurityAllocation(); // Reset input
+	}
+
+	private void RemoveSecurityAllocation(SecurityAllocation allocation)
+	{
+		USMDetails.SecurityAllocations.Remove(allocation);
+		USMDetails.RemovedSecurityAllocations.Add(allocation);
+	}
+
+	private void AddEventAllocation()
+	{
+		if (string.IsNullOrWhiteSpace(newEvent.Event) || newEvent.Allocation == 0)
+		{
+			Console.WriteLine("Invalid Event allocation entry.");
+			return;
+		}
+
+		USMDetails.EventAllocations.Add(new EventAllocation
+			{
+				Event = newEvent.Event,
+				Allocation = newEvent.Allocation
+			});
+
+		newEvent = new EventAllocation(); // Reset input
+	}
+
+	private void RemoveEventAllocation(EventAllocation allocation)
+	{
+		USMDetails.EventAllocations.Remove(allocation);
+		USMDetails.RemovedEventAllocations.Add(allocation);
+	}
+}

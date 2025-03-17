@@ -120,32 +120,32 @@ namespace Sandbox.Services
 					);
 
 					// Fetch YOA allocations
-					usmDetails.YOAAllocations = await connection.QueryAsync<YOAAllocation>(
+					usmDetails.YOAAllocations = (await connection.QueryAsync<YOAAllocation>(
 						"ORI.spGetORIUSMAllocationsYOA",
 						parameters,
 						commandType: CommandType.StoredProcedure
-					);
+					)).ToList();
 
 					// Fetch COB allocations
-					usmDetails.COBAllocations = await connection.QueryAsync<COBAllocation>(
+					usmDetails.COBAllocations = (await connection.QueryAsync<COBAllocation>(
 						"ORI.spGetORIUSMAllocationsCOB",
 						parameters,
 						commandType: CommandType.StoredProcedure
-					);
+					)).ToList();
 
 					// Fetch Security allocations
-					usmDetails.SecurityAllocations = await connection.QueryAsync<SecurityAllocation>(
+					usmDetails.SecurityAllocations = (await connection.QueryAsync<SecurityAllocation>(
 						"ORI.spGetORIUSMAllocationsSecurity",
 						parameters,
 						commandType: CommandType.StoredProcedure
-					);
+					)).ToList();
 
 					// Fetch Event allocations
-					usmDetails.EventAllocations = await connection.QueryAsync<EventAllocation>(
+					usmDetails.EventAllocations = (await connection.QueryAsync<EventAllocation>(
 						"ORI.spGetORIUSMAllocationsEvent",
 						parameters,
 						commandType: CommandType.StoredProcedure
-					);
+					)).ToList();
 				}
 
 				return usmDetails;
@@ -216,5 +216,147 @@ namespace Sandbox.Services
 
 			return results.ToList();
 		}
+		public async Task<List<DropdownItem>> GetDropdownValues(string filterType)
+		{
+			using var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
+			await connection.OpenAsync();
+
+			var storedProcedure = filterType switch
+			{
+				"Class" => "ORI.spGetListClass",
+				"DomicileCountry" => "ORI.spGetListDomicileCountry",
+				"Peril" => "ORI.spGetListPeril",
+				"PlacementUMR" => null,  // Remain as a textbox
+				"PolicyMainRiskCode" => "ORI.spGetListRiskCode",
+				"ReservingClass" => "ORI.spGetListReservingClass",
+				"StatCode1" => "ORI.spGetListStatCode1",
+				"StatCode2" => "ORI.spGetListStatCode2",
+				_ => null
+			};
+
+			if (string.IsNullOrEmpty(storedProcedure))
+				return new List<DropdownItem>(); // No dropdown values for this type
+
+			var results = await connection.QueryAsync<DropdownItem>(
+				storedProcedure,
+				commandType: CommandType.StoredProcedure
+			);
+
+			return results.ToList();
+		}
+		public async Task SaveORIUSM(ORIUSMModel model)
+		{
+			using var db = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
+			var context = _httpContextAccessor.HttpContext;
+			string userNameFinal = context?.User?.Identity?.Name ?? "UnknownUser";
+
+			if (db.State == ConnectionState.Closed)
+			{
+				await db.OpenAsync();
+			}
+
+			using var transaction = db.BeginTransaction();
+			try
+			{
+				Console.WriteLine($"[INFO] Saving ORI USM Data for {model.USMID}");
+
+				// Step 1: Process Removed Allocations
+				foreach (var allocation in model.RemovedYOAAllocations)
+				{
+					var parameters = new DynamicParameters();
+					parameters.Add("@ORIUSMID", model.USMID);
+					parameters.Add("@YOA", allocation.YOA);
+					parameters.Add("@LastUpdatedBy", userNameFinal);
+
+					await db.ExecuteAsync("ORI.spDeleteUSMAllocationsYOA", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
+				}
+
+				foreach (var allocation in model.RemovedCOBAllocations)
+				{
+					var parameters = new DynamicParameters();
+					parameters.Add("@ORIUSMID", model.USMID);
+					parameters.Add("@COB", allocation.COB);
+					parameters.Add("@LastUpdatedBy", userNameFinal);
+
+					await db.ExecuteAsync("ORI.spDeleteUSMAllocationsCOB", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
+				}
+
+				foreach (var allocation in model.RemovedSecurityAllocations)
+				{
+					var parameters = new DynamicParameters();
+					parameters.Add("@ORIUSMID", model.USMID);
+					parameters.Add("@Security", allocation.Security);
+					parameters.Add("@LastUpdatedBy", userNameFinal);
+
+					await db.ExecuteAsync("ORI.spDeleteUSMAllocationsSecurity", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
+				}
+
+				foreach (var allocation in model.RemovedEventAllocations)
+				{
+					var parameters = new DynamicParameters();
+					parameters.Add("@ORIUSMID", model.USMID);
+					parameters.Add("@Event", allocation.Event);
+					parameters.Add("@LastUpdatedBy", userNameFinal);
+
+					await db.ExecuteAsync("ORI.spDeleteUSMAllocationsEvent", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
+				}
+
+				// Step 2: Process Added or Updated Allocations
+				foreach (var allocation in model.YOAAllocations)
+				{
+					var parameters = new DynamicParameters();
+					parameters.Add("@ORIUSMID", model.USMID);
+					parameters.Add("@YOA", allocation.YOA);
+					parameters.Add("@Allocation", allocation.Allocation);
+					parameters.Add("@LastUpdatedBy", userNameFinal);
+
+					await db.ExecuteAsync("ORI.spUpsertUSMAllocationsYOA", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
+				}
+
+				foreach (var allocation in model.COBAllocations)
+				{
+					var parameters = new DynamicParameters();
+					parameters.Add("@ORIUSMID", model.USMID);
+					parameters.Add("@COB", allocation.COB);
+					parameters.Add("@Allocation", allocation.Allocation);
+					parameters.Add("@LastUpdatedBy", userNameFinal);
+
+					await db.ExecuteAsync("ORI.spUpsertUSMAllocationsCOB", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
+				}
+
+				foreach (var allocation in model.SecurityAllocations)
+				{
+					var parameters = new DynamicParameters();
+					parameters.Add("@ORIUSMID", model.USMID);
+					parameters.Add("@Security", allocation.Security);
+					parameters.Add("@Allocation", allocation.Allocation);
+					parameters.Add("@LastUpdatedBy", userNameFinal);
+
+					await db.ExecuteAsync("ORI.spUpsertUSMAllocationsSecurity", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
+				}
+
+				foreach (var allocation in model.EventAllocations)
+				{
+					var parameters = new DynamicParameters();
+					parameters.Add("@ORIUSMID", model.USMID);
+					parameters.Add("@Event", allocation.Event);
+					parameters.Add("@Allocation", allocation.Allocation);
+					parameters.Add("@LastUpdatedBy", userNameFinal);
+
+					await db.ExecuteAsync("ORI.spUpsertUSMAllocationsEvent", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
+				}
+
+				transaction.Commit();
+				Console.WriteLine($"[SUCCESS] ORI USM Data saved successfully for {model.USMID}");
+			}
+			catch (Exception ex)
+			{
+				transaction.Rollback();
+				Console.WriteLine($"[ERROR] Transaction failed: {ex.Message}");
+				throw;
+			}
+		}
+
+
 	}
 }

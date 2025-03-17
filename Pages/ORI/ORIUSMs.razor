@@ -1,0 +1,65 @@
+﻿@page "/ORIUSMs"
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@using Sandbox.Models.ORI
+@using Sandbox.Services
+@inject ORIService ORIService
+
+<h3>ORI USMs</h3>
+
+@if (usmList == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table dataTable" id="usmTable">
+        <thead>
+            <tr>
+                <th>USM ID</th>
+                <th>ORI Policy Reference</th>
+                <th>LPSO No</th>
+                <th>LPSO Date</th>
+                <th>Syndicate No</th>
+                <th>Instalment No</th>
+                <th>Line Amount (SCC)</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var usm in usmList)
+            {
+                <tr>
+                    <td>
+                        <button class="btn btn-link text-decoration-underline"
+                                @onclick="@(() => NavigationManager.NavigateTo($"/ViewORIUSM/{usm.USMID}"))">
+                            @usm.USMID
+                        </button>
+                    </td>
+                    <td>@usm.ORIPolicyReference</td>
+                    <td>@usm.LPSONo</td>
+                    <td>@usm.LPSODate?.ToString("yyyy-MM-dd")</td>
+                    <td>@usm.SyndicateNo</td>
+                    <td>@usm.InstalmentNo</td>
+                    <td>@usm.LineAmountSCC</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm"
+                                @onclick="@(() => NavigationManager.NavigateTo($"/ViewORIUSM/{usm.USMID}"))">
+                            View
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private IEnumerable<ORIUSMListModel> usmList;
+
+    protected override async Task OnInitializedAsync()
+    {
+        usmList = await ORIService.GetORIUSMs();
+        StateHasChanged();
+    }
+}
