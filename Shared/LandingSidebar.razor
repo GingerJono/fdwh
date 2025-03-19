@@ -94,7 +94,7 @@
             await JSRuntime.InvokeVoidAsync("scrollFunctions.addScrollListener", dotNetObjectReference);
             await JSRuntime.InvokeVoidAsync("resizeFunctions.addresizeListener", dotNetObjectReference);
 
-            screenSize = await JSRuntime.InvokeAsync<int>("interop.inner", "innerWidth");
+            screenSize = await JSRuntime.InvokeAsync<decimal>("interop.inner", "innerWidth");
             if(screenSize < 992) {
                 await JSRuntime.InvokeAsync<string>("interop.addAttributeToHtml", "data-toggled", "close");
             }
@@ -384,10 +384,10 @@
         await JSRuntime.InvokeVoidAsync("scrollFunctions.detachScrollListener", dotNetObjectReference);
     }
 
-    int screenSize = 1268;
-    private List<int> WindowPreSize = new List<int>();
+    decimal screenSize = 1268;
+    private List<decimal> WindowPreSize = new List<decimal>();
     [JSInvokable]
-    public async void OnWindowResize(int position)
+    public async void OnWindowResize(decimal position)
     {
         screenSize = position;
         WindowPreSize.Add(position);
@@ -395,8 +395,8 @@
             WindowPreSize.RemoveAt(0);
         }
         if (WindowPreSize.Count > 1) {
-            int recentSize = WindowPreSize[WindowPreSize.Count - 1];
-            int prevSize = WindowPreSize[WindowPreSize.Count - 2];
+            decimal recentSize = WindowPreSize[WindowPreSize.Count - 1];
+            decimal prevSize = WindowPreSize[WindowPreSize.Count - 2];
             if (recentSize < 992 && prevSize >= 992){
                 // Execute logic for window size less than 992
                 <!-- await CheckLayout(); -->
@@ -420,7 +420,7 @@
     }
 
     [JSInvokable]
-    public void SetStickyClass(int scrollY)
+    public void SetStickyClass(decimal scrollY)
     {
         if (scrollY >= 75)
         {
@@ -440,7 +440,7 @@
     private async Task responsivecloseFn()
     {
         var toggled = await JSRuntime.InvokeAsync<string>("interop.getAttributeToHtml", "data-toggled");
-        var inner = await JSRuntime.InvokeAsync<int>("interop.inner", "innerWidth");
+        var inner = await JSRuntime.InvokeAsync<decimal>("interop.inner", "innerWidth");
         
         if (toggled == "open") {
             await JSRuntime.InvokeAsync<string>("interop.addAttributeToHtml", "data-toggled", "close");

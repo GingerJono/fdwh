@@ -5,6 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Sandbox</RootNamespace>
     <AssemblyName>Sandbox</AssemblyName>
+	  <ScopedCssEnabled>true</ScopedCssEnabled>
   </PropertyGroup>
   <ItemGroup>
 	  <PackageReference Include="BlazorColorPicker" Version="3.1.1" />

@@ -486,7 +486,7 @@
     MailList? ActiveMail { get; set; }
     string? MailNav;
     string? TotalMails;
-    int screenSize;
+    decimal screenSize;
     protected override void OnInitialized()
     {
         ActiveMail = MailService.GetMailsData().FirstOrDefault();
@@ -504,7 +504,7 @@
             dotNetObjectReference = DotNetObjectReference.Create(this);
             await JSRuntime.InvokeVoidAsync("resizeFunctions.addresizeListener", dotNetObjectReference);
 
-            screenSize = await JSRuntime.InvokeAsync<int>("interop.inner", "innerWidth");
+            screenSize = await JSRuntime.InvokeAsync<decimal>("interop.inner", "innerWidth");
             if(screenSize < 992) {
                 MailNav = "d-block";
                 TotalMails = "d-none";

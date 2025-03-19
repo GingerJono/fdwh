@@ -152,7 +152,7 @@
                 await stateService.setCurrentItem(currentItem);
                 await SetSubmenu((currentItem, null));
             }
-            screenSize = await JSRuntime.InvokeAsync<int>("interop.inner", "innerWidth");
+            screenSize = await JSRuntime.InvokeAsync<decimal>("interop.inner", "innerWidth");
             WindowPreSize.Add(screenSize);
             dotNetObjectReference = DotNetObjectReference.Create(this);
             await JSRuntime.InvokeVoidAsync("resizeFunctions.addresizeListener", dotNetObjectReference);
@@ -178,7 +178,7 @@
         }
     async void HandleActionTriggered(string actionValue)
     {
-        int inner = await JSRuntime.InvokeAsync<int>("interop.inner", "innerWidth");
+        double inner = await JSRuntime.InvokeAsync<double>("interop.inner", "innerWidth");
         if(actionValue == "vertical"){
             if (currentItem != null)
             {
@@ -190,8 +190,8 @@
         }
         StateHasChanged();
     }
-    int screenSize = 1268;
-    private List<int> WindowPreSize = new List<int>();
+    decimal screenSize = 1268;
+    private List<decimal> WindowPreSize = new List<decimal>();
     
     [JSInvokable]
     public async void OnWindowResize(int position)
@@ -203,8 +203,8 @@
             WindowPreSize.RemoveAt(0);
         }
         if (WindowPreSize.Count > 1) {
-            int recentSize = WindowPreSize[WindowPreSize.Count - 1];
-            int prevSize = WindowPreSize[WindowPreSize.Count - 2];
+            decimal recentSize = WindowPreSize[WindowPreSize.Count - 1];
+            decimal prevSize = WindowPreSize[WindowPreSize.Count - 2];
             if (recentSize < 992 && prevSize >= 992){
                 // Execute logic for window size less than 992
                 if (currentItem != null){
@@ -285,7 +285,7 @@
     }
 
     [JSInvokable]
-    public void SetStickyClass(int scrollY)
+    public void SetStickyClass(decimal scrollY)
     {
         if (scrollY >= 75)
         {
@@ -309,7 +309,7 @@
     private async void rightArrowFn()
     {
         var menuNav = await JSRuntime.InvokeAsync<MenuNavElement>("interop.MenuNavElement", ".main-menu");
-        var mainContainer1 = await JSRuntime.InvokeAsync<int>("interop.mainSidebarOffset", ".main-sidebar");
+        var mainContainer1 = await JSRuntime.InvokeAsync<double>("interop.mainSidebarOffset", ".main-sidebar");
         var marginRightValue = menuNav.marginInlineStart;
         var check = menuNav.scrollWidth - mainContainer1;
         var mainContainer1Width = mainContainer1;
@@ -332,7 +332,7 @@
     private async void leftArrowFn()
     {
         var menuNav = await JSRuntime.InvokeAsync<MenuNavElement>("interop.MenuNavElement", ".main-menu");
-        var mainContainer1 = await JSRuntime.InvokeAsync<int>("interop.mainSidebarOffset", ".main-sidebar");
+        var mainContainer1 = await JSRuntime.InvokeAsync<double>("interop.mainSidebarOffset", ".main-sidebar");
         var marginRightValue = menuNav.marginInlineStart;
         var check = menuNav.scrollWidth - mainContainer1;
         var mainContainer1Width = mainContainer1;
@@ -357,7 +357,7 @@
         {
             await Task.Delay(500); 
             var menuNav = await JSRuntime.InvokeAsync<MenuNavElement>("interop.MenuNavElement", ".main-menu");
-            var mainContainer1 = await JSRuntime.InvokeAsync<int>("interop.mainSidebarOffset", ".main-sidebar");
+            var mainContainer1 = await JSRuntime.InvokeAsync<double>("interop.mainSidebarOffset", ".main-sidebar");
             var marginRightValue = menuNav.marginInlineStart;
             var check = menuNav.scrollWidth - mainContainer1;
             if (menuNav.scrollWidth > mainContainer1) {
@@ -479,7 +479,7 @@
         var rtl = await JSRuntime.InvokeAsync<string>("interop.getAttributeToHtml", "rtl");
         var navLayout = await JSRuntime.InvokeAsync<string>("interop.getAttributeToHtml", "data-nav-layout");
         var toggled = await JSRuntime.InvokeAsync<string>("interop.getAttributeToHtml", "data-toggled");
-        var inner = await JSRuntime.InvokeAsync<int>("interop.inner", "innerWidth");
+        var inner = await JSRuntime.InvokeAsync<double>("interop.inner", "innerWidth");
         MainMenuItems targetObject = data.targetObject;
         MainMenuItems[] menuData = data.menuData;
         MainMenuItems? parent = null; // Initialize parent variable
@@ -612,7 +612,7 @@
                 if(item.Type == "link" && !innerLevel){
                      await JSRuntime.InvokeAsync<string>("interop.addAttributeToHtml", "data-toggled", "double-menu-close");                    
                 }
-                var inner = await JSRuntime.InvokeAsync<int>("interop.inner", "innerWidth");
+                var inner = await JSRuntime.InvokeAsync<double>("interop.inner", "innerWidth");
                 if( currentState?.NavigationStyles !="horizontal" || inner  < 992) {
                     item.Active = true;
                 }
@@ -644,7 +644,7 @@
         var parent = GetParentObject(menuVal, targetObject);
         if (parent != null)
         {
-            var inner = await JSRuntime.InvokeAsync<int>("interop.inner", "innerWidth");
+            var inner = await JSRuntime.InvokeAsync<double>("interop.inner", "innerWidth");
             var navLayout =currentState?.NavigationStyles;
                  // Loop through parent's children to reset Active and Selected
             if (parent?.Children != null && topParent != null && targetObject != null)
@@ -796,7 +796,7 @@
     private async Task responsivecloseFn()
     {
         var toggled = await JSRuntime.InvokeAsync<string>("interop.getAttributeToHtml", "data-toggled");
-        var inner = await JSRuntime.InvokeAsync<int>("interop.inner", "innerWidth");
+        var inner = await JSRuntime.InvokeAsync<double>("interop.inner", "innerWidth");
         
         if (toggled == "open") {
             await JSRuntime.InvokeAsync<string>("interop.addAttributeToHtml", "data-toggled", "close");

@@ -4,6 +4,7 @@
 @using Sandbox.Models.ORI
 @using Sandbox.Services
 @inject ORIService ORIService
+@using System.Text.Json
 
 <h3>ORI USMs</h3>
 
@@ -47,23 +48,27 @@ else
                             @usm.USMID
                         </button>
                     </td>
+                    
                     <td>@usm.ORIPolicyReference</td>
-                    <td>@usm.LPSONo</td>
+                    <td>@(usm.LPSONo?.ToString() ?? "-")</td>
                     <td>@usm.LPSODate?.ToString("yyyy-MM-dd")</td>
-                    <td>@usm.LPSOVersionNo</td>
-                    <td>@usm.UserSequenceNo</td>
-                    <td>@usm.SyndicateNo</td>
-                    <td>@usm.InstalmentNo</td>
-                    <td>@usm.TreatySection</td>
-                    <td>@usm.SyndicateLineNo</td>
+                    <td>@(usm.LPSOVersionNo?.ToString() ?? "-")</td>
+                    <td>@(usm.UserSequenceNo?.ToString() ?? "-")</td>
+                    <td>@(usm.InstalmentNo?.ToString() ?? "-")</td>
+                    <td>@(usm.SyndicateLineNo?.ToString() ?? "-")</td>
+                    <td>@(usm.TreatySection?.ToString() ?? "-")</td>
+                    <td>@(usm.SyndicateLineNo?.ToString() ?? "-")</td>
                     <td>@usm.USMCaCategoryDesc</td>
-                    <td>@usm.ClosingCcy</td>
-                    <td>@usm.SettCcy</td>
-                    <td>@usm.LineAmountSCC</td>
-                    <td>@usm.TotalYOAAllocation</td>
-                    <td>@usm.TotalCOBAllocation</td>
-                    <td>@usm.TotalSecurityAllocation</td>
-                    <td>@usm.TotalEventAllocation</td>
+                    <td>@(usm.ClosingCcy ?? "-")</td>
+                    <td>@(usm.SettCcy ?? "-")</td>
+                    <!-- Numeric Fields with Null Handling -->
+                    <td>@(usm.LineAmountSCC?.ToString("N2") ?? "0.00")</td>
+                    <td>@(usm.TotalYOAAllocation.ToString("N2"))</td>
+                    <td>@(usm.TotalCOBAllocation.ToString("N2"))</td>
+                    <td>@(usm.TotalSecurityAllocation.ToString("N2"))</td>
+                    <td>@(usm.TotalEventAllocation.ToString("N2"))</td>
+                    
+
                     <td>
                         <button class="btn btn-primary btn-sm"
                                 @onclick="@(() => NavigationManager.NavigateTo($"/ViewORIUSM/{usm.USMID}"))">
@@ -73,41 +78,110 @@ else
                 </tr>
             }
         </tbody>
+        <tfoot class="sticky-bottom bg-white">
+            <tr>
+                <th><input class="form-control" @bind="searchUSMID" @oninput="FilterTable" /></th>
+                <th><input class="form-control" @bind="searchORIPolicyReference" @oninput="FilterTable" /></th>
+                <th><input class="form-control" @bind="searchLPSONo" @oninput="FilterTable" /></th>
+                <th><input class="form-control" @bind="searchLPSODate" @oninput="FilterTable" /></th>
+                <th><input class="form-control" @bind="searchLPSOVersion" @oninput="FilterTable" /></th>
+                <th><input class="form-control" @bind="searchUserSequence" @oninput="FilterTable" /></th>
+                <th><input class="form-control" @bind="searchSyndicateNo" @oninput="FilterTable" /></th>
+                <th><input class="form-control" @bind="searchInstalmentNo" @oninput="FilterTable" /></th>
+                <th><input class="form-control" @bind="searchTreatySection" @oninput="FilterTable" /></th>
+                <th><input class="form-control" @bind="searchSyndicateLineNo" @oninput="FilterTable" /></th>
+                <th><input class="form-control" @bind="searchCategoryDesc" @oninput="FilterTable" /></th>
+                <th><input class="form-control" @bind="searchClosingCcy" @oninput="FilterTable" /></th>
+                <th><input class="form-control" @bind="searchSettlementCcy" @oninput="FilterTable" /></th>
+                <th><input class="form-control" @bind="searchLineAmountSCC" @oninput="FilterTable" /></th>
+                <th><input class="form-control" @bind="searchTotalYOA" @oninput="FilterTable" /></th>
+                <th><input class="form-control" @bind="searchTotalCOB" @oninput="FilterTable" /></th>
+                <th><input class="form-control" @bind="searchTotalSecurity" @oninput="FilterTable" /></th>
+                <th><input class="form-control" @bind="searchTotalEvent" @oninput="FilterTable" /></th>
+                <th></th> <!-- Empty for Actions column -->
+            </tr>
+        </tfoot>
+
+
+
     </table>
 
     <!-- Pagination Controls -->
-    <div class="d-flex justify-content-between mt-3">
+    <div class="d-flex justify-content-between mt-3 sticky-bottom-pagination">
         <button class="btn btn-secondary" @onclick="PreviousPage" disabled="@(!HasPreviousPage)">Previous</button>
         <span>Page @CurrentPage of @TotalPages</span>
         <button class="btn btn-secondary" @onclick="NextPage" disabled="@(!HasNextPage)">Next</button>
     </div>
-}
 
+
+}
 @code {
+    private string searchUSMID = "";
+    private string searchORIPolicyReference = "";
+    private string searchLPSONo = "";
+    private string searchLPSODate = "";
+    private string searchLPSOVersion = "";
+    private string searchUserSequence = "";
+    private string searchSyndicateNo = "";
+    private string searchInstalmentNo = "";
+    private string searchTreatySection = "";
+    private string searchSyndicateLineNo = "";
+    private string searchCategoryDesc = "";
+    private string searchClosingCcy = "";
+    private string searchSettlementCcy = "";
+    private string searchLineAmountSCC = "";
+    private string searchTotalYOA = "";
+    private string searchTotalCOB = "";
+    private string searchTotalSecurity = "";
+    private string searchTotalEvent = "";
+
     private List<ORIUSMListModel> usmList = new();
     private List<ORIUSMListModel> PaginatedList = new();
     private int CurrentPage = 1;
-    private int PageSize = 50;
+    private int PageSize = 20;
     private int TotalPages;
 
     protected override async Task OnInitializedAsync()
     {
-        // Fetch all USM records
-        usmList = (await ORIService.GetORIUSMs()).ToList();
+        var data = await ORIService.GetORIUSMs();
 
-        // Calculate total pages
+        usmList = data.ToList();
         TotalPages = (int)Math.Ceiling((double)usmList.Count / PageSize);
-
-        // Populate the first page
         Paginate();
     }
 
     private void Paginate()
     {
         PaginatedList = usmList
+            .Where(usm =>
+                (string.IsNullOrEmpty(searchUSMID) || usm.USMID.Contains(searchUSMID, StringComparison.OrdinalIgnoreCase)) &&
+                (string.IsNullOrEmpty(searchORIPolicyReference) || usm.ORIPolicyReference.Contains(searchORIPolicyReference, StringComparison.OrdinalIgnoreCase)) &&
+                (string.IsNullOrEmpty(searchLPSONo) || (usm.LPSONo?.ToString().Contains(searchLPSONo) ?? false)) &&
+                (string.IsNullOrEmpty(searchLPSODate) || (usm.LPSODate?.ToString("yyyy-MM-dd").Contains(searchLPSODate) ?? false)) &&
+                (string.IsNullOrEmpty(searchLPSOVersion) || (usm.LPSOVersionNo?.ToString().Contains(searchLPSOVersion) ?? false)) &&
+                (string.IsNullOrEmpty(searchUserSequence) || (usm.UserSequenceNo?.ToString().Contains(searchUserSequence) ?? false)) &&
+                (string.IsNullOrEmpty(searchSyndicateNo) || (usm.SyndicateNo?.ToString().Contains(searchSyndicateNo) ?? false)) &&
+                (string.IsNullOrEmpty(searchInstalmentNo) || (usm.InstalmentNo?.ToString().Contains(searchInstalmentNo) ?? false)) &&
+                (string.IsNullOrEmpty(searchTreatySection) || usm.TreatySection.Contains(searchTreatySection, StringComparison.OrdinalIgnoreCase)) &&
+                (string.IsNullOrEmpty(searchSyndicateLineNo) || (usm.SyndicateLineNo?.ToString().Contains(searchSyndicateLineNo) ?? false)) &&
+                (string.IsNullOrEmpty(searchCategoryDesc) || usm.USMCaCategoryDesc.Contains(searchCategoryDesc, StringComparison.OrdinalIgnoreCase)) &&
+                (string.IsNullOrEmpty(searchClosingCcy) || usm.ClosingCcy.Contains(searchClosingCcy, StringComparison.OrdinalIgnoreCase)) &&
+                (string.IsNullOrEmpty(searchSettlementCcy) || usm.SettCcy.Contains(searchSettlementCcy, StringComparison.OrdinalIgnoreCase)) &&
+                (string.IsNullOrEmpty(searchLineAmountSCC) || (usm.LineAmountSCC?.ToString("N2").Contains(searchLineAmountSCC) ?? false)) &&
+                (string.IsNullOrEmpty(searchTotalYOA) || usm.TotalYOAAllocation.ToString("N2").Contains(searchTotalYOA)) &&
+                (string.IsNullOrEmpty(searchTotalCOB) || usm.TotalCOBAllocation.ToString("N2").Contains(searchTotalCOB)) &&
+                (string.IsNullOrEmpty(searchTotalSecurity) || usm.TotalSecurityAllocation.ToString("N2").Contains(searchTotalSecurity)) &&
+                (string.IsNullOrEmpty(searchTotalEvent) || usm.TotalEventAllocation.ToString("N2").Contains(searchTotalEvent))
+            )
             .Skip((CurrentPage - 1) * PageSize)
             .Take(PageSize)
             .ToList();
+    }
+
+    private void FilterTable(ChangeEventArgs e)
+    {
+        CurrentPage = 1;
+        Paginate();
     }
 
     private void NextPage()

@@ -262,7 +262,7 @@ public class StateService
         await PersistState();
     }
 
-    int screenSize = 1268;
+    double screenSize = 1268;
     public async Task navigationStylesFn(string val, bool stateClick)
     {
         if (stateClick && val == "vertical")
@@ -288,13 +288,13 @@ public class StateService
             await _jsRuntime.InvokeVoidAsync("interop.addAttributeToHtml", "data-vertical-style", "overlay");
             await _jsRuntime.InvokeVoidAsync("interop.removeAttributeFromHtml", "data-nav-style");
 
-            if (await _jsRuntime.InvokeAsync<int>("interop.inner", "innerWidth") > 992)
+            if (await _jsRuntime.InvokeAsync<double>("interop.inner", "innerWidth") > 992)
             {
                 await _jsRuntime.InvokeVoidAsync("interop.removeAttributeFromHtml", "data-toggled");
             }
         }
 
-        screenSize = await _jsRuntime.InvokeAsync<int>("interop.inner", "innerWidth");
+        screenSize = await _jsRuntime.InvokeAsync<double>("interop.inner", "innerWidth");
 
         if (screenSize < 992)
         {
@@ -312,7 +312,7 @@ public class StateService
             case "default-menu":
                 await _jsRuntime.InvokeVoidAsync("interop.addAttributeToHtml", "data-vertical-style", "overlay");
                 await _jsRuntime.InvokeVoidAsync("interop.addAttributeToHtml", "data-nav-layout", "vertical");
-                if (await _jsRuntime.InvokeAsync<int>("interop.inner", "innerWidth") > 992)
+                if (await _jsRuntime.InvokeAsync<double>("interop.inner", "innerWidth") > 992)
                 {
                     await _jsRuntime.InvokeVoidAsync("interop.removeAttributeFromHtml", "data-toggled");
                 }
@@ -350,7 +350,7 @@ public class StateService
                 }
                 break;
         }
-        screenSize = await _jsRuntime.InvokeAsync<int>("interop.inner", "innerWidth");
+        screenSize = await _jsRuntime.InvokeAsync<double>("interop.inner", "innerWidth");
 
         if (screenSize < 992)
         {
@@ -367,7 +367,7 @@ public class StateService
         await _jsRuntime.InvokeVoidAsync("interop.addAttributeToHtml", "data-nav-style", val);
         await _jsRuntime.InvokeVoidAsync("interop.addAttributeToHtml", "data-toggled", $"{val}-closed");
 
-        screenSize = await _jsRuntime.InvokeAsync<int>("interop.inner", "innerWidth");
+        screenSize = await _jsRuntime.InvokeAsync<double>("interop.inner", "innerWidth");
 
         if (screenSize < 992)
         {

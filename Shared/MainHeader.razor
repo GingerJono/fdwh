@@ -208,7 +208,7 @@
         var verticalStyle = await JSRuntime.InvokeAsync<string>("interop.getAttributeToHtml", "data-vertical-style");
         var navStyle = await JSRuntime.InvokeAsync<string>("interop.getAttributeToHtml", "data-nav-style");
         var isdoubleMenuActive = await JSRuntime.InvokeAsync<bool>("interop.isEleExist", ".double-menu-active");
-        var inner = await JSRuntime.InvokeAsync<int>("interop.inner", "innerWidth");
+        var inner = await JSRuntime.InvokeAsync<decimal>("interop.inner", "innerWidth");
           
         if (inner <= 992) {
                 if (toggled == "open") {
@@ -289,7 +289,7 @@
     }
 
     [JSInvokable]
-    public void SetStickyClass1(int scrollY)
+    public void SetStickyClass1(decimal scrollY)
     {
         if (scrollY >= 25)
         {

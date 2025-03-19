@@ -45,14 +45,14 @@
             await JSRuntime.InvokeVoidAsync("interop.updateScrollVisibility", DotNetObjectReference.Create(this));
             
             var dataNavLayout = await JSRuntime.InvokeAsync<string>("interop.getAttributeToHtml", "data-nav-layout");
-            var inner = await JSRuntime.InvokeAsync<int>("interop.inner", "innerWidth");
+            var inner = await JSRuntime.InvokeAsync<decimal>("interop.inner", "innerWidth");
             if(dataNavLayout == "horizontal" && inner >= 992){
                 navMenuRef?.closeMenuFn();
             }
         }
     }
     [JSInvokable]
-    public void UpdateScrollVisibility(int scrollHeight)
+    public void UpdateScrollVisibility(decimal scrollHeight)
     {
         ShowButton = scrollHeight >= 100;
         StateHasChanged();
@@ -78,7 +78,7 @@
     {
         var dataToggled = await JSRuntime.InvokeAsync<string>("interop.getAttributeToHtml", "data-toggled");
         var dataNavLayout = await JSRuntime.InvokeAsync<string>("interop.getAttributeToHtml", "data-nav-layout");
-        var inner = await JSRuntime.InvokeAsync<int>("interop.inner", "innerWidth");
+        var inner = await JSRuntime.InvokeAsync<decimal>("interop.inner", "innerWidth");
         if (dataToggled == "icon-text-close") {
             await JSRuntime.InvokeAsync<string>("interop.removeAttributeFromHtml", "data-icon-text");
         }
