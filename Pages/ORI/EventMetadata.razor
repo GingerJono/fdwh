@@ -1,0 +1,162 @@
+@page "/EventMetadata"
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@using Sandbox._Spk
+@using Sandbox.Models.ORI
+@using Sandbox.Services
+@inject ORIService ORIService
+@using DataTablesData
+@inject DataTablesService DataTablesService
+
+<!-- DataTables CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.3.0/css/responsive.bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.bootstrap5.min.css">
+
+<!-- Start::page-header -->
+<SpkPageHeader PageItems="PageItems" />
+<!-- End::page-header -->
+
+<!-- Start: row-1 -->
+<div class="row">
+	<h3>Event Metadata</h3>
+
+	@if (events == null)
+	{
+		<p><em>Loading...</em></p>
+	}
+	else
+	{
+		<table class="table dataTable" id="eventMetadataTable">
+			<thead>
+				<tr>
+					<th>Event Code</th>
+					<th>Peril</th>
+					<th>Region</th>
+					<th>Syndicate Event Desc</th>
+					<th>Num Claims</th>
+					<th>Incurred USD Qtr</th>
+				</tr>
+			</thead>
+			<tbody>
+				@foreach (var ev in events)
+				{
+					<tr>
+						<td>
+							<button class="btn btn-link text-decoration-underline"
+									@onclick="@(() => NavigationManager.NavigateTo($"/ViewEventMetadata/{ev.EventCode}"))">
+								@ev.EventCode
+							</button>
+						</td>
+						<td>@ev.Peril</td>
+						<td>@ev.PerilRegion</td>
+						<td>@ev.EventDescription</td>
+						<td>@ev.NumClaims</td>
+						<td>@ev.IncurredUSDQtr.ToString("N2")</td>
+					</tr>
+				}
+			</tbody>
+			<tfoot>
+				<tr>
+					<th>Event Code</th>
+					<th>Peril</th>
+					<th>Region</th>
+					<th>Event Desc</th>
+					<th>Num Claims</th>
+					<th>Incurred USD</th>
+				</tr>
+			</tfoot>
+		</table>
+	}
+</div>
+
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.12.1/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.3.0/js/dataTables.responsive.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.print.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.6/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+<!-- Internal DataTables JS -->
+<script src="@($"{NavigationManager.BaseUri}assets/js/datatables.js")"></script>
+
+<script>
+    var options = {
+        paging: true,
+        pageLength: 10,
+        fixedHeader: true,
+        lengthChange: false,
+        order: [],
+        columnDefs: [],
+        buttons: [],
+        initComplete: function () {
+            this.api()
+                .columns()
+                .every(function () {
+                    let column = this;
+                    let title = column.footer().textContent;
+
+                    let input = document.createElement('input');
+                    input.placeholder = title;
+                    column.footer().replaceChildren(input);
+
+                    input.addEventListener('keyup', () => {
+                        if (column.search() !== this.value) {
+                            column.search(input.value).draw();
+                        }
+                    });
+                });
+        }
+    };
+    
+    window.initializeDataTables = function () {
+        console.log("Initializing DataTables...");
+        setTimeout(() => {
+            if ($('#eventMetadataTable').length) {
+                $('#eventMetadataTable').DataTable(options);
+                console.log("DataTable initialized successfully.");
+            } else {
+                console.log("Table not found!");
+            }
+        }, 500);
+    };
+</script>
+
+@code {
+	private IEnumerable<EventMetadataListModel> events;
+	private bool isDataLoaded = false;
+
+	protected override async Task OnInitializedAsync()
+	{
+		events = await ORIService.GetEventMetadataList();
+		isDataLoaded = true;
+		StateHasChanged();
+	}
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			await JSRuntime.InvokeVoidAsync("window.interop.initializeTooltips");
+		}
+
+		if (isDataLoaded)
+		{
+			isDataLoaded = false;
+			await JSRuntime.InvokeVoidAsync("initializeDataTables");
+			Console.WriteLine("Blazor called initializeDataTables after data load!");
+		}
+	}
+
+	private List<SpkPageHeader.PageItem> PageItems = new List<SpkPageHeader.PageItem> {
+		new SpkPageHeader.PageItem { PageTitle = "Dashboards" },
+		new SpkPageHeader.PageItem { PageTitle = "Event Metadata" },
+	};
+}

@@ -1,0 +1,146 @@
+@page "/EditEventMetadata/{EventCode}"
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@using Sandbox.Models.ORI
+@using Sandbox.Services
+@inject ORIService ORIService
+
+@if (IsLoading)
+{
+    <p>Loading event details...</p>
+}
+else if (!string.IsNullOrEmpty(ErrorMessage))
+{
+    <p class="text-danger">@ErrorMessage</p>
+}
+else if (EventDetails != null)
+{
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/EventMetadata">EVENT METADATA</a></li>
+            <li class="breadcrumb-item"><a href="/ViewEventMetadata/@EventDetails.EventCode">VIEW EVENT</a></li>
+            <li class="breadcrumb-item active" aria-current="page">EDIT EVENT: @EventDetails.EventCode</li>
+        </ol>
+    </nav>
+
+    <!-- Informational Note -->
+    <div class="alert alert-info">
+        <h5><i class="ri-information-line"></i> About This Page</h5>
+        <p>
+            This page allows you to filter the list of potential ORI Policies that can be used to recover from this event.
+            The <strong>Peril</strong> and <strong>Peril Region</strong> fields are key filters that help refine applicable policies.
+            You can select a predefined value or leave them blank.
+        </p>
+    </div>
+
+    <div class="card">
+        <div class="card-header">Edit Event Metadata</div>
+        <div class="card-body">
+            <form>
+                <div class="mb-3">
+                    <label class="form-label">Event Code</label>
+                    <input type="text" class="form-control" value="@EventDetails.EventCode" disabled>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Peril</label>
+                    <select class="form-select" @bind="EventDetails.Peril">
+                        <option value="">-- No Selection (Reset) --</option>
+                        @foreach (var peril in PerilList)
+                        {
+                            <option value="@peril">@peril</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Peril Region</label>
+                    <select class="form-select" @bind="EventDetails.PerilRegion">
+                        <option value="">-- No Selection (Reset) --</option>
+                        @foreach (var region in PerilRegionList)
+                        {
+                            <option value="@region">@region</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Notes</label>
+                    <textarea class="form-control" rows="3" @bind="EventDetails.Notes"></textarea>
+                </div>
+
+                <div class="d-flex justify-content-end">
+                    <button type="button" class="btn btn-secondary me-2" @onclick="Cancel">Cancel</button>
+                    <button type="button" class="btn btn-primary" @onclick="SaveEventMetadata">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public string EventCode { get; set; }
+
+    private EventMetadataModel EventDetails { get; set; }
+    private bool IsLoading { get; set; } = true;
+    private string ErrorMessage { get; set; }
+
+    private List<string> PerilList = new();
+    private List<string> PerilRegionList = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (string.IsNullOrWhiteSpace(EventCode))
+        {
+            ErrorMessage = "Event code is required.";
+            IsLoading = false;
+            return;
+        }
+
+        try
+        {
+            // Fetch event details
+            EventDetails = await ORIService.GetEventMetadata(EventCode);
+            if (EventDetails == null)
+            {
+                ErrorMessage = $"No event details found for EventCode: {EventCode}";
+            }
+
+            // Fetch dropdown lists and add a blank row for reset
+            PerilList = new List<string> { "" };
+            PerilList.AddRange(await ORIService.GetPerilList());
+
+            PerilRegionList = new List<string> { "" };
+            PerilRegionList.AddRange(await ORIService.GetPerilRegionList());
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = "An error occurred while fetching event details.";
+            Console.WriteLine($"[ERROR] Failed to fetch event details: {ex}");
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task SaveEventMetadata()
+    {
+        try
+        {
+            EventDetails.LastUpdatedBy = "CurrentUser"; // TODO: Replace with actual user context
+            await ORIService.UpsertEventMetadata(EventDetails);
+            NavigationManager.NavigateTo($"/ViewEventMetadata/{EventDetails.EventCode}");
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = "Failed to save event metadata.";
+            Console.WriteLine($"[ERROR] {ex}");
+        }
+    }
+
+    private void Cancel()
+    {
+        NavigationManager.NavigateTo($"/ViewEventMetadata/{EventDetails.EventCode}");
+    }
+}

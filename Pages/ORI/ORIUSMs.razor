@@ -13,21 +13,32 @@
 }
 else
 {
-    <table class="table dataTable" id="usmTable">
+    <table class="table dataTable">
         <thead>
             <tr>
                 <th>USM ID</th>
                 <th>ORI Policy Reference</th>
                 <th>LPSO No</th>
                 <th>LPSO Date</th>
+                <th>LPSO Version</th>
+                <th>User Sequence No</th>
                 <th>Syndicate No</th>
                 <th>Instalment No</th>
+                <th>Treaty Section</th>
+                <th>Syndicate Line No</th>
+                <th>USM CA Category Desc</th>
+                <th>Closing Currency</th>
+                <th>Settlement Currency</th>
                 <th>Line Amount (SCC)</th>
+                <th>Total YOA Allocation</th>
+                <th>Total COB Allocation</th>
+                <th>Total Security Allocation</th>
+                <th>Total Event Allocation</th>
                 <th>Actions</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var usm in usmList)
+            @foreach (var usm in PaginatedList)
             {
                 <tr>
                     <td>
@@ -39,9 +50,20 @@ else
                     <td>@usm.ORIPolicyReference</td>
                     <td>@usm.LPSONo</td>
                     <td>@usm.LPSODate?.ToString("yyyy-MM-dd")</td>
+                    <td>@usm.LPSOVersionNo</td>
+                    <td>@usm.UserSequenceNo</td>
                     <td>@usm.SyndicateNo</td>
                     <td>@usm.InstalmentNo</td>
+                    <td>@usm.TreatySection</td>
+                    <td>@usm.SyndicateLineNo</td>
+                    <td>@usm.USMCaCategoryDesc</td>
+                    <td>@usm.ClosingCcy</td>
+                    <td>@usm.SettCcy</td>
                     <td>@usm.LineAmountSCC</td>
+                    <td>@usm.TotalYOAAllocation</td>
+                    <td>@usm.TotalCOBAllocation</td>
+                    <td>@usm.TotalSecurityAllocation</td>
+                    <td>@usm.TotalEventAllocation</td>
                     <td>
                         <button class="btn btn-primary btn-sm"
                                 @onclick="@(() => NavigationManager.NavigateTo($"/ViewORIUSM/{usm.USMID}"))">
@@ -52,14 +74,60 @@ else
             }
         </tbody>
     </table>
+
+    <!-- Pagination Controls -->
+    <div class="d-flex justify-content-between mt-3">
+        <button class="btn btn-secondary" @onclick="PreviousPage" disabled="@(!HasPreviousPage)">Previous</button>
+        <span>Page @CurrentPage of @TotalPages</span>
+        <button class="btn btn-secondary" @onclick="NextPage" disabled="@(!HasNextPage)">Next</button>
+    </div>
 }
 
 @code {
-    private IEnumerable<ORIUSMListModel> usmList;
+    private List<ORIUSMListModel> usmList = new();
+    private List<ORIUSMListModel> PaginatedList = new();
+    private int CurrentPage = 1;
+    private int PageSize = 50;
+    private int TotalPages;
 
     protected override async Task OnInitializedAsync()
     {
-        usmList = await ORIService.GetORIUSMs();
-        StateHasChanged();
+        // Fetch all USM records
+        usmList = (await ORIService.GetORIUSMs()).ToList();
+
+        // Calculate total pages
+        TotalPages = (int)Math.Ceiling((double)usmList.Count / PageSize);
+
+        // Populate the first page
+        Paginate();
     }
+
+    private void Paginate()
+    {
+        PaginatedList = usmList
+            .Skip((CurrentPage - 1) * PageSize)
+            .Take(PageSize)
+            .ToList();
+    }
+
+    private void NextPage()
+    {
+        if (CurrentPage < TotalPages)
+        {
+            CurrentPage++;
+            Paginate();
+        }
+    }
+
+    private void PreviousPage()
+    {
+        if (CurrentPage > 1)
+        {
+            CurrentPage--;
+            Paginate();
+        }
+    }
+
+    private bool HasPreviousPage => CurrentPage > 1;
+    private bool HasNextPage => CurrentPage < TotalPages;
 }

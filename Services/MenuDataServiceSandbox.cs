@@ -35,6 +35,14 @@ public class MenuDataServiceSandbox
 					dirChange: false
 				),
 				new MainMenuItems (
+					path: "/EventMetadata",
+					type: "link",
+					title: "Event Metadata",
+					selected: false,
+					active: false,
+					dirChange: false
+				),
+				new MainMenuItems (
 					path: "/NavHist",
 					type: "link",
 					title: "NavHist",
@@ -42,7 +50,7 @@ public class MenuDataServiceSandbox
 					active: false,
 					dirChange: false
 				),
-            }
+			}
         ),
 
         

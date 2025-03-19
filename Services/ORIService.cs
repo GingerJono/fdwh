@@ -357,6 +357,96 @@ namespace Sandbox.Services
 			}
 		}
 
+		public async Task<IEnumerable<EventMetadataListModel>> GetEventMetadataList()
+		{
+			using var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
+			await connection.OpenAsync();
+
+			var result = await connection.QueryAsync<EventMetadataListModel>(
+				"ORI.spGetEventMetadataList",
+				commandType: CommandType.StoredProcedure
+			);
+
+			return result.ToList();
+		}
+
+		public async Task<EventMetadataModel> GetEventMetadata(string eventCode)
+		{
+			using var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
+			await connection.OpenAsync();
+
+			var parameters = new DynamicParameters();
+			parameters.Add("@EventCode", eventCode, DbType.String);
+
+			var result = await connection.QuerySingleOrDefaultAsync<EventMetadataModel>(
+				"ORI.spGetEventMetadata",
+				parameters,
+				commandType: CommandType.StoredProcedure
+			);
+
+			return result;
+		}
+
+		public async Task UpsertEventMetadata(EventMetadataModel model)
+		{
+			using var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
+			await connection.OpenAsync();
+
+			var parameters = new DynamicParameters();
+			parameters.Add("@EventCode", model.EventCode, DbType.String);
+			parameters.Add("@Peril", model.Peril, DbType.String);
+			parameters.Add("@PerilRegion", model.PerilRegion, DbType.String);
+			parameters.Add("@Notes", model.Notes, DbType.String);
+			parameters.Add("@LastUpdatedBy", model.LastUpdatedBy, DbType.String);
+
+			await connection.ExecuteAsync(
+				"ORI.spUpsertEventMetadata",
+				parameters,
+				commandType: CommandType.StoredProcedure
+			);
+		}
+
+		public async Task DeleteEventMetadata(string eventCode, string lastUpdatedBy)
+		{
+			using var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
+			await connection.OpenAsync();
+
+			var parameters = new DynamicParameters();
+			parameters.Add("@EventCode", eventCode, DbType.String);
+			parameters.Add("@LastUpdatedBy", lastUpdatedBy, DbType.String);
+
+			await connection.ExecuteAsync(
+				"ORI.spDeleteEventMetadata",
+				parameters,
+				commandType: CommandType.StoredProcedure
+			);
+		}
+		public async Task<List<string>> GetPerilList()
+		{
+			using var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
+			await connection.OpenAsync();
+
+			var result = await connection.QueryAsync<string>(
+				"ORI.spGetListPeril",
+				commandType: CommandType.StoredProcedure
+			);
+
+			return result.ToList();
+		}
+
+		public async Task<List<string>> GetPerilRegionList()
+		{
+			using var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
+			await connection.OpenAsync();
+
+			var result = await connection.QueryAsync<string>(
+				"ORI.spGetListPerilRegion",
+				commandType: CommandType.StoredProcedure
+			);
+
+			return result.ToList();
+		}
+
 
 	}
 }
