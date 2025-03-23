@@ -18,7 +18,7 @@ else if (!string.IsNullOrEmpty(ErrorMessage))
 {
 	<p class="text-danger">@ErrorMessage</p>
 }
-else if (PolicyDetails != null)
+else
 {
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
@@ -29,7 +29,7 @@ else if (PolicyDetails != null)
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="page-header m-0">
-            ORI Policy Reference: @PolicyDetails.ORIPolicyReference
+            ORI Policy Reference: @(PolicyDetails?.ORIPolicyReference ?? "[Not Found]")
         </h1>
         <button class="btn btn-primary" @onclick="NavigateToEdit">Edit Policy</button>
 
@@ -39,8 +39,6 @@ else if (PolicyDetails != null)
             NavigationManager.NavigateTo($"/{nameof(EditORIPolicy)}/{PolicyDetails.ORIPolicyReference}");
         }
     }
-
-        
     </div>
 
     <!-- Policy Details -->
@@ -51,15 +49,15 @@ else if (PolicyDetails != null)
                 <div class="card-body">
                     <table class="table table-bordered">
                         <tbody>
-                            <tr><th>Policy Reference</th><td>@PolicyDetails.ORIPolicyReference</td></tr>
-                            <tr><th>Policy Description</th><td>@PolicyDetails.PolicyDescription</td></tr>
-                            <tr><th>Contract Currency</th><td>@PolicyDetails.ContractCurrency</td></tr>
-                            <tr><th>Inception</th><td>@PolicyDetails.Inception?.ToString("yyyy-MM-dd")</td></tr>
-                            <tr><th>Expiry</th><td>@PolicyDetails.Expiry?.ToString("yyyy-MM-dd")</td></tr>
-                            <tr><th>Order Percent</th><td>@PolicyDetails.OrderPercent</td></tr>
-                            <tr><th>Limit</th><td>@PolicyDetails.Limit</td></tr>
-                            <tr><th>Deductible Retention</th><td>@PolicyDetails.DeductibleRetention</td></tr>
-                            <tr><th>Aggregate</th><td>@PolicyDetails.Aggregate</td></tr>
+                            <tr><th>Policy Reference</th><td>@(PolicyDetails?.ORIPolicyReference ?? "")</td></tr>
+                            <tr><th>Policy Description</th><td>@(PolicyDetails?.PolicyDescription ?? "")</td></tr>
+                            <tr><th>Contract Currency</th><td>@(PolicyDetails?.ContractCurrency ?? "")</td></tr>
+                            <tr><th>Inception</th><td>@(PolicyDetails?.Inception?.ToString("yyyy-MM-dd") ?? "")</td></tr>
+                            <tr><th>Expiry</th><td>@(PolicyDetails?.Expiry?.ToString("yyyy-MM-dd") ?? "")</td></tr>
+                            <tr><th>Order Percent</th><td>@(PolicyDetails?.OrderPercent?.ToString() ?? "")</td></tr>
+                            <tr><th>Limit</th><td>@(PolicyDetails?.Limit?.ToString() ?? "")</td></tr>
+                            <tr><th>Deductible Retention</th><td>@(PolicyDetails?.DeductibleRetention?.ToString() ?? "")</td></tr>
+                            <tr><th>Aggregate</th><td>@(PolicyDetails?.Aggregate?.ToString() ?? "")</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -82,7 +80,7 @@ else if (PolicyDetails != null)
 
 
 
-            @if (PolicyDetails.Filters?.Any() == true)
+            @if (PolicyDetails?.Filters?.Any() == true)
             {
                 <table class="table table-striped">
                     <thead>
@@ -155,10 +153,10 @@ else if (PolicyDetails != null)
         try
         {
             PolicyDetails = await ORIService.GetORIPolicyDetails(ORIPolicyReference);
-            if (PolicyDetails == null)
-            {
-                ErrorMessage = $"No policy details found for reference: {ORIPolicyReference}";
-            }
+            // if (PolicyDetails == null)
+            // {
+            //     ErrorMessage = $"No policy details found for reference: {ORIPolicyReference}";
+            // }
         }
         catch (Exception ex)
         {

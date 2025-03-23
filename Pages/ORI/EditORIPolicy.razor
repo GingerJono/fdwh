@@ -26,6 +26,21 @@ else if (PolicyDetails != null)
 	</nav>
 
 	<h1>Editing ORI Policy Reference: @PolicyDetails.ORIPolicyReference</h1>
+	<div class="card mb-3">
+		<div class="card-header">Copy Terms from Another ORI Policy</div>
+		<div class="card-body">
+			<div class="input-group">
+				<select class="form-select" @bind="SelectedPolicyToCopyFrom">
+					<option value="">-- Select ORI Policy --</option>
+					@foreach (var p in AllPolicies)
+					{
+						<option value="@p.ORIPolicyReference">@p.ORIPolicyReference - @p.PolicyDescription</option>
+					}
+				</select>
+				<button class="btn btn-outline-primary" @onclick="CopyFromAnotherPolicy">Copy</button>
+			</div>
+		</div>
+	</div>
 
 
 	<EditForm Model="PolicyDetails" OnValidSubmit="HandleValidSubmit">
@@ -72,20 +87,7 @@ else if (PolicyDetails != null)
 									</button>
 								</td>
 								<td>
-									@if (DropdownValues.ContainsKey(filter.IncludedOrExcludedItem))
-									{
-										<InputSelect class="form-control" @bind-Value="filter.IncludedOrExcludedValue">
-											<option value="">Select...</option>
-											@foreach (var item in DropdownValues[filter.IncludedOrExcludedItem])
-											{
-												<option value="@item.Code">@item.Name</option>
-											}
-										</InputSelect>
-									}
-									else
-									{
-										<InputText class="form-control" @bind-Value="filter.IncludedOrExcludedValue" />
-									}
+									<InputText class="form-control" @bind-Value="filter.IncludedOrExcludedValue" />
 								</td>
 								<td><InputText class="form-control" @bind-Value="filter.Note" /></td>
 								<td>@filter.LastUpdated?.ToString("yyyy-MM-dd HH:mm")</td>
@@ -106,32 +108,49 @@ else if (PolicyDetails != null)
 							</td>
 							<td>
 								<InputSelect class="form-control"
-											 @bind-Value="newFilter.IncludedOrExcludedItem"
-											 @onchange="OnFilterTypeChanged"
+											 Value="@newFilter.IncludedOrExcludedItem"
+											 ValueChanged="HandleItemChanged"
+											 ValueExpression="() => newFilter.IncludedOrExcludedItem"
 											 TValue="string">
-									<option value="">Select a filter type</option>
-									@foreach (var item in FilterItemsList)
-									{
-										<option value="@item.Code">@item.DisplayName</option>
-									}
-								</InputSelect>
+
+    <option value="">Select a filter type</option>
+    @foreach (var item in FilterItemsList)
+    {
+        <option value="@item.Code">@item.DisplayName</option>
+    }
+</InputSelect>
+
+
+
+
 							</td>
 							<td>
-								@if (!string.IsNullOrWhiteSpace(newFilter.IncludedOrExcludedItem) && DropdownValues.ContainsKey(newFilter.IncludedOrExcludedItem))
+								@if (KnownDropdownTypes.Contains(newFilter.IncludedOrExcludedItem))
 								{
-									<InputSelect class="form-control" @bind-Value="newFilter.IncludedOrExcludedValue">
-										<option value="">Select...</option>
-										@foreach (var item in DropdownValues[newFilter.IncludedOrExcludedItem])
-										{
-											<option value="@item.Code">@item.Name</option>
-										}
-									</InputSelect>
+									if (IsLoadingDropdown)
+									{
+										<InputSelect class="form-control" disabled TValue="string">
+											<option>Fetching options...</option>
+										</InputSelect>
+									}
+									else
+									{
+										<InputSelect class="form-control" @bind-Value="newFilter.IncludedOrExcludedValue" TValue="string">
+											<option value="">Select an option</option>
+											@foreach (var item in DropdownValues.GetValueOrDefault(newFilter.IncludedOrExcludedItem, new()))
+											{
+												<option value="@item.Code">@item.Name</option>
+											}
+										</InputSelect>
+									}
 								}
 								else
 								{
 									<InputText class="form-control" @bind-Value="newFilter.IncludedOrExcludedValue" placeholder="Enter value" />
 								}
 							</td>
+
+
 							<td>
 								<InputText class="form-control" @bind-Value="newFilter.Note" placeholder="Note (optional)" />
 							</td>
@@ -145,11 +164,11 @@ else if (PolicyDetails != null)
 			</div>
 		</div>
 
-	<div class="text-right">
-		<button type="submit" class="btn btn-success">Save Changes</button>
-		<button type="button" class="btn btn-secondary" @onclick="NavigateBack">Cancel</button>
-	</div>
-</EditForm>
+		<div class="text-right">
+			<button type="submit" class="btn btn-success">Save Changes</button>
+			<button type="button" class="btn btn-secondary" @onclick="NavigateBack">Cancel</button>
+		</div>
+	</EditForm>
 }
 
 @code {
@@ -171,6 +190,8 @@ else if (PolicyDetails != null)
 	private List<ORIFilterItemDefinition> FilterItemsList = new();
 	protected override async Task OnInitializedAsync()
 	{
+		FilterItemsList = await ORIService.GetIncludedOrExcludedItems();
+		await LoadAllPolicies(); // <--- Add this line
 
 		if (string.IsNullOrWhiteSpace(ORIPolicyReference))
 		{
@@ -195,35 +216,6 @@ else if (PolicyDetails != null)
 		finally
 		{
 			IsLoading = false;
-		}
-	}
-
-	private async Task OnFilterTypeChanged(ChangeEventArgs e)
-	{
-		var selectedType = e.Value?.ToString();
-
-		if (!string.IsNullOrWhiteSpace(selectedType))
-		{
-			Console.WriteLine($"[DEBUG] Filter type changed to: {selectedType}");
-
-			newFilter.IncludedOrExcludedItem = selectedType; // Explicitly set value
-
-			// Fetch dropdown values if not already cached
-			if (!DropdownValues.ContainsKey(selectedType))
-			{
-				Console.WriteLine($"[DEBUG] Fetching dropdown values for: {selectedType}");
-				DropdownValues[selectedType] = await ORIService.GetDropdownValues(selectedType);
-			}
-
-			// Reset value so user must reselect
-			newFilter.IncludedOrExcludedValue = "";
-
-			// **Force UI Update**
-			StateHasChanged();
-		}
-		else
-		{
-			Console.WriteLine("[DEBUG] Selected filter type is null or empty.");
 		}
 	}
 
@@ -314,4 +306,70 @@ else if (PolicyDetails != null)
 			_ => "orange-ghost"
 		};
 	}
+
+	private HashSet<string> KnownDropdownTypes = new()
+	{
+		"Class",
+		"DomicileCountry",
+		"Peril",
+		"PlacementUMR",
+		"PolicyMainRiskCode",
+		"ReservingClass",
+		"StatCode1",
+		"StatCode2"
+	};
+
+	private bool IsLoadingDropdown = false;
+
+	private async Task HandleItemChanged(string selected)
+	{
+		newFilter.IncludedOrExcludedItem = selected;
+		newFilter.IncludedOrExcludedValue = "";
+
+		if (!string.IsNullOrWhiteSpace(selected) && KnownDropdownTypes.Contains(selected))
+		{
+			IsLoadingDropdown = true;
+			StateHasChanged(); // Trigger UI re-render
+
+			await Task.Delay(2000); // Simulate DB latency
+
+			if (!DropdownValues.ContainsKey(selected))
+			{
+				DropdownValues[selected] = await ORIService.GetDropdownValues(selected);
+			}
+
+			IsLoadingDropdown = false;
+			StateHasChanged();
+		}
+	}
+
+	private List<ORIPolicyListModel> AllPolicies = new();
+	private string SelectedPolicyToCopyFrom;
+
+	private async Task LoadAllPolicies()
+	{
+		AllPolicies = (await ORIService.GetORIPolicies()).ToList();
+	}
+
+	private async Task CopyFromAnotherPolicy()
+	{
+		if (string.IsNullOrWhiteSpace(SelectedPolicyToCopyFrom)) return;
+
+		var sourcePolicy = await ORIService.GetORIPolicyDetails(SelectedPolicyToCopyFrom);
+		if (sourcePolicy != null)
+		{
+			PolicyDetails.Filters = sourcePolicy.Filters
+				.Select(f => new ORIFilterItem
+					{
+						InclusionExclusion = f.InclusionExclusion,
+						IncludedOrExcludedItem = f.IncludedOrExcludedItem,
+						IncludedOrExcludedValue = f.IncludedOrExcludedValue,
+						Note = f.Note
+					})
+				.ToList();
+
+			StateHasChanged();
+		}
+	}
+
 }

@@ -9,7 +9,7 @@ namespace Sandbox.Models.ORI
 		public DateTime? ExpiryDate { get; set; }
 		public double? Limit { get; set; }
 		public double? Retention { get; set; }
-		public string Description { get; set; }
+		public string PolicyDescription { get; set; }
 		public string PolicyType { get; set; }
 		public string Broker { get; set; }
 		public string Status { get; set; }
