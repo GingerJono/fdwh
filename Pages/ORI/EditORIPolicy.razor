@@ -107,20 +107,18 @@ else if (PolicyDetails != null)
 								</InputSelect>
 							</td>
 							<td>
+
 								<InputSelect class="form-control"
 											 Value="@newFilter.IncludedOrExcludedItem"
 											 ValueChanged="HandleItemChanged"
 											 ValueExpression="() => newFilter.IncludedOrExcludedItem"
 											 TValue="string">
-
-    <option value="">Select a filter type</option>
-    @foreach (var item in FilterItemsList)
-    {
-        <option value="@item.Code">@item.DisplayName</option>
-    }
-</InputSelect>
-
-
+									<option value="">Select a filter type</option>
+									@foreach (var item in FilterItemsList)
+									{
+										<option value="@item.Code">@item.DisplayName</option>
+									}
+								</InputSelect>
 
 
 							</td>
@@ -129,13 +127,20 @@ else if (PolicyDetails != null)
 								{
 									if (IsLoadingDropdown)
 									{
-										<InputSelect class="form-control" disabled TValue="string">
-											<option>Fetching options...</option>
-										</InputSelect>
+										@if (IsLoadingDropdown)
+										{
+											<select class="form-control" disabled>
+												<option>Fetching options...</option>
+											</select>
+										}
 									}
 									else
 									{
-										<InputSelect class="form-control" @bind-Value="newFilter.IncludedOrExcludedValue" TValue="string">
+										<InputSelect class="form-control"
+													 Value="@newFilter.IncludedOrExcludedValue"
+													 ValueChanged="v => newFilter.IncludedOrExcludedValue = v"
+													 ValueExpression="() => newFilter.IncludedOrExcludedValue"
+													 TValue="string">
 											<option value="">Select an option</option>
 											@foreach (var item in DropdownValues.GetValueOrDefault(newFilter.IncludedOrExcludedItem, new()))
 											{
@@ -217,6 +222,7 @@ else if (PolicyDetails != null)
 		{
 			IsLoading = false;
 		}
+		Console.WriteLine("pageloaded");
 	}
 
 	private async Task HandleValidSubmit()
@@ -312,7 +318,6 @@ else if (PolicyDetails != null)
 		"Class",
 		"DomicileCountry",
 		"Peril",
-		"PlacementUMR",
 		"PolicyMainRiskCode",
 		"ReservingClass",
 		"StatCode1",
@@ -323,25 +328,31 @@ else if (PolicyDetails != null)
 
 	private async Task HandleItemChanged(string selected)
 	{
+		Console.WriteLine("triggered HIC");
 		newFilter.IncludedOrExcludedItem = selected;
 		newFilter.IncludedOrExcludedValue = "";
 
 		if (!string.IsNullOrWhiteSpace(selected) && KnownDropdownTypes.Contains(selected))
 		{
+			Console.WriteLine("into if on line 325");
+
 			IsLoadingDropdown = true;
-			StateHasChanged(); // Trigger UI re-render
+			StateHasChanged();
 
 			await Task.Delay(2000); // Simulate DB latency
 
 			if (!DropdownValues.ContainsKey(selected))
 			{
+				Console.WriteLine("going to db");
 				DropdownValues[selected] = await ORIService.GetDropdownValues(selected);
+				Console.WriteLine("coming from db");
 			}
 
 			IsLoadingDropdown = false;
 			StateHasChanged();
 		}
 	}
+
 
 	private List<ORIPolicyListModel> AllPolicies = new();
 	private string SelectedPolicyToCopyFrom;
