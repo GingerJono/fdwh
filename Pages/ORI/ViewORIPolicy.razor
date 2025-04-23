@@ -42,28 +42,85 @@ else
     </div>
 
     <!-- Policy Details -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card mb-4">
-                <div class="card-header">Policy Details</div>
+    <div class="row display-flex">
+        <div class="col-lg-2 col-4 mb-4">
+            <div class="card overflow-hidden h-100 fs-13px border-0 bg-primary-gradient">
                 <div class="card-body">
-                    <table class="table table-bordered">
-                        <tbody>
-                            <tr><th>Policy Reference</th><td>@(PolicyDetails?.ORIPolicyReference ?? "")</td></tr>
-                            <tr><th>Policy Description</th><td>@(PolicyDetails?.PolicyDescription ?? "")</td></tr>
-                            <tr><th>Contract Currency</th><td>@(PolicyDetails?.ContractCurrency ?? "")</td></tr>
-                            <tr><th>Inception</th><td>@(PolicyDetails?.Inception?.ToString("yyyy-MM-dd") ?? "")</td></tr>
-                            <tr><th>Expiry</th><td>@(PolicyDetails?.Expiry?.ToString("yyyy-MM-dd") ?? "")</td></tr>
-                            <tr><th>Order Percent</th><td>@(PolicyDetails?.OrderPercent?.ToString() ?? "")</td></tr>
-                            <tr><th>Limit</th><td>@(PolicyDetails?.Limit?.ToString() ?? "")</td></tr>
-                            <tr><th>Deductible Retention</th><td>@(PolicyDetails?.DeductibleRetention?.ToString() ?? "")</td></tr>
-                            <tr><th>Aggregate</th><td>@(PolicyDetails?.Aggregate?.ToString() ?? "")</td></tr>
-                        </tbody>
-                    </table>
+                    <h6 class="text-white text-opacity-80 mb-1">Policy Ref</h6>
+                    <h4 class="text-white mt-n1">@(PolicyDetails?.ORIPolicyReference ?? "-")</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-8 mb-4">
+            <div class="card overflow-hidden h-100 fs-13px border-0 bg-primary1-gradient">
+                <div class="card-body">
+                    <h6 class="text-white text-opacity-80 mb-1">Description</h6>
+                    <h4 class="text-white mt-n1">@(PolicyDetails?.PolicyDescription ?? "-")</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2 col-4 mb-4">
+            <div class="card overflow-hidden h-100 fs-13px border-0 bg-success-gradient">
+                <div class="card-body">
+                    <h6 class="text-white text-opacity-80 mb-1">Currency</h6>
+                    <h4 class="text-white mt-n1">@(PolicyDetails?.ContractCurrency ?? "-")</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2 col-4 mb-4">
+            <div class="card overflow-hidden h-100 fs-13px border-0 bg-warning-gradient">
+                <div class="card-body">
+                    <h6 class="text-white text-opacity-80 mb-1">Inception</h6>
+                    <h4 class="text-white mt-n1">@(PolicyDetails?.Inception?.ToString("yyyy-MM-dd") ?? "-")</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2 col-4 mb-4">
+            <div class="card overflow-hidden h-100 fs-13px border-0 bg-danger-gradient">
+                <div class="card-body">
+                    <h6 class="text-white text-opacity-80 mb-1">Expiry</h6>
+                    <h4 class="text-white mt-n1">@(PolicyDetails?.Expiry?.ToString("yyyy-MM-dd") ?? "-")</h4>
                 </div>
             </div>
         </div>
     </div>
+
+    <div class="row display-flex">
+        <div class="col-lg-2 col-4 mb-4">
+            <div class="card overflow-hidden h-100 fs-13px border-0 bg-primary2-gradient">
+                <div class="card-body">
+                    <h6 class="text-white text-opacity-80 mb-1">Order %</h6>
+                    <h4 class="text-white mt-n1">@(PolicyDetails?.OrderPercent?.ToString("0.##") ?? "-")</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2 col-4 mb-4">
+            <div class="card overflow-hidden h-100 fs-13px border-0 bg-info-gradient">
+                <div class="card-body">
+                    <h6 class="text-white text-opacity-80 mb-1">Limit</h6>
+                    <h4 class="text-white mt-n1">@(PolicyDetails?.Limit?.ToString("N0") ?? "-")</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2 col-4 mb-4">
+            <div class="card overflow-hidden h-100 fs-13px border-0 bg-secondary-gradient">
+                <div class="card-body">
+                    <h6 class="text-white text-opacity-80 mb-1">Deductible</h6>
+                    <h4 class="text-white mt-n1">@(PolicyDetails?.DeductibleRetention?.ToString("N0") ?? "-")</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2 col-4 mb-4">
+            <div class="card overflow-hidden h-100 fs-13px border-0 bg-dark-gradient">
+                <div class="card-body">
+                    <h6 class="text-white text-opacity-80 mb-1">Aggregate</h6>
+                    <h4 class="text-white mt-n1">@(PolicyDetails?.Aggregate?.ToString("N0") ?? "-")</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     <!-- Unified Inclusions & Exclusions Table -->
     <div class="card mb-4">
         <div class="card-header">Inclusions & Exclusions</div>
