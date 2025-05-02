@@ -29,6 +29,10 @@ namespace Sandbox.Models.ORI
 		// Single List for inclusions and exclusions
 		public List<ORIFilterItem> Filters { get; set; } = new();
 		public List<ORIFilterItem> RemovedFilters { get; set; } = new(); // Track deleted filters
+
+		// New Lists for Policy Allocations
+		public List<ORIPolicyAllocationClass> PolicyAllocationsClass { get; set; } = new();
+		public List<ORIPolicyAllocationYOA> PolicyAllocationsYOA { get; set; } = new();
 	}
 
 	public class ORIFilterItemDefinition
@@ -99,4 +103,21 @@ namespace Sandbox.Models.ORI
 		public string Description { get; set; }
 	}
 
+	// New classes to represent the allocation tables
+	public class ORIPolicyAllocationClass
+	{
+		public string Class { get; set; }
+		public decimal Allocation { get; set; }
+		public DateTime? LastUpdated { get; set; }
+		public string LastUpdatedBy { get; set; }
+	}
+
+	public class ORIPolicyAllocationYOA
+	{
+		public int YearOfAccount { get; set; }
+		public decimal Allocation { get; set; }
+		public DateTime? LastUpdated { get; set; }
+		public string LastUpdatedBy { get; set; }
+	}
 }
+

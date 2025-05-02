@@ -73,10 +73,35 @@ namespace Sandbox.Services
 						parameters,
 						commandType: CommandType.StoredProcedure
 					)).ToList();
+
+					// Fetch Allocations Class and YOA
+					policyDetails.PolicyAllocationsClass = (await GetPolicyAllocationsClass(connection, policyDetails.ORIPolicyReference)).ToList();
+					policyDetails.PolicyAllocationsYOA = (await GetPolicyAllocationsYOA(connection, policyDetails.ORIPolicyReference)).ToList();
 				}
 
 				return policyDetails;
 			}
+		}
+		private async Task<IEnumerable<ORIPolicyAllocationClass>> GetPolicyAllocationsClass(SqlConnection connection, string ORIPolicyReference)
+		{
+			var parameters = new DynamicParameters();
+			parameters.Add("@ORIPolicyReference", ORIPolicyReference, DbType.String);
+
+			return await connection.QueryAsync<ORIPolicyAllocationClass>(
+				"ORI.spGetPolicyAllocationsClass",
+				parameters,
+				commandType: CommandType.StoredProcedure);
+		}
+
+		private async Task<IEnumerable<ORIPolicyAllocationYOA>> GetPolicyAllocationsYOA(SqlConnection connection, string ORIPolicyReference)
+		{
+			var parameters = new DynamicParameters();
+			parameters.Add("@ORIPolicyReference", ORIPolicyReference, DbType.String);
+
+			return await connection.QueryAsync<ORIPolicyAllocationYOA>(
+				"ORI.spGetPolicyAllocationsYOA",
+				parameters,
+				commandType: CommandType.StoredProcedure);
 		}
 		public async Task<IEnumerable<ORIUSMListModel>> GetORIUSMs()
 		{
@@ -194,6 +219,16 @@ namespace Sandbox.Services
 					await db.ExecuteAsync("ORI.spAddORIFiltersMaster", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
 				}
 
+				// Step 3: Save Allocations
+				foreach (var allocation in model.PolicyAllocationsClass)
+				{
+					await UpsertPolicyAllocationsClass(db, allocation, userNameFinal, transaction, model.ORIPolicyReference);
+				}
+				foreach (var allocation in model.PolicyAllocationsYOA)
+				{
+					await UpsertPolicyAllocationsYOA(db, allocation, userNameFinal, transaction, model.ORIPolicyReference);
+				}
+
 				transaction.Commit();
 				Console.WriteLine($"[SUCCESS] ORI Policy Metadata saved successfully for {model.ORIPolicyReference}");
 			}
@@ -203,6 +238,47 @@ namespace Sandbox.Services
 				Console.WriteLine($"[ERROR] Transaction failed: {ex.Message}");
 				throw;
 			}
+		}
+		private async Task UpsertPolicyAllocationsClass(SqlConnection connection, ORIPolicyAllocationClass allocation, string userName, SqlTransaction transaction, string ORIPolicyReference)
+		{
+			var parameters = new DynamicParameters();
+			parameters.Add("@ORIPolicyReference", ORIPolicyReference);
+			parameters.Add("@Class", allocation.Class);
+			parameters.Add("@Allocation", allocation.Allocation);
+			parameters.Add("@LastUpdatedBy", userName);
+
+			await connection.ExecuteAsync("ORI.spUpsertPolicyAllocationsClass", parameters, transaction: transaction, commandType: CommandType.StoredProcedure);
+		}
+
+		private async Task UpsertPolicyAllocationsYOA(SqlConnection connection, ORIPolicyAllocationYOA allocation, string userName, SqlTransaction transaction, string ORIPolicyReference)
+		{
+			var parameters = new DynamicParameters();
+			parameters.Add("@ORIPolicyReference", ORIPolicyReference);
+			parameters.Add("@YearOfAccount", allocation.YearOfAccount);
+			parameters.Add("@Allocation", allocation.Allocation);
+			parameters.Add("@LastUpdatedBy", userName);
+
+			await connection.ExecuteAsync("ORI.spUpsertPolicyAllocationsYOA", parameters, transaction: transaction, commandType: CommandType.StoredProcedure);
+		}
+
+		private async Task DeletePolicyAllocationsClass(SqlConnection connection, string ORIPolicyReference, string className, string userName, SqlTransaction transaction)
+		{
+			var parameters = new DynamicParameters();
+			parameters.Add("@ORIPolicyReference", ORIPolicyReference);
+			parameters.Add("@Class", className);
+			parameters.Add("@LastUpdatedBy", userName);
+
+			await connection.ExecuteAsync("ORI.spDeletePolicyAllocationsClass", parameters, transaction: transaction, commandType: CommandType.StoredProcedure);
+		}
+
+		private async Task DeletePolicyAllocationsYOA(SqlConnection connection, string ORIPolicyReference, int yearOfAccount, string userName, SqlTransaction transaction)
+		{
+			var parameters = new DynamicParameters();
+			parameters.Add("@ORIPolicyReference", ORIPolicyReference);
+			parameters.Add("@YearOfAccount", yearOfAccount);
+			parameters.Add("@LastUpdatedBy", userName);
+
+			await connection.ExecuteAsync("ORI.spDeletePolicyAllocationsYOA", parameters, transaction: transaction, commandType: CommandType.StoredProcedure);
 		}
 		public async Task<List<ORIFilterItemDefinition>> GetIncludedOrExcludedItems()
 		{
@@ -450,3 +526,4 @@ namespace Sandbox.Services
 
 	}
 }
+
