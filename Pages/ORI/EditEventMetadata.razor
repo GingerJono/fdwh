@@ -130,7 +130,7 @@ else if (EventDetails != null)
         {
             EventDetails.LastUpdatedBy = "CurrentUser"; // TODO: Replace with actual user context
             await ORIService.UpsertEventMetadata(EventDetails);
-            NavigationManager.NavigateTo($"/ViewEventMetadata/{EventDetails.EventCode}");
+            NavigationManager.NavigateTo($"ViewEventMetadata/{EventDetails.EventCode}");
         }
         catch (Exception ex)
         {
@@ -141,6 +141,6 @@ else if (EventDetails != null)
 
     private void Cancel()
     {
-        NavigationManager.NavigateTo($"/ViewEventMetadata/{EventDetails.EventCode}");
+        NavigationManager.NavigateTo($"ViewEventMetadata/{EventDetails.EventCode}");
     }
 }

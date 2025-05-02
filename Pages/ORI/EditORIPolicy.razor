@@ -259,7 +259,7 @@ else if (PolicyDetails != null)
 		try
 		{
 			await ORIService.SaveORIPolicyMetadata(PolicyDetails);
-			Navigation.NavigateTo($"/ViewORIPolicy/{PolicyDetails.ORIPolicyReference}", forceLoad: true);
+			Navigation.NavigateTo($"ViewORIPolicy/{PolicyDetails.ORIPolicyReference}", forceLoad: true);
 		}
 		catch (Exception ex)
 		{
@@ -273,7 +273,7 @@ else if (PolicyDetails != null)
 
 	private async Task NavigateBack()
 	{
-		Navigation.NavigateTo($"/ViewORIPolicy/{PolicyDetails.ORIPolicyReference}", forceLoad: true);
+		Navigation.NavigateTo($"ViewORIPolicy/{PolicyDetails.ORIPolicyReference}", forceLoad: true);
 	}
 
 
@@ -333,7 +333,7 @@ else if (PolicyDetails != null)
 			"InwardPolicyReference" => "secondary-ghost",
 			"Peril" => "success-ghost",
 			"PlacementUMR" => "danger-ghost",
-			"PolicyMainRiskCode" => "warning-ghost",
+			"RiskCode" => "warning-ghost",
 			"ReservingClass" => "info-ghost",
 			"StatCode1" => "purple-ghost",
 			"StatCode2" => "teal-ghost",
@@ -346,7 +346,7 @@ else if (PolicyDetails != null)
 		"Class",
 		"DomicileCountry",
 		"Peril",
-		"PolicyMainRiskCode",
+		"RiskCode",
 		"ReservingClass",
 		"StatCode1",
 		"StatCode2"

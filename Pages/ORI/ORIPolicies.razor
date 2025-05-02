@@ -1,3 +1,4 @@
+@page "/"
 @page "/ORIPolicies"
 @inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
 @using Sandbox._Spk
@@ -10,7 +11,6 @@
 @inject ORIService ORIService // Inject the service
 @using DataTablesData
 @inject DataTablesService DataTablesService
-
 
 <!-- DataTables CSS -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/dataTables.bootstrap5.min.css">
@@ -53,7 +53,7 @@
 					<tr>
 						<td>
 							<button class="btn btn-link text-decoration-underline"
-									@onclick="@(() => NavigationManager.NavigateTo($"/ViewORIPolicy/{policy.ORIPolicyReference}"))">
+									@onclick="@(() => NavigationManager.NavigateTo($"ViewORIPolicy/{policy.ORIPolicyReference}"))">
 								@policy.ORIPolicyReference
 							</button>
 						</td>

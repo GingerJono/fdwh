@@ -19,7 +19,7 @@ public class MenuDataServiceSandbox
             children: new MainMenuItems[]
 			{
 				new MainMenuItems (
-					path: "/ORIPolicies",
+					path: "ORIPolicies",
 					type: "link",
 					title: "ORI Policies",
 					selected: false,
@@ -27,7 +27,7 @@ public class MenuDataServiceSandbox
 					dirChange: false
 				),
 				new MainMenuItems (
-					path: "/ORIUSMs",
+					path: "ORIUSMs",
 					type: "link",
 					title: "ORI USMs",
 					selected: false,
@@ -35,7 +35,7 @@ public class MenuDataServiceSandbox
 					dirChange: false
 				),
 				new MainMenuItems (
-					path: "/EventMetadata",
+					path: "EventMetadata",
 					type: "link",
 					title: "Event Metadata",
 					selected: false,
@@ -43,7 +43,7 @@ public class MenuDataServiceSandbox
 					dirChange: false
 				),
 				//new MainMenuItems (
-				//	path: "/NavHist",
+				//	path: "NavHist",
 				//	type: "link",
 				//	title: "NavHist",
 				//	selected: false,

@@ -227,7 +227,7 @@ namespace Sandbox.Services
 				"DomicileCountry" => "ORI.spGetListDomicileCountry",
 				"Peril" => "ORI.spGetListPeril",
 				"PlacementUMR" => null,  // Remain as a textbox
-				"PolicyMainRiskCode" => "ORI.spGetListRiskCode",
+				"RiskCode" => "ORI.spGetListRiskCode",
 				"ReservingClass" => "ORI.spGetListReservingClass",
 				"StatCode1" => "ORI.spGetListStatCode1",
 				"StatCode2" => "ORI.spGetListStatCode2",

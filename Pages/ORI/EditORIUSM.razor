@@ -207,7 +207,7 @@ else if (USMDetails != null)
 	private async Task HandleValidSubmit()
 	{
 		await ORIService.SaveORIUSM(USMDetails);
-		NavigationManager.NavigateTo($"/ViewORIUSM/{USMDetails.USMID}");
+		NavigationManager.NavigateTo($"ViewORIUSM/{USMDetails.USMID}");
 	}
 	private async Task NavigateBack()
 	{
@@ -217,7 +217,7 @@ else if (USMDetails != null)
 				"You have unsaved changes that haven’t been added. Are you sure you want to leave?");
 			if (!confirmLeave) return;
 		}
-		NavigationManager.NavigateTo($"/ViewORIUSM/{USMDetails.USMID}");
+		NavigationManager.NavigateTo($"ViewORIUSM/{USMDetails.USMID}");
 	}
 
 	private YOAAllocation newYOA = new YOAAllocation();

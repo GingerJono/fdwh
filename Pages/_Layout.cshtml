@@ -5,118 +5,109 @@
 @inject StateService stateService
 @using System.Text.Json;
 @inject IHttpContextAccessor HttpContextAccessor
-@{ 
+@{
     var appState = stateService.GetAppState();
 
 }
 
 <!DOCTYPE html>
 <html lang="en"  data-toggled="close"
-    @if (!string.IsNullOrEmpty(appState?.Direction))
-    {
-        <text>dir="@appState.Direction"</text>
-    }
-    @if (!string.IsNullOrEmpty(appState?.NavigationStyles))
-    {
-        <text>data-nav-layout="@appState.NavigationStyles"</text>
-    }
-    @if (!string.IsNullOrEmpty(appState?.ColorTheme))
-    {
-        <text>data-theme-mode="@appState.ColorTheme"</text>
-    }
-    @if (!string.IsNullOrEmpty(appState?.HeaderColor))
-    {
-        <text>data-header-styles="@appState.HeaderColor"</text>
-    }
-    @if (!string.IsNullOrEmpty(appState?.MenuColor))
-    {
-        <text>data-menu-styles="@appState.MenuColor"</text>
-    }
-    @if (!string.IsNullOrEmpty(appState?.MenuStyles))
-    {
-        <text>data-nav-style="@appState.MenuStyles"</text>
-    }
-    @if (!string.IsNullOrEmpty(appState?.PageStyles))
-    {
-        <text>data-page-style="@appState.PageStyles"</text>
-    }
-    @if (!string.IsNullOrEmpty(appState?.WidthStyles))
-    {
-        <text>data-width="@appState.WidthStyles"</text>
-    }
-    @if (!string.IsNullOrEmpty(appState?.MenuPosition))
-    {
-        <text>data-menu-position="@appState.MenuPosition"</text>
-    }
-    @if (!string.IsNullOrEmpty(appState?.HeaderPosition))
-    {
-        <text>data-header-position="@appState.HeaderPosition"</text>
-    }
-    @if (!string.IsNullOrEmpty(appState?.BackgroundImage))
-    {
-        <text>data-bg-img="@appState.BackgroundImage"</text>
-    }
-    @{
-        string style = "";
+@if (!string.IsNullOrEmpty(appState?.Direction))
+{
+    <text>dir="@appState.Direction"</text>
+}
+@if (!string.IsNullOrEmpty(appState?.NavigationStyles))
+{
+    <text>data-nav-layout="@appState.NavigationStyles"</text>
+}
+@if (!string.IsNullOrEmpty(appState?.ColorTheme))
+{
+    <text>data-theme-mode="@appState.ColorTheme"</text>
+}
+@if (!string.IsNullOrEmpty(appState?.HeaderColor))
+{
+    <text>data-header-styles="@appState.HeaderColor"</text>
+}
+@if (!string.IsNullOrEmpty(appState?.MenuColor))
+{
+    <text>data-menu-styles="@appState.MenuColor"</text>
+}
+@if (!string.IsNullOrEmpty(appState?.MenuStyles))
+{
+    <text>data-nav-style="@appState.MenuStyles"</text>
+}
+@if (!string.IsNullOrEmpty(appState?.PageStyles))
+{
+    <text>data-page-style="@appState.PageStyles"</text>
+}
+@if (!string.IsNullOrEmpty(appState?.WidthStyles))
+{
+    <text>data-width="@appState.WidthStyles"</text>
+}
+@if (!string.IsNullOrEmpty(appState?.MenuPosition))
+{
+    <text>data-menu-position="@appState.MenuPosition"</text>
+}
+@if (!string.IsNullOrEmpty(appState?.HeaderPosition))
+{
+    <text>data-header-position="@appState.HeaderPosition"</text>
+}
+@if (!string.IsNullOrEmpty(appState?.BackgroundImage))
+{
+    <text>data-bg-img="@appState.BackgroundImage"</text>
+}
+@{
+    string style = "";
 
-        if (!string.IsNullOrEmpty(appState?.ThemePrimary))
-        {
-            style += $"--primary-rgb: {appState.ThemePrimary}; ";
-        }
-        if (!string.IsNullOrEmpty(appState?.ThemeBackground))
-        {
-            style += $"--body-bg-rgb: {appState.ThemeBackground}; ";
-            style += $"--body-bg-rgb2: {appState.ThemeBackground1}; ";
-            style += $"--light-rgb: {appState.ThemeBackground1}; ";
-            style += $"--form-control-bg: rgb({appState.ThemeBackground1}); ";
-            style += $"--gray-3: rgb({appState.ThemeBackground1}); ";
-            style += $"--light-rgb: rgba(255,255,255,0.1); ";
-        }
+    if (!string.IsNullOrEmpty(appState?.ThemePrimary))
+    {
+        style += $"--primary-rgb: {appState.ThemePrimary}; ";
     }
+    if (!string.IsNullOrEmpty(appState?.ThemeBackground))
+    {
+        style += $"--body-bg-rgb: {appState.ThemeBackground}; ";
+        style += $"--body-bg-rgb2: {appState.ThemeBackground1}; ";
+        style += $"--light-rgb: {appState.ThemeBackground1}; ";
+        style += $"--form-control-bg: rgb({appState.ThemeBackground1}); ";
+        style += $"--gray-3: rgb({appState.ThemeBackground1}); ";
+        style += $"--light-rgb: rgba(255,255,255,0.1); ";
+    }
+}
     style="@style">
 
     <head>
 
-        <!-- Meta Data -->
-		<meta charset="UTF-8">
+        <meta charset="UTF-8">
         <meta name='viewport' content='width=device-width, initial-scale=1.0'>
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="Description" content="Xintra - Blazor Server App Bootstrap5 Premium Admin & Dashboard Template">
-        <meta name="Author" content="Spruko Technologies Private Limited">
-        <meta name="keywords" content="blazor c#, blazor,blazor template,blazor server app,framework blazor,bootstrap templates,blazor dashboard,blazor ui,admin dashboard,admin panel template,blazor admin template,bootstrap framework,blazor bootstrap,blazorserver,bootstrap blazor,bootstrap dashboard">
+        <meta name="Description" content="Dale Sandbox">
+        <meta name="Author" content="Jon O'Neill">
+        
+        <title>Dale Sandbox</title>
 
-        <!-- TITLE -->
-        <title> Xintra - Blazor Server App Bootstrap5 Premium Admin & Dashboard Template </title>
-
-        <!-- FAVICON -->
         <link rel="icon" href="@($"{NavigationManager.BaseUri}assets/images/brand-logos/favicon.ico")" type="image/x-icon">
 
-        <!-- Style Css -->
         <link href="@($"{NavigationManager.BaseUri}assets/css/styles.css")" rel="stylesheet" >
-        
-        <!-- ICONS CSS -->
+
         <link href="@($"{NavigationManager.BaseUri}assets/css/icons.css")" rel="stylesheet">
 
-        <!-- node waves CSS -->
         <link rel="stylesheet" href="@($"{NavigationManager.BaseUri}assets/libs/node-waves/dist/waves.min.css")">
 
-        <!-- Tom Select CSS -->
         <link rel="stylesheet" href="@($"{NavigationManager.BaseUri}assets/libs/tom-select/dist/css/tom-select.bootstrap5.min.css")">
-        
-        <!-- ColorPicker CSS -->
+
         <link href="_content/BlazorColorPicker/colorpicker.css" rel="stylesheet" />
         <link href="_content/BlazorColorPicker/BlazorColorPicker.bundle.scp.css" rel="stylesheet" />
-        
-        <!-- AUTO COMPLETE CSS -->
+
         <link rel="stylesheet" href="@($"{NavigationManager.BaseUri}assets/libs/@tarekraafat/autocomplete.js/dist/css/autoComplete.css")">
 
         <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered" />
+        <base href="@NavigationManager.BaseUri" />
 
-	</head>
+    </head>
 
     <body>
 
-        @RenderBody()
+    @RenderBody()
 
         <!-- POPPER JS -->
         <script src="@($"{NavigationManager.BaseUri}assets/libs/@popperjs/core/dist/umd/popper.min.js")"></script>
@@ -139,7 +130,7 @@
                     let javascriptLinks = [
                         "/assets/js/custom.js"
                     ]
-                    
+
                     javascriptLinks.map((link)=>{
                         var scriptElement = document.createElement('script');
                         scriptElement.src = link;
@@ -154,13 +145,13 @@
             // Load scripts after DOM content is loaded
             document.addEventListener("DOMContentLoaded", function () {
                 var scriptUrls = [
-                
+
                     "_content/FlatpickrBlazor/flatpickr.min.js",
                     "_content/FlatpickrBlazor/flatpickr.blazor.js",
                     "_content/FlatpickrBlazor/l10n/de.js",
                     "_content/FlatpickrBlazor/plugins/monthSelect/index.js",
                     "_content/FlatpickrBlazor/plugins/minMaxTimePlugin.js",
-                    
+
                     "_content/Soenneker.Blazor.TomSelect/tomselectinterop.js",
 
                     "_content/Soenneker.Blazor.FilePond/filepondinterop.js",
@@ -203,7 +194,7 @@
                     "../assets/libs/gridjs/dist/gridjs.umd.js",
                     "../assets/libs/chart.js/dist/chart.umd.js",
                     "../assets/libs/fg-emoji-picker/fgEmojiPicker.js",
-                    "../assets/js/form-wizard.js", 
+                    "../assets/js/form-wizard.js",
                     "../assets/libs/quill/dist/quill.js",
                 ];
                 scriptUrls.forEach(function (url) {
@@ -218,7 +209,7 @@
         <script src="_framework/blazor.server.js"></script>
         <script src="js/javaScriptInterop.js"></script>
         <script src="js/resizeInterop.js"></script>
-    
+
         <script>
 
         function CaptureElementAndCallBlazorFunction(event, menuData) {
