@@ -33,6 +33,8 @@ namespace Sandbox.Models.ORI
 		// New Lists for Policy Allocations
 		public List<ORIPolicyAllocationClass> PolicyAllocationsClass { get; set; } = new();
 		public List<ORIPolicyAllocationYOA> PolicyAllocationsYOA { get; set; } = new();
+		public List<ORIPolicyAllocationClass> RemovedPolicyAllocationsClass { get; set; } = new();
+		public List<ORIPolicyAllocationYOA> RemovedPolicyAllocationsYOA { get; set; } = new();
 	}
 
 	public class ORIFilterItemDefinition

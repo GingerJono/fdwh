@@ -193,40 +193,81 @@ namespace Sandbox.Services
 				Console.WriteLine($"[INFO] Saving ORI Policy Metadata for {model.ORIPolicyReference}");
 
 				// Step 1: Process Removed Filters
-				foreach (var filter in model.RemovedFilters)
+				if (model.RemovedFilters != null && model.RemovedFilters.Any()) // Null and empty check
 				{
-					var parameters = new DynamicParameters();
-					parameters.Add("@ORIPolicyReference", model.ORIPolicyReference);
-					parameters.Add("@InclusionExclusion", filter.InclusionExclusion);
-					parameters.Add("@IncludedOrExcludedItem", filter.IncludedOrExcludedItem);
-					parameters.Add("@IncludedOrExcludedValue", filter.IncludedOrExcludedValue);
-					parameters.Add("@LastUpdatedBy", userNameFinal);
+					foreach (var filter in model.RemovedFilters)
+					{
+						var parameters = new DynamicParameters();
+						parameters.Add("@ORIPolicyReference", model.ORIPolicyReference);
+						parameters.Add("@InclusionExclusion", filter.InclusionExclusion);
+						parameters.Add("@IncludedOrExcludedItem", filter.IncludedOrExcludedItem);
+						parameters.Add("@IncludedOrExcludedValue", filter.IncludedOrExcludedValue);
+						parameters.Add("@LastUpdatedBy", userNameFinal);
 
-					await db.ExecuteAsync("ORI.spRemoveORIFiltersMaster", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
+						await db.ExecuteAsync("ORI.spRemoveORIFiltersMaster", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
+					}
 				}
 
-				// Step 2: Process Added Filters
-				foreach (var filter in model.Filters)
+				// Step 2: Process Added/Updated Filters
+				if (model.Filters != null && model.Filters.Any())
 				{
-					var parameters = new DynamicParameters();
-					parameters.Add("@ORIPolicyReference", model.ORIPolicyReference);
-					parameters.Add("@InclusionExclusion", filter.InclusionExclusion);
-					parameters.Add("@IncludedOrExcludedItem", filter.IncludedOrExcludedItem);
-					parameters.Add("@IncludedOrExcludedValue", filter.IncludedOrExcludedValue);
-					parameters.Add("@Note", filter.Note);
-					parameters.Add("@LastUpdatedBy", userNameFinal);
+					foreach (var filter in model.Filters)
+					{
+						var parameters = new DynamicParameters();
+						parameters.Add("@ORIPolicyReference", model.ORIPolicyReference);
+						parameters.Add("@InclusionExclusion", filter.InclusionExclusion);
+						parameters.Add("@IncludedOrExcludedItem", filter.IncludedOrExcludedItem);
+						parameters.Add("@IncludedOrExcludedValue", filter.IncludedOrExcludedValue);
+						parameters.Add("@Note", filter.Note);
+						parameters.Add("@LastUpdatedBy", userNameFinal);
 
 					await db.ExecuteAsync("ORI.spAddORIFiltersMaster", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
+					}
 				}
 
-				// Step 3: Save Allocations
-				foreach (var allocation in model.PolicyAllocationsClass)
+				// Step 3: Process Class Allocations
+				if (model.PolicyAllocationsClass != null && model.PolicyAllocationsClass.Any())
 				{
-					await UpsertPolicyAllocationsClass(db, allocation, userNameFinal, transaction, model.ORIPolicyReference);
+					foreach (var allocation in model.PolicyAllocationsClass)
+					{
+						await UpsertPolicyAllocationsClass(db, allocation, userNameFinal, transaction, model.ORIPolicyReference);
+					}
 				}
-				foreach (var allocation in model.PolicyAllocationsYOA)
+
+				// Step 4: Process YOA Allocations
+				if (model.PolicyAllocationsYOA != null && model.PolicyAllocationsYOA.Any())
 				{
-					await UpsertPolicyAllocationsYOA(db, allocation, userNameFinal, transaction, model.ORIPolicyReference);
+					foreach (var allocation in model.PolicyAllocationsYOA)
+					{
+						await UpsertPolicyAllocationsYOA(db, allocation, userNameFinal, transaction, model.ORIPolicyReference);
+					}
+				}
+
+				// Step 5: Remove Class Allocations
+				if (model.RemovedPolicyAllocationsClass != null && model.RemovedPolicyAllocationsClass.Any())
+				{
+					foreach (var allocation in model.RemovedPolicyAllocationsClass)
+					{
+						var parameters = new DynamicParameters();
+						parameters.Add("@ORIPolicyReference", model.ORIPolicyReference);
+						parameters.Add("@Class", allocation.Class); // Add the key fields for deletion
+																	//  You might need YearOfAccount too, depending on your table structure
+						parameters.Add("@LastUpdatedBy", userNameFinal);
+						await db.ExecuteAsync("ORI.spDeletePolicyAllocationsClass", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
+					}
+				}
+
+				// Step 6: Remove YOA Allocations
+				if (model.RemovedPolicyAllocationsYOA != null && model.RemovedPolicyAllocationsYOA.Any())
+				{
+					foreach (var allocation in model.RemovedPolicyAllocationsYOA)
+					{
+						var parameters = new DynamicParameters();
+						parameters.Add("@ORIPolicyReference", model.ORIPolicyReference);
+						parameters.Add("@YearOfAccount", allocation.YearOfAccount); // Add the key fields for deletion
+						parameters.Add("@LastUpdatedBy", userNameFinal);
+						await db.ExecuteAsync("ORI.spDeletePolicyAllocationsYOA", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
+					}
 				}
 
 				transaction.Commit();
@@ -237,6 +278,10 @@ namespace Sandbox.Services
 				transaction.Rollback();
 				Console.WriteLine($"[ERROR] Transaction failed: {ex.Message}");
 				throw;
+			}
+			finally
+			{
+				db.Close();
 			}
 		}
 		private async Task UpsertPolicyAllocationsClass(SqlConnection connection, ORIPolicyAllocationClass allocation, string userName, SqlTransaction transaction, string ORIPolicyReference)

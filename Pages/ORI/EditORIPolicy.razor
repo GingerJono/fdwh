@@ -73,7 +73,6 @@ else if (PolicyDetails != null)
 		<DataAnnotationsValidator />
 		<ValidationSummary />
 
-		<!-- Editable List of Filters -->
 		<div class="card mb-4">
 			<div class="card-header">Policy Inclusions/Exclusions</div>
 			<div class="card-body">
@@ -124,7 +123,6 @@ else if (PolicyDetails != null)
 							</tr>
 						}
 
-						<!-- Add New Filter Row -->
 						<tr>
 							<td>
 								<InputSelect class="form-control" @bind-Value="newFilter.InclusionExclusion">
@@ -195,6 +193,133 @@ else if (PolicyDetails != null)
 			</div>
 		</div>
 
+
+		<div class="row">
+			<div class="col-md-6">
+				<div class="card mb-4">
+					<div class="card-header">Policy Allocations by Class</div>
+					<div class="card-body">
+						@if (PolicyDetails.PolicyAllocationsClass != null && PolicyDetails.PolicyAllocationsClass.Any())
+						{
+							<table class="table table-striped">
+								<thead>
+									<tr>
+										<th>Class</th>
+										<th>Allocation</th>
+										<th>Last Updated</th>
+										<th>Updated By</th>
+										<th>Actions</th>
+									</tr>
+								</thead>
+								<tbody>
+									@foreach (var allocation in PolicyDetails.PolicyAllocationsClass)
+									{
+										<tr>
+											<td>
+												<InputText @bind-Value="allocation.Class" class="form-control" />
+											</td>
+											<td>
+												<InputNumber @bind-Value="allocation.Allocation" class="form-control" />
+											</td>
+											<td>@allocation.LastUpdated?.ToString("yyyy-MM-dd HH:mm")</td>
+											<td>@allocation.LastUpdatedBy</td>
+											<td>
+												<button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveClassAllocation(allocation)">
+													Remove
+												</button>
+											</td>
+										</tr>
+									}
+								</tbody>
+							</table>
+						}
+						else
+						{
+							<p class="text-muted">No class allocations defined for this policy.</p>
+						}
+						<div class="mt-3">
+							<h5>Add New Class Allocation</h5>
+							<div class="row g-3">
+								<div class="col-md-4">
+									<label class="form-label">Class</label>
+									<InputText @bind-Value="newClassAllocation.Class" class="form-control" />
+								</div>
+								<div class="col-md-4">
+									<label class="form-label">Allocation</label>
+									<InputNumber @bind-Value="newClassAllocation.Allocation" class="form-control" />
+								</div>
+								<div class="col-md-4">
+									<button type="button" class="btn btn-primary" @onclick="AddClassAllocation">Add Class Allocation</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-md-6">
+				<div class="card mb-4">
+					<div class="card-header">Policy Allocations by Year of Account</div>
+					<div class="card-body">
+						@if (PolicyDetails.PolicyAllocationsYOA != null && PolicyDetails.PolicyAllocationsYOA.Any())
+						{
+							<table class="table table-striped">
+								<thead>
+									<tr>
+										<th>Year of Account</th>
+										<th>Allocation</th>
+										<th>Last Updated</th>
+										<th>Updated By</th>
+										<th>Actions</th>
+									</tr>
+								</thead>
+								<tbody>
+									@foreach (var allocation in PolicyDetails.PolicyAllocationsYOA)
+									{
+										<tr>
+											<td>
+												<InputNumber @bind-Value="allocation.YearOfAccount" class="form-control" />
+											</td>
+											<td>
+												<InputNumber @bind-Value="allocation.Allocation" class="form-control" />
+											</td>
+											<td>@allocation.LastUpdated?.ToString("yyyy-MM-dd HH:mm")</td>
+											<td>@allocation.LastUpdatedBy</td>
+											<td>
+												<button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveYOAAllocation(allocation)">
+													Remove
+												</button>
+											</td>
+										</tr>
+									}
+								</tbody>
+							</table>
+						}
+						else
+						{
+							<p class="text-muted">No year of account allocations defined for this policy.</p>
+						}
+						<div class="mt-3">
+							<h5>Add New YOA Allocation</h5>
+							<div class="row g-3">
+								<div class="col-md-4">
+									<label class="form-label">Year of Account</label>
+									<InputNumber @bind-Value="newYOAAllocation.YearOfAccount" class="form-control" />
+								</div>
+								<div class="col-md-4">
+									<label class="form-label">Allocation</label>
+									<InputNumber @bind-Value="newYOAAllocation.Allocation" class="form-control" />
+								</div>
+								<div class="col-md-4">
+									<button type="button" class="btn btn-primary" @onclick="AddYOAAllocation">Add YOA Allocation</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
 		<div class="text-right">
 			<button type="submit" class="btn btn-success">Save Changes</button>
 			<button type="button" class="btn btn-secondary" @onclick="NavigateBack">Cancel</button>
@@ -213,10 +338,14 @@ else if (PolicyDetails != null)
 	private ORIFilterItem newFilter = new ORIFilterItem
 		{
 			InclusionExclusion = "Inclusion", // Default value
-			IncludedOrExcludedItem = null,    // Use object, not a string
+			IncludedOrExcludedItem = null,         // Use object, not a string
 			IncludedOrExcludedValue = "",
 			Note = ""
 		};
+
+	// New allocation properties
+	private ORIPolicyAllocationClass newClassAllocation = new ORIPolicyAllocationClass();
+	private ORIPolicyAllocationYOA newYOAAllocation = new ORIPolicyAllocationYOA();
 
 	private List<ORIFilterItemDefinition> FilterItemsList = new();
 	protected override async Task OnInitializedAsync()
@@ -307,7 +436,7 @@ else if (PolicyDetails != null)
 		newFilter = new ORIFilterItem
 			{
 				InclusionExclusion = "Inclusion",
-				IncludedOrExcludedItem = null,    // Use object, not a string
+				IncludedOrExcludedItem = null,         // Use object, not a string
 				IncludedOrExcludedValue = "",
 				Note = ""
 			};
@@ -320,6 +449,10 @@ else if (PolicyDetails != null)
 		if (PolicyDetails.Filters.Contains(filter))
 		{
 			PolicyDetails.Filters.Remove(filter);
+			if (PolicyDetails.RemovedFilters == null)
+			{
+				PolicyDetails.RemovedFilters = new List<ORIFilterItem>();
+			}
 			PolicyDetails.RemovedFilters.Add(filter); // Track deleted filters
 		}
 	}
@@ -432,5 +565,65 @@ else if (PolicyDetails != null)
 		PolicySearchTerm = policyRef;
 	}
 
+	// Methods for adding and removing allocations
+	private void AddClassAllocation()
+	{
+		if (newClassAllocation.Class != null && newClassAllocation.Allocation != 0)
+		{
+			if (PolicyDetails.PolicyAllocationsClass == null)
+			{
+				PolicyDetails.PolicyAllocationsClass = new List<ORIPolicyAllocationClass>();
+			}
+			newClassAllocation.LastUpdated = DateTime.Now;
+			newClassAllocation.LastUpdatedBy = "CurrentUser"; // Replace with actual user
+			PolicyDetails.PolicyAllocationsClass.Add(newClassAllocation);
+			newClassAllocation = new ORIPolicyAllocationClass(); // Reset
+			StateHasChanged();
+		}
+	}
 
+	private void RemoveClassAllocation(ORIPolicyAllocationClass allocation)
+	{
+		if (PolicyDetails.PolicyAllocationsClass.Contains(allocation))
+		{
+			PolicyDetails.PolicyAllocationsClass.Remove(allocation);
+			if (PolicyDetails.RemovedPolicyAllocationsClass == null)
+			{
+				PolicyDetails.RemovedPolicyAllocationsClass = new List<ORIPolicyAllocationClass>();
+			}
+			PolicyDetails.RemovedPolicyAllocationsClass.Add(allocation);
+			StateHasChanged();
+		}
+	}
+
+	private void AddYOAAllocation()
+	{
+		if (newYOAAllocation.YearOfAccount != 0 && newYOAAllocation.Allocation != 0)
+		{
+			if (PolicyDetails.PolicyAllocationsYOA == null)
+			{
+				PolicyDetails.PolicyAllocationsYOA = new List<ORIPolicyAllocationYOA>();
+			}
+			newYOAAllocation.LastUpdated = DateTime.Now;
+			newYOAAllocation.LastUpdatedBy = "CurrentUser"; // Replace with actual user
+			PolicyDetails.PolicyAllocationsYOA.Add(newYOAAllocation);
+			newYOAAllocation = new ORIPolicyAllocationYOA(); // Reset
+			StateHasChanged();
+		}
+	}
+
+	private void RemoveYOAAllocation(ORIPolicyAllocationYOA allocation)
+	{
+		if (PolicyDetails.PolicyAllocationsYOA.Contains(allocation))
+		{
+			PolicyDetails.PolicyAllocationsYOA.Remove(allocation);
+			if (PolicyDetails.RemovedPolicyAllocationsYOA == null)
+			{
+				PolicyDetails.RemovedPolicyAllocationsYOA = new List<ORIPolicyAllocationYOA>();
+			}
+			PolicyDetails.RemovedPolicyAllocationsYOA.Add(allocation);
+			StateHasChanged();
+		}
+	}
 }
+
