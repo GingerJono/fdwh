@@ -193,7 +193,6 @@ else if (PolicyDetails != null)
 			</div>
 		</div>
 
-
 		<div class="row">
 			<div class="col-md-6">
 				<div class="card mb-4">
@@ -216,10 +215,10 @@ else if (PolicyDetails != null)
 									{
 										<tr>
 											<td>
-												<InputText @bind-Value="allocation.Class" class="form-control" />
+												<InputText @bind-Value="allocation.Class" class="form-control" readonly />
 											</td>
 											<td>
-												<InputNumber @bind-Value="allocation.Allocation" class="form-control" />
+												<InputNumber @bind-Value="allocation.Allocation" class="form-control" readonly />
 											</td>
 											<td>@allocation.LastUpdated?.ToString("yyyy-MM-dd HH:mm")</td>
 											<td>@allocation.LastUpdatedBy</td>
@@ -256,7 +255,6 @@ else if (PolicyDetails != null)
 					</div>
 				</div>
 			</div>
-
 			<div class="col-md-6">
 				<div class="card mb-4">
 					<div class="card-header">Policy Allocations by Year of Account</div>
@@ -278,10 +276,10 @@ else if (PolicyDetails != null)
 									{
 										<tr>
 											<td>
-												<InputNumber @bind-Value="allocation.YearOfAccount" class="form-control" />
+												<InputNumber @bind-Value="allocation.YearOfAccount" class="form-control" readonly />
 											</td>
 											<td>
-												<InputNumber @bind-Value="allocation.Allocation" class="form-control" />
+												<InputNumber @bind-Value="allocation.Allocation" class="form-control" readonly />
 											</td>
 											<td>@allocation.LastUpdated?.ToString("yyyy-MM-dd HH:mm")</td>
 											<td>@allocation.LastUpdatedBy</td>
@@ -319,6 +317,7 @@ else if (PolicyDetails != null)
 				</div>
 			</div>
 		</div>
+
 
 		<div class="text-right">
 			<button type="submit" class="btn btn-success">Save Changes</button>
