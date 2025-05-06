@@ -42,18 +42,16 @@ public class MenuDataServiceSandbox
 					active: false,
 					dirChange: false
 				),
-				new MainMenuItems (
-					path: "NavHist",
-					type: "link",
-					title: "NavHist",
-					selected: false,
-					active: false,
-					dirChange: false
-				),
+				//new MainMenuItems (
+				//	path: "NavHist",
+				//	type: "link",
+				//	title: "NavHist",
+				//	selected: false,
+				//	active: false,
+				//	dirChange: false
+				//),
 			}
-        ),
-
-        
+        ),        
     };
 
     public List<MainMenuItems> GetMenuData()
