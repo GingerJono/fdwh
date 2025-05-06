@@ -6,9 +6,9 @@
 @* @using JonoTest *@
 @* @inject JonoTestService JonoTestService *@
 @inject IJSRuntime JSRuntime
-@using Sandbox.Models.ORI  // Add the namespace for your model
-@using Sandbox.Services // Add the namespace for your service
-@inject ORIService ORIService // Inject the service
+@using Sandbox.Models.ORI  
+@using Sandbox.Services 
+@inject ORIService ORIService 
 @using DataTablesData
 @inject DataTablesService DataTablesService
 
@@ -16,6 +16,38 @@
 <link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/dataTables.bootstrap5.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.3.0/css/responsive.bootstrap.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.bootstrap5.min.css">
+
+<style>
+	#oripols th,
+	#oripols td {
+		padding: 0.25rem !important; /* override Bootstrap default */
+	}
+</style>
+
+@if (policies != null)
+{
+	<div class="row mb-4">
+		<div class="col-md-6">
+			<div class="card shadow-sm border-0">
+				<div class="card-body">
+					<h5 class="card-title mb-1">Total ORI Policies</h5>
+					<p class="fs-4 fw-bold mb-0">@policies.Count()</p>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-6">
+			<div class="card shadow-sm border-0">
+				<div class="card-body">
+					<h5 class="card-title mb-1">Outstanding Metadata</h5>
+					<p class="fs-4 fw-bold text-danger mb-0">
+						@policies.Count(p => p.MetaDataStatus == "Outstanding")
+					</p>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
 
 <!-- Start::page-header -->
 <SpkPageHeader PageItems="PageItems" />
