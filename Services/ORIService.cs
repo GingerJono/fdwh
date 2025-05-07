@@ -43,6 +43,84 @@ namespace Sandbox.Services
 				return result.ToList();
 			}
 		}
+		public async Task<LORSModel> GetLORSDetails(string fileName, int policySequence)
+		{
+			using (var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection")))
+			{
+				await connection.OpenAsync();
+
+				var parameters = new DynamicParameters();
+				parameters.Add("FileName", fileName);
+				parameters.Add("PolicySequence", policySequence);
+
+				var result = await connection.QueryFirstOrDefaultAsync<LORSModel>(
+					"ORI.spGetLORSDetails", // Create this stored procedure as needed
+					parameters,
+					commandType: CommandType.StoredProcedure
+				);
+
+				return result;
+			}
+		}
+
+		public async Task<IEnumerable<LORSListModel>> GetLORSList()
+		{
+			using (var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection")))
+			{
+				await connection.OpenAsync();
+
+				var parameters = new DynamicParameters();
+				// No parameters needed for this stored procedure
+
+				var result = await connection.QueryAsync<LORSListModel>(
+					"ORI.spGetLORSList",
+					parameters,
+					commandType: CommandType.StoredProcedure
+				);
+
+				return result.ToList();
+			}
+		}
+
+		public async Task<IEnumerable<ORIUSMListModel>> GetORIUSMsByPolicy(string oriPolicyReference)
+		{
+			using (var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection")))
+			{
+				await connection.OpenAsync();
+
+				var parameters = new DynamicParameters();
+				parameters.Add("@ORIPolicyReference", oriPolicyReference, DbType.String);
+
+				var result = await connection.QueryAsync<ORIUSMListModel>(
+					"ORI.spGetORIUSMListByPolicy",
+					parameters,
+					commandType: CommandType.StoredProcedure
+				);
+
+				return result.ToList();
+			}
+		}
+
+		public async Task<IEnumerable<LORSListModel>> GetLORSByPolicy(string oriPolicyReference)
+		{
+			using (var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection")))
+			{
+				await connection.OpenAsync();
+
+				var parameters = new DynamicParameters();
+				parameters.Add("@ORIPolicyReference", oriPolicyReference, DbType.String);
+
+				var result = await connection.QueryAsync<LORSListModel>(
+					"ORI.spGetLORSListByPolicy",
+					parameters,
+					commandType: CommandType.StoredProcedure
+				);
+
+				return result.ToList();
+			}
+		}
+
+
 		private async Task<EditableORIMetadataList<T>> GetEditableList<T>(SqlConnection connection, string storedProcedure, DynamicParameters parameters)
 		{
 			return new EditableORIMetadataList<T>

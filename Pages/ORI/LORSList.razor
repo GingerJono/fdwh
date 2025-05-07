@@ -1,0 +1,135 @@
+﻿@page "/LORSList"
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@using Sandbox._Spk
+@using CardModel
+@* @using JonoTest *@
+@* @inject JonoTestService JonoTestService *@
+@inject IJSRuntime JSRuntime
+@using Sandbox.Models.ORI
+@using Sandbox.Services
+@inject ORIService ORIService
+@using DataTablesData
+@inject DataTablesService DataTablesService
+
+<!-- DataTables CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.3.0/css/responsive.bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.bootstrap5.min.css">
+
+<h3>ORI LORS Files</h3>
+
+@if (lorsList == null)
+{
+	<p><em>Loading...</em></p>
+}
+else
+{
+	<table class="table dataTable" id="lorslist">
+		<thead>
+			<tr>
+				<th>File Name</th>
+				<th>Policy Sequence</th>
+				<th>ORI Policy Reference</th>
+				<th>Processed Date</th>
+				<th>Processed Time</th>
+				<th>Amount</th>
+				<th>Actions</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var item in lorsList)
+			{
+				<tr>
+					<td>@item.FileName</td>
+					<td>@item.PolicySequence</td>
+					<td>@item.ORIPolicyReference</td>
+					<td>@item.ProcessedDate?.ToString("yyyy-MM-dd")</td>
+					<td>@(item.ProcessedTime?.ToString() ?? "-")</td>
+					<td>@item.Amount.ToString("N2")</td>
+					<td>
+						<button class="btn btn-primary btn-sm"
+								@onclick="@(() => NavigationManager.NavigateTo($"ViewLORS/{item.FileName}/{item.PolicySequence}"))">
+							View
+						</button>
+					</td>
+				</tr>
+			}
+		</tbody>
+		<tfoot>
+			<tr>
+				<th>File Name</th>
+				<th>Policy Sequence</th>
+				<th>ORI Policy Reference</th>
+				<th>Processed Date</th>
+				<th>Processed Time</th>
+				<th>Amount</th>
+				<th>Actions</th>
+			</tr>
+		</tfoot>
+	</table>
+}
+
+<!-- jQuery + DataTables JS -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.12.1/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.3.0/js/dataTables.responsive.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.print.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.6/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+<script>
+	var options = {
+		paging: true,
+		pageLength: 10,
+		fixedHeader: true,
+		lengthChange: false,
+		order: [],
+		columnDefs: [],
+		buttons: [],
+		initComplete: function () {
+			this.api().columns().every(function () {
+				let column = this;
+				let title = column.footer().textContent;
+				let input = document.createElement('input');
+				input.placeholder = title;
+				column.footer().replaceChildren(input);
+				input.addEventListener('keyup', () => {
+					if (column.search() !== input.value) {
+						column.search(input.value).draw();
+					}
+				});
+			});
+		}
+	};
+	window.initializeDataTables = function () {
+		setTimeout(() => {
+			if ($('#lorslist').length) {
+				$('#lorslist').DataTable(options);
+			}
+		}, 500);
+	};
+</script>
+
+@code {
+	private List<LORSListModel> lorsList;
+	private bool isDataLoaded = false;
+
+	protected override async Task OnInitializedAsync()
+	{
+		lorsList = (await ORIService.GetLORSList()).ToList();
+		isDataLoaded = true;
+	}
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender && isDataLoaded)
+		{
+			isDataLoaded = false;
+			await JSRuntime.InvokeVoidAsync("initializeDataTables");
+		}
+	}
+}

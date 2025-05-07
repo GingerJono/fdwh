@@ -42,6 +42,14 @@ public class MenuDataServiceSandbox
 					active: false,
 					dirChange: false
 				),
+				new MainMenuItems (
+					path: "LORSList",
+					type: "link",
+					title: "LORS",
+					selected: false,
+					active: false,
+					dirChange: false
+				),
 				//new MainMenuItems (
 				//	path: "NavHist",
 				//	type: "link",

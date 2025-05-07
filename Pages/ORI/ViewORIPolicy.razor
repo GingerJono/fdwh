@@ -251,6 +251,99 @@ else
 			</div>
 		</div>
 	</div>
+	<div class="card mb-4">
+		<div class="card-header">USMs Linked to This Policy</div>
+		<div class="card-body">
+			@if (USMs?.Any() == true)
+			{
+				<table class="table table-bordered table-striped">
+					<thead>
+						<tr>
+							<th>USM ID</th>
+							<th>LPSO No</th>
+							<th>LPSO Date</th>
+							<th>Version</th>
+							<th>Instalment</th>
+							<th>Syndicate</th>
+							<th>Line</th>
+							<th>CA Category</th>
+							<th>Line Amt (SCC)</th>
+							<th>Actions</th>
+						</tr>
+					</thead>
+					<tbody>
+						@foreach (var usm in USMs)
+						{
+							<tr>
+								<td>@usm.USMID</td>
+								<td>@usm.LPSONo</td>
+								<td>@usm.LPSODate?.ToString("yyyy-MM-dd")</td>
+								<td>@usm.LPSOVersionNo</td>
+								<td>@usm.InstalmentNo</td>
+								<td>@usm.SyndicateNo</td>
+								<td>@usm.SyndicateLineNo</td>
+								<td>@usm.USMCaCategoryDesc</td>
+								<td>@usm.LineAmountSCC?.ToString("N2")</td>
+								<td>
+									<button class="btn btn-sm btn-outline-primary"
+											@onclick="@(() => NavigationManager.NavigateTo($"ViewORIUSM/{usm.USMID}"))">
+										View
+									</button>
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			}
+			else
+			{
+				<p class="text-muted">No USMs linked to this policy.</p>
+			}
+		</div>
+	</div>
+	<div class="card mb-4">
+		<div class="card-header">LORS Files Linked to This Policy</div>
+		<div class="card-body">
+			@if (LORS?.Any() == true)
+			{
+				<table class="table table-bordered table-striped">
+					<thead>
+						<tr>
+							<th>File Name</th>
+							<th>Sequence</th>
+							<th>Processed Date</th>
+							<th>Time</th>
+							<th>Amount</th>
+							<th>Actions</th>
+						</tr>
+					</thead>
+					<tbody>
+						@foreach (var lors in LORS)
+						{
+							<tr>
+								<td>@lors.FileName</td>
+								<td>@lors.PolicySequence</td>
+								<td>@lors.ProcessedDate?.ToString("yyyy-MM-dd")</td>
+								<td>@lors.ProcessedTime?.ToString() ?? "-"</td>
+								<td>@lors.Amount.ToString("N2")</td>
+								<td>
+									<button class="btn btn-sm btn-outline-primary"
+											@onclick="@(() => NavigationManager.NavigateTo($"ViewLORS/{lors.FileName}/{lors.PolicySequence}"))">
+										View
+									</button>
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			}
+			else
+			{
+				<p class="text-muted">No LORS files linked to this policy.</p>
+			}
+		</div>
+	</div>
+
 }
 
 @code {
@@ -259,6 +352,9 @@ else
 	private ORIPolicyModel PolicyDetails { get; set; }
 	private bool IsLoading { get; set; } = true;
 	private string ErrorMessage { get; set; }
+	private List<ORIUSMListModel> USMs { get; set; } = new();
+	private List<LORSListModel> LORS { get; set; } = new();
+
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -272,6 +368,9 @@ else
 		try
 		{
 			PolicyDetails = await ORIService.GetORIPolicyDetails(ORIPolicyReference);
+			USMs = (await ORIService.GetORIUSMsByPolicy(ORIPolicyReference)).ToList();
+			LORS = (await ORIService.GetLORSByPolicy(ORIPolicyReference)).ToList();
+
 			if (PolicyDetails == null)
 			{
 				ErrorMessage = $"No policy details found for reference: {ORIPolicyReference}";

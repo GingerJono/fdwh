@@ -1,0 +1,69 @@
+﻿@page "/ViewLORS/{FileName}/{PolicySequence:int}"
+@inject NavigationManager NavigationManager
+@inject ORIService ORIService
+@using Sandbox.Models.ORI
+@using Sandbox.Services
+@using Microsoft.AspNetCore.Components
+
+<h3>View LORS</h3>
+
+@if (IsLoading)
+{
+    <p>Loading LORS details...</p>
+}
+else if (!string.IsNullOrEmpty(ErrorMessage))
+{
+    <p class="text-danger">@ErrorMessage</p>
+}
+else if (LORSDetails != null)
+{
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/LORSList">ORI LORS List</a></li>
+            <li class="breadcrumb-item active" aria-current="page">View LORS</li>
+        </ol>
+    </nav>
+
+    <div class="card">
+        <div class="card-header">
+            LORS File: <strong>@LORSDetails.FileName</strong>
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered">
+                <tbody>
+                    <tr><th>Policy Sequence</th><td>@LORSDetails.PolicySequence</td></tr>
+                    <tr><th>ORI Policy Reference</th><td>@LORSDetails.ORIPolicyReference</td></tr>
+                    <tr><th>Processed Date</th><td>@LORSDetails.ProcessedDate?.ToString("yyyy-MM-dd")</td></tr>
+                    <tr><th>Processed Time</th><td>@(LORSDetails.ProcessedTime?.ToString() ?? "-")</td></tr>
+                    <tr><th>Amount</th><td>@LORSDetails.Amount.ToString("N2")</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public string FileName { get; set; }
+    [Parameter] public int PolicySequence { get; set; }
+
+    private LORSModel LORSDetails { get; set; }
+    private bool IsLoading = true;
+    private string ErrorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            LORSDetails = await ORIService.GetLORSDetails(FileName, PolicySequence);
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = "Error loading LORS details.";
+            Console.Error.WriteLine(ex);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+}
