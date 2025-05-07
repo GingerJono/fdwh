@@ -181,14 +181,15 @@ namespace Sandbox.Services
 				parameters,
 				commandType: CommandType.StoredProcedure);
 		}
-		public async Task<IEnumerable<ORIUSMListModel>> GetORIUSMs()
+		public async Task<IEnumerable<ORIUSMListModel>> GetORIUSMs(int? policyYOA = null, int? usmYear = null)
 		{
 			using (var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection")))
 			{
 				await connection.OpenAsync();
 
 				var parameters = new DynamicParameters();
-				//parameters.Add("UserName", userName, DbType.String);
+				parameters.Add("PolicyYOA", policyYOA, DbType.Int32);
+				parameters.Add("USMYear", usmYear, DbType.Int32);
 
 				var result = await connection.QueryAsync<ORIUSMListModel>(
 					"ORI.spGetORIUSMList",
@@ -199,6 +200,7 @@ namespace Sandbox.Services
 				return result.ToList();
 			}
 		}
+
 		public async Task<ORIUSMModel> GetORIUSMDetails(string ORIUSMID)
 		{
 			using (var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection")))

@@ -1,4 +1,6 @@
 ﻿@page "/ORIUSMs"
+@page "/ORIUSMs/PolicyYOA/{PolicyYOA:int?}"
+@page "/ORIUSMs/USMYear/{USMYear:int?}"
 @inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
 @using Sandbox.Models.ORI
@@ -6,7 +8,56 @@
 @inject ORIService ORIService
 @using System.Text.Json
 
+<style>
+    #oriusms tfoot th {
+        padding: 0 !important;
+    }
+
+        #oriusms tfoot th input {
+            width: 100%;
+            padding: 2px 4px;
+            font-size: 0.75rem;
+            box-sizing: border-box;
+        }
+
+</style>
+
 <h3>ORI USMs</h3>
+
+<h4 class="mb-2">Filter by Policy YOA</h4>
+<div class="btn-group mb-3" role="group">
+    @foreach (var year in YearRange)
+    {
+        <a class="btn @(PolicyYOA == year ? "btn-secondary" : "btn-outline-secondary")"
+           href="@($"/ORIUSMs/PolicyYOA/{year}")">@year</a>
+    }
+</div>
+
+<h4 class="mb-2">Filter by USM Year</h4>
+<div class="btn-group mb-4" role="group">
+    @foreach (var year in YearRange)
+    {
+        <a class="btn @(USMYear == year ? "btn-primary" : "btn-outline-primary")"
+           href="@($"/ORIUSMs/USMYear/{year}")">@year</a>
+    }
+</div>
+
+@if (PolicyYOA is not null || USMYear is not null)
+{
+    <div class="alert alert-info d-flex align-items-center gap-2" role="alert">
+        <i class="ri-filter-line fs-5"></i>
+        <strong>Filtering by:</strong>
+        @if (PolicyYOA is not null)
+        {
+            <span>Policy YOA: <span class="badge bg-secondary">@PolicyYOA</span></span>
+        }
+        @if (USMYear is not null)
+        {
+            <span>USM Year: <span class="badge bg-primary">@USMYear</span></span>
+        }
+    </div>
+}
+
 
 @if (usmList == null)
 {
@@ -14,7 +65,7 @@
 }
 else
 {
-    <table class="table dataTable">
+    <table class="table dataTable" id="oriusms">
         <thead>
             <tr>
                 <th>USM ID</th>
@@ -39,7 +90,7 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var usm in PaginatedList)
+            @foreach (var usm in usmList)
             {
                 <tr>
                     <td>
@@ -48,27 +99,23 @@ else
                             @usm.USMID
                         </button>
                     </td>
-                    
                     <td>@usm.ORIPolicyReference</td>
-                    <td>@(usm.LPSONo?.ToString() ?? "-")</td>
+                    <td>@usm.LPSONo</td>
                     <td>@usm.LPSODate?.ToString("yyyy-MM-dd")</td>
-                    <td>@(usm.LPSOVersionNo?.ToString() ?? "-")</td>
-                    <td>@(usm.UserSequenceNo?.ToString() ?? "-")</td>
-                    <td>@(usm.InstalmentNo?.ToString() ?? "-")</td>
-                    <td>@(usm.SyndicateLineNo?.ToString() ?? "-")</td>
-                    <td>@(usm.TreatySection?.ToString() ?? "-")</td>
-                    <td>@(usm.SyndicateLineNo?.ToString() ?? "-")</td>
+                    <td>@usm.LPSOVersionNo</td>
+                    <td>@usm.UserSequenceNo</td>
+                    <td>@usm.SyndicateNo</td>
+                    <td>@usm.InstalmentNo</td>
+                    <td>@usm.TreatySection</td>
+                    <td>@usm.SyndicateLineNo</td>
                     <td>@usm.USMCaCategoryDesc</td>
-                    <td>@(usm.ClosingCcy ?? "-")</td>
-                    <td>@(usm.SettCcy ?? "-")</td>
-                    <!-- Numeric Fields with Null Handling -->
+                    <td>@usm.ClosingCcy</td>
+                    <td>@usm.SettCcy</td>
                     <td>@(usm.LineAmountSCC?.ToString("N2") ?? "0.00")</td>
-                    <td>@(usm.TotalYOAAllocation.ToString("N2"))</td>
-                    <td>@(usm.TotalCOBAllocation.ToString("N2"))</td>
-                    <td>@(usm.TotalSecurityAllocation.ToString("N2"))</td>
-                    <td>@(usm.TotalEventAllocation.ToString("N2"))</td>
-                    
-
+                    <td>@usm.TotalYOAAllocation.ToString("N2")</td>
+                    <td>@usm.TotalCOBAllocation.ToString("N2")</td>
+                    <td>@usm.TotalSecurityAllocation.ToString("N2")</td>
+                    <td>@usm.TotalEventAllocation.ToString("N2")</td>
                     <td>
                         <button class="btn btn-primary btn-sm"
                                 @onclick="@(() => NavigationManager.NavigateTo($"ViewORIUSM/{usm.USMID}"))">
@@ -78,130 +125,161 @@ else
                 </tr>
             }
         </tbody>
-        <tfoot class="sticky-bottom bg-white">
+        <tfoot>
             <tr>
-                <th><input class="form-control" @bind="searchUSMID" @oninput="FilterTable" /></th>
-                <th><input class="form-control" @bind="searchORIPolicyReference" @oninput="FilterTable" /></th>
-                <th><input class="form-control" @bind="searchLPSONo" @oninput="FilterTable" /></th>
-                <th><input class="form-control" @bind="searchLPSODate" @oninput="FilterTable" /></th>
-                <th><input class="form-control" @bind="searchLPSOVersion" @oninput="FilterTable" /></th>
-                <th><input class="form-control" @bind="searchUserSequence" @oninput="FilterTable" /></th>
-                <th><input class="form-control" @bind="searchSyndicateNo" @oninput="FilterTable" /></th>
-                <th><input class="form-control" @bind="searchInstalmentNo" @oninput="FilterTable" /></th>
-                <th><input class="form-control" @bind="searchTreatySection" @oninput="FilterTable" /></th>
-                <th><input class="form-control" @bind="searchSyndicateLineNo" @oninput="FilterTable" /></th>
-                <th><input class="form-control" @bind="searchCategoryDesc" @oninput="FilterTable" /></th>
-                <th><input class="form-control" @bind="searchClosingCcy" @oninput="FilterTable" /></th>
-                <th><input class="form-control" @bind="searchSettlementCcy" @oninput="FilterTable" /></th>
-                <th><input class="form-control" @bind="searchLineAmountSCC" @oninput="FilterTable" /></th>
-                <th><input class="form-control" @bind="searchTotalYOA" @oninput="FilterTable" /></th>
-                <th><input class="form-control" @bind="searchTotalCOB" @oninput="FilterTable" /></th>
-                <th><input class="form-control" @bind="searchTotalSecurity" @oninput="FilterTable" /></th>
-                <th><input class="form-control" @bind="searchTotalEvent" @oninput="FilterTable" /></th>
-                <th></th> <!-- Empty for Actions column -->
+                <th>USM ID</th>
+                <th>ORI Policy Reference</th>
+                <th>LPSO No</th>
+                <th>LPSO Date</th>
+                <th>LPSO Version</th>
+                <th>User Sequence No</th>
+                <th>Syndicate No</th>
+                <th>Instalment No</th>
+                <th>Treaty Section</th>
+                <th>Syndicate Line No</th>
+                <th>USM CA Category Desc</th>
+                <th>Closing Currency</th>
+                <th>Settlement Currency</th>
+                <th>Line Amount (SCC)</th>
+                <th>Total YOA Allocation</th>
+                <th>Total COB Allocation</th>
+                <th>Total Security Allocation</th>
+                <th>Total Event Allocation</th>
+                <th>Actions</th>
             </tr>
         </tfoot>
-
-
-
     </table>
 
-    <!-- Pagination Controls -->
-    <div class="d-flex justify-content-between mt-3 sticky-bottom-pagination">
-        <button class="btn btn-secondary" @onclick="PreviousPage" disabled="@(!HasPreviousPage)">Previous</button>
-        <span>Page @CurrentPage of @TotalPages</span>
-        <button class="btn btn-secondary" @onclick="NextPage" disabled="@(!HasNextPage)">Next</button>
-    </div>
+
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.3.0/css/responsive.bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.bootstrap5.min.css">
+
+    <!-- jQuery + DataTables JS -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.12.1/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.3.0/js/dataTables.responsive.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.print.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.6/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+    <script>
+                window.initializeDataTables = function () {
+            requestAnimationFrame(() => {
+                const $table = $('#oriusms');
+                if ($table.length === 0) {
+                    console.warn("DataTables init aborted: table not found.");
+                    return;
+                }
+
+                if ($.fn.DataTable.isDataTable($table)) {
+                    $table.DataTable().clear().destroy();
+                }
+
+                $table.DataTable({
+                    paging: true,
+                    pageLength: 10,
+                    lengthChange: false,
+                    ordering: true,
+                    order: [],
+                    fixedHeader: true,
+                    initComplete: function () {
+                        this.api().columns().every(function () {
+                            const column = this;
+                            const title = column.footer().textContent;
+                            const input = document.createElement('input');
+                            input.placeholder = title;
+                            column.footer().replaceChildren(input);
+                            input.addEventListener('keyup', function () {
+                                if (column.search() !== this.value) {
+                                    column.search(this.value).draw();
+                                }
+                            });
+                        });
+                    }
+                });
+            });
+        };
+
+    </script>
+
+    <style>
+        .btn-group h4 {
+            margin-bottom: 0.5rem;
+        }
+
+        .btn-group a {
+            font-size: 0.875rem;
+        }
+    </style>
 
 
 }
 @code {
-    private string searchUSMID = "";
-    private string searchORIPolicyReference = "";
-    private string searchLPSONo = "";
-    private string searchLPSODate = "";
-    private string searchLPSOVersion = "";
-    private string searchUserSequence = "";
-    private string searchSyndicateNo = "";
-    private string searchInstalmentNo = "";
-    private string searchTreatySection = "";
-    private string searchSyndicateLineNo = "";
-    private string searchCategoryDesc = "";
-    private string searchClosingCcy = "";
-    private string searchSettlementCcy = "";
-    private string searchLineAmountSCC = "";
-    private string searchTotalYOA = "";
-    private string searchTotalCOB = "";
-    private string searchTotalSecurity = "";
-    private string searchTotalEvent = "";
+    [Parameter] public int? PolicyYOA { get; set; }
+    [Parameter] public int? USMYear { get; set; }
 
     private List<ORIUSMListModel> usmList = new();
-    private List<ORIUSMListModel> PaginatedList = new();
-    private int CurrentPage = 1;
-    private int PageSize = 20;
-    private int TotalPages;
+ 
+    private bool shouldInitDataTables = false;
+    private List<int> YearRange = Enumerable.Range(2014, DateTime.UtcNow.Year - 2014 + 1).Reverse().ToList();
 
     protected override async Task OnInitializedAsync()
     {
-        var data = await ORIService.GetORIUSMs();
+        int? effectiveUSMYear = USMYear ?? (PolicyYOA is null ? DateTime.UtcNow.Year : null);
+        usmList = (await ORIService.GetORIUSMs(PolicyYOA, effectiveUSMYear)).ToList();
 
-        usmList = data.ToList();
-        TotalPages = (int)Math.Ceiling((double)usmList.Count / PageSize);
-        Paginate();
+        shouldInitDataTables = true;
     }
 
-    private void Paginate()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        PaginatedList = usmList
-            .Where(usm =>
-                (string.IsNullOrEmpty(searchUSMID) || usm.USMID.Contains(searchUSMID, StringComparison.OrdinalIgnoreCase)) &&
-                (string.IsNullOrEmpty(searchORIPolicyReference) || usm.ORIPolicyReference.Contains(searchORIPolicyReference, StringComparison.OrdinalIgnoreCase)) &&
-                (string.IsNullOrEmpty(searchLPSONo) || (usm.LPSONo?.ToString().Contains(searchLPSONo) ?? false)) &&
-                (string.IsNullOrEmpty(searchLPSODate) || (usm.LPSODate?.ToString("yyyy-MM-dd").Contains(searchLPSODate) ?? false)) &&
-                (string.IsNullOrEmpty(searchLPSOVersion) || (usm.LPSOVersionNo?.ToString().Contains(searchLPSOVersion) ?? false)) &&
-                (string.IsNullOrEmpty(searchUserSequence) || (usm.UserSequenceNo?.ToString().Contains(searchUserSequence) ?? false)) &&
-                (string.IsNullOrEmpty(searchSyndicateNo) || (usm.SyndicateNo?.ToString().Contains(searchSyndicateNo) ?? false)) &&
-                (string.IsNullOrEmpty(searchInstalmentNo) || (usm.InstalmentNo?.ToString().Contains(searchInstalmentNo) ?? false)) &&
-                (string.IsNullOrEmpty(searchTreatySection) || usm.TreatySection.Contains(searchTreatySection, StringComparison.OrdinalIgnoreCase)) &&
-                (string.IsNullOrEmpty(searchSyndicateLineNo) || (usm.SyndicateLineNo?.ToString().Contains(searchSyndicateLineNo) ?? false)) &&
-                (string.IsNullOrEmpty(searchCategoryDesc) || usm.USMCaCategoryDesc.Contains(searchCategoryDesc, StringComparison.OrdinalIgnoreCase)) &&
-                (string.IsNullOrEmpty(searchClosingCcy) || usm.ClosingCcy.Contains(searchClosingCcy, StringComparison.OrdinalIgnoreCase)) &&
-                (string.IsNullOrEmpty(searchSettlementCcy) || usm.SettCcy.Contains(searchSettlementCcy, StringComparison.OrdinalIgnoreCase)) &&
-                (string.IsNullOrEmpty(searchLineAmountSCC) || (usm.LineAmountSCC?.ToString("N2").Contains(searchLineAmountSCC) ?? false)) &&
-                (string.IsNullOrEmpty(searchTotalYOA) || usm.TotalYOAAllocation.ToString("N2").Contains(searchTotalYOA)) &&
-                (string.IsNullOrEmpty(searchTotalCOB) || usm.TotalCOBAllocation.ToString("N2").Contains(searchTotalCOB)) &&
-                (string.IsNullOrEmpty(searchTotalSecurity) || usm.TotalSecurityAllocation.ToString("N2").Contains(searchTotalSecurity)) &&
-                (string.IsNullOrEmpty(searchTotalEvent) || usm.TotalEventAllocation.ToString("N2").Contains(searchTotalEvent))
-            )
-            .Skip((CurrentPage - 1) * PageSize)
-            .Take(PageSize)
-            .ToList();
-    }
-
-    private void FilterTable(ChangeEventArgs e)
-    {
-        CurrentPage = 1;
-        Paginate();
-    }
-
-    private void NextPage()
-    {
-        if (CurrentPage < TotalPages)
+        if (shouldInitDataTables)
         {
-            CurrentPage++;
-            Paginate();
+            shouldInitDataTables = false;
+
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("initializeDataTables");
+            }
+            catch (JSDisconnectedException)
+            {
+                Console.WriteLine("[WARN] JS interop called after circuit disconnected.");
+            }
+            catch (JSException jsEx)
+            {
+                Console.WriteLine($"[ERROR] JS init failed: {jsEx.Message}");
+            }
         }
     }
 
-    private void PreviousPage()
+
+
+    public override async Task SetParametersAsync(ParameterView parameters)
     {
-        if (CurrentPage > 1)
+        // Store current values before they are potentially updated
+        int? previousPolicyYOA = PolicyYOA;
+        int? previousUSMYear = USMYear;
+
+        // Apply new parameters (this sets PolicyYOA and USMYear)
+        await base.SetParametersAsync(parameters);
+
+        // Only re-fetch if the parameters actually changed
+        bool paramsChanged = previousPolicyYOA != PolicyYOA || previousUSMYear != USMYear;
+
+        if (paramsChanged)
         {
-            CurrentPage--;
-            Paginate();
+            int? effectiveUSMYear = USMYear ?? (PolicyYOA is null ? DateTime.UtcNow.Year : null);
+            usmList = (await ORIService.GetORIUSMs(PolicyYOA, effectiveUSMYear)).ToList();
+
+            shouldInitDataTables = true;
         }
     }
 
-    private bool HasPreviousPage => CurrentPage > 1;
-    private bool HasNextPage => CurrentPage < TotalPages;
+
 }
