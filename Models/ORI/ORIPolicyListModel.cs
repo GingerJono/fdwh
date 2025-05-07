@@ -13,6 +13,9 @@ namespace Sandbox.Models.ORI
 		public string PolicyType { get; set; }
 		public string Broker { get; set; }
 		public string Status { get; set; }
-		public string MetaDataStatus { get; set; }
+		public string FiltersStatus { get; set; }
+		public double YOAAllocations { get; set; }
+		public double ClassAllocations { get; set; }
+
 	}
 }

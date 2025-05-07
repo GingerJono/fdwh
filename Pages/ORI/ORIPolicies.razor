@@ -27,7 +27,7 @@
 @if (policies != null)
 {
 	<div class="row mb-4">
-		<div class="col-md-6">
+		<div class="col-md-4">
 			<div class="card shadow-sm border-0">
 				<div class="card-body">
 					<h5 class="card-title mb-1">Total ORI Policies</h5>
@@ -35,19 +35,28 @@
 				</div>
 			</div>
 		</div>
-		<div class="col-md-6">
+		<div class="col-md-4">
 			<div class="card shadow-sm border-0">
 				<div class="card-body">
-					<h5 class="card-title mb-1">Outstanding Metadata</h5>
+					<h5 class="card-title mb-1">Outstanding Filters</h5>
 					<p class="fs-4 fw-bold text-danger mb-0">
-						@policies.Count(p => p.MetaDataStatus == "Outstanding")
+						@policies.Count(p => p.FiltersStatus == "Outstanding")
+					</p>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-4">
+			<div class="card shadow-sm border-0">
+				<div class="card-body">
+					<h5 class="card-title mb-1">Not Fully Allocated</h5>
+					<p class="fs-4 fw-bold text-warning mb-0">
+						@policies.Count(p => p.ClassAllocations != 100 || p.YOAAllocations != 100)
 					</p>
 				</div>
 			</div>
 		</div>
 	</div>
 }
-
 
 <!-- Start::page-header -->
 <SpkPageHeader PageItems="PageItems" />
@@ -76,7 +85,9 @@
 					<th>Policy Type</th>
 					<th>Broker</th>
 					<th>Status</th>
-					<th>Meta Data Status</th>
+					<th>Filters Status</th>
+					<th>YOA Allocation %</th>
+					<th>Class Allocation %</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -98,10 +109,12 @@
 						<td>@policy.Broker</td>
 						<td>@policy.Status</td>
 						<td>
-							<span class="@($"badge {(policy.MetaDataStatus == "Entered" ? "bg-outline-primary" : "bg-danger")}")">
-								@policy.MetaDataStatus
+							<span class="@($"badge {(policy.FiltersStatus == "Entered" ? "bg-outline-primary" : "bg-danger")}")">
+								@policy.FiltersStatus
 							</span>
 						</td>
+						<td>@($"{policy.YOAAllocations/100.0:P0}")</td>
+						<td>@($"{policy.ClassAllocations / 100.0:P0}")</td>
 					</tr>
 				}
 			</tbody>
@@ -116,7 +129,9 @@
 					<th>Policy Type</th>
 					<th>Broker</th>
 					<th>Status</th>
-					<th>Meta Data Status</th>
+					<th>Filters Status</th>
+					<th>YOA Allocation %</th>
+					<th>Class Allocation %</th>
 				</tr>
 			</tfoot>
 		</table>
