@@ -35,6 +35,9 @@ namespace Sandbox.Models.ORI
 		public List<ORIPolicyAllocationYOA> PolicyAllocationsYOA { get; set; } = new();
 		public List<ORIPolicyAllocationClass> RemovedPolicyAllocationsClass { get; set; } = new();
 		public List<ORIPolicyAllocationYOA> RemovedPolicyAllocationsYOA { get; set; } = new();
+		public List<Narrative> Narratives { get; set; } = new();
+		public List<PolicySecurity> PolicySecurities { get; set; } = new();
+
 	}
 
 	public class ORIFilterItemDefinition

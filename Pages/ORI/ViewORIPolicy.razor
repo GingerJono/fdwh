@@ -7,6 +7,15 @@
 @using Sandbox.Services
 @inject ORIService ORIService
 
+<style>
+	.table thead th {
+		background-color: #002855; /* dark navy blue */
+		color: white;
+		border-color: #dee2e6;
+	}
+
+</style>
+
 @if (IsLoading)
 {
 	<p>Loading policy details...</p>
@@ -39,98 +48,36 @@ else
 </div>
 
 	<!-- Policy Details -->
-	<div class="row display-flex">
-		<div class="col-lg-2 col-4 mb-4">
-			<div class="card overflow-hidden h-100 fs-13px border-0 bg-primary-gradient">
-				<div class="card-body">
-					<h6 class="text-white text-opacity-80 mb-1">Policy Ref</h6>
-					<h4 class="text-white mt-n1">@(PolicyDetails?.ORIPolicyReference ?? "-")</h4>
-				</div>
-			</div>
+	<div class="card mb-4">
+	  <div class="card-header bg-primary text-white">Policy Summary</div>
+	  <div class="card-body">
+		<div class="row">
+		  <div class="col-md-4"><strong>Policy Ref:</strong> @PolicyDetails.ORIPolicyReference</div>
+		  <div class="col-md-4"><strong>Description:</strong> @PolicyDetails.PolicyDescription</div>
+		  <div class="col-md-4"><strong>Currency:</strong> @PolicyDetails.ContractCurrency</div>
+		  <div class="col-md-4"><strong>Inception:</strong> @PolicyDetails.Inception?.ToString("yyyy-MM-dd")</div>
+		  <div class="col-md-4"><strong>Expiry:</strong> @PolicyDetails.Expiry?.ToString("yyyy-MM-dd")</div>
+		  <div class="col-md-4"><strong>Order %:</strong> @PolicyDetails.OrderPercent</div>
 		</div>
-		<div class="col-lg-4 col-8 mb-4">
-			<div class="card overflow-hidden h-100 fs-13px border-0 bg-primary1-gradient">
-				<div class="card-body">
-					<h6 class="text-white text-opacity-80 mb-1">Description</h6>
-					<h4 class="text-white mt-n1">@(PolicyDetails?.PolicyDescription ?? "-")</h4>
-				</div>
-			</div>
-		</div>
-		<div class="col-lg-2 col-4 mb-4">
-			<div class="card overflow-hidden h-100 fs-13px border-0 bg-success-gradient">
-				<div class="card-body">
-					<h6 class="text-white text-opacity-80 mb-1">Currency</h6>
-					<h4 class="text-white mt-n1">@(PolicyDetails?.ContractCurrency ?? "-")</h4>
-				</div>
-			</div>
-		</div>
-		<div class="col-lg-2 col-4 mb-4">
-			<div class="card overflow-hidden h-100 fs-13px border-0 bg-warning-gradient">
-				<div class="card-body">
-					<h6 class="text-white text-opacity-80 mb-1">Inception</h6>
-					<h4 class="text-white mt-n1">@(PolicyDetails?.Inception?.ToString("yyyy-MM-dd") ?? "-")</h4>
-				</div>
-			</div>
-		</div>
-		<div class="col-lg-2 col-4 mb-4">
-			<div class="card overflow-hidden h-100 fs-13px border-0 bg-danger-gradient">
-				<div class="card-body">
-					<h6 class="text-white text-opacity-80 mb-1">Expiry</h6>
-					<h4 class="text-white mt-n1">@(PolicyDetails?.Expiry?.ToString("yyyy-MM-dd") ?? "-")</h4>
-				</div>
-			</div>
-		</div>
+	  </div>
 	</div>
-
-	<div class="row display-flex">
-		<div class="col-lg-2 col-4 mb-4">
-			<div class="card overflow-hidden h-100 fs-13px border-0 bg-primary2-gradient">
-				<div class="card-body">
-					<h6 class="text-white text-opacity-80 mb-1">Order %</h6>
-					<h4 class="text-white mt-n1">@(PolicyDetails?.OrderPercent?.ToString("0.##") ?? "-")</h4>
-				</div>
-			</div>
-		</div>
-		<div class="col-lg-2 col-4 mb-4">
-			<div class="card overflow-hidden h-100 fs-13px border-0 bg-info-gradient">
-				<div class="card-body">
-					<h6 class="text-white text-opacity-80 mb-1">Limit</h6>
-					<h4 class="text-white mt-n1">@(PolicyDetails?.Limit?.ToString("N0") ?? "-")</h4>
-				</div>
-			</div>
-		</div>
-		<div class="col-lg-2 col-4 mb-4">
-			<div class="card overflow-hidden h-100 fs-13px border-0 bg-secondary-gradient">
-				<div class="card-body">
-					<h6 class="text-white text-opacity-80 mb-1">Deductible</h6>
-					<h4 class="text-white mt-n1">@(PolicyDetails?.DeductibleRetention?.ToString("N0") ?? "-")</h4>
-				</div>
-			</div>
-		</div>
-		<div class="col-lg-2 col-4 mb-4">
-			<div class="card overflow-hidden h-100 fs-13px border-0 bg-dark-gradient">
-				<div class="card-body">
-					<h6 class="text-white text-opacity-80 mb-1">Aggregate</h6>
-					<h4 class="text-white mt-n1">@(PolicyDetails?.Aggregate?.ToString("N0") ?? "-")</h4>
-				</div>
-			</div>
-		</div>
-	</div>
-
 
 	<!-- Inclusions & Exclusions Table -->
 	<div class="card mb-4">
 		<div class="card-header">Inclusions & Exclusions</div>
 		<div class="card-body">
-			<blockquote class="blockquote custom-blockquote primary mb-0">
-				<h6>The terms below are used to determine which policies, premiums and claims are applicable to the reinsurance contract.</h6>
-				<ul>
-					<li>"Excluded" means that the particular business item will not be applicable. </li>
-					<li>"Included" means that <strong>only those stated business values will</strong> be applicable (and any other value for that "item" will be excluded).</li>
-					<li>Outside of the terms below, the only other data point used to determine applicability of this ORI Contact to Inwards Policies/Claims is the "risk basis"(e.g.RAD, LOD) and inception/ expiry date.</li>
-				</ul>
-				<span class="quote-icon"><i class="ri-information-line"></i></span>
-			</blockquote>
+			<div class="alert alert-info small" role="alert">
+				<strong>Inclusion & Exclusion Logic:</strong>
+				<a href="#" class="float-end text-decoration-underline" data-bs-toggle="collapse" data-bs-target="#filterExplanation">Details</a>
+				<div class="collapse mt-2" id="filterExplanation">
+					<ul>
+						<li>"Excluded" means that the particular business item will not be applicable. </li>
+						<li>"Included" means that <strong>only those stated business values will</strong> be applicable (and any other value for that "item" will be excluded).</li>
+						<li>Outside of the terms below, the only other data point used to determine applicability of this ORI Contact to Inwards Policies/Claims is the "risk basis"(e.g.RAD, LOD) and inception/ expiry date.</li>
+					</ul>
+				</div>
+			</div>
+
 
 			@if (PolicyDetails?.Filters?.Any() == true)
 			{
@@ -251,6 +198,81 @@ else
 			</div>
 		</div>
 	</div>
+
+	<div class="row">
+		<div class="col-md-6">
+			<div class="card mb-4">
+				<div class="card-header">Narratives</div>
+				<div class="card-body">
+					@if (PolicyDetails?.Narratives?.Any() == true)
+					{
+						<table class="table table-sm table-striped">
+							<thead>
+								<tr>
+									<th>Seq</th>
+									<th>Note</th>
+									<th>Entered</th>
+									<th>Initials</th>
+								</tr>
+							</thead>
+							<tbody>
+								@foreach (var note in PolicyDetails.Narratives)
+								{
+									<tr>
+										<td>@note.Sequence_no</td>
+										<td>@note.Notes</td>
+										<td>@note.Date_entered?.ToString("yyyy-MM-dd")</td>
+										<td>@note.underwriter_initials</td>
+									</tr>
+								}
+							</tbody>
+						</table>
+					}
+					else
+					{
+						<p class="text-muted">No narratives available.</p>
+					}
+				</div>
+			</div>
+		</div>
+		<div class="col-md-6">
+			<div class="card mb-4">
+				<div class="card-header">Security</div>
+				<div class="card-body">
+					@if (PolicyDetails?.PolicySecurities?.Any() == true)
+					{
+						<table class="table table-sm table-striped">
+							<thead>
+								<tr>
+									<th>LORS</th>
+									<th>Share</th>
+									<th>Status</th>
+									<th>Name</th>
+								</tr>
+							</thead>
+							<tbody>
+								@foreach (var sec in PolicyDetails.PolicySecurities)
+								{
+									<tr>
+										<td>@sec.LORS</td>
+										<td>@sec.Share.ToString("P2")</td>
+										<td>@sec.SecurityStatus</td>
+										<td>@sec.SecurityName</td>
+									</tr>
+								}
+							</tbody>
+						</table>
+					}
+					else
+					{
+						<p class="text-muted">No security info available.</p>
+					}
+				</div>
+			</div>
+		</div>
+	</div>
+
+
 	<div class="card mb-4">
 		<div class="card-header">USMs Linked to This Policy</div>
 		<div class="card-body">

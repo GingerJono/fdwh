@@ -152,6 +152,12 @@ namespace Sandbox.Services
 						commandType: CommandType.StoredProcedure
 					)).ToList();
 
+					policyDetails.Narratives = (await connection.QueryAsync<Narrative>(
+						"ORI.spGetORIPolicyNarratives", parameters, commandType: CommandType.StoredProcedure)).ToList();
+
+					policyDetails.PolicySecurities = (await connection.QueryAsync<PolicySecurity>(
+						"ORI.spGetORIPolicySecurity", parameters, commandType: CommandType.StoredProcedure)).ToList();
+
 					// Fetch Allocations Class and YOA
 					policyDetails.PolicyAllocationsClass = (await GetPolicyAllocationsClass(connection, policyDetails.ORIPolicyReference)).ToList();
 					policyDetails.PolicyAllocationsYOA = (await GetPolicyAllocationsYOA(connection, policyDetails.ORIPolicyReference)).ToList();
@@ -301,7 +307,7 @@ namespace Sandbox.Services
 						parameters.Add("@Note", filter.Note);
 						parameters.Add("@LastUpdatedBy", userNameFinal);
 
-					await db.ExecuteAsync("ORI.spAddORIFiltersMaster", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
+						await db.ExecuteAsync("ORI.spAddORIFiltersMaster", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
 					}
 				}
 
@@ -646,6 +652,28 @@ namespace Sandbox.Services
 			);
 
 			return result.ToList();
+		}
+
+		public async Task<IEnumerable<Narrative>> GetORIPolicyNarratives(string ORIPolicyReference)
+		{
+			using var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
+			await connection.OpenAsync();
+			var parameters = new DynamicParameters();
+			parameters.Add("@ORIPolicyReference", ORIPolicyReference, DbType.String);
+
+			return (await connection.QueryAsync<Narrative>(
+				"ORI.spGetORIPolicyNarratives", parameters, commandType: CommandType.StoredProcedure)).ToList();
+		}
+
+		public async Task<IEnumerable<PolicySecurity>> GetORIPolicySecurity(string ORIPolicyReference)
+		{
+			using var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
+			await connection.OpenAsync();
+			var parameters = new DynamicParameters();
+			parameters.Add("@ORIPolicyReference", ORIPolicyReference, DbType.String);
+
+			return (await connection.QueryAsync<PolicySecurity>(
+				"ORI.spGetORIPolicySecurity", parameters, commandType: CommandType.StoredProcedure)).ToList();
 		}
 
 

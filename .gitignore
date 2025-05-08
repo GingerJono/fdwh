@@ -6,6 +6,8 @@ publish/
 dist/
 .vs/
 
+*.pubxml
+
 # User-specific files
 .vscode/
 *.suo
