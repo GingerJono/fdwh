@@ -23,5 +23,8 @@ namespace Sandbox.Models.ORI
 		public decimal TotalCOBAllocation { get; set; }
 		public decimal TotalSecurityAllocation { get; set; }
 		public decimal TotalEventAllocation { get; set; }
+		public bool IsRIP { get; set; }
+		public bool IsPC { get; set; }
+
 	}
 }

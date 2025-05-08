@@ -81,7 +81,9 @@ else
                 <th>USM CA Category Desc</th>
                 <th>Closing Currency</th>
                 <th>Settlement Currency</th>
-                <th>Line Amount (SCC)</th>
+                    <th>Line Amount (SCC)</th>
+                                <th>Is RIP</th>
+                                <th>Is PC</th>
                 <th>Total YOA Allocation</th>
                 <th>Total COB Allocation</th>
                 <th>Total Security Allocation</th>
@@ -111,7 +113,9 @@ else
                     <td>@usm.USMCaCategoryDesc</td>
                     <td>@usm.ClosingCcy</td>
                     <td>@usm.SettCcy</td>
-                    <td>@(usm.LineAmountSCC?.ToString("N2") ?? "0.00")</td>
+                            <td>@(usm.LineAmountSCC?.ToString("N2") ?? "0.00")</td>
+                                        <td>@(usm.IsRIP ? "Yes" : "No")</td>
+                                        <td>@(usm.IsPC ? "Yes" : "No")</td>
                     <td>@usm.TotalYOAAllocation.ToString("N2")</td>
                     <td>@usm.TotalCOBAllocation.ToString("N2")</td>
                     <td>@usm.TotalSecurityAllocation.ToString("N2")</td>
@@ -140,7 +144,9 @@ else
                 <th>USM CA Category Desc</th>
                 <th>Closing Currency</th>
                 <th>Settlement Currency</th>
-                <th>Line Amount (SCC)</th>
+                    <th>Line Amount (SCC)</th>
+                                <th>Is RIP</th>
+                                <th>Is PC</th>
                 <th>Total YOA Allocation</th>
                 <th>Total COB Allocation</th>
                 <th>Total Security Allocation</th>

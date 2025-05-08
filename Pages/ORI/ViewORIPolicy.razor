@@ -14,6 +14,10 @@
 		border-color: #dee2e6;
 	}
 
+	.card h2, .card h3 {
+		margin-bottom: 0.25rem;
+	}
+
 </style>
 
 @if (IsLoading)
@@ -48,18 +52,16 @@ else
 </div>
 
 	<!-- Policy Details -->
-	<div class="card mb-4">
-	  <div class="card-header bg-primary text-white">Policy Summary</div>
-	  <div class="card-body">
-		<div class="row">
-		  <div class="col-md-4"><strong>Policy Ref:</strong> @PolicyDetails.ORIPolicyReference</div>
-		  <div class="col-md-4"><strong>Description:</strong> @PolicyDetails.PolicyDescription</div>
-		  <div class="col-md-4"><strong>Currency:</strong> @PolicyDetails.ContractCurrency</div>
-		  <div class="col-md-4"><strong>Inception:</strong> @PolicyDetails.Inception?.ToString("yyyy-MM-dd")</div>
-		  <div class="col-md-4"><strong>Expiry:</strong> @PolicyDetails.Expiry?.ToString("yyyy-MM-dd")</div>
-		  <div class="col-md-4"><strong>Order %:</strong> @PolicyDetails.OrderPercent</div>
+	<div class="card shadow-sm mb-4 border-0">
+		<div class="card-body">
+			<div class="row text-center">
+				<div class="col-md-2"><strong>Currency</strong><div>@PolicyDetails.ContractCurrency</div></div>
+				<div class="col-md-3"><strong>Inception</strong><div>@PolicyDetails.Inception?.ToString("yyyy-MM-dd")</div></div>
+				<div class="col-md-3"><strong>Expiry</strong><div>@PolicyDetails.Expiry?.ToString("yyyy-MM-dd")</div></div>
+				<div class="col-md-2"><strong>Order %</strong><div>@PolicyDetails.OrderPercent?.ToString("N2")</div></div>
+				<div class="col-md-2"><strong>Description</strong><div>@PolicyDetails.PolicyDescription</div></div>
+			</div>
 		</div>
-	  </div>
 	</div>
 
 	<!-- Inclusions & Exclusions Table -->
@@ -269,6 +271,37 @@ else
 					}
 				</div>
 			</div>
+			<div class="card mb-4">
+				<div class="card-header">USM Summary</div>
+				<div class="card-body">
+
+					<table class="table table-bordered table-sm">
+						<thead>
+							<tr>
+								<th>Category</th>
+								@foreach (var ccy in USMs.Select(x => x.SettCcy).Distinct().OrderBy(x => x))
+								{
+									<th>@ccy</th>
+								}
+							</tr>
+						</thead>
+						<tbody>
+							@foreach (var category in new[] { "RIP", "PC", "Prem", "Claim" })
+							{
+								<tr>
+									<td>@category</td>
+									@foreach (var ccy in USMs.Select(x => x.SettCcy).Distinct().OrderBy(x => x))
+									{
+										var filtered = USMs.Where(x => GetCategory(x) == category && x.SettCcy == ccy);
+										var total = filtered.Sum(x => x.LineAmountSCC ?? 0);
+										<td>@total.ToString("N2")</td>
+									}
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+			</div>
 		</div>
 	</div>
 
@@ -290,6 +323,8 @@ else
 							<th>Line</th>
 							<th>CA Category</th>
 							<th>Line Amt (SCC)</th>
+							<th>Is RIP</th>
+							<th>Is PC</th>
 							<th>Actions</th>
 						</tr>
 					</thead>
@@ -306,6 +341,9 @@ else
 								<td>@usm.SyndicateLineNo</td>
 								<td>@usm.USMCaCategoryDesc</td>
 								<td>@usm.LineAmountSCC?.ToString("N2")</td>
+								<td>@(usm.IsRIP ? "Yes" : "No")</td>
+											<td>@(usm.IsPC ? "Yes" : "No")</td>
+
 								<td>
 									<button class="btn btn-sm btn-outline-primary"
 											@onclick="@(() => NavigationManager.NavigateTo($"ViewORIUSM/{usm.USMID}"))">
@@ -323,6 +361,19 @@ else
 			}
 		</div>
 	</div>
+		
+
+	@code {
+	private string GetCategory(ORIUSMListModel x)
+	{
+		if (x.IsRIP) return "RIP";
+		if (x.IsPC) return "PC";
+		if (!string.IsNullOrEmpty(x.USMCaCategoryDesc) && x.USMCaCategoryDesc.Contains("Prem", StringComparison.OrdinalIgnoreCase)) return "Prem";
+		if (!string.IsNullOrEmpty(x.USMCaCategoryDesc) && x.USMCaCategoryDesc.Contains("Claim", StringComparison.OrdinalIgnoreCase)) return "Claim";
+		return "Other";
+	}
+}
+
 	<div class="card mb-4">
 		<div class="card-header">LORS Files Linked to This Policy</div>
 		<div class="card-body">
