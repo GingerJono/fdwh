@@ -151,7 +151,7 @@ builder.Services.AddScoped<SocialService>();
 builder.Services.AddScoped<JonoTestService>();
 //Dashboards End//
 
-//Apps Start//
+//Apps Start //
 builder.Services.AddScoped<CartService>();
 builder.Services.AddScoped<OrderdetailsService>();
 builder.Services.AddScoped<OrdersService>();
