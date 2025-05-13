@@ -39,7 +39,7 @@ else
 
 	<div class="d-flex justify-content-between align-items-center mb-4">
 		<h1 class="page-header m-0">
-			ORI Policy Reference: @(PolicyDetails?.ORIPolicyReference ?? "[Not Found]")
+			ORI Policy Reference: @(PolicyDetails?.ORIPolicyReference ?? "[Not Found]") (@PolicyDetails.PolicyDescription)
 		</h1>
 		<button class="btn btn-primary" @onclick="NavigateToEdit">Edit Policy</button>
 
@@ -52,20 +52,28 @@ else
 </div>
 
 	<!-- Policy Details -->
-	<div class="card shadow-sm mb-4 border-0">
+	<div class="card shadow mb-4 border border-dark">
 		<div class="card-body">
-			<div class="row text-center">
-				<div class="col-md-2"><strong>Currency</strong><div>@PolicyDetails.ContractCurrency</div></div>
-				<div class="col-md-3"><strong>Inception</strong><div>@PolicyDetails.Inception?.ToString("yyyy-MM-dd")</div></div>
-				<div class="col-md-3"><strong>Expiry</strong><div>@PolicyDetails.Expiry?.ToString("yyyy-MM-dd")</div></div>
-				<div class="col-md-2"><strong>Order %</strong><div>@PolicyDetails.OrderPercent?.ToString("N2")</div></div>
-				<div class="col-md-2"><strong>Description</strong><div>@PolicyDetails.PolicyDescription</div></div>
+			<div class="row">
+				<div class="col-md-2"><strong>Inception</strong><div class="fs-4 text">@PolicyDetails.Inception?.ToString("yyyy-MM-dd")</div></div>
+				<div class="col-md-2"><strong>Expiry</strong><div class="fs-4 text">@PolicyDetails.Expiry?.ToString("yyyy-MM-dd")</div></div>
+				<div class="col-md-2"><strong>Currency</strong><div class="fs-4 text">@PolicyDetails.ContractCurrency</div></div>
+				<div class="col-md-2"><strong>Premium</strong><div class="fs-4 text">@PolicyDetails.Premium.ToString("N2")</div></div>
+				<div class="col-md-2"><strong>Limit</strong><div class="fs-4 text">@PolicyDetails.Limit?.ToString("N2")</div></div>
+				<div class="col-md-2"><strong>Deductible</strong><div class="fs-4 text">@PolicyDetails.DeductibleRetention?.ToString("N2")</div></div>
 			</div>
+			<div class="row">
+				<div class="col-md-2"><strong>Policy Type</strong><div class="fs-4 text">@PolicyDetails.PolicyType</div></div>
+				<div class="col-md-2"><strong>Basis of Cover</strong><div class="fs-4 text">@PolicyDetails.BasisOfCover</div></div>
+				<div class="col-md-4"><strong>Leader</strong><div class="fs-4 text">@PolicyDetails.SecurityLeader</div></div>
+				<div class="col-md-2"><strong>Broker</strong><div class="fs-4 text">@PolicyDetails.BrokerPseudonym</div></div>
+				<div class="col-md-2"><strong>Order (@PolicyDetails.OfWholeOrOrder) % </strong><div class="fs-4 text">@PolicyDetails.OrderPercent?.ToString("N2")</div></div>
+			</div>			
 		</div>
 	</div>
 
 	<!-- Inclusions & Exclusions Table -->
-	<div class="card mb-4">
+	<div class="card shadow" mb-4>
 		<div class="card-header">Inclusions & Exclusions</div>
 		<div class="card-body">
 			<div class="alert alert-info small" role="alert">
@@ -129,7 +137,7 @@ else
 	</div>
 	<div class="row">
 		<div class="col-md-6">
-			<div class="card mb-4">
+			<div class="card shadow mb-4">
 				<div class="card-header">Policy Allocations by Class</div>
 				<div class="card-body">
 					@if (PolicyDetails?.PolicyAllocationsClass?.Any() == true)
@@ -306,7 +314,7 @@ else
 	</div>
 
 
-	<div class="card mb-4">
+	<div class="card shadow mb-4">
 		<div class="card-header">USMs Linked to This Policy</div>
 		<div class="card-body">
 			@if (USMs?.Any() == true)

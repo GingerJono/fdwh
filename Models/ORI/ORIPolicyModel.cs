@@ -25,9 +25,15 @@ namespace Sandbox.Models.ORI
 		public decimal? Limit { get; set; }
 		public decimal? DeductibleRetention { get; set; }
 		public decimal? Aggregate { get; set; }
+		public int? BrokerNumber { get; set; }
+		public string BrokerPseudonym { get; set; }
+		public decimal Premium { get; set; }
+		public string PolicyTypeCode { get; set; }
+		public string PolicyType { get; set; }
+		public string SecurityLeader { get; set; }
 
-		// Single List for inclusions and exclusions
-		public List<ORIFilterItem> Filters { get; set; } = new();
+        // Single List for inclusions and exclusions
+        public List<ORIFilterItem> Filters { get; set; } = new();
 		public List<ORIFilterItem> RemovedFilters { get; set; } = new(); // Track deleted filters
 
 		// New Lists for Policy Allocations
