@@ -34,7 +34,7 @@ else if (LORSDetails != null)
                     <tr><th>Policy Sequence</th><td>@LORSDetails.PolicySequence</td></tr>
                     <tr><th>ORI Policy Reference</th><td>@LORSDetails.ORIPolicyReference</td></tr>
                     <tr><th>Processed Date</th><td>@LORSDetails.ProcessedDate?.ToString("yyyy-MM-dd")</td></tr>
-                    <tr><th>Processed Time</th><td>@(LORSDetails.ProcessedTime?.ToString() ?? "-")</td></tr>
+                    <tr><th>Processed Time</th><td>@(LORSDetails.ProcessedTime)</td></tr>
                     <tr><th>Amount</th><td>@LORSDetails.Amount.ToString("N2")</td></tr>
                 </tbody>
             </table>
