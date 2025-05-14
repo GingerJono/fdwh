@@ -193,12 +193,10 @@
 			});
 		}
 	};
-	window.initializeDataTables = function () {
-		console.log("Initializing DataTables..."); // Debug log
+	window.initializeDataTables = function () {		
 		setTimeout(() => {
 			if ($('#oripols').length) {
-				$('#oripols').DataTable(options);
-				console.log("DataTable initialized successfully.");
+				$('#oripols').DataTable(options);				
 			} else {
 				console.log("Table not found!");
 			}

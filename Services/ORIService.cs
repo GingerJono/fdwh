@@ -43,6 +43,26 @@ namespace Sandbox.Services
 				return result.ToList();
 			}
 		}
+
+		public async Task<List<FXTreatmentModel>> GetFXTreatments()
+		{
+            using (var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection")))
+            {
+                await connection.OpenAsync();
+
+                var parameters = new DynamicParameters();
+                //parameters.Add("UserName", userName, DbType.String);
+
+                var result = await connection.QueryAsync<FXTreatmentModel>(
+                    "ORI.spGetFxTreatments",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                );
+
+                return result.ToList();
+            }
+        }
+
 		public async Task<LORSModel> GetLORSDetails(string fileName, int policySequence)
 		{
 			using (var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection")))
@@ -356,7 +376,15 @@ namespace Sandbox.Services
 					}
 				}
 
-				transaction.Commit();
+				// Step 7: Update Policy Metadata
+				var metaDataParameters = new DynamicParameters();
+                metaDataParameters.Add("@ORIPolicyReference", model.ORIPolicyReference);
+				metaDataParameters.Add("@FXRateApplicationDate", model.FXRateApplicationDate);
+				metaDataParameters.Add("@FXTreatment", model.FXTreatment);
+				metaDataParameters.Add("@InuringPriority", model.InuringPriority);
+				await db.ExecuteAsync("ORI.spUpsertPolicyDetails", metaDataParameters, commandType: CommandType.StoredProcedure, transaction: transaction);
+
+                transaction.Commit();
 				Console.WriteLine($"[SUCCESS] ORI Policy Metadata saved successfully for {model.ORIPolicyReference}");
 			}
 			catch (Exception ex)

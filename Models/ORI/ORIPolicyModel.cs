@@ -10,14 +10,14 @@ namespace Sandbox.Models.ORI
 	public class ORIPolicyModel
 	{
 		public string ORIPillar { get; set; }
-		public DateTime? FXRateApplicationDate { get; set; }
-		public string FXTreatment { get; set; }
+		public string FXRateApplicationDate { get; set; }
+        public string FXTreatment { get; set; }
 		public bool AllowBlocks { get; set; }
 		public string ORIPolicyReference { get; set; }
 		public string PolicyDescription { get; set; }
 		public string ContractCurrency { get; set; }
-		public DateTime? Inception { get; set; }
-		public DateTime? Expiry { get; set; }
+		public DateTime Inception { get; set; }
+		public DateTime Expiry { get; set; }
 		public string BasisOfCoverCode { get; set; }
 		public string BasisOfCover { get; set; }
 		public decimal? OrderPercent { get; set; }
