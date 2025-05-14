@@ -31,6 +31,7 @@ namespace Sandbox.Models.ORI
 		public string PolicyTypeCode { get; set; }
 		public string PolicyType { get; set; }
 		public string SecurityLeader { get; set; }
+		public int InuringPriority { get; set; }
 		
 
         // Single List for inclusions and exclusions
