@@ -272,9 +272,9 @@ namespace Sandbox.Services
 						commandType: CommandType.StoredProcedure
 					)).ToList();
 
-					// Fetch COB allocations
-					usmDetails.COBAllocations = (await connection.QueryAsync<COBAllocation>(
-						"ORI.spGetORIUSMAllocationsCOB",
+					// Fetch Class allocations
+					usmDetails.ClassAllocations = (await connection.QueryAsync<ClassAllocation>(
+						"ORI.spGetORIUSMAllocationsClass",
 						parameters,
 						commandType: CommandType.StoredProcedure
 					)).ToList();
@@ -521,14 +521,14 @@ namespace Sandbox.Services
 					await db.ExecuteAsync("ORI.spDeleteUSMAllocationsYOA", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
 				}
 
-				foreach (var allocation in model.RemovedCOBAllocations)
+				foreach (var allocation in model.RemovedClassAllocations)
 				{
 					var parameters = new DynamicParameters();
 					parameters.Add("@ORIUSMID", model.USMID);
-					parameters.Add("@COB", allocation.COB);
+					parameters.Add("@Class", allocation.Class);
 					parameters.Add("@LastUpdatedBy", userNameFinal);
 
-					await db.ExecuteAsync("ORI.spDeleteUSMAllocationsCOB", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
+					await db.ExecuteAsync("ORI.spDeleteUSMAllocationsClass", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
 				}
 
 				foreach (var allocation in model.RemovedSecurityAllocations)
@@ -563,15 +563,15 @@ namespace Sandbox.Services
 					await db.ExecuteAsync("ORI.spUpsertUSMAllocationsYOA", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
 				}
 
-				foreach (var allocation in model.COBAllocations)
+				foreach (var allocation in model.ClassAllocations)
 				{
 					var parameters = new DynamicParameters();
 					parameters.Add("@ORIUSMID", model.USMID);
-					parameters.Add("@COB", allocation.COB);
+					parameters.Add("@Class", allocation.Class);
 					parameters.Add("@Allocation", allocation.Allocation);
 					parameters.Add("@LastUpdatedBy", userNameFinal);
 
-					await db.ExecuteAsync("ORI.spUpsertUSMAllocationsCOB", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
+					await db.ExecuteAsync("ORI.spUpsertUSMAllocationsClass", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
 				}
 
 				foreach (var allocation in model.SecurityAllocations)
