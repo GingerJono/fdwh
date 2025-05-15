@@ -1,0 +1,79 @@
+﻿@page "/PrismRuns"
+@using Sandbox.Models.Prism
+@using Sandbox.Services
+@using Sandbox._Spk
+@using CardModel
+@inject IJSRuntime JSRuntime
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
+@inject PrismService PrismService
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+	<h1 class="page-header m-0">Prism Run Manager</h1>
+</div>
+
+<div class="card shadow mb-4">
+	<div class="card-header">Run History</div>
+	<div class="card-body">
+		@if (prismRuns == null)
+		{
+			<p><em>Loading...</em></p>
+		}
+		else
+		{
+			<table class="table table-striped">
+				<thead>
+					<tr>
+						<th>ID</th>
+						<th>User</th>
+						<th>Status</th>
+						<th>Notes</th>
+						<th>As At Date</th>
+						<th>Start Time</th>
+						<th>End Time</th>
+						<th class="text-end">Duration (Minutes)</th>
+						<th>Actions</th>
+					</tr>
+				</thead>
+				<tbody>
+					@foreach (var run in prismRuns)
+					{
+						<tr>
+							<td>@run.RunID</td>
+							<td>@run.RunUser</td>
+							<td>@run.Status</td>
+							<td>@run.Notes</td>
+							<td>@run.AsAtDate.ToString("yyyy-MM-dd")</td>
+							<td>@run.StartTime.ToString("yyyy-MM-dd HH:mm")</td>
+							<td>@(run.EndTime?.ToString("yyyy-MM-dd HH:mm") ?? "")</td>
+							<td class="text-end">@(run.DurationMinutes.ToString() ?? "")</td>
+							<td>
+								<button class="btn btn-sm btn-outline-primary"
+										@onclick="@(() => NavigationManager.NavigateTo($"ViewPrismRun/{run.RunID}"))">
+									View
+								</button>
+							</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		}
+	</div>
+</div>
+
+<!-- jquery Cdn -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+@code {
+	private List<RunModel> prismRuns;
+
+	protected override async Task OnInitializedAsync()
+	{
+		prismRuns = await PrismService.GetRuns();
+		StateHasChanged(); // Trigger UI refresh
+	}
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+
+	}
+}

@@ -8,3 +8,18 @@
 
 <component type="typeof(App)" render-mode="ServerPrerendered" />
 <base href="/" />
+
+<script>
+    window.downloadFileFromStream = async (filename, contentStreamReference) => {
+        const arrayBuffer = await contentStreamReference.arrayBuffer();
+        const blob = new Blob([arrayBuffer]);
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = filename ?? 'download.csv';
+        anchor.click();
+        anchor.remove();
+        URL.revokeObjectURL(url);
+    };
+</script>
+

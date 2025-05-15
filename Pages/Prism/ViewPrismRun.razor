@@ -1,0 +1,330 @@
+﻿@page "/ViewPrismRun/{RunID}"
+@using Sandbox.Models.Prism
+@using Sandbox.Services
+@using CardModel
+@using System.Text
+@using System.IO.Compression;
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager
+@inject PrismService PrismService
+@inject IJSRuntime JS
+
+
+<style>
+	.table thead th {
+		background-color: #002855; /* dark navy blue */
+		color: white;
+		border-color: #dee2e6;
+	}
+
+	.card h2, .card h3 {
+		margin-bottom: 0.25rem;
+	}
+
+</style>
+
+@if (IsLoading)
+{
+	<p>Loading Run details...</p>
+}
+else if (!string.IsNullOrEmpty(ErrorMessage))
+{
+	<p class="text-danger">@ErrorMessage</p>
+}
+else
+{
+	<div class="row">
+		<div class="d-flex justify-content-between align-items-center mb-4">
+			<h1 class="page-header m-0">
+				Prism Run @(Run?.RunID.ToString() ?? "[Not Found]")
+			</h1>
+		</div>
+	</div>
+	<div class="row">
+		<div class="card shadow mb-4 border border-dark">
+			<div class="card-body">
+				<div class="row">
+					<div class="col-md-2"><strong>Status</strong><div class="fs-4 text">@Run.Status</div></div>
+					<div class="col-md-2"><strong>As At Date</strong><div class="fs-4 text">@Run.AsAtDate.ToString("yyyy-MM-dd")</div></div>
+					<div class="col-md-2"><strong>Start Time</strong><div class="fs-4 text">@Run.StartTime.ToString("yyyy-MM-dd HH:mm")</div></div>
+					<div class="col-md-2"><strong>End Time</strong><div class="fs-4 text">@Run.EndTime?.ToString("yyyy-MM-dd HH:mm")</div></div>
+					<div class="col-md-2"><strong>Duration (Minutes)</strong><div class="fs-4 text">@Run.DurationMinutes</div></div>
+					<div class="col-md-2"><strong>Run By</strong><div class="fs-4 text">@Run.RunUser</div></div>
+				</div>
+				@if (!string.IsNullOrEmpty(Run.Notes))
+				{
+					<div class="row">
+
+						<div class="col-md-12"><strong>Notes</strong><div class="fs-4 text">@Run.Notes</div></div>
+					</div>
+				}
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="d-flex justify-content-between align-items-center mb-4">
+			<h3>Output</h3>
+			<button class="btn btn-primary btn-sm" @onclick="() => ExportAllCsvsAsZip(Run, JS)">
+				<i class="bi bi-file-zip me-1"></i>
+			</button>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-md-6">
+			<div class="card shadow mb-4">
+				<div class="card-header d-flex justify-content-between align-items-center">
+					<span>Incurred Claims Mapping</span>
+					<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.ORIPolIncurredClaimsMapping, $"IncurredClaimsMapping_{Run.RunID}.csv"))">
+						<i class="bi bi-download me-1"></i>
+					</button>
+				</div>
+				<div class="card-body">
+					@if (Run.ORIPolIncurredClaimsMapping == null)
+					{
+						<p><em>No data found</em></p>
+					}
+				</div>
+			</div>
+		</div>
+		<div class="col-md-6">
+			<div class="card shadow mb-4">
+				<div class="card-header d-flex justify-content-between align-items-center">
+					<span>Ultimate Claims Mapping</span>
+					<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.ORIPolUltimateClaimsMapping, $"UltimateClaimsMapping_{Run.RunID}.csv"))">
+						<i class="bi bi-download me-1"></i>
+					</button>
+				</div>
+				<div class="card-body">
+					@if (Run.ORIPolUltimateClaimsMapping == null)
+					{
+						<p><em>No data found</em></p>
+					}
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-md-6">
+			<div class="card shadow mb-4">
+				<div class="card-header d-flex justify-content-between align-items-center">
+					<span>Incurred Claims By Event</span>
+					<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.IncurredClaimsByEvent, $"IncurredClaimsByEvent_{Run.RunID}.csv"))">
+						<i class="bi bi-download me-1"></i>
+					</button>
+				</div>
+				<div class="card-body">
+					@if (Run.IncurredClaimsByEvent == null)
+					{
+						<p><em>No data found</em></p>
+					}
+				</div>
+			</div>
+		</div>
+		<div class="col-md-6">
+			<div class="card shadow mb-4">
+				<div class="card-header d-flex justify-content-between align-items-center">
+					<span>Ultimate Claims By Event</span>
+					<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.UltimateClaimsByEvent, $"UltimateClaimsByEvent_{Run.RunID}.csv"))">
+						<i class="bi bi-download me-1"></i>
+					</button>
+				</div>
+				<div class="card-body">
+					@if (Run.UltimateClaimsByEvent == null)
+					{
+						<p><em>No data found</em></p>
+					}
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-md-6">
+			<div class="card shadow mb-4">
+				<div class="card-header d-flex justify-content-between align-items-center">
+					<span>Allocated Paid Recoveries</span>
+					<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.AllocatedPaidRecoveries, $"AllocatedPaidRecoveries_{Run.RunID}.csv"))">
+						<i class="bi bi-download me-1"></i>
+					</button>
+				</div>
+				<div class="card-body">
+					@if (Run.AllocatedPaidRecoveries == null)
+					{
+						<p><em>No data found</em></p>
+					}
+				</div>
+			</div>
+		</div>
+		<div class="col-md-6">
+			<div class="card shadow mb-4">
+				<div class="card-header d-flex justify-content-between align-items-center">
+					<span>Allocated Incurred Recoveries</span>
+					<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.AllocatedIncurredRecoveries, $"AllocatedIncurredRecoveries_{Run.RunID}.csv"))">
+						<i class="bi bi-download me-1"></i>
+					</button>
+				</div>
+				<div class="card-body">
+					@if (Run.AllocatedIncurredRecoveries == null)
+					{
+						<p><em>No data found</em></p>
+					}
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-md-6">
+			<div class="card shadow mb-4">
+				<div class="card-header d-flex justify-content-between align-items-center">
+					<span>Allocated Ultimate Recoveries</span>
+					<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.AllocatedUltimateRecoveries, $"AllocatedUltimateRecoveries_{Run.RunID}.csv"))">
+						<i class="bi bi-download me-1"></i>
+					</button>
+				</div>
+				<div class="card-body">
+					@if (Run.AllocatedUltimateRecoveries == null)
+					{
+						<p><em>No data found</em></p>
+					}
+				</div>
+			</div>
+		</div>
+		<div class="col-md-6">
+			<div class="card shadow mb-4">
+				<div class="card-header d-flex justify-content-between align-items-center">
+					<span>Merged Allocated Recoveries</span>
+					<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.AllocatedRecoveriesMerged, $"AllocatedRecoveriesMerged_{Run.RunID}.csv"))">
+						<i class="bi bi-download me-1"></i>
+					</button>
+				</div>
+				<div class="card-body">
+					@if (Run.AllocatedRecoveriesMerged == null)
+					{
+						<p><em>No data found</em></p>
+					}
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="row">
+		<h3>Logs</h3>
+
+		@if (!Run.Logs.Any())
+		{
+			<p><em>No logs found</em></p>
+		}
+		else
+		{
+			<table class="table table-striped">
+				<thead>
+					<tr>
+						<th>Time</th>
+						<th>Level</th>
+						<th>Message</th>
+					</tr>
+				</thead>
+				<tbody>
+					@foreach (var log in Run.Logs)
+					{
+						<tr>
+							<td>@log.LogTime.ToString("yyyy-MM-dd HH:mm")</td>
+							<td>@log.LogLevel</td>
+							<td>@log.Message</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		}
+	</div>
+}
+@code {
+	[Parameter] public string RunID { get; set; }
+
+	private RunModel Run { get; set; }
+	private bool IsLoading { get; set; } = true;
+	private string ErrorMessage { get; set; }
+
+	protected override async Task OnInitializedAsync()
+	{
+		if (string.IsNullOrWhiteSpace(RunID))
+		{
+			ErrorMessage = "Run ID is required.";
+			IsLoading = false;
+			return;
+		}
+
+		try
+		{
+			int runLogNumber = int.Parse(RunID);
+			Run = await PrismService.GetRun(runLogNumber);
+
+			if (Run == null)
+			{
+				ErrorMessage = $"No details found for run with ID: {RunID}";
+			}
+		}
+		catch (Exception ex)
+		{
+			ErrorMessage = "An error occurred while fetch Run Logs";
+			Console.WriteLine($"[ERROR] Failed to fetch Run Logs: {ex}");
+		}
+		finally
+		{
+			IsLoading = false;
+			Console.WriteLine($"[INFO] Data loading complete for {RunID}");
+		}
+	}
+
+	private async Task ExportToCsv<T>(List<T> data, string filename)
+	{
+		if (data == null || !data.Any())
+		{
+			Console.WriteLine($"[ExportToCsv] No data found for export: {filename}");
+			return;
+		}
+
+		var csv = CsvExportService.ToCsv(data);
+		var bytes = Encoding.UTF8.GetBytes(csv);
+		using var stream = new MemoryStream(bytes);
+		using var streamRef = new DotNetStreamReference(stream);
+
+		await JS.InvokeVoidAsync("downloadFileFromStream", filename, streamRef);
+	}
+
+	public async Task ExportAllCsvsAsZip(RunModel run, IJSRuntime js)
+	{
+		using var zipStream = new MemoryStream();
+
+		using (var archive = new ZipArchive(zipStream, ZipArchiveMode.Create, leaveOpen: true))
+		{
+			void AddCsv<T>(List<T> data, string filename)
+			{
+				if (data != null && data.Any())
+				{
+					var csv = CsvExportService.ToCsv(data);
+					var entry = archive.CreateEntry(filename);
+					using var entryStream = entry.Open();
+					using var writer = new StreamWriter(entryStream);
+					writer.Write(csv);
+				}
+			}
+
+			AddCsv(run.ORIPolIncurredClaimsMapping, $"IncurredClaimsMapping_{Run.RunID}.csv");
+			AddCsv(run.ORIPolUltimateClaimsMapping, $"UltimateClaimsMapping_{Run.RunID}.csv");
+			AddCsv(run.IncurredClaimsByEvent, $"IncurredClaimsByEvent_{Run.RunID}.csv");
+			AddCsv(run.UltimateClaimsByEvent, $"UltimateClaimsByEvent_{Run.RunID}.csv");
+			AddCsv(run.AllocatedPaidRecoveries, $"AllocatedPaidRecoveries_{Run.RunID}.csv");
+			AddCsv(run.AllocatedIncurredRecoveries, $"AllocatedIncurredRecoveries_{Run.RunID}.csv");
+			AddCsv(run.AllocatedUltimateRecoveries, $"AllocatedUltimateRecoveries_{Run.RunID}.csv");
+			AddCsv(run.AllocatedRecoveriesMerged, $"AllocatedRecoveriesMerged_{Run.RunID}.csv");
+		}
+
+		zipStream.Position = 0;
+
+		using var streamRef = new DotNetStreamReference(zipStream);
+		await js.InvokeVoidAsync("downloadFileFromStream", $"Prism_Export_Run_{run.RunID}.zip", streamRef);
+	}
+}
