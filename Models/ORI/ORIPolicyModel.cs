@@ -44,6 +44,7 @@ namespace Sandbox.Models.ORI
 		public List<ORIPolicyAllocationClass> RemovedPolicyAllocationsClass { get; set; } = new();
 		public List<ORIPolicyAllocationYOA> RemovedPolicyAllocationsYOA { get; set; } = new();
 		public List<Narrative> Narratives { get; set; } = new();
+		public List<ORIPolicyReinstatementModel> Reinstatements { get; set; } = new();
 		public List<PolicySecurity> PolicySecurities { get; set; } = new();
 
 	}

@@ -44,7 +44,22 @@ namespace Sandbox.Services
 			}
 		}
 
-		public async Task<List<FXTreatmentModel>> GetFXTreatments()
+		public async Task<IEnumerable<ORIPolicyReinstatementModel>> GetReinstatementsByPolicy(string ORIPolicyReference)
+        {
+            using (var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection")))
+            {
+                await connection.OpenAsync();
+                var parameters = new DynamicParameters();
+                parameters.Add("ORIPolicyReference", ORIPolicyReference, DbType.String);
+                var result = await connection.QueryAsync<ORIPolicyReinstatementModel>(
+                    "ORI.spGetReinstatementsByPolicy",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                );
+                return result.ToList();
+            }
+        }
+        public async Task<List<FXTreatmentModel>> GetFXTreatments()
 		{
             using (var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection")))
             {
