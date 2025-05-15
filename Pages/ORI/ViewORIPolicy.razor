@@ -74,7 +74,7 @@ else
 	</div>
 
 	<!-- Inclusions & Exclusions Table -->
-	<div class="card shadow" mb-4>
+	<div class="card shadow mb-4">
 		<div class="card-header">Inclusions & Exclusions</div>
 		<div class="card-body">
 			<div class="alert alert-info small" role="alert">
@@ -88,7 +88,6 @@ else
 					</ul>
 				</div>
 			</div>
-
 
 			@if (PolicyDetails?.Filters?.Any() == true)
 			{
@@ -174,7 +173,7 @@ else
 		</div>
 
 		<div class="col-md-6">
-			<div class="card mb-4">
+			<div class="card shadow mb-4">
 				<div class="card-header">Policy Allocations by Year of Account</div>
 				<div class="card-body">
 					@if (PolicyDetails?.PolicyAllocationsYOA?.Any() == true)
@@ -212,7 +211,44 @@ else
 
 	<div class="row">
 		<div class="col-md-6">
-			<div class="card mb-4">
+			<div class="card shadow md-4">
+				<div class="card-header">Reinstatements</div>
+				<div class="card-body">
+					@if (PolicyDetails?.Reinstatements.Any() == true)
+					{
+						<table class=" table table-sm table-striped">
+							<thead>
+								<tr>
+									<th>Programme Reference</th>
+									<th>Order</th>
+									<th>Pro Rate by Time</th>
+									<th>Terms</th>
+									<th class="text-end">Percent</th>
+									<th class="text-end">Number</th>
+								</tr>
+							</thead>
+							<tbody>
+								@foreach (var reinstatement in PolicyDetails.Reinstatements)
+								{
+									<tr>
+										<td>@reinstatement.ProgrammeReference</td>
+										<td>@reinstatement.ReinstatementOrder</td>
+										<td>@reinstatement.ProRateByTime</td>
+										<td>@reinstatement.ReinstatementTerms</td>
+										<td class="text-end">@reinstatement.ReinstatementPercent</td>
+										<td class="text-end">@reinstatement.NumberOfReinstatements</td>
+									</tr>
+								}
+							</tbody>
+						</table>
+					}
+					else
+					{
+						<p class="text-muted">No reinstatements.</p>
+					}
+				</div>
+			</div>
+			<div class="card shadow mb-4">
 				<div class="card-header">Narratives</div>
 				<div class="card-body">
 					@if (PolicyDetails?.Narratives?.Any() == true)
@@ -220,7 +256,7 @@ else
 						<table class="table table-sm table-striped">
 							<thead>
 								<tr>
-									<th>Seq</th>
+									<th>Sequence</th>
 									<th>Note</th>
 									<th>Entered</th>
 									<th>Initials</th>
@@ -247,7 +283,7 @@ else
 			</div>
 		</div>
 		<div class="col-md-6">
-			<div class="card mb-4">
+			<div class="card shadow mb-4">
 				<div class="card-header">Security</div>
 				<div class="card-body">
 					@if (PolicyDetails?.PolicySecurities?.Any() == true)
@@ -280,7 +316,7 @@ else
 					}
 				</div>
 			</div>
-			<div class="card mb-4">
+			<div class="card shadow mb-4">
 				<div class="card-header">USM Summary</div>
 				<div class="card-body">
 
@@ -324,7 +360,7 @@ else
 					<thead>
 						<tr>
 							<th>USM ID</th>
-							<th>LPSO No</th>
+							<th>LPSO Number</th>
 							<th>LPSO Date</th>
 							<th>Version</th>
 							<th>Instalment</th>
@@ -361,6 +397,15 @@ else
 							</tr>
 						}
 					</tbody>
+					<tfoot>
+						<tr>
+							<td colspan="10" class="text-end fw-bold">Total:</td>
+							<td class="text-end fw-bold">
+								@USMs.Sum(x => x.LineAmountSCC ?? 0).ToString("N2")
+							</td>
+							<td></td>
+						</tr>
+					</tfoot>
 				</table>
 			}
 			else
@@ -382,7 +427,7 @@ else
 	}
 }
 
-	<div class="card mb-4">
+	<div class="card shadow mb-4">
 		<div class="card-header">LORS Files Linked to This Policy</div>
 		<div class="card-body">
 			@if (LORS?.Any() == true)
@@ -416,6 +461,15 @@ else
 							</tr>
 						}
 					</tbody>
+					<tfoot>
+						<tr>
+							<td colspan="4" class="text-end fw-bold">Total:</td>
+							<td class="text-end fw-bold">
+								@LORS.Sum(x => x.Amount).ToString("N2")
+							</td>
+							<td></td>
+						</tr>
+					</tfoot>
 				</table>
 			}
 			else
@@ -436,7 +490,6 @@ else
 	private List<ORIUSMListModel> USMs { get; set; } = new();
 	private List<LORSListModel> LORS { get; set; } = new();
 
-
 	protected override async Task OnInitializedAsync()
 	{
 		if (string.IsNullOrWhiteSpace(ORIPolicyReference))
@@ -449,10 +502,14 @@ else
 		try
 		{
 			PolicyDetails = await ORIService.GetORIPolicyDetails(ORIPolicyReference);
-			USMs = (await ORIService.GetORIUSMsByPolicy(ORIPolicyReference)).ToList();
-			LORS = (await ORIService.GetLORSByPolicy(ORIPolicyReference)).ToList();
 
-			if (PolicyDetails == null)
+			if (PolicyDetails != null)
+			{
+				USMs = (await ORIService.GetORIUSMsByPolicy(ORIPolicyReference)).ToList();
+				LORS = (await ORIService.GetLORSByPolicy(ORIPolicyReference)).ToList();
+				PolicyDetails.Reinstatements = (await ORIService.GetReinstatementsByPolicy(ORIPolicyReference)).ToList();
+			}
+			else
 			{
 				ErrorMessage = $"No policy details found for reference: {ORIPolicyReference}";
 			}
