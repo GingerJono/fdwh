@@ -3,6 +3,7 @@ using Microsoft.Data.SqlClient;
 using System.Data;
 using Sandbox.Helpers;
 using Sandbox.Models.ORI;
+using System.Diagnostics;
 
 namespace Sandbox.Services
 {
@@ -337,25 +338,7 @@ namespace Sandbox.Services
                     }
                 }
 
-                // Step 3: Process Class Allocations
-                if (model.PolicyAllocationsClass != null && model.PolicyAllocationsClass.Any())
-                {
-                    foreach (var allocation in model.PolicyAllocationsClass)
-                    {
-                        await UpsertPolicyAllocationsClass(db, allocation, userNameFinal, transaction, model.ORIPolicyReference);
-                    }
-                }
-
-                // Step 4: Process YOA Allocations
-                if (model.PolicyAllocationsYOA != null && model.PolicyAllocationsYOA.Any())
-                {
-                    foreach (var allocation in model.PolicyAllocationsYOA)
-                    {
-                        await UpsertPolicyAllocationsYOA(db, allocation, userNameFinal, transaction, model.ORIPolicyReference);
-                    }
-                }
-
-                // Step 5: Remove Class Allocations
+                // Step 3: Remove Class Allocations
                 if (model.RemovedPolicyAllocationsClass != null && model.RemovedPolicyAllocationsClass.Any())
                 {
                     foreach (var allocation in model.RemovedPolicyAllocationsClass)
@@ -369,7 +352,8 @@ namespace Sandbox.Services
                     }
                 }
 
-                // Step 6: Remove YOA Allocations
+
+                // Step 4: Remove YOA Allocations
                 if (model.RemovedPolicyAllocationsYOA != null && model.RemovedPolicyAllocationsYOA.Any())
                 {
                     foreach (var allocation in model.RemovedPolicyAllocationsYOA)
@@ -379,6 +363,25 @@ namespace Sandbox.Services
                         parameters.Add("@YearOfAccount", allocation.YearOfAccount); // Add the key fields for deletion
                         parameters.Add("@LastUpdatedBy", userNameFinal);
                         await db.ExecuteAsync("ORI.spDeletePolicyAllocationsYOA", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
+                    }
+                }
+                
+
+                // Step 5: Process Class Allocations
+                if (model.PolicyAllocationsClass != null && model.PolicyAllocationsClass.Any())
+                {
+                    foreach (var allocation in model.PolicyAllocationsClass)
+                    {
+                        await UpsertPolicyAllocationsClass(db, allocation, userNameFinal, transaction, model.ORIPolicyReference);
+                    }
+                }
+
+                // Step 6: Process YOA Allocations
+                if (model.PolicyAllocationsYOA != null && model.PolicyAllocationsYOA.Any())
+                {
+                    foreach (var allocation in model.PolicyAllocationsYOA)
+                    {
+                        await UpsertPolicyAllocationsYOA(db, allocation, userNameFinal, transaction, model.ORIPolicyReference);
                     }
                 }
 
