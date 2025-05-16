@@ -364,7 +364,7 @@ namespace Sandbox.Services
                         await db.ExecuteAsync("ORI.spDeletePolicyAllocationsYOA", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
                     }
                 }
-                
+
 
                 // Step 5: Process Class Allocations
                 if (model.PolicyAllocationsClass != null && model.PolicyAllocationsClass.Any())
@@ -636,12 +636,18 @@ namespace Sandbox.Services
             using var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
             await connection.OpenAsync();
 
+            if (string.IsNullOrEmpty(model.EventStartDateOverride))
+                {
+                model.EventStartDateOverride = null;
+            }
+
             var parameters = new DynamicParameters();
             parameters.Add("@EventCode", model.EventCode, DbType.String);
             parameters.Add("@Peril", model.Peril, DbType.String);
             parameters.Add("@PerilRegion", model.PerilRegion, DbType.String);
             parameters.Add("@Notes", model.Notes, DbType.String);
             parameters.Add("@LastUpdatedBy", model.LastUpdatedBy, DbType.String);
+            parameters.Add("@EventStartDateOverride", model.EventStartDateOverride, DbType.DateTime);
 
             await connection.ExecuteAsync(
                 "ORI.spUpsertEventMetadata",
