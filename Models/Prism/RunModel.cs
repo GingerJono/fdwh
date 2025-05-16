@@ -21,5 +21,16 @@
         public List<AllocatedIncurredRecoveriesByORIPolicyEventClassYOAModel> AllocatedIncurredRecoveries { get; set; } = new();
         public List<AllocatedUltimateRecoveriesByORIPolicyEventClassYOAModel> AllocatedUltimateRecoveries { get; set; } = new();
         public List<AllocatedRecoveryModel> AllocatedRecoveriesMerged { get; set; } = new();
+
+        public bool HasOutput
+        {
+            get
+            {
+                return this.ORIPolIncurredClaimsMapping.Count != 0 || this.ORIPolUltimateClaimsMapping.Count != 0
+                     || this.IncurredClaimsByEvent.Count != 0 || this.UltimateClaimsByEvent.Count != 0
+                     || this.AllocatedPaidRecoveries.Count != 0 || this.AllocatedIncurredRecoveries.Count != 0
+                     || this.AllocatedUltimateRecoveries.Any() || this.AllocatedRecoveriesMerged.Count != 0;
+            }
+        }
     }
 }

@@ -63,9 +63,12 @@ else
 	<div class="row">
 		<div class="d-flex justify-content-between align-items-center mb-4">
 			<h3>Output</h3>
-			<button class="btn btn-primary btn-sm" @onclick="() => ExportAllCsvsAsZip(Run, JS)">
-				<i class="bi bi-file-zip me-1"></i>
-			</button>
+			@if (Run.HasOutput)
+			{
+				<button class="btn btn-primary btn-sm" @onclick="() => ExportAllCsvsAsZip(Run, JS)">
+					<i class="bi bi-file-zip me-1"></i>
+				</button>
+			}
 		</div>
 	</div>
 
@@ -74,12 +77,15 @@ else
 			<div class="card shadow mb-4">
 				<div class="card-header d-flex justify-content-between align-items-center">
 					<span>Incurred Claims Mapping</span>
-					<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.ORIPolIncurredClaimsMapping, $"IncurredClaimsMapping_{Run.RunID}.csv"))">
-						<i class="bi bi-download me-1"></i>
-					</button>
+					@if (Run.ORIPolIncurredClaimsMapping.Any())
+					{
+						<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.ORIPolIncurredClaimsMapping, $"IncurredClaimsMapping_{Run.RunID}.csv"))">
+							<i class="bi bi-download me-1"></i>
+						</button>
+					}
 				</div>
 				<div class="card-body">
-					@if (Run.ORIPolIncurredClaimsMapping == null)
+					@if (!Run.ORIPolIncurredClaimsMapping.Any())
 					{
 						<p><em>No data found</em></p>
 					}
@@ -90,12 +96,15 @@ else
 			<div class="card shadow mb-4">
 				<div class="card-header d-flex justify-content-between align-items-center">
 					<span>Ultimate Claims Mapping</span>
-					<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.ORIPolUltimateClaimsMapping, $"UltimateClaimsMapping_{Run.RunID}.csv"))">
-						<i class="bi bi-download me-1"></i>
-					</button>
+					@if (Run.ORIPolUltimateClaimsMapping.Any())
+					{
+						<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.ORIPolUltimateClaimsMapping, $"UltimateClaimsMapping_{Run.RunID}.csv"))">
+							<i class="bi bi-download me-1"></i>
+						</button>
+					}
 				</div>
 				<div class="card-body">
-					@if (Run.ORIPolUltimateClaimsMapping == null)
+					@if (!Run.ORIPolUltimateClaimsMapping.Any())
 					{
 						<p><em>No data found</em></p>
 					}
@@ -109,12 +118,15 @@ else
 			<div class="card shadow mb-4">
 				<div class="card-header d-flex justify-content-between align-items-center">
 					<span>Incurred Claims By Event</span>
-					<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.IncurredClaimsByEvent, $"IncurredClaimsByEvent_{Run.RunID}.csv"))">
-						<i class="bi bi-download me-1"></i>
-					</button>
+					@if (Run.IncurredClaimsByEvent.Any())
+					{
+						<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.IncurredClaimsByEvent, $"IncurredClaimsByEvent_{Run.RunID}.csv"))">
+							<i class="bi bi-download me-1"></i>
+						</button>
+					}
 				</div>
 				<div class="card-body">
-					@if (Run.IncurredClaimsByEvent == null)
+					@if (!Run.IncurredClaimsByEvent.Any())
 					{
 						<p><em>No data found</em></p>
 					}
@@ -125,12 +137,15 @@ else
 			<div class="card shadow mb-4">
 				<div class="card-header d-flex justify-content-between align-items-center">
 					<span>Ultimate Claims By Event</span>
-					<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.UltimateClaimsByEvent, $"UltimateClaimsByEvent_{Run.RunID}.csv"))">
-						<i class="bi bi-download me-1"></i>
-					</button>
+					@if (Run.UltimateClaimsByEvent.Any())
+					{
+						<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.UltimateClaimsByEvent, $"UltimateClaimsByEvent_{Run.RunID}.csv"))">
+							<i class="bi bi-download me-1"></i>
+						</button>
+					}
 				</div>
 				<div class="card-body">
-					@if (Run.UltimateClaimsByEvent == null)
+					@if (!Run.UltimateClaimsByEvent.Any())
 					{
 						<p><em>No data found</em></p>
 					}
@@ -144,12 +159,15 @@ else
 			<div class="card shadow mb-4">
 				<div class="card-header d-flex justify-content-between align-items-center">
 					<span>Allocated Paid Recoveries</span>
-					<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.AllocatedPaidRecoveries, $"AllocatedPaidRecoveries_{Run.RunID}.csv"))">
-						<i class="bi bi-download me-1"></i>
-					</button>
+					@if (Run.AllocatedPaidRecoveries.Any())
+					{
+						<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.AllocatedPaidRecoveries, $"AllocatedPaidRecoveries_{Run.RunID}.csv"))">
+							<i class="bi bi-download me-1"></i>
+						</button>
+					}
 				</div>
 				<div class="card-body">
-					@if (Run.AllocatedPaidRecoveries == null)
+					@if (!Run.AllocatedPaidRecoveries.Any())
 					{
 						<p><em>No data found</em></p>
 					}
@@ -160,12 +178,15 @@ else
 			<div class="card shadow mb-4">
 				<div class="card-header d-flex justify-content-between align-items-center">
 					<span>Allocated Incurred Recoveries</span>
-					<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.AllocatedIncurredRecoveries, $"AllocatedIncurredRecoveries_{Run.RunID}.csv"))">
-						<i class="bi bi-download me-1"></i>
-					</button>
+					@if (Run.AllocatedIncurredRecoveries.Any())
+					{
+						<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.AllocatedIncurredRecoveries, $"AllocatedIncurredRecoveries_{Run.RunID}.csv"))">
+							<i class="bi bi-download me-1"></i>
+						</button>
+					}
 				</div>
 				<div class="card-body">
-					@if (Run.AllocatedIncurredRecoveries == null)
+					@if (!Run.AllocatedIncurredRecoveries.Any())
 					{
 						<p><em>No data found</em></p>
 					}
@@ -179,12 +200,15 @@ else
 			<div class="card shadow mb-4">
 				<div class="card-header d-flex justify-content-between align-items-center">
 					<span>Allocated Ultimate Recoveries</span>
-					<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.AllocatedUltimateRecoveries, $"AllocatedUltimateRecoveries_{Run.RunID}.csv"))">
-						<i class="bi bi-download me-1"></i>
-					</button>
+					@if (Run.AllocatedUltimateRecoveries.Any())
+					{
+						<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.AllocatedUltimateRecoveries, $"AllocatedUltimateRecoveries_{Run.RunID}.csv"))">
+							<i class="bi bi-download me-1"></i>
+						</button>
+					}
 				</div>
 				<div class="card-body">
-					@if (Run.AllocatedUltimateRecoveries == null)
+					@if (!Run.AllocatedUltimateRecoveries.Any())
 					{
 						<p><em>No data found</em></p>
 					}
@@ -195,12 +219,15 @@ else
 			<div class="card shadow mb-4">
 				<div class="card-header d-flex justify-content-between align-items-center">
 					<span>Merged Allocated Recoveries</span>
-					<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.AllocatedRecoveriesMerged, $"AllocatedRecoveriesMerged_{Run.RunID}.csv"))">
-						<i class="bi bi-download me-1"></i>
-					</button>
+					@if (Run.AllocatedRecoveriesMerged.Any())
+					{
+						<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.AllocatedRecoveriesMerged, $"AllocatedRecoveriesMerged_{Run.RunID}.csv"))">
+							<i class="bi bi-download me-1"></i>
+						</button>
+					}
 				</div>
 				<div class="card-body">
-					@if (Run.AllocatedRecoveriesMerged == null)
+					@if (!Run.AllocatedRecoveriesMerged.Any())
 					{
 						<p><em>No data found</em></p>
 					}
