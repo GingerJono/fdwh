@@ -41,7 +41,14 @@ else if (EventDetails != null)
                     <label class="form-label">Event Code</label>
                     <input type="text" class="form-control" value="@EventDetails.EventCode" disabled>
                 </div>
-
+                <div class="mb-3">
+                    <label class="form-label">Event Start Date </label>
+                    <input type="text" class="form-control" value="@EventDetails.EventStartDate" disabled>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Event Start Date Override</label>
+                    <InputText class="form-control" @bind-Value="EventDetails.EventStartDateOverride" />
+                </div>
                 <div class="mb-3">
                     <label class="form-label">Peril</label>
                     <select class="form-select" @bind="EventDetails.Peril">
