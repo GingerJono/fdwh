@@ -1,0 +1,15 @@
+﻿namespace Sandbox.Models.Prism
+{
+    public class UltimateClaimsByORIPolicyByEventModel
+    {
+        public int RunID { get; set; }
+        public string ORIPolicyReference { get; set; }
+        public string EventCode { get; set; }
+        public string ContractCcy { get; set; }
+
+        public decimal? UltimateClaimsInContractCcy { get; set; }
+        public decimal? UltimateRecoveriesInContractCcy { get; set; }
+        public decimal? UltimateBasisRIPsInContractCcy { get; set; }
+        public decimal? ResidualUltimateClaimsInContractCcy { get; set; }
+    }
+}

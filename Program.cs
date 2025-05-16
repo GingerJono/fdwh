@@ -129,6 +129,7 @@ builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddScoped<ReservingService>();
 builder.Services.AddScoped<ReportingService>();
 builder.Services.AddScoped<ORIService>();
+builder.Services.AddScoped<PrismService>();
 builder.Services.AddScoped<CookieManager>();
 
 //Dashboards Start//
