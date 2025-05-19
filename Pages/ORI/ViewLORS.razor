@@ -9,61 +9,100 @@
 
 @if (IsLoading)
 {
-    <p>Loading LORS details...</p>
+	<p>Loading LORS details...</p>
 }
 else if (!string.IsNullOrEmpty(ErrorMessage))
 {
-    <p class="text-danger">@ErrorMessage</p>
+	<p class="text-danger">@ErrorMessage</p>
 }
 else if (LORSDetails != null)
 {
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="/LORSList">ORI LORS List</a></li>
-            <li class="breadcrumb-item active" aria-current="page">View LORS</li>
-        </ol>
-    </nav>
+	<nav aria-label="breadcrumb">
+		<ol class="breadcrumb">
+			<li class="breadcrumb-item"><a href="/LORSList">ORI LORS List</a></li>
+			<li class="breadcrumb-item active" aria-current="page">View LORS</li>
+		</ol>
+	</nav>
 
-    <div class="card">
-        <div class="card-header">
-            LORS File: <strong>@LORSDetails.FileName</strong>
-        </div>
-        <div class="card-body">
-            <table class="table table-bordered">
-                <tbody>
-                    <tr><th>Policy Sequence</th><td>@LORSDetails.PolicySequence</td></tr>
-                    <tr><th>ORI Policy Reference</th><td>@LORSDetails.ORIPolicyReference</td></tr>
-                    <tr><th>Processed Date</th><td>@LORSDetails.ProcessedDate?.ToString("yyyy-MM-dd")</td></tr>
-                    <tr><th>Processed Time</th><td>@(LORSDetails.ProcessedTime)</td></tr>
-                    <tr><th>Amount</th><td>@LORSDetails.Amount.ToString("N2")</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
+	<div class="card shadow mb-4">
+		<div class="card-header">
+			LORS File: <strong>@LORSDetails.FileName</strong>
+		</div>
+		<div class="card-body">
+			<table class="table table-bordered">
+				<tbody>
+					<tr><th>Policy Sequence</th><td>@LORSDetails.PolicySequence</td></tr>
+					<tr><th>ORI Policy Reference</th><td>@LORSDetails.ORIPolicyReference</td></tr>
+					<tr><th>Processed Date</th><td>@LORSDetails.ProcessedDate?.ToString("yyyy-MM-dd")</td></tr>
+					<tr><th>Processed Time</th><td>@(LORSDetails.ProcessedTime)</td></tr>
+					<tr><th>Amount</th><td>@LORSDetails.Amount.ToString("N2")</td></tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+	<div class="card shadow mb-4">
+		<div class="card-header">Reinsurers</div>
+		<div class="card-body">
+			@if(LORSDetails.LORSReinsurers.Any())
+			{
+			<table class="table table-striped">
+				<thead>
+					<tr>
+						<th>Reinsurer</th>
+						<th>Reinsurer Code</th>
+						<th>Amount Qualifier</th>
+						<th class="text-end">Amount`</th>
+					</tr>
+				</thead>
+				<tbody>
+					@foreach (var reinsurer in LORSDetails.LORSReinsurers)
+					{
+						<tr>
+							<td>@reinsurer.Reinsurer</td>
+							<td>@reinsurer.PartyCode</td>
+							<td>@reinsurer.AmountQualifier</td>
+							<td class="text-end">@reinsurer.Amount.ToString("N2")</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+			}
+			else
+			{
+				<p><em>No Reinsurers found.</em></p>
+			}
+		</div>
+	</div>
 }
 
 @code {
-    [Parameter] public string FileName { get; set; }
-    [Parameter] public int PolicySequence { get; set; }
+	[Parameter] public string FileName { get; set; }
+	[Parameter] public int PolicySequence { get; set; }
 
-    private LORSModel LORSDetails { get; set; }
-    private bool IsLoading = true;
-    private string ErrorMessage;
+	private LORSModel LORSDetails { get; set; }
+	private bool IsLoading = true;
+	private string ErrorMessage;
 
-    protected override async Task OnInitializedAsync()
-    {
-        try
-        {
-            LORSDetails = await ORIService.GetLORSDetails(FileName, PolicySequence);
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = "Error loading LORS details.";
-            Console.Error.WriteLine(ex);
-        }
-        finally
-        {
-            IsLoading = false;
-        }
-    }
+	protected override async Task OnInitializedAsync()
+	{
+		try
+		{
+			LORSDetails = await ORIService.GetLORSDetails(FileName, PolicySequence);
+
+			if (LORSDetails != null)
+			{
+				LORSDetails.LORSReinsurers = await ORIService.GetLORSReinsurers(FileName, PolicySequence);
+			}
+		}
+		catch (Exception ex)
+		{
+			ErrorMessage = "Error loading LORS details.";
+			Console.Error.WriteLine(ex);
+		}
+		finally
+		{
+			IsLoading = false;
+		}
+	}
 }

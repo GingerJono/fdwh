@@ -89,6 +89,26 @@ namespace Sandbox.Services
             }
         }
 
+        public async Task <List<LORSReinsurerModel>> GetLORSReinsurers(string fileName, int policySequence)
+        {
+            using (var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection")))
+            {
+                await connection.OpenAsync();
+
+                var parameters = new DynamicParameters();
+                parameters.Add("FileName", fileName);
+                parameters.Add("PolicySequence", policySequence);
+
+                var result = await connection.QueryAsync<LORSReinsurerModel>(
+                    "ORI.spGetLORSReinsurers", 
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                );
+
+                return result.ToList();
+            }
+        }
+
         public async Task<IEnumerable<LORSListModel>> GetLORSList()
         {
             using (var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection")))
