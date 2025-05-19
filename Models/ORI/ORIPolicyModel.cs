@@ -47,6 +47,9 @@ namespace Sandbox.Models.ORI
         public List<ORIPolicyReinstatementModel> Reinstatements { get; set; } = new();
         public List<PolicySecurity> PolicySecurities { get; set; } = new();
 
+        // Class/Year of Account Allocation Splits
+        public List<ClassYearOfAccountSplits> ClassYearOfAccountSplits { get; set; } = new();
+
     }
 
     public class ORIFilterItemDefinition
@@ -133,5 +136,12 @@ namespace Sandbox.Models.ORI
         public DateTime? LastUpdated { get; set; }
         public string LastUpdatedBy { get; set; }
     }
+
+    public class ClassYearOfAccountSplits
+    {
+        public string Class { get; set; }
+        public Dictionary<int, decimal> YearOfAccountSplits { get; set; } = new();
+    }
+
 }
 

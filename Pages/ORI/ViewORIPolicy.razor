@@ -1,4 +1,4 @@
-@page "/ViewORIPolicy/{ORIPolicyReference}"
+﻿@page "/ViewORIPolicy/{ORIPolicyReference}"
 @inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager
 @using Sandbox._Spk
 @using CardModel
@@ -170,9 +170,6 @@ else
 					}
 				</div>
 			</div>
-		</div>
-
-		<div class="col-md-6">
 			<div class="card shadow mb-4">
 				<div class="card-header">Policy Allocations by Year of Account</div>
 				<div class="card-body">
@@ -203,6 +200,55 @@ else
 					else
 					{
 						<p class="text-muted">No allocations by year of account defined for this policy.</p>
+					}
+				</div>
+			</div>
+		</div>
+
+		<div class="col-md-6">
+			<div class="card shadow mb-4">
+				<div class="card-header">Policy Allocations Splits</div>
+				<div class="card-body">
+					@if (PolicyDetails?.ClassYearOfAccountSplits?.Any() == true)
+					{
+						<table class="table">
+							<thead>
+								<tr>
+									<th>Class</th>
+									@foreach (var yearOfAccount in PolicyYearsOfAccount)
+									{
+										<th>@yearOfAccount</th>
+									}
+								</tr>
+							</thead>
+							<tbody>
+								@foreach (var row in PolicyDetails.ClassYearOfAccountSplits)
+								{
+									<tr>
+										<td>@row.Class</td>
+										@foreach (var yoa in PolicyYearsOfAccount)
+										{
+											var value = row.YearOfAccountSplits.TryGetValue(yoa, out var split) ? split : 0m;
+
+											var weight = value / 100m; // 0 to 1
+											int r = (int)Math.Round(255 - (255 - 0) * weight);   // from 255 → 0
+											int g = (int)Math.Round(255 - (255 - 40) * weight);  // from 255 → 40
+											int b = (int)Math.Round(255 - (255 - 85) * weight);  // from 255 → 85
+											var bgColor = $"rgb({r}, {g}, {b})";
+											var textColor = value > 60 ? "white" : "black";
+
+											<td style="@($"background-color:{bgColor}; color:{textColor};")">
+												@value.ToString("N2")%
+											</td>
+										}
+									</tr>
+								}
+							</tbody>
+						</table>
+					}
+					else
+					{
+						<p class="text-muted">No allocation splits available for this policy.</p>
 					}
 				</div>
 			</div>
@@ -489,6 +535,31 @@ else
 	private string ErrorMessage { get; set; }
 	private List<ORIUSMListModel> USMs { get; set; } = new();
 	private List<LORSListModel> LORS { get; set; } = new();
+	private List<int> PolicyYearsOfAccount => PolicyDetails?.ClassYearOfAccountSplits?
+	.SelectMany(y => y.YearOfAccountSplits.Keys)
+	.Distinct()
+	.OrderBy(y => y)
+	.ToList() ?? new List<int>();
+
+	// COB/YoA Splits matrix
+	public List<ClassYearOfAccountSplits> GetClassYearOfAccountSplits()
+	{
+		if (PolicyDetails != null && PolicyDetails.PolicyAllocationsClass != null && PolicyDetails.PolicyAllocationsYOA != null)
+		{
+			return PolicyDetails.PolicyAllocationsClass.Select(x => new ClassYearOfAccountSplits
+				{
+					Class = x.Class,
+					YearOfAccountSplits = PolicyDetails.PolicyAllocationsYOA.ToDictionary(
+								ya => ya.YearOfAccount,
+								ya => Math.Round(x.Allocation * ya.Allocation / 100, 2)) // Keep 2 decimal places
+				}).ToList();
+		}
+		else
+		{
+			return null;
+		}
+	}
+
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -508,6 +579,7 @@ else
 				USMs = (await ORIService.GetORIUSMsByPolicy(ORIPolicyReference)).ToList();
 				LORS = (await ORIService.GetLORSByPolicy(ORIPolicyReference)).ToList();
 				PolicyDetails.Reinstatements = (await ORIService.GetReinstatementsByPolicy(ORIPolicyReference)).ToList();
+				PolicyDetails.ClassYearOfAccountSplits = GetClassYearOfAccountSplits();
 			}
 			else
 			{
