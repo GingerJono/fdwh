@@ -11,10 +11,10 @@
         public string EventCode { get; set; }
         public DateTime? EventDate { get; set; }
         public string Ccy { get; set; }
-        public decimal? UltimateClaims { get; set; }
+        public decimal UltimateClaims { get; set; }
         public string Peril { get; set; }
         public string PerilRegion { get; set; }
-        public decimal? FXRateFromCcyToContractCcy { get; set; }
-        public decimal? UltimateClaimsInContractCcy { get; set; }
+        public decimal FXRateFromCcyToContractCcy { get; set; }
+        public decimal UltimateClaimsInContractCcy { get; set; }
     }
 }

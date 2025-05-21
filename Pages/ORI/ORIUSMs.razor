@@ -1,5 +1,5 @@
 ﻿@page "/ORIUSMs"
-@page "/ORIUSMs/PolicyYOA/{PolicyYOA:int?}"
+@page "/ORIUSMs/YoA/{YoA:int?}"
 @page "/ORIUSMs/USMYear/{USMYear:int?}"
 @inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
@@ -28,8 +28,8 @@
 <div class="btn-group mb-3" role="group">
     @foreach (var year in YearRange)
     {
-        <a class="btn @(PolicyYOA == year ? "btn-secondary" : "btn-outline-secondary")"
-           href="@($"/ORIUSMs/PolicyYOA/{year}")">@year</a>
+        <a class="btn @(YoA == year ? "btn-secondary" : "btn-outline-secondary")"
+           href="@($"/ORIUSMs/YoA/{year}")">@year</a>
     }
 </div>
 
@@ -42,14 +42,14 @@
     }
 </div>
 
-@if (PolicyYOA is not null || USMYear is not null)
+@if (YoA is not null || USMYear is not null)
 {
     <div class="alert alert-info d-flex align-items-center gap-2" role="alert">
         <i class="ri-filter-line fs-5"></i>
         <strong>Filtering by:</strong>
-        @if (PolicyYOA is not null)
+        @if (YoA is not null)
         {
-            <span>Policy YOA: <span class="badge bg-secondary">@PolicyYOA</span></span>
+            <span>Policy YOA: <span class="badge bg-secondary">@YoA</span></span>
         }
         @if (USMYear is not null)
         {
@@ -227,7 +227,7 @@ else
 
 }
 @code {
-    [Parameter] public int? PolicyYOA { get; set; }
+    [Parameter] public int? YoA { get; set; }
     [Parameter] public int? USMYear { get; set; }
 
     private List<ORIUSMListModel> usmList = new();
@@ -237,8 +237,8 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        int? effectiveUSMYear = USMYear ?? (PolicyYOA is null ? DateTime.UtcNow.Year : null);
-        usmList = (await ORIService.GetORIUSMs(PolicyYOA, effectiveUSMYear)).ToList();
+        int? effectiveUSMYear = USMYear ?? (YoA is null ? DateTime.UtcNow.Year : null);
+        usmList = (await ORIService.GetORIUSMs(YoA, effectiveUSMYear)).ToList();
 
         shouldInitDataTables = true;
     }
@@ -269,19 +269,19 @@ else
     public override async Task SetParametersAsync(ParameterView parameters)
     {
         // Store current values before they are potentially updated
-        int? previousPolicyYOA = PolicyYOA;
+        int? previousPolicyYOA = YoA;
         int? previousUSMYear = USMYear;
 
-        // Apply new parameters (this sets PolicyYOA and USMYear)
+        // Apply new parameters (this sets YoA and USMYear)
         await base.SetParametersAsync(parameters);
 
         // Only re-fetch if the parameters actually changed
-        bool paramsChanged = previousPolicyYOA != PolicyYOA || previousUSMYear != USMYear;
+        bool paramsChanged = previousPolicyYOA != YoA || previousUSMYear != USMYear;
 
         if (paramsChanged)
         {
-            int? effectiveUSMYear = USMYear ?? (PolicyYOA is null ? DateTime.UtcNow.Year : null);
-            usmList = (await ORIService.GetORIUSMs(PolicyYOA, effectiveUSMYear)).ToList();
+            int? effectiveUSMYear = USMYear ?? (YoA is null ? DateTime.UtcNow.Year : null);
+            usmList = (await ORIService.GetORIUSMs(YoA, effectiveUSMYear)).ToList();
 
             shouldInitDataTables = true;
         }

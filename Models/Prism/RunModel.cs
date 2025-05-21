@@ -10,6 +10,8 @@
         public int? DurationMinutes { get; set; }
         public required string Status { get; set; }
         public string RunUser { get; set; } = string.Empty;
+        public string? PrismVersion { get; set; } = string.Empty;
+        public string? ProcessingMonth { get; set; } = string.Empty;
 
         public List<RunLogModel> Logs { get; set; } = new();
 
