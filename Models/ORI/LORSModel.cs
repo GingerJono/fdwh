@@ -10,5 +10,6 @@ namespace Sandbox.Models.ORI
 		public DateTime? ProcessedDate { get; set; }
 		public required string ProcessedTime { get; set; }
 		public decimal Amount { get; set; }
+		public List<LORSReinsurerModel> LORSReinsurers { get; set; } = new List<LORSReinsurerModel>();
 	}
 }

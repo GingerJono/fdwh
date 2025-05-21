@@ -11,13 +11,13 @@
 
 <style>
 	.table thead th {
-		background-color: #002855; /* dark navy blue */
-		color: white;
-		border-color: #dee2e6;
+	background-color: #002855; /* dark navy blue */
+	color: white;
+	border-color: #dee2e6;
 	}
 
 	.card h2, .card h3 {
-		margin-bottom: 0.25rem;
+	margin-bottom: 0.25rem;
 	}
 
 </style>
@@ -43,12 +43,20 @@ else
 		<div class="card shadow mb-4 border border-dark">
 			<div class="card-body">
 				<div class="row">
-					<div class="col-md-2"><strong>Status</strong><div class="fs-4 text">@Run.Status</div></div>
-					<div class="col-md-2"><strong>As At Date</strong><div class="fs-4 text">@Run.AsAtDate.ToString("yyyy-MM-dd")</div></div>
-					<div class="col-md-2"><strong>Start Time</strong><div class="fs-4 text">@Run.StartTime.ToString("yyyy-MM-dd HH:mm")</div></div>
-					<div class="col-md-2"><strong>End Time</strong><div class="fs-4 text">@Run.EndTime?.ToString("yyyy-MM-dd HH:mm")</div></div>
-					<div class="col-md-2"><strong>Duration (Minutes)</strong><div class="fs-4 text">@Run.DurationMinutes</div></div>
-					<div class="col-md-2"><strong>Run By</strong><div class="fs-4 text">@Run.RunUser</div></div>
+					@if (Run != null)
+					{
+						<div class="col-md-2"><strong>Processing Month</strong><div class="fs-4 text">@Run.ProcessingMonth</div></div>
+						<div class="col-md-2"><strong>Start Time</strong><div class="fs-4 text">@Run.StartTime.ToString("yyyy-MM-dd HH:mm")</div></div>
+						<div class="col-md-2"><strong>End Time</strong><div class="fs-4 text">@Run.EndTime?.ToString("yyyy-MM-dd HH:mm")</div></div>
+						<div class="col-md-2"><strong>Duration (Minutes)</strong><div class="fs-4 text">@Run.DurationMinutes</div></div>
+						<div class="col-md-1"><strong>Version</strong><div class="fs-4 text">@Run.PrismVersion</div></div>
+						<div class="col-md-2"><strong>Run By</strong><div class="fs-4 text">@Run.RunUser</div></div>
+						<div class="col-md-1"><strong>Status</strong><div class="fs-4 text">@Run.Status</div></div>
+					}
+					else
+					{
+						<p><em>No Run details found.</em></p>
+					}
 				</div>
 				@if (!string.IsNullOrEmpty(Run.Notes))
 				{
@@ -63,12 +71,9 @@ else
 	<div class="row">
 		<div class="d-flex justify-content-between align-items-center mb-4">
 			<h3>Output</h3>
-			@if (Run.HasOutput)
-			{
-				<button class="btn btn-primary btn-sm" @onclick="() => ExportAllCsvsAsZip(Run, JS)">
-					<i class="bi bi-file-zip me-1"></i>
-				</button>
-			}
+			<button class="btn btn-primary btn-sm" @onclick="() => ExportAllCsvsAsZip(Run, JS)">
+				<i class="bi bi-file-zip me-1"></i>
+			</button>
 		</div>
 	</div>
 
@@ -76,16 +81,13 @@ else
 		<div class="col-md-6">
 			<div class="card shadow mb-4">
 				<div class="card-header d-flex justify-content-between align-items-center">
-					<span>Incurred Claims Mapping</span>
-					@if (Run.ORIPolIncurredClaimsMapping.Any())
-					{
-						<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.ORIPolIncurredClaimsMapping, $"IncurredClaimsMapping_{Run.RunID}.csv"))">
-							<i class="bi bi-download me-1"></i>
-						</button>
-					}
+					<span>Incurred Claims Mapping (@Run?.ORIPolIncurredClaimsMapping?.Count())</span>
+					<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.ORIPolIncurredClaimsMapping, $"IncurredClaimsMapping_{Run.RunID}.csv"))">
+						<i class="bi bi-download me-1"></i>
+					</button>
 				</div>
 				<div class="card-body">
-					@if (!Run.ORIPolIncurredClaimsMapping.Any())
+					@if (Run.ORIPolIncurredClaimsMapping == null)
 					{
 						<p><em>No data found</em></p>
 					}
@@ -95,16 +97,13 @@ else
 		<div class="col-md-6">
 			<div class="card shadow mb-4">
 				<div class="card-header d-flex justify-content-between align-items-center">
-					<span>Ultimate Claims Mapping</span>
-					@if (Run.ORIPolUltimateClaimsMapping.Any())
-					{
-						<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.ORIPolUltimateClaimsMapping, $"UltimateClaimsMapping_{Run.RunID}.csv"))">
-							<i class="bi bi-download me-1"></i>
-						</button>
-					}
+					<span>Ultimate Claims Mapping (@Run?.ORIPolUltimateClaimsMapping?.Count())</span>
+					<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.ORIPolUltimateClaimsMapping, $"UltimateClaimsMapping_{Run.RunID}.csv"))">
+						<i class="bi bi-download me-1"></i>
+					</button>
 				</div>
 				<div class="card-body">
-					@if (!Run.ORIPolUltimateClaimsMapping.Any())
+					@if (Run.ORIPolUltimateClaimsMapping == null)
 					{
 						<p><em>No data found</em></p>
 					}
@@ -117,16 +116,13 @@ else
 		<div class="col-md-6">
 			<div class="card shadow mb-4">
 				<div class="card-header d-flex justify-content-between align-items-center">
-					<span>Incurred Claims By Event</span>
-					@if (Run.IncurredClaimsByEvent.Any())
-					{
-						<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.IncurredClaimsByEvent, $"IncurredClaimsByEvent_{Run.RunID}.csv"))">
-							<i class="bi bi-download me-1"></i>
-						</button>
-					}
+					<span>Incurred Claims By Event(@Run?.IncurredClaimsByEvent?.Count())</span>
+					<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.IncurredClaimsByEvent, $"IncurredClaimsByEvent_{Run.RunID}.csv"))">
+						<i class="bi bi-download me-1"></i>
+					</button>
 				</div>
 				<div class="card-body">
-					@if (!Run.IncurredClaimsByEvent.Any())
+					@if (Run.IncurredClaimsByEvent == null)
 					{
 						<p><em>No data found</em></p>
 					}
@@ -136,16 +132,13 @@ else
 		<div class="col-md-6">
 			<div class="card shadow mb-4">
 				<div class="card-header d-flex justify-content-between align-items-center">
-					<span>Ultimate Claims By Event</span>
-					@if (Run.UltimateClaimsByEvent.Any())
-					{
-						<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.UltimateClaimsByEvent, $"UltimateClaimsByEvent_{Run.RunID}.csv"))">
-							<i class="bi bi-download me-1"></i>
-						</button>
-					}
+					<span>Ultimate Claims By Event (@Run?.UltimateClaimsByEvent?.Count())</span>
+					<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.UltimateClaimsByEvent, $"UltimateClaimsByEvent_{Run.RunID}.csv"))">
+						<i class="bi bi-download me-1"></i>
+					</button>
 				</div>
 				<div class="card-body">
-					@if (!Run.UltimateClaimsByEvent.Any())
+					@if (Run.UltimateClaimsByEvent == null)
 					{
 						<p><em>No data found</em></p>
 					}
@@ -158,16 +151,13 @@ else
 		<div class="col-md-6">
 			<div class="card shadow mb-4">
 				<div class="card-header d-flex justify-content-between align-items-center">
-					<span>Allocated Paid Recoveries</span>
-					@if (Run.AllocatedPaidRecoveries.Any())
-					{
-						<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.AllocatedPaidRecoveries, $"AllocatedPaidRecoveries_{Run.RunID}.csv"))">
-							<i class="bi bi-download me-1"></i>
-						</button>
-					}
+					<span>Allocated Paid Recoveries (@Run?.AllocatedIncurredRecoveries?.Count())</span>
+					<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.AllocatedPaidRecoveries, $"AllocatedPaidRecoveries_{Run.RunID}.csv"))">
+						<i class="bi bi-download me-1"></i>
+					</button>
 				</div>
 				<div class="card-body">
-					@if (!Run.AllocatedPaidRecoveries.Any())
+					@if (Run.AllocatedPaidRecoveries == null)
 					{
 						<p><em>No data found</em></p>
 					}
@@ -177,16 +167,13 @@ else
 		<div class="col-md-6">
 			<div class="card shadow mb-4">
 				<div class="card-header d-flex justify-content-between align-items-center">
-					<span>Allocated Incurred Recoveries</span>
-					@if (Run.AllocatedIncurredRecoveries.Any())
-					{
-						<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.AllocatedIncurredRecoveries, $"AllocatedIncurredRecoveries_{Run.RunID}.csv"))">
-							<i class="bi bi-download me-1"></i>
-						</button>
-					}
+					<span>Allocated Incurred Recoveries (@Run?.AllocatedIncurredRecoveries?.Count())</span>
+					<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.AllocatedIncurredRecoveries, $"AllocatedIncurredRecoveries_{Run.RunID}.csv"))">
+						<i class="bi bi-download me-1"></i>
+					</button>
 				</div>
 				<div class="card-body">
-					@if (!Run.AllocatedIncurredRecoveries.Any())
+					@if (Run.AllocatedIncurredRecoveries == null)
 					{
 						<p><em>No data found</em></p>
 					}
@@ -199,16 +186,13 @@ else
 		<div class="col-md-6">
 			<div class="card shadow mb-4">
 				<div class="card-header d-flex justify-content-between align-items-center">
-					<span>Allocated Ultimate Recoveries</span>
-					@if (Run.AllocatedUltimateRecoveries.Any())
-					{
-						<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.AllocatedUltimateRecoveries, $"AllocatedUltimateRecoveries_{Run.RunID}.csv"))">
-							<i class="bi bi-download me-1"></i>
-						</button>
-					}
+					<span>Allocated Ultimate Recoveries (@Run?.AllocatedUltimateRecoveries?.Count())</span>
+					<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.AllocatedUltimateRecoveries, $"AllocatedUltimateRecoveries_{Run.RunID}.csv"))">
+						<i class="bi bi-download me-1"></i>
+					</button>
 				</div>
 				<div class="card-body">
-					@if (!Run.AllocatedUltimateRecoveries.Any())
+					@if (Run.AllocatedUltimateRecoveries == null)
 					{
 						<p><em>No data found</em></p>
 					}
@@ -218,16 +202,13 @@ else
 		<div class="col-md-6">
 			<div class="card shadow mb-4">
 				<div class="card-header d-flex justify-content-between align-items-center">
-					<span>Merged Allocated Recoveries</span>
-					@if (Run.AllocatedRecoveriesMerged.Any())
-					{
-						<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.AllocatedRecoveriesMerged, $"AllocatedRecoveriesMerged_{Run.RunID}.csv"))">
-							<i class="bi bi-download me-1"></i>
-						</button>
-					}
+					<span>Merged Allocated Recoveries (@Run?.AllocatedRecoveriesMerged?.Count())</span>
+					<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.AllocatedRecoveriesMerged, $"AllocatedRecoveriesMerged_{Run.RunID}.csv"))">
+						<i class="bi bi-download me-1"></i>
+					</button>
 				</div>
 				<div class="card-body">
-					@if (!Run.AllocatedRecoveriesMerged.Any())
+					@if (Run.AllocatedRecoveriesMerged == null)
 					{
 						<p><em>No data found</em></p>
 					}
@@ -245,7 +226,7 @@ else
 		}
 		else
 		{
-			<table class="table table-striped">
+			@* <table class="table table-striped">
 				<thead>
 					<tr>
 						<th>Time</th>
@@ -257,13 +238,79 @@ else
 					@foreach (var log in Run.Logs)
 					{
 						<tr>
-							<td>@log.LogTime.ToString("yyyy-MM-dd HH:mm")</td>
+							<td class="text-nowrap">@log.LogTime.ToString("yyyy-MM-dd HH:mm")</td>
+							<td>@log.LogLevel</td>
+							<td>@log.Message</td>
+						</tr>
+					}
+				</tbody>
+			</table> *@
+
+			<table class="table table-striped">
+				<thead>
+					<tr>
+						<th>Time</th>
+						<th>Level</th>
+						<th>Message</th>
+					</tr>
+				</thead>
+				<tbody>
+					@foreach (var log in PaginatedLogs)
+					{
+						<tr>
+							<td class="text-nowrap">@log.LogTime.ToString("yyyy-MM-dd HH:mm")</td>
 							<td>@log.LogLevel</td>
 							<td>@log.Message</td>
 						</tr>
 					}
 				</tbody>
 			</table>
+
+			<div class="d-flex justify-content-between align-items-center">
+				<select class="form-select form-select-sm w-auto" @onchange="OnPageSizeChange">
+					@foreach (var size in PageSizeOptions)
+					{
+						<option value="@size" selected="@(PageSize == size)">
+							@size per page
+						</option>
+					}
+				</select>
+
+				<nav>
+					<ul class="pagination mb-0">
+						<li class="page-item @(CurrentPage == 1 ? "disabled" : "")">
+							<button class="page-link" @onclick="() => GoToPage(CurrentPage - 1)">Previous</button>
+						</li>
+
+						@if (StartPage > 1)
+						{
+							<li class="page-item">
+								<button class="page-link" @onclick="() => ShiftPageWindow(-1)">...</button>
+							</li>
+						}
+
+						@for (int i = StartPage; i <= EndPage; i++)
+						{
+							<li class="page-item @(CurrentPage == i ? "active" : "")">
+								<button class="page-link" @onclick="() => GoToPage(i)">@i</button>
+							</li>
+						}
+
+						@if (EndPage < TotalPages)
+						{
+							<li class="page-item">
+								<button class="page-link" @onclick="() => ShiftPageWindow(1)">...</button>
+							</li>
+						}
+
+						<li class="page-item @(CurrentPage == TotalPages ? "disabled" : "")">
+							<button class="page-link" @onclick="() => GoToPage(CurrentPage + 1)">Next</button>
+						</li>
+					</ul>
+				</nav>
+
+			</div>
+
 		}
 	</div>
 }
@@ -354,4 +401,48 @@ else
 		using var streamRef = new DotNetStreamReference(zipStream);
 		await js.InvokeVoidAsync("downloadFileFromStream", $"Prism_Export_Run_{run.RunID}.zip", streamRef);
 	}
+
+	// Paginated Log table code
+	private int CurrentPage = 1;
+	private int PageSize = 25;
+	private List<int> PageSizeOptions = new() { 10, 25, 50, 100 };
+	private List<RunLogModel> AllLogs => Run?.Logs ?? new List<RunLogModel>();
+	private int TotalPages => (int)Math.Ceiling((double)AllLogs.Count / PageSize);
+	private const int MaxVisiblePages = 10;
+
+	private IEnumerable<RunLogModel> PaginatedLogs =>
+		AllLogs
+			.Skip((CurrentPage - 1) * PageSize)
+			.Take(PageSize);
+
+	// Paging window start and end
+	private int StartPage => Math.Max(1, ((CurrentPage - 1) / MaxVisiblePages) * MaxVisiblePages + 1);
+	private int EndPage => Math.Min(StartPage + MaxVisiblePages - 1, TotalPages);
+
+	private void GoToPage(int page)
+	{
+		if (page >= 1 && page <= TotalPages)
+		{
+			CurrentPage = page;
+		}
+	}
+
+	private void OnPageSizeChange(ChangeEventArgs e)
+	{
+		if (int.TryParse(e.Value?.ToString(), out int newSize))
+		{
+			PageSize = newSize;
+			CurrentPage = 1;
+		}
+	}
+
+	private void ShiftPageWindow(int direction)
+	{
+		int newPage = direction > 0
+			? Math.Min(StartPage + MaxVisiblePages, TotalPages)
+			: Math.Max(StartPage - MaxVisiblePages, 1);
+
+		GoToPage(newPage);
+	}
+
 }

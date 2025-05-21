@@ -26,8 +26,9 @@
 						<th>ID</th>
 						<th>User</th>
 						<th>Status</th>
+						<th>Version</th>
 						<th>Notes</th>
-						<th>As At Date</th>
+						<th>Processing Month</th>
 						<th>Start Time</th>
 						<th>End Time</th>
 						<th class="text-end">Duration (Minutes)</th>
@@ -41,8 +42,9 @@
 							<td>@run.RunID</td>
 							<td>@run.RunUser</td>
 							<td>@run.Status</td>
+							<td>@run.PrismVersion</td>
 							<td>@run.Notes</td>
-							<td>@run.AsAtDate.ToString("yyyy-MM-dd")</td>
+							<td>@run.ProcessingMonth</td>
 							<td>@run.StartTime.ToString("yyyy-MM-dd HH:mm")</td>
 							<td>@(run.EndTime?.ToString("yyyy-MM-dd HH:mm") ?? "")</td>
 							<td class="text-end">@(run.DurationMinutes.ToString() ?? "")</td>

@@ -89,6 +89,26 @@ namespace Sandbox.Services
             }
         }
 
+        public async Task <List<LORSReinsurerModel>> GetLORSReinsurers(string fileName, int policySequence)
+        {
+            using (var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection")))
+            {
+                await connection.OpenAsync();
+
+                var parameters = new DynamicParameters();
+                parameters.Add("FileName", fileName);
+                parameters.Add("PolicySequence", policySequence);
+
+                var result = await connection.QueryAsync<LORSReinsurerModel>(
+                    "ORI.spGetLORSReinsurers", 
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                );
+
+                return result.ToList();
+            }
+        }
+
         public async Task<IEnumerable<LORSListModel>> GetLORSList()
         {
             using (var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection")))
@@ -213,14 +233,14 @@ namespace Sandbox.Services
                 parameters,
                 commandType: CommandType.StoredProcedure);
         }
-        public async Task<IEnumerable<ORIUSMListModel>> GetORIUSMs(int? policyYOA = null, int? usmYear = null)
+        public async Task<IEnumerable<ORIUSMListModel>> GetORIUSMs(int? YoA = null, int? usmYear = null)
         {
             using (var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection")))
             {
                 await connection.OpenAsync();
 
                 var parameters = new DynamicParameters();
-                parameters.Add("PolicyYOA", policyYOA, DbType.Int32);
+                parameters.Add("YoA", YoA, DbType.Int32);
                 parameters.Add("USMYear", usmYear, DbType.Int32);
 
                 var result = await connection.QueryAsync<ORIUSMListModel>(
