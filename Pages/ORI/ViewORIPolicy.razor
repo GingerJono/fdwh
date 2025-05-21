@@ -41,8 +41,15 @@ else
 		<h1 class="page-header m-0">
 			ORI Policy Reference: @(PolicyDetails?.ORIPolicyReference ?? "[Not Found]") (@PolicyDetails.PolicyDescription)
 		</h1>
-		<button class="btn btn-primary btn-lg" @onclick="NavigateToEdit">Edit Policy</button>
-
+		<div class="d-flex gap-2 ms-auto">
+			<a class="btn btn-secondary btn-lg"
+			   href="@PolicyDetails.DMSLink"
+			   target="_blank"
+			   rel="noopener noreferrer">
+				<i class="bi bi-file-earmark-text"></i>
+			</a>
+			<button class="btn btn-primary btn-lg" @onclick="NavigateToEdit">Edit Policy</button>
+		</div>
 		@code {
 		private void NavigateToEdit()
 		{
@@ -550,8 +557,8 @@ else
 				{
 					Class = x.Class,
 					YearOfAccountSplits = PolicyDetails.PolicyAllocationsYOA.ToDictionary(
-								ya => ya.YearOfAccount,
-								ya => Math.Round(x.Allocation * ya.Allocation / 100, 2)) // Keep 2 decimal places
+									ya => ya.YearOfAccount,
+									ya => Math.Round(x.Allocation * ya.Allocation / 100, 2)) // Keep 2 decimal places
 				}).ToList();
 		}
 		else
