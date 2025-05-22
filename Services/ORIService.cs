@@ -287,6 +287,7 @@ namespace Sandbox.Services
 					usmDetails.ClassAllocations = (await connection.QueryAsync<ClassAllocation>(
 						"ORI.spGetORIUSMAllocationsClass",
 
+
                         parameters,
                         commandType: CommandType.StoredProcedure
                     )).ToList();
