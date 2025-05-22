@@ -285,7 +285,7 @@ namespace Sandbox.Services
 
                     // Fetch COB allocations
                     usmDetails.COBAllocations = (await connection.QueryAsync<COBAllocation>(
-                        "ORI.spGetORIUSMAllocationsCOB",
+                        "ORI.spGetORIUSMAllocationsClass",
                         parameters,
                         commandType: CommandType.StoredProcedure
                     )).ToList();
