@@ -1,0 +1,48 @@
+﻿@page "/MyAccounts"
+@using Sandbox.Models.Windowpane
+@using Sandbox.Services
+@inject WindowpaneService WindowpaneService
+@inject NavigationManager NavigationManager
+
+<h1 class="page-header mb-3">@(Model?.Programs?.Any() == true ? "Your Accounts" : "No Accounts").</h1>
+
+@if (Model?.Programs?.Any() == true)
+{
+    <div class="card">
+        <div class="card-body">
+            <table class="table table-hover table-striped">
+                <thead>
+                    <tr>
+                        <th>Program Ref</th>
+                        <th>Inception</th>
+                        <th>Assured</th>
+                        <th>Gross EPI</th>
+                        <th>Layers</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var prog in Model.Programs)
+                    {
+                        <tr>
+                            <td><a href="/ViewProgram/@prog.ProgramRef">@prog.ProgramRef</a></td>
+                            <td>@prog.Inception.ToString("dd/MM/yyyy")</td>
+                            <td>@prog.Assured</td>
+                            <td>@prog.GrossEPI.ToString("C0")</td>
+                            <td>@prog.LayerCount</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@code {
+    private MyAccountsModel Model { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+            Model.Programs = (await WindowpaneService.GetAllProgramsAsync())?.ToList() ?? new();
+        
+    }
+}
