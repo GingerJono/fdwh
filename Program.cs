@@ -261,6 +261,16 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 var connString = builder.Configuration.GetConnectionString("DaleSandboxConnection");
 var parsed = new SqlConnectionStringBuilder(connString);
 
+// Override database server if running on DUWPMLSW03
+if (Environment.MachineName.Equals("DUWPMLSW03", StringComparison.OrdinalIgnoreCase))
+{
+	parsed.DataSource = "DUWPMND06";
+
+	// Override the config directly
+	builder.Configuration["ConnectionStrings:DaleSandboxConnection"] = parsed.ConnectionString;
+	Console.WriteLine($"[Startup] Overriding DB server to DUWPMND06 for {Environment.MachineName}");
+}
+
 var sandboxContext = new SandboxContext
 {
 	WebServerName = Environment.MachineName,
