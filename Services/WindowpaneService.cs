@@ -134,7 +134,8 @@ namespace Sandbox.Services
 
 		public async Task<IEnumerable<MyProgram>> GetAllProgramsAsync()
 		{
-			var username = _httpContextAccessor.HttpContext?.User?.Identity?.Name;
+			var context = _httpContextAccessor.HttpContext;
+			var username = context?.User?.Identity?.Name;
 			// e.g., "DUW\\jononeill"
 
 			using var db = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));

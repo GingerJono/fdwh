@@ -1,3 +1,18 @@
+@using Sandbox.Helpers
+@inject SandboxContext SandboxContext
+
+<footer class="footer mt-auto py-3 bg-white text-center">
+    <div class="container">
+        <span class="bi bi-heart-fill text-danger"></span>
+        <span class="muted">
+            app server: @SandboxContext.WebServerName.
+            database server: @SandboxContext.DatabaseServer.
+            database: @SandboxContext.DatabaseName.
+            user: @SandboxContext.EffectiveUserName.
+        </span>
+        <span class="bi bi-heart-fill text-danger"></span>
+    </div>
+</footer>
 
 
 @code {

@@ -4,12 +4,20 @@
 @inject WindowpaneService WindowpaneService
 @inject NavigationManager NavigationManager
 
-<h1 class="page-header mb-3">@(Model?.Programs?.Any() == true ? "Your Accounts" : "No Accounts").</h1>
-
-@if (Model?.Programs?.Any() == true)
-{
-    <div class="card">
-        <div class="card-body">
+<div class="card">
+    <div class="card-header bg-none fw-semibold">
+        Account List
+    </div>
+    <div class="card-body overflow-x-auto">
+        @if (isLoading)
+        {
+            <div class="d-flex align-items-center">
+                <div class="spinner-border text-primary me-2" role="status"></div>
+                <span>Loading accounts...</span>
+            </div>
+        }
+        else if (Model?.Programs?.Any() == true)
+        {
             <table class="table table-hover table-striped">
                 <thead>
                     <tr>
@@ -33,16 +41,32 @@
                     }
                 </tbody>
             </table>
-        </div>
+        }
+        else
+        {
+            <p>No accounts found.</p>
+        }
     </div>
-}
+</div>
 
 @code {
     private MyAccountsModel Model { get; set; } = new();
+    private bool isLoading = true;
+    private bool hasLoaded = false;
 
     protected override async Task OnInitializedAsync()
     {
+        if (hasLoaded) return;
+
+        isLoading = true;
+        try
+        {
             Model.Programs = (await WindowpaneService.GetAllProgramsAsync())?.ToList() ?? new();
-        
+        }
+        finally
+        {
+            isLoading = false;
+            hasLoaded = true;
+        }
     }
 }
