@@ -29,7 +29,7 @@
     @foreach (var year in YearRange)
     {
         <a class="btn @(YoA == year ? "btn-secondary" : "btn-outline-secondary")"
-           href="@($"/ORIUSMs/YoA/{year}")">@year</a>
+           href="@($"{NavigationManager.BaseUri}ORIUSMs/YoA/{year}")">@year</a>
     }
 </div>
 
@@ -38,7 +38,7 @@
     @foreach (var year in YearRange)
     {
         <a class="btn @(USMYear == year ? "btn-primary" : "btn-outline-primary")"
-           href="@($"/ORIUSMs/USMYear/{year}")">@year</a>
+               href="@($"{NavigationManager.BaseUri}ORIUSMs/USMYear/{year}")">@year</a>
     }
 </div>
 

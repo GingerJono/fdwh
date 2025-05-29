@@ -54,7 +54,7 @@
                                 @foreach (var policy in Model.Policies)
                                 {
                                     <tr class="border-bottom-0">
-                                        <td><a href="/ViewPolicy/@policy.PolicyRef">@policy.PolicyRef</a></td>
+                                        <td><a href="@($"{NavigationManager.BaseUri}ViewPolicy/{policy.PolicyRef}")">@policy.PolicyRef</a></td>
                                         <td>@policy.Class</td>
                                         <td>@policy.ReservingClass</td>
                                         <td>@policy.InceptionDate</td>
@@ -85,7 +85,7 @@
                                 @foreach (var program in Model.Programs)
                                 {
                                     <tr class="border-bottom-0">
-                                        <td><a href="/ViewProgram/@program.ProgramRef">@program.ProgramRef</a></td>
+                                        <td><a href="@($"{NavigationManager.BaseUri}ViewProgram/{program.ProgramRef}")">@program.ProgramRef</a></td>
                                         <td>@program.Class</td>
                                         <td>@program.ReservingClass</td>
                                         <td>@program.InceptionDate</td>
@@ -115,7 +115,7 @@
                                 @foreach (var claim in Model.Claims)
                                 {
                                     <tr class="border-bottom-0">
-                                        <td><a href="/ViewClaim/@claim.ClaimRef">@claim.ClaimRef</a></td>
+                                        <td><a href="@($"{NavigationManager.BaseUri}ViewClaim/{claim.ClaimRef}")">@claim.ClaimRef</a></td>
                                         <td>@claim.Class</td>
                                         <td>@claim.ReservingClass</td>
                                         <td>@claim.LossDate</td>

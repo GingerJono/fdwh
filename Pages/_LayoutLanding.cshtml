@@ -48,8 +48,8 @@
         <link href="@($"{NavigationManager.BaseUri}assets/css/icons.css")" rel="stylesheet">
 
         <!-- ColorPicker CSS -->
-        <link href="_content/BlazorColorPicker/colorpicker.css" rel="stylesheet" />
-        <link href="_content/BlazorColorPicker/BlazorColorPicker.bundle.scp.css" rel="stylesheet" />
+        <link href="@($"{NavigationManager.BaseUri}_content/BlazorColorPicker/colorpicker.css")" rel="stylesheet" />
+        <link href="@($"{NavigationManager.BaseUri}_content/BlazorColorPicker/BlazorColorPicker.bundle.scp.css")" rel="stylesheet" />
 
         <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered" />
         
@@ -65,9 +65,9 @@
         <!-- Bootstrap JS -->
         <script src="@($"{NavigationManager.BaseUri}assets/libs/bootstrap/js/bootstrap.bundle.min.js")"></script>
 
-        <script src="_framework/blazor.server.js"></script>
-        <script src="js/javaScriptInterop.js"></script>
-        <script src="js/resizeInterop.js"></script>
+        <script src="@($"{NavigationManager.BaseUri}_framework/blazor.server.js")"></script>
+        <script src="@($"{NavigationManager.BaseUri}js/javaScriptInterop.js")"></script>
+        <script src="@($"{NavigationManager.BaseUri}js/resizeInterop.js")></script>
     
 
     </body>

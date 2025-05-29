@@ -10,8 +10,8 @@
 @inject ORIService ORIService
 
 <!-- Flatpickr Css -->
-<link href="_content/FlatpickrBlazor/flatpickr.min.css" rel="stylesheet" />
-<link href="_content/FlatpickrBlazor/plugins/monthSelect/style.css" rel="stylesheet" />
+<link href="@($"{NavigationManager.BaseUri}_content/FlatpickrBlazor/flatpickr.min.css")" rel="stylesheet" />
+<link href="@($"{NavigationManager.BaseUri}_content/FlatpickrBlazor/plugins/monthSelect/style.css")" rel="stylesheet" />
 
 @if (IsLoading)
 {
