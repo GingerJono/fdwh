@@ -22,6 +22,7 @@ public class MenuDataServiceSandbox
 					path: "ORIPolicies",
 					type: "link",
 					title: "ORI Policies",
+
 					selected: false,
 					active: false,
 					dirChange: false
@@ -35,9 +36,10 @@ public class MenuDataServiceSandbox
 					dirChange: false
 				),
 				new MainMenuItems (
+
 					path: "EventMetadata",
 					type: "link",
-					title: "Event Metadata",
+                    title: "Events",
 					selected: false,
 					active: false,
 					dirChange: false
@@ -50,9 +52,8 @@ public class MenuDataServiceSandbox
 					active: false,
 					dirChange: false
 				),
-
 				new MainMenuItems (
-					path: "NavHist",
+                    path: "ORIUSMs",
 					type: "link",
 					title: "NavHist",
 					selected: false,
@@ -60,6 +61,7 @@ public class MenuDataServiceSandbox
 					dirChange: false
 				),
 			}
+
 		),
 		new MainMenuItems(
 			type: "sub",

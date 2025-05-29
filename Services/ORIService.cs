@@ -114,18 +114,26 @@ namespace Sandbox.Services
         {
             using (var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection")))
             {
-                await connection.OpenAsync();
+                try
+                {
+                    await connection.OpenAsync();
 
-                var parameters = new DynamicParameters();
-                // No parameters needed for this stored procedure
+                    var parameters = new DynamicParameters();
+                    // No parameters needed for this stored procedure
 
-                var result = await connection.QueryAsync<LORSListModel>(
-                    "ORI.spGetLORSList",
-                    parameters,
-                    commandType: CommandType.StoredProcedure
-                );
+                    var result = await connection.QueryAsync<LORSListModel>(
+                        "ORI.spGetLORSList",
+                        parameters,
+                        commandType: CommandType.StoredProcedure
+                    );
 
-                return result.ToList();
+                    return result.ToList();
+                }
+                catch(Exception ex)
+                {
+                    throw;
+                }
+               
             }
         }
 
@@ -241,7 +249,7 @@ namespace Sandbox.Services
                 await connection.OpenAsync();
 
                 var parameters = new DynamicParameters();
-                parameters.Add("YoA", YoA, DbType.Int32);
+                parameters.Add("PolicyYoA", YoA, DbType.Int32);
                 parameters.Add("USMYear", usmYear, DbType.Int32);
 
                 var result = await connection.QueryAsync<ORIUSMListModel>(
