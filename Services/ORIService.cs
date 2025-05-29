@@ -4,6 +4,7 @@ using System.Data;
 using Sandbox.Helpers;
 using Sandbox.Models.ORI;
 using System.Diagnostics;
+using Sandbox.Models;
 
 namespace Sandbox.Services
 {
@@ -89,7 +90,7 @@ namespace Sandbox.Services
             }
         }
 
-        public async Task <List<LORSReinsurerModel>> GetLORSReinsurers(string fileName, int policySequence)
+        public async Task<List<LORSReinsurerModel>> GetLORSReinsurers(string fileName, int policySequence)
         {
             using (var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection")))
             {
@@ -100,7 +101,7 @@ namespace Sandbox.Services
                 parameters.Add("PolicySequence", policySequence);
 
                 var result = await connection.QueryAsync<LORSReinsurerModel>(
-                    "ORI.spGetLORSReinsurers", 
+                    "ORI.spGetLORSReinsurers",
                     parameters,
                     commandType: CommandType.StoredProcedure
                 );
@@ -636,6 +637,33 @@ namespace Sandbox.Services
             return result.ToList();
         }
 
+        public async Task<PagedResult<EventMetadataListModel>> GetEventMetadataPaged(int page, int pageSize, string? eventCode = null, string? peril = null, string? region = null, string? description = null)
+        {
+            using var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
+            await connection.OpenAsync();
+
+            var result = (await connection.QueryAsync<EventMetadataListModel>(
+                "ORI.spGetEventMetadataPaged",
+                new
+                {
+                    Page = page,
+                    PageSize = pageSize,
+                    EventCode = eventCode,
+                    Peril = peril,
+                    Region = region,
+                    Description = description
+                },
+                commandType: CommandType.StoredProcedure
+            )).ToList();
+
+            int total = result.FirstOrDefault()?.TotalCount ?? 0;
+
+            return new PagedResult<EventMetadataListModel>
+            {
+                Items = result,  // Cast to base model if needed
+                TotalCount = total
+            };
+        }
         public async Task<EventMetadataModel> GetEventMetadata(string eventCode)
         {
             using var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
@@ -659,7 +687,7 @@ namespace Sandbox.Services
             await connection.OpenAsync();
 
             if (string.IsNullOrEmpty(model.EventStartDateOverride))
-                {
+            {
                 model.EventStartDateOverride = null;
             }
 

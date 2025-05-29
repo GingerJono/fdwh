@@ -5,149 +5,227 @@
 @using Sandbox.Models.ORI
 @using Sandbox.Services
 @inject ORIService ORIService
-@using DataTablesData
-@inject DataTablesService DataTablesService
-
-<!-- DataTables CSS -->
-<link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/dataTables.bootstrap5.min.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.3.0/css/responsive.bootstrap.min.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.bootstrap5.min.css">
 
 <!-- Start: row-1 -->
-<div class="row">
+<div class="row mt-4 mb-4">
+
 	<h3>Event Metadata</h3>
 
-	@if (events == null)
-	{
-		<p><em>Loading...</em></p>
-	}
-	else
-	{
-		<table class="table dataTable" id="eventMetadataTable">
-			<thead>
-				<tr>
-					<th>Event Code</th>
-					<th>Peril</th>
-					<th>Region</th>
-					<th>Syndicate Event Desc</th>
-					<th>Num Claims</th>
-					<th>Incurred USD Qtr</th>
-				</tr>
-			</thead>
-			<tbody>
-				@foreach (var ev in events)
-				{
+	<div class="card shadow-sm border-0">
+		<div class="position-relative">
+			<table class="table table-striped">
+				<thead>
 					<tr>
-						<td>
-							<button class="btn btn-link text-decoration-underline"
-									@onclick="@(() => NavigationManager.NavigateTo($"ViewEventMetadata/{ev.EventCode}"))">
-								@ev.EventCode
-							</button>
-						</td>
-						<td>@ev.Peril</td>
-						<td>@ev.PerilRegion</td>
-						<td>@ev.EventDescription</td>
-						<td>@ev.NumClaims</td>
-						<td>@ev.IncurredUSDQtr.ToString("N2")</td>
+						<th>
+							Event Code
+							<input class="form-control form-control-sm" placeholder="Filter Event Code..." value="@FilterEventCode" @oninput="e => OnEventCodeChanged(e.Value?.ToString())" />
+						</th>
+						<th>Start Date
+							<input class="form-control form-control-sm" placeholder="Filter Start Date..." value="@FilterEventCode" @oninput="e => OnEventStartDateChanged(e.Value?.ToString())" />
+						</th>
+						<th>
+							Peril
+							<input class="form-control form-control-sm" placeholder="Filter Peril..." value="@FilterPeril" @oninput="e => OnPerilChanged(e.Value?.ToString())" />
+						</th>
+						<th>
+							Region
+							<input class="form-control form-control-sm" placeholder="Filter Region..." value="@FilterRegion" @oninput="e => OnRegionChanged(e.Value?.ToString())" />
+						</th>
+						<th>
+							Description
+							<input class="form-control form-control-sm" placeholder="Filter Description..." value="@FilterDescription" @oninput="e => OnDescriptionChanged(e.Value?.ToString())" />
+						</th>
+						<th class="text-end">Number of Claims</th>
+						<th class="text-end">Incurred USD Qtr</th>
+						<th>Actions</th>
 					</tr>
+				</thead>
+				<tbody>
+					@if (IsLoading)
+					{
+						<tr>
+							<td colspan="7" class="text-center">
+								<div class="spinner-border text-secondary" role="status"></div>
+							</td>
+						</tr>
+					}
+					else
+					{
+						@foreach (var ev in CurrentPageEvents)
+						{
+							<tr>
+								<td>@ev.EventCode</td>
+								<td>@ev.EventStartDate</td>
+								<td>@ev.Peril</td>
+								<td>@ev.PerilRegion</td>
+								<td>@ev.EventDescription</td>
+								<td class="text-end">@ev.NumClaims</td>
+								<td class="text-end">@ev.IncurredUSDQtr.ToString("N2")</td>
+								<td>
+									<button class="btn btn-sm btn-outline-primary"
+									@onclick='() => NavigationManager.NavigateTo($"ViewEventMetadata/{ev.EventCode}")'>
+										View
+									</button>
+								</td>
+							</tr>
+						}
+					}
+				</tbody>
+			</table>
+		</div>
+
+		<div class="d-flex justify-content-between align-items-center">
+			<select class="form-select form-select-sm w-auto" @onchange="OnPageSizeChange">
+				@foreach (var size in PageSizeOptions)
+				{
+					<option value="@size" selected="@(PageSize == size)">@size per page</option>
 				}
-			</tbody>
-			<tfoot>
-				<tr>
-					<th>Event Code</th>
-					<th>Peril</th>
-					<th>Region</th>
-					<th>Event Desc</th>
-					<th>Num Claims</th>
-					<th>Incurred USD</th>
-				</tr>
-			</tfoot>
-		</table>
-	}
+			</select>
+
+			<nav>
+				<ul class="pagination mb-0">
+					<li class="page-item @(CurrentPage == 1 ? "disabled" : "")">
+						<button class="page-link" @onclick="() => GoToPage(CurrentPage - 1)">Previous</button>
+					</li>
+
+					@if (StartPage > 1)
+					{
+						<li class="page-item">
+							<button class="page-link" @onclick="() => ShiftPageWindow(-1)">...</button>
+						</li>
+					}
+
+					@for (int i = StartPage; i <= EndPage; i++)
+					{
+						<li class="page-item @(CurrentPage == i ? "active" : "")">
+							<button class="page-link" @onclick="() => GoToPage(i)">@i</button>
+						</li>
+					}
+
+					@if (EndPage < TotalPages)
+					{
+						<li class="page-item">
+							<button class="page-link" @onclick="() => ShiftPageWindow(1)">...</button>
+						</li>
+					}
+
+					<li class="page-item @(CurrentPage == TotalPages ? "disabled" : "")">
+						<button class="page-link" @onclick="() => GoToPage(CurrentPage + 1)">Next</button>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</div>
 </div>
 
-<!-- jQuery -->
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-
-<!-- DataTables JS -->
-<script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.12.1/js/dataTables.bootstrap5.min.js"></script>
-<script src="https://cdn.datatables.net/responsive/2.3.0/js/dataTables.responsive.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.print.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.6/pdfmake.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-
-<!-- Internal DataTables JS -->
-<script src="@($"{NavigationManager.BaseUri}assets/js/datatables.js")"></script>
-
-<script>
-    var options = {
-        paging: true,
-        pageLength: 10,
-        fixedHeader: true,
-        lengthChange: false,
-        order: [],
-        columnDefs: [],
-        buttons: [],
-        initComplete: function () {
-            this.api()
-                .columns()
-                .every(function () {
-                    let column = this;
-                    let title = column.footer().textContent;
-
-                    let input = document.createElement('input');
-                    input.placeholder = title;
-                    column.footer().replaceChildren(input);
-
-                    input.addEventListener('keyup', () => {
-                        if (column.search() !== this.value) {
-                            column.search(input.value).draw();
-                        }
-                    });
-                });
-        }
-    };
-    
-    window.initializeDataTables = function () {
-        console.log("Initializing DataTables...");
-        setTimeout(() => {
-            if ($('#eventMetadataTable').length) {
-                $('#eventMetadataTable').DataTable(options);
-                console.log("DataTable initialized successfully.");
-            } else {
-                console.log("Table not found!");
-            }
-        }, 500);
-    };
-</script>
-
 @code {
-	private IEnumerable<EventMetadataListModel> events;
-	private bool isDataLoaded = false;
+	private List<EventMetadataListModel> AllEvents = new();
+	private List<EventMetadataListModel> CurrentPageEvents = new();
+	private int CurrentPage = 1;
+	private int PageSize = 50;
+	private int TotalRecords = 0;
+
+	private bool IsLoading = false;
+	private List<int> PageSizeOptions = new() { 10, 20, 50, 100 };
+
+	private string FilterEventCode = "";
+	private string FilterEventStartDate = "";
+	private string FilterPeril = "";
+	private string FilterRegion = "";
+	private string FilterDescription = "";
+
+	private const int MaxVisiblePages = 10;
+	private int TotalPages => Math.Max(1, (int)Math.Ceiling((double)TotalRecords / PageSize));
+	private int StartPage => Math.Max(1, ((CurrentPage - 1) / MaxVisiblePages) * MaxVisiblePages + 1);
+	private int EndPage => Math.Min(StartPage + MaxVisiblePages - 1, TotalPages);
 
 	protected override async Task OnInitializedAsync()
 	{
-		events = await ORIService.GetEventMetadataList();
-		isDataLoaded = true;
-		StateHasChanged();
+		await LoadEvents();
 	}
 
-	protected override async Task OnAfterRenderAsync(bool firstRender)
+	private async Task LoadEvents()
 	{
-		if (firstRender)
-		{
-			await JSRuntime.InvokeVoidAsync("window.interop.initializeTooltips");
-		}
+		IsLoading = true;
+		AllEvents = (await ORIService.GetEventMetadataList()).ToList();
+		IsLoading = false;
+		await ApplyFilters();
+	}
 
-		if (isDataLoaded)
+	private async Task ApplyFilters()
+	{
+		var filtered = AllEvents.Where(ev =>
+			(string.IsNullOrWhiteSpace(FilterEventCode) || ev.EventCode?.Contains(FilterEventCode, StringComparison.OrdinalIgnoreCase) == true) &&
+			(string.IsNullOrWhiteSpace(FilterEventCode) || ev.EventStartDate?.Contains(FilterEventStartDate, StringComparison.OrdinalIgnoreCase) == true) &&
+			(string.IsNullOrWhiteSpace(FilterPeril) || ev.Peril?.Contains(FilterPeril, StringComparison.OrdinalIgnoreCase) == true) &&
+			(string.IsNullOrWhiteSpace(FilterRegion) || ev.PerilRegion?.Contains(FilterRegion, StringComparison.OrdinalIgnoreCase) == true) &&
+			(string.IsNullOrWhiteSpace(FilterDescription) || ev.EventDescription?.Contains(FilterDescription, StringComparison.OrdinalIgnoreCase) == true)
+		);
+
+		TotalRecords = filtered.Count();
+		CurrentPageEvents = filtered.Skip((CurrentPage - 1) * PageSize).Take(PageSize).ToList();
+	}
+
+	private async Task GoToPage(int page)
+	{
+		if (page >= 1 && page <= TotalPages)
 		{
-			isDataLoaded = false;
-			await JSRuntime.InvokeVoidAsync("initializeDataTables");
+			CurrentPage = page;
+			await ApplyFilters();
 		}
 	}
-	};
+
+	private async Task ShiftPageWindow(int direction)
+	{
+		int newPage = direction > 0
+			? Math.Min(StartPage + MaxVisiblePages, TotalPages)
+			: Math.Max(StartPage - MaxVisiblePages, 1);
+
+		await GoToPage(newPage);
+	}
+
+	private async Task OnPageSizeChange(ChangeEventArgs e)
+	{
+		if (int.TryParse(e.Value?.ToString(), out int newSize))
+		{
+			PageSize = newSize;
+			CurrentPage = 1;
+			await ApplyFilters();
+		}
+	}
+
+	private async Task OnEventCodeChanged(string value)
+	{
+		FilterEventCode = value;
+		CurrentPage = 1;
+		await ApplyFilters();
+	}
+
+	private async Task OnEventStartDateChanged(string value)
+	{
+		FilterEventStartDate = value;
+		CurrentPage = 1;
+		await ApplyFilters();
+	}
+
+	private async Task OnPerilChanged(string value)
+	{
+		FilterPeril = value;
+		CurrentPage = 1;
+		await ApplyFilters();
+	}
+
+	private async Task OnRegionChanged(string value)
+	{
+		FilterRegion = value;
+		CurrentPage = 1;
+		await ApplyFilters();
+	}
+
+	private async Task OnDescriptionChanged(string value)
+	{
+		FilterDescription = value;
+		CurrentPage = 1;
+		await ApplyFilters();
+	}
 }
