@@ -35,7 +35,7 @@ if exist "%DestinationPath%" (
 
 :: Stop the IIS Application Pool
 echo Stopping IIS Application Pool...
-psexec \\duwpmlsw03 C:\Windows\System32\inetsrv\appcmd stop apppool /apppool.name:%AppPoolName%
+"C:\PSTools\psexec.exe" \\duwpmlsw03 C:\Windows\System32\inetsrv\appcmd stop apppool /apppool.name:%AppPoolName%
 if %ERRORLEVEL% neq 0 (
     echo Application pool was not running or failed to stop. Continuing deployment.
 ) else (
@@ -52,7 +52,7 @@ if %ERRORLEVEL% GEQ 8 (
 
 :: Start the IIS Application Pool
 echo Starting the IIS Application Pool...
-psexec \\duwpmlsw03 C:\Windows\System32\inetsrv\appcmd start apppool /apppool.name:%AppPoolName%
+"C:\PSTools\psexec.exe" \\duwpmlsw03 C:\Windows\System32\inetsrv\appcmd start apppool /apppool.name:%AppPoolName%
 if %ERRORLEVEL% neq 0 (
     echo Failed to start the application pool. Exiting.
     exit /b 1
@@ -60,7 +60,7 @@ if %ERRORLEVEL% neq 0 (
 
 :: Restart IIS (optional)
 echo Restarting IIS...
-psexec \\duwpmlsw03 iisreset
+"C:\PSTools\psexec.exe" \\duwpmlsw03 iisreset
 if %ERRORLEVEL% neq 0 (
     echo Failed to restart IIS. Exiting.
     exit /b 1
