@@ -4,7 +4,7 @@ namespace Sandbox.Models.ORI
 {
 	public class ORIPolicyListModel
 	{
-		public string ORIPolicyReference { get; set; }
+		public required string ORIPolicyReference { get; set; }
 		public DateTime? InceptionDate { get; set; }
 		public DateTime? ExpiryDate { get; set; }
 		public double? Limit { get; set; }

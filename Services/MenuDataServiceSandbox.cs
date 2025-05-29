@@ -21,15 +21,7 @@ public class MenuDataServiceSandbox
                 new MainMenuItems (
                     path: "ORIPolicies",
                     type: "link",
-                    title: "ORI Policies",
-                    selected: false,
-                    active: false,
-                    dirChange: false
-                ),
-                new MainMenuItems (
-                    path: "ORIUSMs",
-                    type: "link",
-                    title: "ORI USMs",
+                    title: "Policies",
                     selected: false,
                     active: false,
                     dirChange: false
@@ -37,12 +29,12 @@ public class MenuDataServiceSandbox
                 new MainMenuItems (
                     path: "EventMetadata",
                     type: "link",
-                    title: "Event Metadata",
+                    title: "Events",
                     selected: false,
                     active: false,
                     dirChange: false
                 ),
-                new MainMenuItems (
+                 new MainMenuItems (
                     path: "LORSList",
                     type: "link",
                     title: "LORS",
@@ -50,15 +42,22 @@ public class MenuDataServiceSandbox
                     active: false,
                     dirChange: false
                 ),
-
                 new MainMenuItems (
-                    path: "NavHist",
+                    path: "ORIUSMs",
                     type: "link",
-                    title: "NavHist",
+                    title: "USMs",
                     selected: false,
                     active: false,
                     dirChange: false
                 ),
+                //new MainMenuItems (
+                //    path: "NavHist",
+                //    type: "link",
+                //    title: "NavHist",
+                //    selected: false,
+                //    active: false,
+                //    dirChange: false
+                //),
             }
         ),
         new MainMenuItems(

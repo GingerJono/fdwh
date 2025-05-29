@@ -7,8 +7,8 @@ namespace Sandbox.Models.ORI
 		public required string FileName { get; set; }
 		public int PolicySequence { get; set; }
 		public required string ORIPolicyReference { get; set; }
-		public DateTime? ProcessedDate { get; set; }
-		public required string ProcessedTime { get; set; }
+		public string? ProcessedDate { get; set; }
+		public  string? ProcessedTime { get; set; }
 		public decimal Amount { get; set; }
 	}
 }

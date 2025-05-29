@@ -8,284 +8,322 @@
 @inject ORIService ORIService
 @using System.Text.Json
 
-<style>
-    #oriusms tfoot th {
-        padding: 0 !important;
-    }
-
-        #oriusms tfoot th input {
-            width: 100%;
-            padding: 2px 4px;
-            font-size: 0.75rem;
-            box-sizing: border-box;
-        }
-
-</style>
-
-<h3>ORI USMs</h3>
-
-<h4 class="mb-2">Filter by Policy YOA</h4>
-<div class="btn-group mb-3" role="group">
-    @foreach (var year in YearRange)
-    {
-        <a class="btn @(YoA == year ? "btn-secondary" : "btn-outline-secondary")"
-           href="@($"/ORIUSMs/YoA/{year}")">@year</a>
-    }
+<div class="row mt-4 mb-4">
+	<h3>ORI USMs</h3>
 </div>
 
-<h4 class="mb-2">Filter by USM Year</h4>
-<div class="btn-group mb-4" role="group">
-    @foreach (var year in YearRange)
-    {
-        <a class="btn @(USMYear == year ? "btn-primary" : "btn-outline-primary")"
-           href="@($"/ORIUSMs/USMYear/{year}")">@year</a>
-    }
+<div class="row mb-4">
+	<div class="col-md-6">
+		<div class="card shadow-sm border-0">
+			<div class="card-body">
+				<h5 class="card-title mb-1">Filter by Policy Year of Account</h5>
+				<div class="btn-group mb-3" role="group">
+					@foreach (var year in YearRange)
+					{
+						<a class="btn @(YoA == year ? "btn-secondary" : "btn-outline-secondary")"
+						   href="@($"/ORIUSMs/YoA/{year}")">@year</a>
+					}
+					<a class="btn btn-secondary" href="/ORIUSMs">Clear</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="col-md-6">
+		<div class="card shadow-sm border-0">
+			<div class="card-body">
+				<h5 class="card-title mb-1">Filter by USM Year</h5>
+				<div class="btn-group mb-4" role="group">
+					@foreach (var year in YearRange)
+					{
+						<a class="btn @(USMYear == year ? "btn-primary" : "btn-outline-primary")"
+						   href="@($"/ORIUSMs/USMYear/{year}")">@year</a>
+					}
+					<a class="btn btn-secondary" href="/ORIUSMs">Clear</a>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
 
-@if (YoA is not null || USMYear is not null)
-{
-    <div class="alert alert-info d-flex align-items-center gap-2" role="alert">
-        <i class="ri-filter-line fs-5"></i>
-        <strong>Filtering by:</strong>
-        @if (YoA is not null)
-        {
-            <span>Policy YOA: <span class="badge bg-secondary">@YoA</span></span>
-        }
-        @if (USMYear is not null)
-        {
-            <span>USM Year: <span class="badge bg-primary">@USMYear</span></span>
-        }
-    </div>
-}
+<div class="row mb-4">
+	<div class="col-md-12">
+		@if (YoA is not null || USMYear is not null)
+		{
+			<div class="card bg-info text-white shadow-sm border-0">
+				<div class="card-body d-flex align-items-center gap-3">
+					<i class="ri-filter-line fs-5"></i>
+					<strong>Filtering by:</strong>
+					@if (YoA is not null)
+					{
+						<span>Policy YOA: <span class="badge bg-light text-dark">@YoA</span></span>
+					}
+					@if (USMYear is not null)
+					{
+						<span>USM Year: <span class="badge bg-light text-dark">@USMYear</span></span>
+					}
+				</div>
+			</div>
+		}
+	</div>
+
+	<div class="row mb-4">
+		@if (AllUSMs == null)
+		{
+			<p><em>Loading...</em></p>
+		}
+		else
+		{
+			<div class="card shadow-sm border-0">
+				<div class="table-responsive">
+					<table class="table table-striped table-fixed text-nowrap">
+						<colgroup>
+							<col style="width: 5%">
+							<col style="width: 10%">
+							<col style="width: 8%">
+							<col style="width: 8%">
+							<col style="width: 6%">
+							<col style="width: 6%">
+							<col style="width: 6%">
+							<col style="width: 6%">
+							<col style="width: 8%">
+							<col style="width: 6%">
+							<col style="width: 10%">
+							<col style="width: 5%">
+							<col style="width: 5%">
+							<col style="width: 4%">
+							<col style="width: 4%">
+							<col style="width: 8%">
+							<col style="width: 6%">
+							<col style="width: 6%">
+							<col style="width: 6%">
+							<col style="width: 6%">
+							<col style="width: 4%">
+						</colgroup>
+						<thead>
+							<tr>
+								<th class="align-top">
+									USM ID
+									<input class="form-control form-control-sm" placeholder="Filter USM ID..." value="@FilterUSMID" @oninput="e => OnUSMIDChanged(e.Value?.ToString())" />
+								</th>
+								<th class="align-top">
+									ORI Policy Reference
+									<input class="form-control form-control-sm" placeholder="Filter ORI Policy Reference..." value="@FilterORIPolicyReference" @oninput="e => OnORIPolicyReferenceChanges(e.Value?.ToString())" />
+								</th>
+								<th class="align-top">
+									LPSO No
+									<input class="form-control form-control-sm" placeholder="Filter LPSO No..." value="@FilterLPSONo" @oninput="e => OnLPSONoChanged(e.Value?.ToString())" />
+								</th>
+								<th class="align-top">LPSO Date</th>
+								<th class="align-top">LPSO Version</th>
+								<th class="align-top">User Sequence No</th>
+								<th class="align-top">Syndicate No</th>
+								<th class="align-top">Instalment No</th>
+								<th class="align-top">Treaty Section</th>
+								<th class="align-top">Syndicate Line No</th>
+								<th class="align-top">USM CA Category Desc</th>
+								<th class="align-top">Closing Currency</th>
+								<th class="align-top">Settlement Currency</th>
+								<th class="align-top">Is RIP</th>
+								<th class="align-top">Is PC</th>
+								<th class="align-top text-end">Line Amount (SCC)</th>
+								<th class="align-top text-end">Total YOA Allocation</th>
+								<th class="align-top text-end">Total COB Allocation</th>
+								<th class="align-top text-end">Total Security Allocation</th>
+								<th class="align-top text-end">Total Event Allocation</th>
+								<th class="align-top">Actions</th>
+							</tr>
+						</thead>
+						<tbody>
+							@foreach (var usm in PagedUSMs)
+							{
+								<tr>
+									<td>@usm.USMID</td>
+									<td>@usm.ORIPolicyReference</td>
+									<td>@usm.LPSONo</td>
+									<td>@usm.LPSODate?.ToString("yyyy-MM-dd")</td>
+									<td>@usm.LPSOVersionNo</td>
+									<td>@usm.UserSequenceNo</td>
+									<td>@usm.SyndicateNo</td>
+									<td>@usm.InstalmentNo</td>
+									<td>@usm.TreatySection</td>
+									<td>@usm.SyndicateLineNo</td>
+									<td>@usm.USMCaCategoryDesc</td>
+									<td>@usm.ClosingCcy</td>
+									<td>@usm.SettCcy</td>
+									<td>@(usm.IsRIP ? "Yes" : "No")</td>
+									<td>@(usm.IsPC ? "Yes" : "No")</td>
+									<td class="text-end">@(usm.LineAmountSCC?.ToString("N2") ?? "0.00")</td>
+									<td class="text-end">@usm.TotalYOAAllocation.ToString("N2")</td>
+									<td class="text-end">@usm.TotalCOBAllocation.ToString("N2")</td>
+									<td class="text-end">@usm.TotalSecurityAllocation.ToString("N2")</td>
+									<td class="text-end">@usm.TotalEventAllocation.ToString("N2")</td>
+									<td>
+										<button class="btn btn-primary btn-sm"
+												@onclick="@(() => NavigationManager.NavigateTo($"ViewORIUSM/{usm.USMID}"))">
+											View
+										</button>
+									</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+
+				<div class="px-3 pb-3">
+					<div class="d-flex justify-content-between align-items-center mt-3">
+						<select class="form-select form-select-sm w-auto" @onchange="OnPageSizeChanged">
+							@foreach (var size in PageSizeOptions)
+							{
+								<option value="@size" selected="@(PageSize == size)">
+									@size per page
+								</option>
+							}
+						</select>
+
+						<nav>
+							<ul class="pagination mb-0">
+								<li class="page-item @(CurrentPage == 1 ? "disabled" : "")">
+									<button class="page-link" @onclick="() => GoToPage(CurrentPage - 1)">Previous</button>
+								</li>
+
+								@if (StartPage > 1)
+								{
+									<li class="page-item">
+										<button class="page-link" @onclick="() => ShiftPageWindow(-1)">...</button>
+									</li>
+								}
+
+								@for (int i = StartPage; i <= EndPage && i <= TotalPages; i++)
+								{
+									var pageNumber = i;  // capture value
+									<li class="page-item @(CurrentPage == pageNumber ? "active" : "")">
+										<button class="page-link" @onclick="() => GoToPage(pageNumber)">@pageNumber</button>
+									</li>
+								}
+
+								@if (EndPage < TotalPages)
+								{
+									<li class="page-item">
+										<button class="page-link" @onclick="() => ShiftPageWindow(1)">...</button>
+									</li>
+								}
+
+								<li class="page-item @(CurrentPage == TotalPages ? "disabled" : "")">
+									<button class="page-link" @onclick="() => GoToPage(CurrentPage + 1)">Next</button>
+								</li>
+							</ul>
+						</nav>
+					</div>
+				</div>
+			</div>
+		}
+	</div>
+</div>
 
 
-@if (usmList == null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <table class="table dataTable" id="oriusms">
-        <thead>
-            <tr>
-                <th>USM ID</th>
-                <th>ORI Policy Reference</th>
-                <th>LPSO No</th>
-                <th>LPSO Date</th>
-                <th>LPSO Version</th>
-                <th>User Sequence No</th>
-                <th>Syndicate No</th>
-                <th>Instalment No</th>
-                <th>Treaty Section</th>
-                <th>Syndicate Line No</th>
-                <th>USM CA Category Desc</th>
-                <th>Closing Currency</th>
-                <th>Settlement Currency</th>
-                    <th>Line Amount (SCC)</th>
-                                <th>Is RIP</th>
-                                <th>Is PC</th>
-                <th>Total YOA Allocation</th>
-                <th>Total COB Allocation</th>
-                <th>Total Security Allocation</th>
-                <th>Total Event Allocation</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var usm in usmList)
-            {
-                <tr>
-                    <td>
-                        <button class="btn btn-link text-decoration-underline"
-                                @onclick="@(() => NavigationManager.NavigateTo($"ViewORIUSM/{usm.USMID}"))">
-                            @usm.USMID
-                        </button>
-                    </td>
-                    <td>@usm.ORIPolicyReference</td>
-                    <td>@usm.LPSONo</td>
-                    <td>@usm.LPSODate?.ToString("yyyy-MM-dd")</td>
-                    <td>@usm.LPSOVersionNo</td>
-                    <td>@usm.UserSequenceNo</td>
-                    <td>@usm.SyndicateNo</td>
-                    <td>@usm.InstalmentNo</td>
-                    <td>@usm.TreatySection</td>
-                    <td>@usm.SyndicateLineNo</td>
-                    <td>@usm.USMCaCategoryDesc</td>
-                    <td>@usm.ClosingCcy</td>
-                    <td>@usm.SettCcy</td>
-                            <td>@(usm.LineAmountSCC?.ToString("N2") ?? "0.00")</td>
-                                        <td>@(usm.IsRIP ? "Yes" : "No")</td>
-                                        <td>@(usm.IsPC ? "Yes" : "No")</td>
-                    <td>@usm.TotalYOAAllocation.ToString("N2")</td>
-                    <td>@usm.TotalCOBAllocation.ToString("N2")</td>
-                    <td>@usm.TotalSecurityAllocation.ToString("N2")</td>
-                    <td>@usm.TotalEventAllocation.ToString("N2")</td>
-                    <td>
-                        <button class="btn btn-primary btn-sm"
-                                @onclick="@(() => NavigationManager.NavigateTo($"ViewORIUSM/{usm.USMID}"))">
-                            View
-                        </button>
-                    </td>
-                </tr>
-            }
-        </tbody>
-        <tfoot>
-            <tr>
-                <th>USM ID</th>
-                <th>ORI Policy Reference</th>
-                <th>LPSO No</th>
-                <th>LPSO Date</th>
-                <th>LPSO Version</th>
-                <th>User Sequence No</th>
-                <th>Syndicate No</th>
-                <th>Instalment No</th>
-                <th>Treaty Section</th>
-                <th>Syndicate Line No</th>
-                <th>USM CA Category Desc</th>
-                <th>Closing Currency</th>
-                <th>Settlement Currency</th>
-                    <th>Line Amount (SCC)</th>
-                                <th>Is RIP</th>
-                                <th>Is PC</th>
-                <th>Total YOA Allocation</th>
-                <th>Total COB Allocation</th>
-                <th>Total Security Allocation</th>
-                <th>Total Event Allocation</th>
-                <th>Actions</th>
-            </tr>
-        </tfoot>
-    </table>
-
-
-    <!-- DataTables CSS -->
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/dataTables.bootstrap5.min.css">
-    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.3.0/css/responsive.bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.bootstrap5.min.css">
-
-    <!-- jQuery + DataTables JS -->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.12.1/js/dataTables.bootstrap5.min.js"></script>
-    <script src="https://cdn.datatables.net/responsive/2.3.0/js/dataTables.responsive.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.print.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.6/pdfmake.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
-    <script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-
-    <script>
-                window.initializeDataTables = function () {
-            requestAnimationFrame(() => {
-                const $table = $('#oriusms');
-                if ($table.length === 0) {
-                    console.warn("DataTables init aborted: table not found.");
-                    return;
-                }
-
-                if ($.fn.DataTable.isDataTable($table)) {
-                    $table.DataTable().clear().destroy();
-                }
-
-                $table.DataTable({
-                    paging: true,
-                    pageLength: 10,
-                    lengthChange: false,
-                    ordering: true,
-                    order: [],
-                    fixedHeader: true,
-                    initComplete: function () {
-                        this.api().columns().every(function () {
-                            const column = this;
-                            const title = column.footer().textContent;
-                            const input = document.createElement('input');
-                            input.placeholder = title;
-                            column.footer().replaceChildren(input);
-                            input.addEventListener('keyup', function () {
-                                if (column.search() !== this.value) {
-                                    column.search(this.value).draw();
-                                }
-                            });
-                        });
-                    }
-                });
-            });
-        };
-
-    </script>
-
-    <style>
-        .btn-group h4 {
-            margin-bottom: 0.5rem;
-        }
-
-        .btn-group a {
-            font-size: 0.875rem;
-        }
-    </style>
-
-
-}
 @code {
-    [Parameter] public int? YoA { get; set; }
-    [Parameter] public int? USMYear { get; set; }
+	[Parameter] public int? YoA { get; set; }
+	[Parameter] public int? USMYear { get; set; }
+	private List<int> YearRange = Enumerable.Range(2014, DateTime.UtcNow.Year - 2014 + 1).Reverse().ToList();
 
-    private List<ORIUSMListModel> usmList = new();
- 
-    private bool shouldInitDataTables = false;
-    private List<int> YearRange = Enumerable.Range(2014, DateTime.UtcNow.Year - 2014 + 1).Reverse().ToList();
+	private List<ORIUSMListModel> AllUSMs = new();      // full dataset
+	private List<ORIUSMListModel> PagedUSMs = new();    // current page
+	private int CurrentPage = 1;
+	private int PageSize = 10;
+	private int TotalRecords = 0;
+	private List<int> PageSizeOptions = new() { 10, 20, 50, 100 };
 
-    protected override async Task OnInitializedAsync()
-    {
-        int? effectiveUSMYear = USMYear ?? (YoA is null ? DateTime.UtcNow.Year : null);
-        usmList = (await ORIService.GetORIUSMs(YoA, effectiveUSMYear)).ToList();
+	private string FilterORIPolicyReference = "";
+	private string FilterLPSONo = "";
+	private string FilterSyndicateNo = "";
+	private string FilterUSMID = "";
+	private string FilterCurrency = "";
 
-        shouldInitDataTables = true;
-    }
+	private const int MaxVisiblePages = 10;
+	private int TotalPages => Math.Max(1, (int)Math.Ceiling((double)TotalRecords / PageSize));
+	private int StartPage => Math.Max(1, ((CurrentPage - 1) / MaxVisiblePages) * MaxVisiblePages + 1);
+	private int EndPage => Math.Min(StartPage + MaxVisiblePages - 1, TotalPages);
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (shouldInitDataTables)
-        {
-            shouldInitDataTables = false;
+	private IEnumerable<ORIUSMListModel> FilteredUSMs => AllUSMs.Where(usm =>
+		(string.IsNullOrWhiteSpace(FilterORIPolicyReference) || usm.ORIPolicyReference?.Contains(FilterORIPolicyReference, StringComparison.OrdinalIgnoreCase) == true) &&
+		(string.IsNullOrWhiteSpace(FilterLPSONo) || usm.LPSONo?.Contains(FilterLPSONo, StringComparison.OrdinalIgnoreCase) == true) &&
+		(string.IsNullOrWhiteSpace(FilterSyndicateNo) || usm.SyndicateNo?.ToString().Contains(FilterSyndicateNo) == true) &&
+		(string.IsNullOrWhiteSpace(FilterUSMID) || usm.USMID.ToString().Contains(FilterUSMID)) &&
+		(string.IsNullOrWhiteSpace(FilterCurrency) || usm.ClosingCcy?.Contains(FilterCurrency, StringComparison.OrdinalIgnoreCase) == true)
+	);
 
-            try
-            {
-                await JSRuntime.InvokeVoidAsync("initializeDataTables");
-            }
-            catch (JSDisconnectedException)
-            {
-                Console.WriteLine("[WARN] JS interop called after circuit disconnected.");
-            }
-            catch (JSException jsEx)
-            {
-                Console.WriteLine($"[ERROR] JS init failed: {jsEx.Message}");
-            }
-        }
-    }
+	protected override async Task OnInitializedAsync()
+	{
+		int? effectiveUSMYear = USMYear ?? (YoA is null ? DateTime.UtcNow.Year : null);
+		
+		AllUSMs = (await ORIService.GetORIUSMs()).ToList(); // replace with your data method
+		await ApplyFilters();
+	}
 
+	public override async Task SetParametersAsync(ParameterView parameters)
+	{
+		// Store current values before they are potentially updated
+		int? previousPolicyYOA = YoA;
+		int? previousUSMYear = USMYear;
 
+		// Apply new parameters (this sets YoA and USMYear)
+		await base.SetParametersAsync(parameters);
 
-    public override async Task SetParametersAsync(ParameterView parameters)
-    {
-        // Store current values before they are potentially updated
-        int? previousPolicyYOA = YoA;
-        int? previousUSMYear = USMYear;
+		// Only re-fetch if the parameters actually changed
+		bool paramsChanged = previousPolicyYOA != YoA || previousUSMYear != USMYear;
 
-        // Apply new parameters (this sets YoA and USMYear)
-        await base.SetParametersAsync(parameters);
+		if (paramsChanged)
+		{
+			int? effectiveUSMYear = USMYear ?? (YoA is null ? DateTime.UtcNow.Year : null);
+			AllUSMs = (await ORIService.GetORIUSMs(YoA, effectiveUSMYear)).ToList();
+			await ApplyFilters();
+		}
+	}
 
-        // Only re-fetch if the parameters actually changed
-        bool paramsChanged = previousPolicyYOA != YoA || previousUSMYear != USMYear;
+	private void ApplyPagination()
+	{
+		PagedUSMs = FilteredUSMs
+			.Skip((CurrentPage - 1) * PageSize)
+			.Take(PageSize)
+			.ToList();
+	}
 
-        if (paramsChanged)
-        {
-            int? effectiveUSMYear = USMYear ?? (YoA is null ? DateTime.UtcNow.Year : null);
-            usmList = (await ORIService.GetORIUSMs(YoA, effectiveUSMYear)).ToList();
+	private async Task ApplyFilters()
+	{
+		TotalRecords = FilteredUSMs.Count();
+		ApplyPagination();
+		await InvokeAsync(StateHasChanged); // ensures the UI updates correctly
+	}
 
-            shouldInitDataTables = true;
-        }
-    }
+	private async Task GoToPage(int page)
+	{
+		if (page >= 1 && page <= TotalPages)
+		{
+			CurrentPage = page;
+			await ApplyFilters();
+		}
+	}
 
+	private async Task ShiftPageWindow(int direction)
+	{
+		int newPage = direction > 0
+			? Math.Min(EndPage + 1, TotalPages) // shift to the first page of the next window
+			: Math.Max(StartPage - MaxVisiblePages, 1); // shift to the first page of the previous window
 
+		await GoToPage(newPage);
+	}
+
+	private async Task OnPageSizeChanged(ChangeEventArgs e)
+	{
+		if (int.TryParse(e.Value?.ToString(), out int newSize))
+		{
+			PageSize = newSize;
+			CurrentPage = 1;
+			await ApplyFilters();
+		}
+	}
+
+	private async Task OnUSMIDChanged(string value) { FilterUSMID = value; await ApplyFilters(); }
+	private async Task OnORIPolicyReferenceChanges(string value) { FilterORIPolicyReference = value; await ApplyFilters(); }
+	private async Task OnLPSONoChanged(string value) { FilterLPSONo = value; await ApplyFilters(); }
 }

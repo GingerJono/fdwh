@@ -1,17 +1,4 @@
-﻿/* Sticky tfoot for table (above pagination) */
-tfoot.sticky-bottom {
-	position: sticky;
-	bottom: 50px; /* Ensures space for pagination */
-	background: white;
-	z-index: 1025;
-}
-
-/* Sticky pagination controls (at the very bottom) */
-.sticky-bottom-pagination {
-	position: sticky;
-	bottom: 0;
-	background: white;
-	z-index: 1020;
-	padding: 10px;
-	box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+﻿.table-fixed {
+	table-layout: fixed;
+	width: 100%;
 }
