@@ -49,6 +49,8 @@
     </div>
 </div>
 
+@inject IHttpContextAccessor HttpContextAccessor
+
 @code {
     private MyAccountsModel Model { get; set; } = new();
     private bool isLoading = true;
@@ -57,6 +59,21 @@
     protected override async Task OnInitializedAsync()
     {
         if (hasLoaded) return;
+
+        var username = HttpContextAccessor.HttpContext?.User?.Identity?.Name;
+
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            // Wait briefly to allow context to populate, in case it's mid-lifecycle
+            await Task.Delay(250);
+            username = HttpContextAccessor.HttpContext?.User?.Identity?.Name;
+
+            if (string.IsNullOrWhiteSpace(username))
+            {
+                Console.WriteLine("Username not resolved in MyAccounts. Aborting data load.");
+                return;
+            }
+        }
 
         isLoading = true;
         try
