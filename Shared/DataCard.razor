@@ -1,0 +1,335 @@
+﻿@using Sandbox.Models.Windowpane
+@using System.Text.RegularExpressions;
+@inject Sandbox.Services.WindowpaneService WindowpaneService
+
+@code {
+	[Parameter] public string HeaderTitle { get; set; }
+	[Parameter] public string ID { get; set; }
+	[Parameter] public string MethodName { get; set; }
+	[Parameter] public string DivClasses { get; set; }
+	[Parameter] public string GroupByColumnName { get; set; }
+
+	private bool IsLoading { get; set; } = true;
+	private object Data { get; set; }
+	private bool HasLoaded { get; set; } = false;
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender && !HasLoaded)
+		{
+			IsLoading = true;
+			try
+			{
+				Data = await WindowpaneService.ExecuteMethodByName(MethodName, ID);
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Error fetching data using {MethodName}: {ex.Message}");
+			}
+			finally
+			{
+				IsLoading = false;
+				HasLoaded = true;
+				StateHasChanged();
+			}
+		}
+	}
+}
+
+
+<div class="card @DivClasses">
+	<div class="card-header bg-none fw-semibold">
+		@HeaderTitle
+	</div>
+	<div class="card-body overflow-x-auto">
+		<div>
+			@if (IsLoading)
+			{
+				<div class="spinner-grow text-primary"></div>
+			}
+			else
+			{
+				if (Data is List<Dictionary<string, object>> tableData)
+				{
+					@MultiColumnTable(@tableData)
+				}
+				else if (Data is Dictionary<string, string> columnData)
+				{
+					@SingleColumnTable(@columnData)
+				}
+				else if (Data is List<Tuple<string, string, string>> pivotData)
+				{
+					@PivotedTable(@pivotData)
+				}
+				else if (Data is IEnumerable<IGrouping<string, Dictionary<string, object>>> tabData)
+				{
+					@TabbedTable(@tabData)
+				}
+				else
+				{
+					<text>Error: No data returned.</text>
+				}
+			}
+		</div>
+	</div>
+</div>
+
+@code {
+	private RenderFragment MultiColumnTable(List<Dictionary<string, object>> data) => builder =>
+	{
+		var seq = 0;
+
+		// Table start
+		builder.OpenElement(seq++, "table");
+		builder.AddAttribute(seq++, "class", "table");
+
+		// Thead
+		builder.OpenElement(seq++, "thead");
+		builder.OpenElement(seq++, "tr");
+
+		var firstDictionary = data.FirstOrDefault();
+		if (firstDictionary != null)
+		{
+			foreach (var key in firstDictionary.Keys)
+			{
+				builder.OpenElement(seq++, "th");
+				builder.AddContent(seq++, key);
+				builder.CloseElement(); // th
+			}
+		}
+
+		builder.CloseElement(); // tr
+		builder.CloseElement(); // thead
+
+		// Tbody
+		builder.OpenElement(seq++, "tbody");
+
+		foreach (var dictionary in data)
+		{
+			builder.OpenElement(seq++, "tr");
+			foreach (var value in dictionary.Values)
+			{
+				builder.OpenElement(seq++, "td");
+					builder.AddContent(seq++, new MarkupString(value?.ToString()));  // Converted value to string, be cautious if value can be null.
+				builder.CloseElement(); // td
+			}
+			builder.CloseElement(); // tr
+		}
+
+		builder.CloseElement(); // tbody
+		builder.CloseElement(); // table
+	};
+
+	private RenderFragment SingleColumnTable(Dictionary<string, string> data) => builder =>
+	{
+		int sequence = 0;
+
+		// Open the table
+		builder.OpenElement(sequence++, "table");
+		builder.AddAttribute(sequence++, "class", "table");
+
+		// Render the tbody section
+		builder.OpenElement(sequence++, "tbody");
+
+		foreach (var item in data)
+		{
+			builder.OpenElement(sequence++, "tr");
+
+			builder.OpenElement(sequence++, "td");
+			builder.AddContent(sequence++, item.Key);
+			builder.CloseElement(); // td
+
+			builder.OpenElement(sequence++, "td");
+			builder.AddContent(sequence++, new MarkupString(item.Value.ToString()));
+
+			builder.CloseElement(); // td
+
+			builder.CloseElement(); // tr
+		}
+
+		builder.CloseElement(); // tbody
+		builder.CloseElement(); // table
+	};
+
+	private RenderFragment PivotedTable(List<Tuple<string, string, string>> data) => builder =>
+	{
+		var seq = 0;
+
+		// Pivot the data first
+		var pivotData = new Dictionary<string, Dictionary<string, string>>();
+		var columns = new HashSet<string>();
+
+		foreach (var item in data)
+		{
+			var rowValue = item.Item1;
+			var columnValue = item.Item2;
+			var outputValue = item.Item3;
+
+			if (!pivotData.ContainsKey(rowValue))
+			{
+				pivotData[rowValue] = new Dictionary<string, string>();
+			}
+
+			pivotData[rowValue][columnValue] = outputValue;
+			columns.Add(columnValue);
+		}
+
+		// Table start
+		builder.OpenElement(seq++, "table");
+		builder.AddAttribute(seq++, "class", "table");
+
+		// Thead
+		builder.OpenElement(seq++, "thead");
+		builder.OpenElement(seq++, "tr");
+
+		builder.OpenElement(seq++, "th");
+		builder.AddContent(seq++, "");
+		builder.CloseElement(); // th
+
+		foreach (var column in columns)
+		{
+			builder.OpenElement(seq++, "th");
+			builder.AddContent(seq++, column);
+			builder.CloseElement(); // th
+		}
+
+		builder.CloseElement(); // tr
+		builder.CloseElement(); // thead
+
+		// Tbody
+		builder.OpenElement(seq++, "tbody");
+
+		foreach (var rowKey in pivotData.Keys)
+		{
+			builder.OpenElement(seq++, "tr");
+
+			// Row key
+			builder.OpenElement(seq++, "td");
+			builder.AddContent(seq++, rowKey);
+			builder.CloseElement(); // td
+
+			foreach (var column in columns)
+			{
+				builder.OpenElement(seq++, "td");
+				builder.AddContent(seq++, new MarkupString(pivotData[rowKey].ContainsKey(column) ? pivotData[rowKey][column].ToString() : ""));
+
+				builder.CloseElement(); // td
+			}
+
+			builder.CloseElement(); // tr
+		}
+
+		builder.CloseElement(); // tbody
+		builder.CloseElement(); // table
+	};
+
+	private RenderFragment<IEnumerable<IGrouping<string, Dictionary<string, object>>>> TabbedTable =>
+		(IEnumerable<IGrouping<string, Dictionary<string, object>>> groups) => builder =>
+		{
+			var seq = 0;
+
+			// Sanitize function
+			string SanitizeForHtmlId(string input)
+			{
+				string noSpaces = input.Replace(" ", "_");
+				return Regex.Replace(noSpaces, "[^a-zA-Z0-9_]", "");
+			}
+
+			// Start div
+			builder.OpenElement(seq++, "div");
+
+			// Tab titles
+			builder.OpenElement(seq++, "ul");
+			builder.AddAttribute(seq++, "class", "nav nav-pills");
+			builder.AddAttribute(seq++, "id", "pills-tab");
+			builder.AddAttribute(seq++, "role", "tablist");
+			foreach (var group in groups)
+			{
+				var sanitizedKey = SanitizeForHtmlId(group.Key);
+				builder.OpenElement(seq++, "li");
+				builder.AddAttribute(seq++, "class", "nav-item");
+
+				builder.OpenElement(seq++, "a");
+				builder.AddAttribute(seq++, "class", "nav-link");
+				builder.AddAttribute(seq++, "data-bs-toggle", "pill");
+				builder.AddAttribute(seq++, "href", $"#{sanitizedKey}");
+				builder.AddContent(seq++, group.Key);
+				builder.CloseElement();  // Close "a"
+
+				builder.CloseElement();  // Close "li"
+			}
+			builder.CloseElement();  // Close "ul"
+
+			// Tab content
+			builder.OpenElement(seq++, "div");
+			builder.AddAttribute(seq++, "class", "tab-content");
+			builder.AddAttribute(seq++, "id", "pills-tabContent");
+			foreach (var group in groups)
+			{
+				var sanitizedKey = SanitizeForHtmlId(group.Key);
+				builder.OpenElement(seq++, "div");
+				builder.AddAttribute(seq++, "class", "tab-pane fade");
+				builder.AddAttribute(seq++, "id", sanitizedKey);
+				builder.AddAttribute(seq++, "role", "tabpanel");
+				builder.AddAttribute(seq++, "aria-labelledby", $"{sanitizedKey}-tab");
+
+				builder.OpenElement(seq++, "table");
+				builder.AddAttribute(seq++, "class", "table");
+
+				// Table head
+				builder.OpenElement(seq++, "thead");
+				builder.OpenElement(seq++, "tr");
+
+				var firstDictionary = group.FirstOrDefault();
+				if (firstDictionary != null)
+				{
+					foreach (var key in firstDictionary.Keys)
+					{
+						builder.OpenElement(seq++, "th");
+						builder.AddContent(seq++, key);
+						builder.CloseElement();  // Close "th"
+					}
+				}
+
+				builder.CloseElement();  // Close "tr"
+				builder.CloseElement();  // Close "thead"
+
+				// Table body
+				builder.OpenElement(seq++, "tbody");
+				foreach (var dictionary in group)
+				{
+					builder.OpenElement(seq++, "tr");
+					foreach (var value in dictionary.Values)
+					{
+						builder.OpenElement(seq++, "td");
+						//builder.AddContent(seq++, value?.ToString());  // Be cautious if value can be null.
+						builder.AddContent(seq++, new MarkupString(value?.ToString()));
+						builder.CloseElement();  // Close "td"
+					}
+					builder.CloseElement();  // Close "tr"
+				}
+				builder.CloseElement();  // Close "tbody"
+
+				builder.CloseElement();  // Close "table"
+				builder.CloseElement();  // Close "div"
+			}
+
+			builder.CloseElement();  // Close "div"
+
+			// Initialize the first tab as active
+			// Open script tag
+			builder.OpenElement(seq++, "script");
+
+			// Add script content
+			builder.AddContent(seq++,
+				@"$(document).ready(function () {
+				$('#pills-tab .nav-item:first-child .nav-link').tab('show');
+			});");
+
+			// Close script tag
+			builder.CloseElement();
+
+			builder.CloseElement();  // Close outer "div"
+		};
+
+}

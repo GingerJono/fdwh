@@ -12,6 +12,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Data.SqlClient;
+
+
 using ApexCharts;
 using Index1;
 using Analytics;
@@ -254,6 +257,29 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
     });
 
+// do app context
+var connString = builder.Configuration.GetConnectionString("DaleSandboxConnection");
+var parsed = new SqlConnectionStringBuilder(connString);
+
+// Override database server if running on DUWPMLSW03
+if (Environment.MachineName.Equals("DUWPMLSW03", StringComparison.OrdinalIgnoreCase))
+{
+	parsed.DataSource = "DUWPMND06";
+
+	// Override the config directly
+	builder.Configuration["ConnectionStrings:DaleSandboxConnection"] = parsed.ConnectionString;
+	Console.WriteLine($"[Startup] Overriding DB server to DUWPMND06 for {Environment.MachineName}");
+}
+
+var sandboxContext = new SandboxContext
+{
+	WebServerName = Environment.MachineName,
+	DatabaseServer = parsed.DataSource,
+	DatabaseName = parsed.InitialCatalog
+};
+
+builder.Services.AddSingleton(sandboxContext);
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -268,6 +294,14 @@ app.UseHttpsRedirection();
 app.UseSession();
 
 app.UseStaticFiles();
+
+// adding username to app context
+app.Use(async (context, next) =>
+{
+	var info = context.RequestServices.GetRequiredService<SandboxContext>();
+	info.UserName = context.User?.Identity?.Name ?? "Unknown";
+	await next.Invoke();
+});
 
 app.UseRouting();
 

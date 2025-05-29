@@ -19,6 +19,7 @@ using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using System.Collections.Generic;
 using System.IO;
+using Microsoft.AspNetCore.Http;
 
 namespace Sandbox.Services
 {
@@ -26,11 +27,13 @@ namespace Sandbox.Services
 	{
 		private readonly IConfiguration _configuration;
 		private readonly ILogger<WindowpaneService> _logger;
+		private readonly IHttpContextAccessor _httpContextAccessor;
 
-		public WindowpaneService(IConfiguration configuration, ILogger<WindowpaneService> logger)
+		public WindowpaneService(IConfiguration configuration, ILogger<WindowpaneService> logger, IHttpContextAccessor httpContextAccessor)
 		{
 			_configuration = configuration;
 			_logger = logger;
+			_httpContextAccessor = httpContextAccessor;
 		}
 
 		public async Task<IEnumerable<SearchPolicyModel>> SearchPolicies(string searchTerm)
@@ -128,6 +131,21 @@ namespace Sandbox.Services
 				throw; // Rethrow the exception after logging
 			}
 		}
+
+		public async Task<IEnumerable<MyProgram>> GetAllProgramsAsync()
+		{
+			var context = _httpContextAccessor.HttpContext;
+			var username = context?.User?.Identity?.Name;
+			// e.g., "DUW\\jononeill"
+
+			using var db = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
+			return await db.QueryAsync<MyProgram>(
+				"[Windowpane].[spDashboardGetAllPrograms]",
+				new { ID = username },
+				commandType: CommandType.StoredProcedure);
+		}
+
+
 
 		// method for generating Excel proforma
 

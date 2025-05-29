@@ -35760,14 +35760,6 @@ ul.files-main-nav li div.filemanager-upgrade-storage img {
 }
 /* End::text colors */
 /* Start::links */
-a {
-  text-decoration: none;
-  color: rgba(var(--dark-rgb), var(--bs-link-opacity, 1));
-}
-a:hover {
-  opacity: 1;
-  color: rgba(var(--dark-rgb), var(--bs-link-opacity, 1));
-}
 a.link-underline {
   text-decoration-color: rgba(var(--dark-rgb), var(--bs-link-underline-opacity)) !important;
 }
