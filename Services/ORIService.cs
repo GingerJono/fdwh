@@ -32,7 +32,15 @@ namespace Sandbox.Services
                     commandType: CommandType.StoredProcedure
                 );
 
-                return result.ToList();
+                if (result != null)
+                {
+                    return result.ToList();
+                }
+                else
+                {
+                    throw new Exception("No ORI policies found.");
+                }
+
             }
         }
 
@@ -48,7 +56,16 @@ namespace Sandbox.Services
                     parameters,
                     commandType: CommandType.StoredProcedure
                 );
-                return result.ToList();
+
+                if (result != null)
+                {
+                    return result.ToList();
+                }
+                else
+                {
+                    throw new Exception($"No reinstatements found for policy reference: {ORIPolicyReference}.");
+                }
+
             }
         }
         public async Task<List<FXTreatmentModel>> GetFXTreatments()
@@ -66,7 +83,15 @@ namespace Sandbox.Services
                     commandType: CommandType.StoredProcedure
                 );
 
-                return result.ToList();
+                if (result != null)
+                {
+                    return result.ToList();
+                }
+                else
+                {
+                    throw new Exception("No FX treatments found.");
+                }
+
             }
         }
 
@@ -86,7 +111,14 @@ namespace Sandbox.Services
                     commandType: CommandType.StoredProcedure
                 );
 
-                return result;
+                if (result != null)
+                {
+                    return result;
+                }
+                else
+                {
+                    throw new Exception($"No LORS details found for FileName: {fileName} and PolicySequence: {policySequence}.");
+                }
             }
         }
 
@@ -106,7 +138,14 @@ namespace Sandbox.Services
                     commandType: CommandType.StoredProcedure
                 );
 
-                return result.ToList();
+                if (result != null)
+                {
+                    return result.ToList();
+                }
+                else
+                {
+                    throw new Exception($"No LORS reinsurers found for FileName: {fileName} and PolicySequence: {policySequence}.");
+                }
             }
         }
 
@@ -114,26 +153,26 @@ namespace Sandbox.Services
         {
             using (var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection")))
             {
-                try
+                await connection.OpenAsync();
+
+                var parameters = new DynamicParameters();
+                // No parameters needed for this stored procedure
+
+                var result = await connection.QueryAsync<LORSListModel>(
+                    "ORI.spGetLORSList",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                );
+
+                if (result != null)
                 {
-                    await connection.OpenAsync();
-
-                    var parameters = new DynamicParameters();
-                    // No parameters needed for this stored procedure
-
-                    var result = await connection.QueryAsync<LORSListModel>(
-                        "ORI.spGetLORSList",
-                        parameters,
-                        commandType: CommandType.StoredProcedure
-                    );
-
                     return result.ToList();
                 }
-                catch(Exception ex)
+                else
                 {
-                    throw;
+                    throw new Exception("No LORS records found.");
                 }
-               
+
             }
         }
 
@@ -152,7 +191,14 @@ namespace Sandbox.Services
                     commandType: CommandType.StoredProcedure
                 );
 
-                return result.ToList();
+                if (result != null)
+                {
+                    return result.ToList();
+                }
+                else
+                {
+                    throw new Exception($"No ORI USMs found for policy reference: {oriPolicyReference}.");
+                }
             }
         }
 
@@ -171,18 +217,17 @@ namespace Sandbox.Services
                     commandType: CommandType.StoredProcedure
                 );
 
-                return result.ToList();
+                if (result != null)
+                {
+                    return result.ToList();
+                }
+                else
+                {
+                    throw new Exception($"No LORS records found for policy reference: {oriPolicyReference}.");
+                }
             }
         }
 
-
-        private async Task<EditableORIMetadataList<T>> GetEditableList<T>(SqlConnection connection, string storedProcedure, DynamicParameters parameters)
-        {
-            return new EditableORIMetadataList<T>
-            {
-                Current = (await connection.QueryAsync<T>(storedProcedure, parameters, commandType: CommandType.StoredProcedure)).ToList()
-            };
-        }
         public async Task<ORIPolicyModel> GetORIPolicyDetails(string ORIPolicyReference)
         {
             using (var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection")))
@@ -216,9 +261,19 @@ namespace Sandbox.Services
                     // Fetch Allocations Class and YOA
                     policyDetails.PolicyAllocationsClass = (await GetPolicyAllocationsClass(connection, policyDetails.ORIPolicyReference)).ToList();
                     policyDetails.PolicyAllocationsYOA = (await GetPolicyAllocationsYOA(connection, policyDetails.ORIPolicyReference)).ToList();
-                }
 
-                return policyDetails;
+                    // Get Reinstatements
+                    policyDetails.Reinstatements = (await GetPolicyReinstatements(connection, policyDetails.ORIPolicyReference)).ToList();
+
+                    // Get Agg Deductibles
+                    policyDetails.AggDeductibles = (await GetAggDeductibles(connection, policyDetails.ORIPolicyReference)).ToList();
+
+                    return policyDetails;
+                }
+                else
+                {
+                    throw new Exception($"No ORI policy found with reference: {ORIPolicyReference}.");
+                }
             }
         }
         private async Task<IEnumerable<ORIPolicyAllocationClass>> GetPolicyAllocationsClass(SqlConnection connection, string ORIPolicyReference)
@@ -226,10 +281,39 @@ namespace Sandbox.Services
             var parameters = new DynamicParameters();
             parameters.Add("@ORIPolicyReference", ORIPolicyReference, DbType.String);
 
-            return await connection.QueryAsync<ORIPolicyAllocationClass>(
+            var result = await connection.QueryAsync<ORIPolicyAllocationClass>(
                 "ORI.spGetPolicyAllocationsClass",
                 parameters,
                 commandType: CommandType.StoredProcedure);
+
+            if (result != null)
+            {
+                return result.ToList();
+            }
+            else
+            {
+                throw new Exception($"No policy allocations found for policy reference: {ORIPolicyReference}.");
+            }
+        }
+
+        private async Task<IEnumerable<AggDeductibleModel>> GetAggDeductibles(SqlConnection connection, string ORIPolicyReference)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("@ORIPolicyReference", ORIPolicyReference, DbType.String);
+
+            var result = await connection.QueryAsync<AggDeductibleModel>(
+                "ORI.spGetAggDeductibles",
+                parameters,
+                commandType: CommandType.StoredProcedure);
+
+            if (result != null)
+            {
+                return result.ToList();
+            }
+            else
+            {
+                throw new Exception($"No aggregate deductibles found for policy reference: {ORIPolicyReference}.");
+            }
         }
 
         private async Task<IEnumerable<ORIPolicyAllocationYOA>> GetPolicyAllocationsYOA(SqlConnection connection, string ORIPolicyReference)
@@ -237,11 +321,42 @@ namespace Sandbox.Services
             var parameters = new DynamicParameters();
             parameters.Add("@ORIPolicyReference", ORIPolicyReference, DbType.String);
 
-            return await connection.QueryAsync<ORIPolicyAllocationYOA>(
+            var result = await connection.QueryAsync<ORIPolicyAllocationYOA>(
                 "ORI.spGetPolicyAllocationsYOA",
                 parameters,
                 commandType: CommandType.StoredProcedure);
+
+            if (result != null)
+            {
+                return result.ToList();
+            }
+            else
+            {
+                throw new Exception($"No policy allocations found for policy reference: {ORIPolicyReference}.");
+            }
         }
+
+        private async Task<IEnumerable<ORIPolicyReinstatementModel>> GetPolicyReinstatements(SqlConnection connection, string ORIPolicyReference)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("@ORIPolicyReference", ORIPolicyReference, DbType.String);
+
+            var result = await connection.QueryAsync<ORIPolicyReinstatementModel>(
+                "ORI.spGetReinstatementsByPolicy",
+                parameters,
+                commandType: CommandType.StoredProcedure);
+
+            if (result != null)
+            {
+                return result.ToList();
+            }
+            else
+            {
+                throw new Exception($"No reinstatements found for policy reference: {ORIPolicyReference}.");
+            }
+        }
+
+
         public async Task<IEnumerable<ORIUSMListModel>> GetORIUSMs(int? YoA = null, int? usmYear = null)
         {
             using (var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection")))
@@ -258,7 +373,15 @@ namespace Sandbox.Services
                     commandType: CommandType.StoredProcedure
                 );
 
-                return result.ToList();
+                if (result != null)
+                {
+                    return result.ToList();
+                }
+                else
+                {
+                    throw new Exception("No ORI USMs found.");
+                }
+
             }
         }
 
@@ -292,9 +415,9 @@ namespace Sandbox.Services
                         commandType: CommandType.StoredProcedure
                     )).ToList();
 
-					// Fetch Class allocations
-					usmDetails.ClassAllocations = (await connection.QueryAsync<ClassAllocation>(
-						"ORI.spGetORIUSMAllocationsClass",
+                    // Fetch Class allocations
+                    usmDetails.ClassAllocations = (await connection.QueryAsync<ClassAllocation>(
+                        "ORI.spGetORIUSMAllocationsClass",
 
 
                         parameters,
@@ -314,9 +437,13 @@ namespace Sandbox.Services
                         parameters,
                         commandType: CommandType.StoredProcedure
                     )).ToList();
-                }
 
-                return usmDetails;
+                    return usmDetails;
+                }
+                else
+                {
+                    throw new Exception($"No ORI USM found with ID: {ORIUSMID}.");
+                }
             }
         }
         public async Task SaveORIPolicyMetadata(ORIPolicyModel model)
@@ -484,12 +611,19 @@ namespace Sandbox.Services
             using var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
             await connection.OpenAsync();
 
-            var results = await connection.QueryAsync<ORIFilterItemDefinition>(
+            var result = await connection.QueryAsync<ORIFilterItemDefinition>(
                 "ORI.spGetIncludedOrExcludedItems",
                 commandType: CommandType.StoredProcedure
             );
 
-            return results.ToList();
+            if (result != null)
+            {
+                return result.ToList();
+            }
+            else
+            {
+                throw new Exception("No included or excluded items found.");
+            }
         }
         public async Task<List<DropdownItem>> GetDropdownValues(string filterType)
         {
@@ -512,12 +646,19 @@ namespace Sandbox.Services
             if (string.IsNullOrEmpty(storedProcedure))
                 return new List<DropdownItem>(); // No dropdown values for this type
 
-            var results = await connection.QueryAsync<DropdownItem>(
+            var result = await connection.QueryAsync<DropdownItem>(
                 storedProcedure,
                 commandType: CommandType.StoredProcedure
             );
 
-            return results.ToList();
+            if (result != null)
+            {
+                return result.ToList();
+            }
+            else
+            {
+                throw new Exception($"No dropdown values found for filter type: {filterType}.");
+            }
         }
         public async Task SaveORIUSM(ORIUSMModel model)
         {
@@ -546,14 +687,14 @@ namespace Sandbox.Services
                     await db.ExecuteAsync("ORI.spDeleteUSMAllocationsYOA", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
                 }
 
-				foreach (var allocation in model.RemovedClassAllocations)
+                foreach (var allocation in model.RemovedClassAllocations)
                 {
                     var parameters = new DynamicParameters();
                     parameters.Add("@ORIUSMID", model.USMID);
-					parameters.Add("@Class", allocation.Class);
+                    parameters.Add("@Class", allocation.Class);
                     parameters.Add("@LastUpdatedBy", userNameFinal);
 
-					await db.ExecuteAsync("ORI.spDeleteUSMAllocationsClass", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
+                    await db.ExecuteAsync("ORI.spDeleteUSMAllocationsClass", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
                 }
 
                 foreach (var allocation in model.RemovedSecurityAllocations)
@@ -588,15 +729,15 @@ namespace Sandbox.Services
                     await db.ExecuteAsync("ORI.spUpsertUSMAllocationsYOA", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
                 }
 
-				foreach (var allocation in model.ClassAllocations)
+                foreach (var allocation in model.ClassAllocations)
                 {
                     var parameters = new DynamicParameters();
                     parameters.Add("@ORIUSMID", model.USMID);
-					parameters.Add("@Class", allocation.Class);
+                    parameters.Add("@Class", allocation.Class);
                     parameters.Add("@Allocation", allocation.Allocation);
                     parameters.Add("@LastUpdatedBy", userNameFinal);
 
-					await db.ExecuteAsync("ORI.spUpsertUSMAllocationsClass", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
+                    await db.ExecuteAsync("ORI.spUpsertUSMAllocationsClass", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
                 }
 
                 foreach (var allocation in model.SecurityAllocations)
@@ -642,7 +783,14 @@ namespace Sandbox.Services
                 commandType: CommandType.StoredProcedure
             );
 
-            return result.ToList();
+            if (result != null)
+            {
+                return result.ToList();
+            }
+            else
+            {
+                throw new Exception("No event metadata found.");
+            }
         }
 
         public async Task<PagedResult<EventMetadataListModel>> GetEventMetadataPaged(int page, int pageSize, string? eventCode = null, string? peril = null, string? region = null, string? description = null)
@@ -666,11 +814,18 @@ namespace Sandbox.Services
 
             int total = result.FirstOrDefault()?.TotalCount ?? 0;
 
-            return new PagedResult<EventMetadataListModel>
+            if (result != null)
             {
-                Items = result,  // Cast to base model if needed
-                TotalCount = total
-            };
+                return new PagedResult<EventMetadataListModel>
+                {
+                    Items = result,  // Cast to base model if needed
+                    TotalCount = total
+                };
+            }
+            else
+            {
+                throw new Exception("No event metadata found.");
+            }
         }
         public async Task<EventMetadataModel> GetEventMetadata(string eventCode)
         {
@@ -686,7 +841,14 @@ namespace Sandbox.Services
                 commandType: CommandType.StoredProcedure
             );
 
-            return result;
+            if (result != null)
+            {
+                return result;
+            }
+            else
+            {
+                throw new Exception($"No event metadata found for event code: {eventCode}.");
+            }
         }
 
         public async Task UpsertEventMetadata(EventMetadataModel model)
@@ -739,7 +901,14 @@ namespace Sandbox.Services
                 commandType: CommandType.StoredProcedure
             );
 
-            return result.ToList();
+            if (result != null )
+            {
+                return result.ToList(); 
+            }
+            {
+                throw new Exception("No peril list found.");
+            }
+            
         }
 
         public async Task<List<string>> GetPerilRegionList()
@@ -752,7 +921,14 @@ namespace Sandbox.Services
                 commandType: CommandType.StoredProcedure
             );
 
-            return result.ToList();
+            if (result != null)
+            {
+                return result.ToList();
+            }
+            else
+            {
+                throw new Exception("No peril regions found.");
+            }
         }
 
         public async Task<IEnumerable<Narrative>> GetORIPolicyNarratives(string ORIPolicyReference)
@@ -762,8 +938,16 @@ namespace Sandbox.Services
             var parameters = new DynamicParameters();
             parameters.Add("@ORIPolicyReference", ORIPolicyReference, DbType.String);
 
-            return (await connection.QueryAsync<Narrative>(
-                "ORI.spGetORIPolicyNarratives", parameters, commandType: CommandType.StoredProcedure)).ToList();
+            var result =  (await connection.QueryAsync<Narrative>("ORI.spGetORIPolicyNarratives", parameters, commandType: CommandType.StoredProcedure)).ToList();
+
+            if (result != null)
+            {
+                return result;
+            }
+            else
+            {
+                throw new Exception($"No narratives found for policy reference: {ORIPolicyReference}.");
+            }
         }
 
         public async Task<IEnumerable<PolicySecurity>> GetORIPolicySecurity(string ORIPolicyReference)
@@ -773,11 +957,17 @@ namespace Sandbox.Services
             var parameters = new DynamicParameters();
             parameters.Add("@ORIPolicyReference", ORIPolicyReference, DbType.String);
 
-            return (await connection.QueryAsync<PolicySecurity>(
-                "ORI.spGetORIPolicySecurity", parameters, commandType: CommandType.StoredProcedure)).ToList();
+            var result = (await connection.QueryAsync<PolicySecurity>("ORI.spGetORIPolicySecurity", parameters, commandType: CommandType.StoredProcedure)).ToList();
+
+            if (result != null)
+            {
+                return result;
+            }
+            else
+            {
+                throw new Exception($"No policy securities found for policy reference: {ORIPolicyReference}.");
+            }
         }
-
-
     }
 }
 
