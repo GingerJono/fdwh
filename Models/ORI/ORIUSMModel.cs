@@ -22,11 +22,11 @@ namespace Sandbox.Models.ORI
 		// Collection of narrative lines
 		public IEnumerable<USMNarrative> Narratives { get; set; }
 		public List<YOAAllocation> YOAAllocations { get; set; }
-		public List<COBAllocation> COBAllocations { get; set; }
+		public List<ClassAllocation> ClassAllocations { get; set; }
 		public List<SecurityAllocation> SecurityAllocations { get; set; }
 		public List<EventAllocation> EventAllocations { get; set; }
 		public List<YOAAllocation> RemovedYOAAllocations { get; set; } = new();
-		public List<COBAllocation> RemovedCOBAllocations { get; set; } = new();
+		public List<ClassAllocation> RemovedClassAllocations { get; set; } = new();
 		public List<SecurityAllocation> RemovedSecurityAllocations { get; set; } = new();
 		public List<EventAllocation> RemovedEventAllocations { get; set; } = new();
 
@@ -45,9 +45,9 @@ namespace Sandbox.Models.ORI
 		public decimal Allocation { get; set; }
 	}
 
-	public class COBAllocation
+	public class ClassAllocation
 	{
-		public string COB { get; set; }
+		public string Class { get; set; }
 		public decimal Allocation { get; set; }
 	}
 

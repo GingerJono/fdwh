@@ -4,43 +4,21 @@
 @using Sandbox._Spk
 @using CardModel
 @inject IJSRuntime JSRuntime
-@using Sandbox.Models.ORI  
-@using Sandbox.Services 
-@inject ORIService ORIService 
-@using DataTablesData
-@inject DataTablesService DataTablesService
+@using Sandbox.Models.ORI
+@using Sandbox.Services
+@inject ORIService ORIService
 
-<!-- DataTables CSS -->
-<link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/dataTables.bootstrap5.min.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.3.0/css/responsive.bootstrap.min.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.bootstrap5.min.css">
-
-<style>
-	#oripols th,
-	#oripols td {
-		padding: 0.25rem !important; /* override Bootstrap default */
-	}
-
-	#oripols tfoot th {
-		padding: 0 !important;
-	}
-
-		#oripols tfoot th input {
-			width: 100%;
-			font-size: 0.75rem;
-			padding: 2px 4px;
-		}
-
-</style>
-
-@if (policies != null)
+<div class="row mt-4 mb-4">
+	<h3>ORI Policies</h3>
+</div>
+@if (AllPolicies != null)
 {
 	<div class="row mb-4">
 		<div class="col-md-4">
 			<div class="card shadow-sm border-0">
 				<div class="card-body">
 					<h5 class="card-title mb-1">Total ORI Policies</h5>
-					<p class="fs-4 fw-bold mb-0">@policies.Count()</p>
+					<p class="fs-4 fw-bold mb-0">@AllPolicies.Count()</p>
 				</div>
 			</div>
 		</div>
@@ -49,7 +27,7 @@
 				<div class="card-body">
 					<h5 class="card-title mb-1">Outstanding Filters</h5>
 					<p class="fs-4 fw-bold text-danger mb-0">
-						@policies.Count(p => p.FiltersStatus == "Outstanding")
+						@AllPolicies.Count(p => p.FiltersStatus == "Outstanding")
 					</p>
 				</div>
 			</div>
@@ -59,7 +37,7 @@
 				<div class="card-body">
 					<h5 class="card-title mb-1">Not Fully Allocated</h5>
 					<p class="fs-4 fw-bold text-warning mb-0">
-						@policies.Count(p => p.ClassAllocations != 100 || p.YOAAllocations != 100)
+						@AllPolicies.Count(p => p.ClassAllocations != 100 || p.YOAAllocations != 100)
 					</p>
 				</div>
 			</div>
@@ -67,184 +45,250 @@
 	</div>
 }
 
-<!-- Start: row-1 -->
 <div class="row">
-	<!-- End:: row-1 -->
 
-	<h3>ORI Policies</h3>
-
-	@if (policies == null)
+	@if (AllPolicies == null)
 	{
 		<p><em>Loading...</em></p>
 	}
 	else
 	{
-		<table class="table dataTable" id="oripols">
-			<thead>
-				<tr>
-					<th>ORI Policy Reference</th>
-					<th>Inception Date</th>
-					<th>Expiry Date</th>
-					<th>Limit</th>
-					<th>Retention</th>
-					<th>Description</th>
-					<th>Policy Type</th>
-					<th>Broker</th>
-					<th>Status</th>
-					<th>Filters Status</th>
-					<th>YOA Allocation %</th>
-					<th>Class Allocation %</th>
-				</tr>
-			</thead>
-			<tbody>
-				@foreach (var policy in policies)
-				{
-					<tr>
-						<td>
-							<button class="btn btn-link text-decoration-underline"
-									@onclick="@(() => NavigationManager.NavigateTo($"ViewORIPolicy/{policy.ORIPolicyReference}"))">
-								@policy.ORIPolicyReference
-							</button>
-						</td>
-						<td>@policy.InceptionDate?.ToString("yyyy-MM-dd")</td>
-						<td>@policy.ExpiryDate?.ToString("yyyy-MM-dd")</td>
-						<td>@(policy.Limit ?? 0)</td>
-						<td>@(policy.Retention ?? 0)</td>
-						<td>@policy.PolicyDescription</td>
-						<td>@policy.PolicyType</td>
-						<td>@policy.Broker</td>
-						<td>@policy.Status</td>
-						<td>
-							<span class="@($"badge {(policy.FiltersStatus == "Entered" ? "bg-outline-primary" : "bg-danger")}")">
-								@policy.FiltersStatus
-							</span>
-						</td>
-						<td>@($"{policy.YOAAllocations/100.0:P0}")</td>
-						<td>@($"{policy.ClassAllocations / 100.0:P0}")</td>
-					</tr>
-				}
-			</tbody>
-			<tfoot>
-				<tr>
-					<th>ORI Policy Reference</th>
-					<th>Inception Date</th>
-					<th>Expiry Date</th>
-					<th>Limit</th>
-					<th>Retention</th>
-					<th>Description</th>
-					<th>Policy Type</th>
-					<th>Broker</th>
-					<th>Status</th>
-					<th>Filters Status</th>
-					<th>YOA Allocation %</th>
-					<th>Class Allocation %</th>
-				</tr>
-			</tfoot>
-		</table>
+		<div class="card shadow-sm border-0">
+			<div class="table-responsive">
+				<table class="table table-striped table-fixed">
+					<colgroup>
+						<col style="width: 12%" />
+						<col style="width: 8%" />
+						<col style="width: 8%" />
+						<col style="width: 8%" />
+						<col style="width: 8%" />
+						<col style="width: 15%" />
+						<col style="width: 8%" />
+						<col style="width: 10%" />
+						<col style="width: 7%" />
+						<col style="width: 7%" />
+						<col style="width: 4%" />
+						<col style="width: 4%" />
+						<col style="width: 3%" />
+					</colgroup>
+					<thead>
+						<tr>
+							<th class="align-top">
+								ORI Policy Reference
+								<input class="form-control form-control-sm" placeholder="Filter ORI Policy Reference..." value="@FilterORIPolicyReference" @oninput="e => OnORIPolicyReferenceChanged(e.Value?.ToString())" />
+							</th>
+							<th class="align-top">
+								Inception Date
+								<input class="form-control form-control-sm" placeholder="Filter Inception Date..." value="@FilterInceptionDate" @oninput="e => OnInceptionChanged(e.Value?.ToString())" />
+							</th>
+							<th class="align-top">
+								Expiry Date
+								<input class="form-control form-control-sm" placeholder="Filter Expiry Date.." value="@FilterExpiryDate" @oninput="e => OnExpiryChanged(e.Value?.ToString())" />
+							</th>
+							<th class="align-top">
+								Limit
+								<input class="form-control form-control-sm" placeholder="Filter Limit..." value="@FilterLimit" @oninput="e => OnLimitChanged(e.Value?.ToString())" />
+							</th>
+							<th class="align-top">
+								Retention
+								<input class="form-control form-control-sm" placeholder="Filter Retention..." value="@FilterRetention" @oninput="e => OnRetentionChanged(e.Value?.ToString())" />
+							</th>
+							<th class="align-top">
+								Description
+								<input class="form-control form-control-sm" placeholder="Filter Description..." value="@FilterDescription" @oninput="e => OnDescriptionChanged(e.Value?.ToString())" />
+							</th>
+							<th class="align-top">
+								Policy Type
+								<input class="form-control form-control-sm" placeholder="Filter Policy Type..." value="@FilterPolicyType" @oninput="e => OnPolicyTypeChanged(e.Value?.ToString())" />
+							</th>
+							<th class="align-top">
+								Broker
+								<input class="form-control form-control-sm" placeholder="Filter Broker..." value="@FilterBroker" @oninput="e => OnBrokerChanged(e.Value?.ToString())" />
+							</th>
+							<th class="align-top">
+								Status
+								<input class="form-control form-control-sm" placeholder="Filter Status..." value="@FilterStatus" @oninput="e => OnStatusChanged(e.Value?.ToString())" />
+							</th>
+							<th class="align-top">
+								Status
+							</th>
+							<th class="align-top">YOA Allocation %</th>
+							<th class="align-top">Class Allocation %</th>
+							<th>Actions</th>
+						</tr>
+					</thead>
+					<tbody>
+						@foreach (var policy in PagedPolicies)
+						{
+							<tr>
+								<td>@policy.ORIPolicyReference</td>
+								<td>@policy.InceptionDate?.ToString("yyyy-MM-dd")</td>
+								<td>@policy.ExpiryDate?.ToString("yyyy-MM-dd")</td>
+								<td>@(policy.Limit ?? 0)</td>
+								<td>@(policy.Retention ?? 0)</td>
+								<td>@policy.PolicyDescription</td>
+								<td>@policy.PolicyType</td>
+								<td>@policy.Broker</td>
+								<td>@policy.Status</td>
+								<td>
+									<span class="@($"badge {(policy.FiltersStatus == "Entered" ? "bg-outline-primary" : "bg-danger")}")">
+										@policy.FiltersStatus
+									</span>
+								</td>
+								<td class="text-end">@($"{policy.YOAAllocations / 100.0:P0}")</td>
+								<td class="text-end">@($"{policy.ClassAllocations / 100.0:P0}")</td>
+								<td>
+									<button class="btn btn-sm btn-outline-primary"
+											@onclick='() => NavigationManager.NavigateTo($"ViewORIPolicy/{policy.ORIPolicyReference}")'>
+										View
+									</button>
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+		</div>
+		<div class="px-3 pb-3">
+			<div class="d-flex justify-content-between align-items-center mt-3">
+				<select class="form-select form-select-sm w-auto" @onchange="OnPageSizeChanged">
+					@foreach (var size in PageSizeOptions)
+					{
+						<option value="@size" selected="@(PageSize == size)">
+							@size per page
+						</option>
+					}
+				</select>
+
+				<nav>
+					<ul class="pagination mb-0">
+						<li class="page-item @(CurrentPage == 1 ? "disabled" : "")">
+							<button class="page-link" @onclick="() => GoToPage(CurrentPage - 1)">Previous</button>
+						</li>
+
+						@if (StartPage > 1)
+						{
+							<li class="page-item">
+								<button class="page-link" @onclick="() => ShiftPageWindow(-1)">...</button>
+						</li>
+						}
+
+						@for (int i = StartPage; i <= EndPage && i <= TotalPages; i++)
+						{
+							var pageNumber = i;  // capture value
+							<li class="page-item @(CurrentPage == pageNumber ? "active" : "")">
+								<button class="page-link" @onclick="() => GoToPage(pageNumber)">@pageNumber</button>
+							</li>
+						}
+
+						@if (EndPage < TotalPages)
+						{
+							<li class="page-item">
+								<button class="page-link" @onclick="() => ShiftPageWindow(1)">...</button>
+							</li>
+						}
+
+						<li class="page-item @(CurrentPage == TotalPages ? "disabled" : "")">
+							<button class="page-link" @onclick="() => GoToPage(CurrentPage + 1)">Next</button>
+						</li>
+					</ul>
+				</nav>
+			</div>
+		</div>
 	}
 </div>
 
-
-<!-- jquery Cdn -->
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-
-<!-- Datatables Cdn -->
-<script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.12.1/js/dataTables.bootstrap5.min.js"></script>
-<script src="https://cdn.datatables.net/responsive/2.3.0/js/dataTables.responsive.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.print.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.6/pdfmake.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-
-<!-- Internal Datatables JS -->
-<script src="@($"{NavigationManager.BaseUri}assets/js/datatables.js")"></script>
-
-<script>
-	var options = {
-		paging: true,
-		pageLength: 10, // Set the default number of rows visible
-		fixedHeader: true, // Keep the header fixed
-		lengthChange: false, // Disable the length change dropdown
-		order: [], // No default ordering
-		columnDefs: [], // Customize columns if needed
-		buttons: [], // Add buttons if required
-		initComplete: function () {
-		// Ensure footer exists and add search boxes for each column
-		this.api()
-			.columns()
-				.every(function () {
-					let column = this;
-					let title = column.footer().textContent;
-
-					// Create input element
-					let input = document.createElement('input');
-					input.placeholder = title;
-					column.footer().replaceChildren(input);
-
-					// Event listener for user input
-					input.addEventListener('keyup', () => {
-						if (column.search() !== this.value) {
-							column.search(input.value).draw();
-					}
-				});
-			});
-		}
-	};
-	window.initializeDataTables = function () {
-		console.log("Initializing DataTables..."); // Debug log
-		setTimeout(() => {
-			if ($('#oripols').length) {
-				$('#oripols').DataTable(options);
-				console.log("DataTable initialized successfully.");
-			} else {
-				console.log("Table not found!");
-			}
-		}, 500);
-	};
-</script>
-
 @code {
-	private IEnumerable<ORIPolicyListModel> policies;
-	private bool isDataLoaded = false; // Flag to track when data is loaded
+	private List<ORIPolicyListModel> AllPolicies = new();
+	private List<ORIPolicyListModel> PagedPolicies = new();
+	private int CurrentPage = 1;
+	private int PageSize = 10;
+	private int TotalRecords = 0;
+	private List<int> PageSizeOptions = new() { 10, 20, 50, 100 };
+
+	private string FilterORIPolicyReference = "";
+	private string FilterInceptionDate = "";
+	private string FilterExpiryDate = "";
+	private string FilterLimit = "";
+	private string FilterRetention = "";
+	private string FilterDescription = "";
+	private string FilterPolicyType = "";
+	private string FilterBroker = "";
+	private string FilterStatus = "";
+
+	private const int MaxVisiblePages = 10;
+	private int TotalPages => Math.Max(1, (int)Math.Ceiling((double)TotalRecords / PageSize));
+	private int StartPage => Math.Max(1, ((CurrentPage - 1) / MaxVisiblePages) * MaxVisiblePages + 1);
+	private int EndPage => Math.Min(StartPage + MaxVisiblePages - 1, TotalPages);
+
+	private IEnumerable<ORIPolicyListModel> FilteredPolicies => AllPolicies.Where(p =>
+	(string.IsNullOrWhiteSpace(FilterORIPolicyReference) || p.ORIPolicyReference?.Contains(FilterORIPolicyReference, StringComparison.OrdinalIgnoreCase) == true) &&
+	(string.IsNullOrWhiteSpace(FilterInceptionDate) || p.InceptionDate?.ToString("yyyy-MM-dd").Contains(FilterInceptionDate) == true) &&
+	(string.IsNullOrWhiteSpace(FilterExpiryDate) || p.ExpiryDate?.ToString("yyyy-MM-dd").Contains(FilterExpiryDate) == true) &&
+	(string.IsNullOrWhiteSpace(FilterLimit) || p.Limit?.ToString().Contains(FilterLimit) == true) &&
+	(string.IsNullOrWhiteSpace(FilterRetention) || p.Retention?.ToString().Contains(FilterRetention) == true) &&
+	(string.IsNullOrWhiteSpace(FilterDescription) || p.PolicyDescription?.Contains(FilterDescription, StringComparison.OrdinalIgnoreCase) == true) &&
+	(string.IsNullOrWhiteSpace(FilterPolicyType) || p.PolicyType?.Contains(FilterPolicyType, StringComparison.OrdinalIgnoreCase) == true) &&
+	(string.IsNullOrWhiteSpace(FilterBroker) || p.Broker?.Contains(FilterBroker, StringComparison.OrdinalIgnoreCase) == true) &&
+	(string.IsNullOrWhiteSpace(FilterStatus) || p.Status?.Contains(FilterStatus, StringComparison.OrdinalIgnoreCase) == true));
 
 	protected override async Task OnInitializedAsync()
 	{
-		policies = await ORIService.GetORIPolicies();
-
-		isDataLoaded = true; // Mark data as loaded
-		StateHasChanged(); // Trigger UI refresh
+		AllPolicies = (await ORIService.GetORIPolicies()).ToList();
+		await ApplyFilters();
 	}
 
-	protected override async Task OnAfterRenderAsync(bool firstRender)
+	private void ApplyPagination()
 	{
-		if (firstRender)
-		{
-			await JSRuntime.InvokeVoidAsync("window.interop.initializeTooltips");
-		}
-		// Ensure DataTables is initialized only after data is loaded and page renders
-		if (isDataLoaded)
-		{
-			isDataLoaded = false; // Prevent multiple calls
-			await JSRuntime.InvokeVoidAsync("initializeDataTables");
-		}
+		PagedPolicies = FilteredPolicies
+		.Skip((CurrentPage - 1) * PageSize)
+		.Take(PageSize)
+		.ToList();
 	}
-}
-
-
-@code {
-
-	protected override void OnInitialized()
+	private async Task ApplyFilters()
 	{
+		TotalRecords = FilteredPolicies.Count();
+		ApplyPagination();
 
-		// WebsiteDesign End //
+		await InvokeAsync(StateHasChanged); // ensures the UI updates correctly
 	}
-}
 
+	private async Task GoToPage(int page)
+	{
+		if (page >= 1 && page <= TotalPages)
+		{
+			CurrentPage = page;
+			await ApplyFilters();
+		}
+	}
 
-@code {
+	private async Task ShiftPageWindow(int direction)
+	{
+		int newPage = direction > 0
+			? Math.Min(EndPage + 1, TotalPages) // shift to the first page of the next window
+			: Math.Max(StartPage - MaxVisiblePages, 1); // shift to the first page of the previous window
 
+		await GoToPage(newPage);
+	}
 
+	private async Task OnPageSizeChanged(ChangeEventArgs e)
+	{
+		if (int.TryParse(e.Value?.ToString(), out int newSize))
+		{
+			PageSize = newSize;
+			CurrentPage = 1;
+			await ApplyFilters(); // <-- applies filters and resets paging properly
+		}
+	}
+
+	// Re-apply filters when any filter is changed
+	private async Task OnORIPolicyReferenceChanged(string value) { FilterORIPolicyReference = value; await ApplyFilters(); }
+	private async Task OnInceptionChanged(string value) { FilterInceptionDate = value; await ApplyFilters(); }
+	private async Task OnExpiryChanged(string value) { FilterExpiryDate = value; await ApplyFilters(); }
+	private async Task OnLimitChanged(string value) { FilterLimit = value; await ApplyFilters(); }
+	private async Task OnRetentionChanged(string value) { FilterRetention = value; await ApplyFilters(); }
+	private async Task OnDescriptionChanged(string value) { FilterDescription = value; await ApplyFilters(); }
+	private async Task OnPolicyTypeChanged(string value) { FilterPolicyType = value; await ApplyFilters(); }
+	private async Task OnBrokerChanged(string value) { FilterBroker = value; await ApplyFilters(); }
+	private async Task OnStatusChanged(string value) { FilterStatus = value; await ApplyFilters(); }
 }

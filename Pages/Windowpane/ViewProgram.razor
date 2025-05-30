@@ -1,0 +1,231 @@
+﻿@page "/ViewProgram/{ID}"
+@using Sandbox.Models.Windowpane
+@using Sandbox.Services
+@using CardModel
+@using System.Text
+@using System.IO.Compression;
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager
+@inject WindowpaneService WindowpaneService
+@inject IJSRuntime JS
+
+
+<style>
+	.table thead th {
+	background-color: #002855; /* dark navy blue */
+	color: white;
+	border-color: #dee2e6;
+	}
+
+	.card h2, .card h3 {
+	margin-bottom: 0.25rem;
+	}
+
+</style>
+
+
+@if (Model?.ID != null)
+{
+	<!-- Breadcrumbs -->
+	<ol class="breadcrumb">
+		<li class="breadcrumb-item">
+			<a @onclick="@(() => NavigationManager.NavigateTo("/Windowpane/Search"))">SEARCH</a>
+		</li>
+		<li class="breadcrumb-item">
+			<a @onclick="@(() => NavigationManager.NavigateTo("/Windowpane/ViewProgram"))">VIEW PROGRAM</a>
+		</li>
+		<li class="breadcrumb-item active">@Model.ID</li>
+	</ol>
+
+
+	<!-- Header cards using HeaderData -->
+	<div class="row display-flex">
+		<div class="col-lg-2 col-4 mb-4">
+			<div class="card mb-3 overflow-hidden h-100 border-0 bg-primary-gradient bg-opacity-100">
+				<div class="card-body position-relative">
+					<h5 class="text-white text-opacity-80 mb-4">Program Ref / UMR</h5>
+					<h3 class="text-white mt-n1">@Model.ID</h3>
+					<p class="text-white mt-n1 mb-0">@HeaderData.GetValueOrDefault("UMR")</p>
+				</div>
+			</div>
+		</div>
+		<div class="col-lg-4 col-8 mb-4">
+			<div class="card mb-3 overflow-hidden h-100 border-0 bg-primary-gradient bg-opacity-75">
+				<div class="card-body position-relative">
+					<h5 class="text-white text-opacity-80 mb-3">Assured</h5>
+					<h3 class="text-white mt-n1">@HeaderData.GetValueOrDefault("Assured")</h3>
+					<p class="text-white mt-n1 mb-0">@HeaderData.GetValueOrDefault("RiskDescription")</p>
+				</div>
+			</div>
+		</div>
+		<div class="col-lg-2 col-4 mb-4">
+			<div class="card mb-3 overflow-hidden h-100 border-0 bg-primary-gradient bg-opacity-100">
+				<div class="card-body position-relative">
+					<h5 class="text-white text-opacity-80 mb-3">Inception</h5>
+					<h3 class="text-white mt-n1">@HeaderData.GetValueOrDefault("Inception")</h3>
+				</div>
+			</div>
+		</div>
+		<div class="col-lg-2 col-4 mb-4">
+			<div class="card mb-3 overflow-hidden h-100 border-0 bg-primary-gradient bg-opacity-75">
+				<div class="card-body position-relative">
+					<h5 class="text-white text-opacity-80 mb-3">UW</h5>
+					<h3 class="text-white mt-n1">@HeaderData.GetValueOrDefault("UW")</h3>
+				</div>
+			</div>
+		</div>
+		<div class="col-lg-2 col-4 mb-4">
+			<div class="card mb-3 overflow-hidden h-100 border-0 bg-primary-gradient bg-opacity-100">
+				<div class="card-body position-relative">
+					<h5 class="text-white text-opacity-80 mb-3">Status</h5>
+					<h3 class="text-white mt-n1">@HeaderData.GetValueOrDefault("Status")</h3>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+		<li class="nav-item" role="presentation">
+			<button class="nav-link active" id="pills-snapshot-tab" data-bs-toggle="pill" data-bs-target="#pills-snapshot" type="button" role="tab">Snapshot</button>
+		</li>
+		<li class="nav-item" role="presentation">
+			<button class="nav-link" id="pills-premium-tab" data-bs-toggle="pill" data-bs-target="#pills-premium" type="button" role="tab">Premium</button>
+		</li>
+		<li class="nav-item" role="presentation">
+			<button class="nav-link" id="pills-claims-tab" data-bs-toggle="pill" data-bs-target="#pills-claims" type="button" role="tab">Claims</button>
+		</li>
+		<li class="nav-item" role="presentation">
+			<button class="nav-link" id="pills-pricing-tab" data-bs-toggle="pill" data-bs-target="#pills-pricing" type="button" role="tab">Pricing</button>
+		</li>
+		<li class="nav-item" role="presentation">
+			<button class="nav-link" id="pills-audit-tab" data-bs-toggle="pill" data-bs-target="#pills-audit" type="button" role="tab">Notes</button>
+		</li>
+		<li class="nav-item" role="presentation">
+			<button class="nav-link" id="pills-accuracy-tab" data-bs-toggle="pill" data-bs-target="#pills-accuracy" type="button" role="tab">Accuracy Check</button>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link bg-info text-white" href="@($"{NavigationManager.BaseUri}ViewProgramProforma/{ID}")" target="_blank">Proforma</a>
+		</li>
+	</ul>
+
+<div class="tab-content" id="pills-tabContent">
+
+	<div class="tab-pane fade show active" id="pills-snapshot">
+		<div class="row display-flex mb-4">
+			<div class="col-6 col-md-4">
+				<DataCard DivClasses="mb-4" HeaderTitle="Key Stats" MethodName="GetProgramSnapshotKeyStats" ID="@Model.ID" />
+			</div>
+			<div class="col-6 col-md-4">
+				<DataCard DivClasses="mb-4" HeaderTitle="Dates" MethodName="GetProgramSnapshotDates" ID="@Model.ID" />
+			</div>
+			<div class="col-6 col-md-4">
+				<DataCard DivClasses="mb-4" HeaderTitle="Companies" MethodName="GetProgramSnapshotCompanies" ID="@Model.ID" />
+			</div>
+		</div>
+		<div class="row mb-4">
+			<div class="col">
+				<DataCard DivClasses="mb-4" HeaderTitle="Lines" MethodName="GetProgramSnapshotLines" ID="@Model.ID" />
+			</div>
+		</div>
+		<div class="row display-flex mb-4">
+			<div class="col-6 col-md-4">
+				<DataCard DivClasses="mb-4" HeaderTitle="Geographical" MethodName="GetProgramSnapshotGeographical" ID="@Model.ID" />
+			</div>
+			<div class="col-6 col-md-4">
+				<DataCard DivClasses="mb-4" HeaderTitle="Deductions" MethodName="GetProgramSnapshotDeductions" ID="@Model.ID" />
+			</div>
+			<div class="col-6 col-md-4">
+				<DataCard DivClasses="mb-4" HeaderTitle="Segmentation" MethodName="GetProgramSnapshotSegmentation" ID="@Model.ID" />
+			</div>
+		</div>
+		<div class="row mb-4">
+			<div class="col-6">
+				<DataCard DivClasses="mb-4" HeaderTitle="Risk Code Matrix" MethodName="GetProgramSnapshotRiskCodes" ID="@Model.ID" />
+			</div>
+			<div class="col-6">
+				<DataCard DivClasses="mb-4" HeaderTitle="Documents" MethodName="GetProgramSnapshotDocuments" ID="@Model.ID" />
+			</div>
+		</div>
+		<div class="row mb-4">
+			<div class="col">
+				<DataCard DivClasses="mb-4" HeaderTitle="History" MethodName="GetProgramSnapshotHistory" ID="@Model.ID" />
+			</div>
+		</div>
+		<div class="row mb-4">
+			<div class="col">
+				<DataCard DivClasses="mb-4" HeaderTitle="NDEX Notes" MethodName="GetProgramSnapshotNDEXNotes" ID="@Model.ID" />
+			</div>
+		</div>
+		<div class="row mb-4">
+			<div class="col">
+				<ScatterCard DivClasses="mb-4" HeaderTitle="ELR vs. Premium" MethodName="GetProgramELRvsPremium" XAxisLabel="Premium (GBP)" YAxisLabel="IELR" ID="@Model.ID" />
+			</div>
+		</div>
+	</div>
+
+	<div class="tab-pane fade" id="pills-premium">
+		<div class="row">
+			<DataCard DivClasses="mb-4" HeaderTitle="Currencies" MethodName="GetProgramPremiumCurrencies" ID="@Model.ID" />
+			<DataCard DivClasses="mb-4" HeaderTitle="History" MethodName="GetProgramPremiumHistory" ID="@Model.ID" />
+			<DataCard DivClasses="mb-4" HeaderTitle="Patterns" MethodName="GetProgramPremiumPatterns" ID="@Model.ID" />
+			<DataCard DivClasses="mb-4" HeaderTitle="Signings" MethodName="GetProgramPremiumSignings" ID="@Model.ID" />
+		</div>
+	</div>
+
+	<div class="tab-pane fade" id="pills-claims">
+		<div class="row">
+			<DataCard DivClasses="mb-4" HeaderTitle="Development" MethodName="GetProgramClaimsDevelopment" ID="@Model.ID" />
+			<DataCard DivClasses="mb-4" HeaderTitle="Events" MethodName="GetProgramClaimsEvents" ID="@Model.ID" />
+			<DataCard DivClasses="mb-4" HeaderTitle="List" MethodName="GetProgramClaimsList" ID="@Model.ID" />
+		</div>
+	</div>
+
+	<div class="tab-pane fade" id="pills-pricing">
+		<div class="row">
+			<DataCard DivClasses="mb-4" HeaderTitle="ELRs" MethodName="GetProgramPricingELRs" ID="@Model.ID" />
+			<DataCard DivClasses="mb-4" HeaderTitle="OptalitixQuotes" MethodName="GetProgramPricingOptalitixQuotes" ID="@Model.ID" />
+			<DataCard DivClasses="mb-4" HeaderTitle="PremiumSplits" MethodName="GetProgramPricingPremiumSplits" ID="@Model.ID" />
+			<DataCard DivClasses="mb-4" HeaderTitle="RateChange" MethodName="GetProgramPricingRateChange" ID="@Model.ID" />
+		</div>
+	</div>
+
+	<div class="tab-pane fade" id="pills-audit">
+		<div class="row">
+			<DataCard DivClasses="mb-4" HeaderTitle="WorkbenchNotes" MethodName="GetProgramNotesWorkbenchNotes" ID="@Model.ID" />
+		</div>
+	</div>
+
+	<div class="tab-pane fade" id="pills-accuracy">
+		<div class="row">
+			<DataCard DivClasses="mb-4" HeaderTitle="Accuracy Check" MethodName="GetProgramAccuracyCheckDetails" ID="@Model.ID" />
+		</div>
+	</div>
+
+</div>
+
+}
+else
+{
+	<ol class="breadcrumb">
+		<li class="breadcrumb-item active">VIEW PROGRAM</li>
+	</ol>
+
+	<h1 class="page-header mb-3">View Program.</h1>
+}
+
+@code {
+	[Parameter] public string ID { get; set; }
+
+	private WindowpaneViewXModel Model { get; set; } = new();
+	private Dictionary<string, string> HeaderData { get; set; } = new();
+
+	protected override void OnInitialized()
+	{
+		if (!string.IsNullOrWhiteSpace(ID))
+		{
+			Model.ID = ID;
+			HeaderData = WindowpaneService.GetProgramHeaderKeyValuePairs(ID)
+				?? new Dictionary<string, string>();
+		}
+	}
+}

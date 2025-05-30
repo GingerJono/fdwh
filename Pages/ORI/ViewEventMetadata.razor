@@ -7,88 +7,93 @@
 
 @if (IsLoading)
 {
-    <p>Loading event details...</p>
+	<p>Loading event details...</p>
 }
 else if (!string.IsNullOrEmpty(ErrorMessage))
 {
-    <p class="text-danger">@ErrorMessage</p>
+	<p class="text-danger">@ErrorMessage</p>
 }
 else if (EventDetails != null)
 {
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="/EventMetadata">EVENT METADATA</a></li>
-            <li class="breadcrumb-item active" aria-current="page">VIEW EVENT: @EventDetails.EventCode</li>
-        </ol>
-    </nav>
+	<nav aria-label="breadcrumb">
+		<ol class="breadcrumb">
+			<li class="breadcrumb-item"><a href="/EventMetadata">EVENT METADATA</a></li>
+			<li class="breadcrumb-item active" aria-current="page">VIEW EVENT: @EventDetails.EventCode</li>
+		</ol>
+	</nav>
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="page-header m-0">Event Code: @EventDetails.EventCode</h1>
-        <button class="btn btn-primary" @onclick="NavigateToEdit">Edit Event</button>
-    </div>
+	<div class="d-flex justify-content-between align-items-center mb-4">
+		<h1 class="page-header m-0">Event Code: @EventDetails.EventCode</h1>
+		@if (EventDetails.IsDerived == false)
+		{
+			<button class="btn btn-primary" @onclick="NavigateToEdit">Edit Event</button>
+		}
+	</div>
 
-    <!-- Event Details -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card mb-4">
-                <div class="card-header">Event Details</div>
-                <div class="card-body">
-                    <table class="table table-bordered">
-                        <tbody>
-                            <tr><th>Event Code</th><td>@EventDetails.EventCode</td></tr>
-                            <tr><th>Peril</th><td>@EventDetails.Peril</td></tr>
-                            <tr><th>Region</th><td>@EventDetails.PerilRegion</td></tr>
-                            <tr><th>Notes</th><td>@EventDetails.Notes</td></tr>
-                            <tr><th>Last Updated</th><td>@EventDetails.LastUpdated.ToString("yyyy-MM-dd HH:mm")</td></tr>
-                            <tr><th>Updated By</th><td>@EventDetails.LastUpdatedBy</td></tr>
-                            <tr><th>Syndicate Event Description</th><td>@EventDetails.EventDescription</td></tr>
-                            <tr><th>Number of Claims</th><td>@EventDetails.NumClaims</td></tr>
-                            <tr><th>Total Incurred USD</th><td>@EventDetails.IncurredUSDQtr.ToString("N0")</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
+	<!-- Event Details -->
+	<div class="row">
+		<div class="col-12">
+			<div class="card mb-4">
+				<div class="card-header">Event Details</div>
+				<div class="card-body">
+					<table class="table table-bordered">
+						<tbody>
+							<tr><th>Event Code</th><td>@EventDetails.EventCode</td></tr>
+							<tr><th>Peril</th><td>@EventDetails.Peril</td></tr>
+							<tr><th>Region</th><td>@EventDetails.PerilRegion</td></tr>
+							<tr><th>Event Start Date</th><td>@EventDetails.EventStartDate</td></tr>
+							<tr><th>Event Start Date Override</th><td>@EventDetails.EventStartDateOverride</td></tr>
+							<tr><th>Notes</th><td>@EventDetails.Notes</td></tr>
+							<tr><th>Last Updated</th><td>@EventDetails.LastUpdated.ToString("yyyy-MM-dd HH:mm")</td></tr>
+							<tr><th>Updated By</th><td>@EventDetails.LastUpdatedBy</td></tr>
+							<tr><th>Syndicate Event Description</th><td>@EventDetails.EventDescription</td></tr>
+							<tr><th>Number of Claims</th><td>@EventDetails.NumberOfClaims</td></tr>
+							<tr><th>Total Incurred USD</th><td>@EventDetails.IncurredUSDQtr.ToString("N0")</td></tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
 }
 
 @code {
-    [Parameter] public string EventCode { get; set; }
+	[Parameter] public string EventCode { get; set; }
 
-    private EventMetadataModel EventDetails { get; set; }
-    private bool IsLoading { get; set; } = true;
-    private string ErrorMessage { get; set; }
+	private EventMetadataModel EventDetails { get; set; }
+	private bool IsLoading { get; set; } = true;
+	private string ErrorMessage { get; set; }
 
-    protected override async Task OnInitializedAsync()
-    {
-        if (string.IsNullOrWhiteSpace(EventCode))
-        {
-            ErrorMessage = "Event code is required.";
-            IsLoading = false;
-            return;
-        }
+	protected override async Task OnInitializedAsync()
+	{
+		if (string.IsNullOrWhiteSpace(EventCode))
+		{
+			ErrorMessage = "Event code is required.";
+			IsLoading = false;
+			return;
+		}
 
-        try
-        {
-            EventDetails = await ORIService.GetEventMetadata(EventCode);
-            if (EventDetails == null)
-            {
-                ErrorMessage = $"No event details found for EventCode: {EventCode}";
-            }
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = "An error occurred while fetching event details.";
-            Console.WriteLine($"[ERROR] Failed to fetch event details: {ex}");
-        }
-        finally
-        {
-            IsLoading = false;
-        }
-    }
+		try
+		{
+			EventDetails = await ORIService.GetEventMetadata(EventCode);
+			if (EventDetails == null)
+			{
+				ErrorMessage = $"No event details found for EventCode: {EventCode}";
+			}
+		}
+		catch (Exception ex)
+		{
+			ErrorMessage = "An error occurred while fetching event details.";
+			Console.WriteLine($"[ERROR] Failed to fetch event details: {ex}");
+		}
+		finally
+		{
+			IsLoading = false;
+		}
+	}
 
-    private void NavigateToEdit()
-    {
-        NavigationManager.NavigateTo($"EditEventMetadata/{EventDetails.EventCode}");
-    }
+	private void NavigateToEdit()
+	{
+		NavigationManager.NavigateTo($"EditEventMetadata/{EventDetails.EventCode}");
+	}
 }

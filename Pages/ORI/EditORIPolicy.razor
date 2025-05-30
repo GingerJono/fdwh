@@ -2,10 +2,16 @@
 @inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager
 @using Sandbox._Spk
 @using CardModel
+@using FlatpickrBlazor
+@using FlatpickrBlazor.Components
 @inject IJSRuntime JSRuntime
 @using Sandbox.Models.ORI
 @using Sandbox.Services
 @inject ORIService ORIService
+
+<!-- Flatpickr Css -->
+<link href="@($"{NavigationManager.BaseUri}_content/FlatpickrBlazor/flatpickr.min.css")" rel="stylesheet" />
+<link href="@($"{NavigationManager.BaseUri}_content/FlatpickrBlazor/plugins/monthSelect/style.css")" rel="stylesheet" />
 
 @if (IsLoading)
 {
@@ -196,6 +202,61 @@ else if (PolicyDetails != null)
 		<div class="row">
 			<div class="col-md-6">
 				<div class="card mb-4">
+					<div class="card-header">Policy Details</div>
+					<div class="card-body">
+						<table class="table table-bordered">
+							<tbody>
+								<tr>
+									<th>FX Rate Application Date</th>
+									<td>
+										<InputText @bind-Value="PolicyDetails.FXRateApplicationDate" class="form-control" readonly />
+
+										@* <div class="form-group">
+											<div class="input-group">
+												<div class="input-group-text text-muted"> <i class="ri-calendar-line"></i> </div>
+												<Flatpickr id="fxRateApplicationDatePickr" class="form-control" @ref="fxRateApplicationDatePickr" Value="@selectedFXRateApplicationDate" ValueChanged="OnFXRateDateChanged" DateFormat="Y-m-d" placeholder="Choose date" />
+											</div>
+										</div> *@
+									</td>
+								</tr>
+								<tr>
+									<th>FX Treatment</th>
+									<td>
+										<InputSelect class="form-control" @bind-Value=PolicyDetails.FXTreatment TValue="string">
+											<option value="">Select an FX Treatment</option>
+											@if (FXTreatments != null)
+											{
+												@foreach (var item in FXTreatments)
+												{
+													<option value="@item.FXTreatment">@item.FXTreatment</option>
+												}
+											}
+										</InputSelect>
+									</td>
+								</tr>
+								<tr>
+									<th>Inuring Priority</th>
+									<td>
+										<InputNumber @bind-Value="PolicyDetails.InuringPriority" class="form-control" />
+									</td>
+								</tr>
+								<tr>
+									<th>Ceded Premium Calculation</th>
+									<td>
+										<InputSelect class="form-control" @bind-Value=PolicyDetails.CededPremiumCalculation TValue="string">
+											<option value="">Select a Ceded Premium Calculation...</option>
+											<option value="GrossGross" class="form-control">Gross Gross</option>
+											<option value="GrossNet" class="form-control">Gross Net</option>
+										</InputSelect>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-6">
+				<div class="card mb-4">
 					<div class="card-header">Policy Allocations by Class</div>
 					<div class="card-body">
 						@if (PolicyDetails.PolicyAllocationsClass != null && PolicyDetails.PolicyAllocationsClass.Any())
@@ -254,8 +315,6 @@ else if (PolicyDetails != null)
 						</div>
 					</div>
 				</div>
-			</div>
-			<div class="col-md-6">
 				<div class="card mb-4">
 					<div class="card-header">Policy Allocations by Year of Account</div>
 					<div class="card-body">
@@ -328,11 +387,38 @@ else if (PolicyDetails != null)
 
 @code {
 	[Inject] private NavigationManager Navigation { get; set; }
-	[Parameter] public string ORIPolicyReference { get; set; }
+	[Parameter] public required string ORIPolicyReference { get; set; }
+
+	// Basic Date picker //
+	public Flatpickr? fxRateApplicationDatePickr;
 
 	private Dictionary<string, List<DropdownItem>> DropdownValues = new();
 	private ORIPolicyModel PolicyDetails { get; set; }
+	private List<FXTreatmentModel> FXTreatments { get; set; }
 	private bool IsLoading = true;
+
+
+	private DateTime selectedFXRateApplicationDate
+	{
+		get
+		{
+			if (DateTime.TryParseExact(PolicyDetails.FXRateApplicationDate, "yyyy-MM-dd", null, System.Globalization.DateTimeStyles.None, out var dt))
+			{
+				return dt.Date;
+			}
+			else
+			{
+				var defaultDate = PolicyDetails.Inception;
+				return defaultDate.Date;
+			}
+		}
+		set
+		{
+			PolicyDetails.FXRateApplicationDate = value.ToString("yyyy-MM-dd");
+		}
+	}
+
+
 	private string ErrorMessage;
 	private ORIFilterItem newFilter = new ORIFilterItem
 		{
@@ -349,11 +435,6 @@ else if (PolicyDetails != null)
 	private List<ORIFilterItemDefinition> FilterItemsList = new();
 	protected override async Task OnInitializedAsync()
 	{
-		FilterItemsList = await ORIService.GetIncludedOrExcludedItems();
-		await LoadAllPolicies();
-		FilteredPolicies = AllPolicies;
-
-
 		if (string.IsNullOrWhiteSpace(ORIPolicyReference))
 		{
 			ErrorMessage = "Policy reference is required.";
@@ -363,9 +444,20 @@ else if (PolicyDetails != null)
 
 		try
 		{
-			PolicyDetails = await ORIService.GetORIPolicyDetails(ORIPolicyReference);
+			// Get All Policies for filtering
 			FilterItemsList = await ORIService.GetIncludedOrExcludedItems();
-			if (PolicyDetails == null)
+			await LoadAllPolicies();
+			FilteredPolicies = AllPolicies;
+
+
+			// Get Policy Details
+			PolicyDetails = await ORIService.GetORIPolicyDetails(ORIPolicyReference);
+			if (PolicyDetails != null)
+			{
+				FilterItemsList = await ORIService.GetIncludedOrExcludedItems();
+				FXTreatments = await ORIService.GetFXTreatments();
+			}
+			else
 			{
 				ErrorMessage = $"No policy details found for reference: {ORIPolicyReference}";
 			}
@@ -380,6 +472,12 @@ else if (PolicyDetails != null)
 		}
 		Console.WriteLine("pageloaded");
 	}
+
+	private void OnFXRateDateChanged(DateTime date)
+	{
+		selectedFXRateApplicationDate = date;
+	}
+
 
 	private async Task HandleValidSubmit()
 	{

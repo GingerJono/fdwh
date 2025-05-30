@@ -20,7 +20,7 @@ namespace Sandbox.Models.ORI
 		public double? LineAmountSCC { get; set; }
 		// Total Allocations
 		public decimal TotalYOAAllocation { get; set; }
-		public decimal TotalCOBAllocation { get; set; }
+		public decimal TotalClassAllocation { get; set; }
 		public decimal TotalSecurityAllocation { get; set; }
 		public decimal TotalEventAllocation { get; set; }
 		public bool IsRIP { get; set; }

@@ -61,30 +61,30 @@ else if (USMDetails != null)
 				</div>
 			</div>
 
-			<!-- COB Allocations -->
+			<!-- Class Allocations -->
 			<div class="col-md-6">
 				<div class="card mb-4">
-					<div class="card-header">COB Allocations</div>
+					<div class="card-header">Class Allocations</div>
 					<div class="card-body">
 						<table class="table">
 							<thead>
-								<tr><th>COB</th><th>Allocation</th><th>Actions</th></tr>
+								<tr><th>Class</th><th>Allocation</th><th>Actions</th></tr>
 							</thead>
 							<tbody>
-								@foreach (var allocation in USMDetails.COBAllocations)
+								@foreach (var allocation in USMDetails.ClassAllocations)
 								{
 									<tr>
-										<td>@allocation.COB</td>
+										<td>@allocation.Class</td>
 										<td><InputNumber class="form-control" @bind-Value="allocation.Allocation" /></td>
 										<td>
-											<button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveCOBAllocation(allocation)">Remove</button>
+											<button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveClassAllocation(allocation)">Remove</button>
 										</td>
 									</tr>
 								}
 								<tr>
-									<td><InputText class="form-control" @bind-Value="newCOB.COB" /></td>
-									<td><InputNumber class="form-control" @bind-Value="newCOB.Allocation" /></td>
-									<td><button type="button" class="btn btn-primary btn-sm" @onclick="AddCOBAllocation">Add</button></td>
+									<td><InputText class="form-control" @bind-Value="newClass.Class" /></td>
+									<td><InputNumber class="form-control" @bind-Value="newClass.Allocation" /></td>
+									<td><button type="button" class="btn btn-primary btn-sm" @onclick="AddClassAllocation">Add</button></td>
 								</tr>
 							</tbody>
 						</table>
@@ -177,7 +177,7 @@ else if (USMDetails != null)
 
 			// Ensure lists are initialized to avoid null reference issues
 			USMDetails.YOAAllocations ??= new List<YOAAllocation>();
-			USMDetails.COBAllocations ??= new List<COBAllocation>();
+			USMDetails.ClassAllocations ??= new List<ClassAllocation>();
 			USMDetails.SecurityAllocations ??= new List<SecurityAllocation>();
 			USMDetails.EventAllocations ??= new List<EventAllocation>();
 		}
@@ -196,7 +196,7 @@ else if (USMDetails != null)
 		// Check if any new allocations have values but haven't been added
 		bool hasUncommittedChanges =
 			(newYOA.YOA != 0 || newYOA.Allocation != 0) ||
-			(!string.IsNullOrWhiteSpace(newCOB.COB) || newCOB.Allocation != 0) ||
+			(!string.IsNullOrWhiteSpace(newClass.Class) || newClass.Allocation != 0) ||
 			(!string.IsNullOrWhiteSpace(newSecurity.Security) || newSecurity.Allocation != 0) ||
 			(!string.IsNullOrWhiteSpace(newEvent.Event) || newEvent.Allocation != 0);
 
@@ -221,7 +221,7 @@ else if (USMDetails != null)
 	}
 
 	private YOAAllocation newYOA = new YOAAllocation();
-	private COBAllocation newCOB = new COBAllocation();
+	private ClassAllocation newClass = new ClassAllocation();
 	private SecurityAllocation newSecurity = new SecurityAllocation();
 	private EventAllocation newEvent = new EventAllocation();
 
@@ -248,27 +248,27 @@ else if (USMDetails != null)
 		USMDetails.RemovedYOAAllocations.Add(allocation);
 	}
 
-	private void AddCOBAllocation()
+	private void AddClassAllocation()
 	{
-		if (string.IsNullOrWhiteSpace(newCOB.COB) || newCOB.Allocation == 0)
+		if (string.IsNullOrWhiteSpace(newClass.Class) || newClass.Allocation == 0)
 		{
-			Console.WriteLine("Invalid COB allocation entry.");
+			Console.WriteLine("Invalid Class allocation entry.");
 			return;
 		}
 
-		USMDetails.COBAllocations.Add(new COBAllocation
+		USMDetails.ClassAllocations.Add(new ClassAllocation
 			{
-				COB = newCOB.COB,
-				Allocation = newCOB.Allocation
+				Class = newClass.Class,
+				Allocation = newClass.Allocation
 			});
 
-		newCOB = new COBAllocation(); // Reset input
+		newClass = new ClassAllocation(); // Reset input
 	}
 
-	private void RemoveCOBAllocation(COBAllocation allocation)
+	private void RemoveClassAllocation(ClassAllocation allocation)
 	{
-		USMDetails.COBAllocations.Remove(allocation);
-		USMDetails.RemovedCOBAllocations.Add(allocation);
+		USMDetails.ClassAllocations.Remove(allocation);
+		USMDetails.RemovedClassAllocations.Add(allocation);
 	}
 
 	private void AddSecurityAllocation()

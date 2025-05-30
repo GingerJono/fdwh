@@ -1,0 +1,89 @@
+﻿@page "/MyAccounts"
+@using Sandbox.Models.Windowpane
+@using Sandbox.Services
+@inject WindowpaneService WindowpaneService
+@inject NavigationManager NavigationManager
+
+<div class="card">
+    <div class="card-header bg-none fw-semibold">
+        Account List
+    </div>
+    <div class="card-body overflow-x-auto">
+        @if (isLoading)
+        {
+            <div class="d-flex align-items-center">
+                <div class="spinner-border text-primary me-2" role="status"></div>
+                <span>Loading accounts...</span>
+            </div>
+        }
+        else if (Model?.Programs?.Any() == true)
+        {
+            <table class="table table-hover table-striped">
+                <thead>
+                    <tr>
+                        <th>Program Ref</th>
+                        <th>Inception</th>
+                        <th>Assured</th>
+                        <th>Gross EPI</th>
+                        <th>Layers</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var prog in Model.Programs)
+                    {
+                        <tr>
+                            <td><a href="/ViewProgram/@prog.ProgramRef">@prog.ProgramRef</a></td>
+                            <td>@prog.Inception.ToString("dd/MM/yyyy")</td>
+                            <td>@prog.Assured</td>
+                            <td>@prog.GrossEPI.ToString("C0")</td>
+                            <td>@prog.LayerCount</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p>No accounts found.</p>
+        }
+    </div>
+</div>
+
+@inject IHttpContextAccessor HttpContextAccessor
+
+@code {
+    private MyAccountsModel Model { get; set; } = new();
+    private bool isLoading = true;
+    private bool hasLoaded = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (hasLoaded) return;
+
+        var username = HttpContextAccessor.HttpContext?.User?.Identity?.Name;
+
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            // Wait briefly to allow context to populate, in case it's mid-lifecycle
+            await Task.Delay(250);
+            username = HttpContextAccessor.HttpContext?.User?.Identity?.Name;
+
+            if (string.IsNullOrWhiteSpace(username))
+            {
+                Console.WriteLine("Username not resolved in MyAccounts. Aborting data load.");
+                return;
+            }
+        }
+
+        isLoading = true;
+        try
+        {
+            Model.Programs = (await WindowpaneService.GetAllProgramsAsync())?.ToList() ?? new();
+        }
+        finally
+        {
+            isLoading = false;
+            hasLoaded = true;
+        }
+    }
+}

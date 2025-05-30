@@ -1,0 +1,94 @@
+﻿@page "/ViewPolicy/{ID}"
+@using Sandbox.Models.Windowpane
+@using Sandbox.Services
+@inject WindowpaneService WindowpaneService
+@inject NavigationManager NavigationManager
+
+@if (Model?.ID != null)
+{
+    <!-- Breadcrumbs -->
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a @onclick="@(() => NavigationManager.NavigateTo("/Windowpane/Search"))">SEARCH</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a @onclick="@(() => NavigationManager.NavigateTo("/Windowpane/ViewPolicy"))">VIEW POLICY</a>
+        </li>
+        <li class="breadcrumb-item active">@Model.ID</li>
+    </ol>
+
+    <!-- Header -->
+    <div class="row display-flex">
+        <div class="col-lg-2 col-4 mb-4">
+            <div class="card mb-3 overflow-hidden h-100 fs-13px border-0 bg-gradient-red-pink">
+                <div class="card-body position-relative">
+                    <h5 class="text-white text-opacity-80 mb-3 fs-16px">Policy Ref</h5>
+                    <h3 class="text-white mt-n1">@Model.ID</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-8 mb-4">
+            <div class="card mb-3 overflow-hidden h-100 fs-13px border-0 bg-gradient-custom-orange">
+                <div class="card-body position-relative">
+                    <h5 class="text-white text-opacity-80 mb-3 fs-16px">Assured</h5>
+                    <h3 class="text-white mt-n1">@HeaderData.GetValueOrDefault("Assured")</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2 col-4 mb-4">
+            <div class="card mb-3 overflow-hidden h-100 fs-13px border-0 bg-gradient-custom-teal">
+                <div class="card-body position-relative">
+                    <h5 class="text-white text-opacity-80 mb-3 fs-16px">Inception</h5>
+                    <h3 class="text-white mt-n1">@HeaderData.GetValueOrDefault("Inception")</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2 col-4 mb-4">
+            <div class="card mb-3 overflow-hidden h-100 fs-13px border-0 bg-gradient-custom-blue">
+                <div class="card-body position-relative">
+                    <h5 class="text-white text-opacity-80 mb-3 fs-16px">UW</h5>
+                    <h3 class="text-white mt-n1">@HeaderData.GetValueOrDefault("UW")</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2 col-4 mb-4">
+            <div class="card mb-3 overflow-hidden h-100 fs-13px border-0 bg-gradient-custom-indigo">
+                <div class="card-body position-relative">
+                    <h5 class="text-white text-opacity-80 mb-3 fs-16px">Status</h5>
+                    <h3 class="text-white mt-n1">@HeaderData.GetValueOrDefault("Status")</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs Navigation -->
+    <WindowpaneNavTabs For="Policy" />
+
+    <!-- Tabs Content -->
+    <WindowpaneTabPanels For="Policy" ID="@Model.ID" />
+}
+else
+{
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item active">VIEW POLICY</li>
+    </ol>
+
+    <h1 class="page-header mb-3">View Policy.</h1>
+}
+
+@code {
+    [Parameter] public string ID { get; set; }
+
+    private WindowpaneViewXModel Model { get; set; } = new();
+    private Dictionary<string, string> HeaderData { get; set; } = new();
+
+    protected override void OnInitialized()
+    {
+        if (!string.IsNullOrWhiteSpace(ID))
+        {
+            Model.ID = ID;
+            HeaderData = WindowpaneService.GetPolicyHeaderKeyValuePairs(ID)
+                ?? new Dictionary<string, string>();
+        }
+    }
+}

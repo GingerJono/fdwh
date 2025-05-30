@@ -119,28 +119,28 @@ else if (USMDetails != null)
             </div>
         </div>
 
-        <!-- COB Allocation -->
+        <!-- Class Allocation -->
         <div class="col-md-6">
             <div class="card mb-4">
-                <div class="card-header">COB Allocation</div>
+                <div class="card-header">Class Allocation</div>
                 <div class="card-body">
-                    @if (USMDetails.COBAllocations.Any())
+                    @if (USMDetails.ClassAllocations.Any())
                     {
                         <table class="table table-bordered">
                             <thead>
-                                <tr><th>COB</th><th>Allocation</th></tr>
+                                <tr><th>Class</th><th>Allocation</th></tr>
                             </thead>
                             <tbody>
-                                @foreach (var cob in USMDetails.COBAllocations)
+                                @foreach (var Class in USMDetails.ClassAllocations)
                                 {
-                                    <tr><td>@cob.COB</td><td>@cob.Allocation</td></tr>
+                                    <tr><td>@Class.Class</td><td>@Class.Allocation</td></tr>
                                 }
                             </tbody>
                         </table>
                     }
                     else
                     {
-                        <p class="text-muted">No COB allocations available.</p>
+                        <p class="text-muted">No Class allocations available.</p>
                     }
                 </div>
             </div>
