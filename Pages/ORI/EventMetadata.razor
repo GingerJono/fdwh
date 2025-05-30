@@ -8,122 +8,120 @@
 @using DataTablesData
 @inject DataTablesService DataTablesService
 
-<!-- DataTables CSS -->
-<link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/dataTables.bootstrap5.min.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.3.0/css/responsive.bootstrap.min.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.bootstrap5.min.css">
-
-<!-- Start: row-1 -->
-<div class="row">
+<div class="row mt-4 mb-4">
 	<h3>Event Metadata</h3>
-
-	@if (events == null)
-	{
-		<p><em>Loading...</em></p>
-	}
-	else
-	{
-		<table class="table dataTable" id="eventMetadataTable">
-			<thead>
-				<tr>
-					<th>Event Code</th>
-					<th>Peril</th>
-					<th>Region</th>
-					<th>Syndicate Event Desc</th>
-					<th>Num Claims</th>
-					<th>Incurred USD Qtr</th>
-				</tr>
-			</thead>
-			<tbody>
-				@foreach (var ev in events)
-				{
-					<tr>
-						<td>
-							<button class="btn btn-link text-decoration-underline"
-									@onclick="@(() => NavigationManager.NavigateTo($"ViewEventMetadata/{ev.EventCode}"))">
-								@ev.EventCode
-							</button>
-						</td>
-						<td>@ev.Peril</td>
-						<td>@ev.PerilRegion</td>
-						<td>@ev.EventDescription</td>
-						<td>@ev.NumClaims</td>
-						<td>@ev.IncurredUSDQtr.ToString("N2")</td>
-					</tr>
-				}
-			</tbody>
-			<tfoot>
-				<tr>
-					<th>Event Code</th>
-					<th>Peril</th>
-					<th>Region</th>
-					<th>Event Desc</th>
-					<th>Num Claims</th>
-					<th>Incurred USD</th>
-				</tr>
-			</tfoot>
-		</table>
-	}
 </div>
+@if (AllEvents != null)
+{
+	<div class="row mb-4">
+		<div class="card shadow-sm border-0">
+			<div class="table-relative">
+				<table class="table table-striped table-fixed">
+					<colgroup>
+						<col style="width: 12%;" />
+						<col style="width: 20%;" />
+						<col style="width: 14%;" />
+						<col style="width: 12%;" />
+						<col style="width: 12%;" />
+						<col style="width: 10%;" />
+						<col style="width: 10%;" />
+						<col style="width: 10%;" />
+					</colgroup>
+					<thead>
+						<tr>
+							<th class="align-top">
+								Event Code
+								<input class="form-control form-control-sm" placeholder="Filter Event Code..." value="@FilterEventCode" @oninput="e => OnEventCodeChanged(e.Value?.ToString())" />
+							</th>
+							<th class="align-top">
+								Description
+								<input class="form-control form-control-sm" placeholder="Filter Description..." value="@FilterDescription" @oninput="e => OnDescriptionChanged(e.Value?.ToString())" />
+							</th>
+							<th class="align-top">
+								Start Date
+								<input class="form-control form-control-sm" placeholder="Filter Start Date..." value="@FilterEventCode" @oninput="e => OnEventStartDateChanged(e.Value?.ToString())" />
+							</th>
+							<th class="align-top">
+								Peril
+								<input class="form-control form-control-sm" placeholder="Filter Peril..." value="@FilterPeril" @oninput="e => OnPerilChanged(e.Value?.ToString())" />
+							</th>
+							<th class="align-top">
+								Region
+								<input class="form-control form-control-sm" placeholder="Filter Region..." value="@FilterRegion" @oninput="e => OnRegionChanged(e.Value?.ToString())" />
+							</th>
+							<th class="text-end align-top">Number of Claims</th>
+							<th class="text-end align-top">Incurred USD Qtr</th>
+							<th class="align-top">Actions</th>
+						</tr>
+					</thead>
+					<tbody>
+						@foreach (var ev in PagedEvents)
+						{
+							<tr>
+								<td class="@(ev.IsDerived == 0 ? "fw-bold" : "")">@ev.EventCode</td>
+								<td>@ev.Description</td>
+								<td>@ev.EventStartDate</td>
+								<td>@ev.Peril</td>
+								<td>@ev.PerilRegion</td>
+								<td class="text-end">@ev.NumberOfClaims</td>
+								<td class="text-end">@ev.IncurredUSDQtr.ToString("N2")</td>
+								<td>
+									<button class="btn btn-sm btn-outline-primary"
+											@onclick='() => NavigationManager.NavigateTo($"ViewEventMetadata/{ev.EventCode}")'>
+										View
+									</button>
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+			<div class="px-3 pb-3">
+				<div class="d-flex justify-content-between align-items-center">
+					<select class="form-select form-select-sm w-auto" @onchange="OnPageSizeChange">
+						@foreach (var size in PageSizeOptions)
+						{
+							<option value="@size" selected="@(PageSize == size)">@size per page</option>
+						}
+					</select>
 
-<!-- jQuery -->
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+					<nav>
+						<ul class="pagination mb-0">
+							<li class="page-item @(CurrentPage == 1 ? "disabled" : "")">
+								<button class="page-link" @onclick="() => GoToPage(CurrentPage - 1)">Previous</button>
+							</li>
 
-<!-- DataTables JS -->
-<script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.12.1/js/dataTables.bootstrap5.min.js"></script>
-<script src="https://cdn.datatables.net/responsive/2.3.0/js/dataTables.responsive.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.print.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.6/pdfmake.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+							@if (StartPage > 1)
+							{
+								<li class="page-item">
+									<button class="page-link" @onclick="() => ShiftPageWindow(-1)">...</button>
+								</li>
+							}
 
-<!-- Internal DataTables JS -->
-<script src="@($"{NavigationManager.BaseUri}assets/js/datatables.js")"></script>
+							@for (int i = StartPage; i <= EndPage; i++)
+							{
+								<li class="page-item @(CurrentPage == i ? "active" : "")">
+									<button class="page-link" @onclick="() => GoToPage(i)">@i</button>
+								</li>
+							}
 
-<script>
-    var options = {
-        paging: true,
-        pageLength: 10,
-        fixedHeader: true,
-        lengthChange: false,
-        order: [],
-        columnDefs: [],
-        buttons: [],
-        initComplete: function () {
-            this.api()
-                .columns()
-                .every(function () {
-                    let column = this;
-                    let title = column.footer().textContent;
+							@if (EndPage < TotalPages)
+							{
+								<li class="page-item">
+									<button class="page-link" @onclick="() => ShiftPageWindow(1)">...</button>
+								</li>
+							}
 
-                    let input = document.createElement('input');
-                    input.placeholder = title;
-                    column.footer().replaceChildren(input);
-
-                    input.addEventListener('keyup', () => {
-                        if (column.search() !== this.value) {
-                            column.search(input.value).draw();
-                        }
-                    });
-                });
-        }
-    };
-    
-    window.initializeDataTables = function () {
-        console.log("Initializing DataTables...");
-        setTimeout(() => {
-            if ($('#eventMetadataTable').length) {
-                $('#eventMetadataTable').DataTable(options);
-                console.log("DataTable initialized successfully.");
-            } else {
-                console.log("Table not found!");
-            }
-        }, 500);
-    };
-</script>
+							<li class="page-item @(CurrentPage == TotalPages ? "disabled" : "")">
+								<button class="page-link" @onclick="() => GoToPage(CurrentPage + 1)">Next</button>
+							</li>
+						</ul>
+					</nav>
+				</div>
+			</div>
+		</div>
+	</div>
+}
 
 @code {
 	private IEnumerable<EventMetadataListModel> events;
