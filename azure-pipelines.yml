@@ -1,0 +1,76 @@
+trigger:
+- master  
+
+pool:
+  name: duwpmdev01 
+
+variables:
+  buildConfiguration: 'Release'
+  publishDir: '$(Build.ArtifactStagingDirectory)/published'
+
+stages:
+- stage: BuildAndPublish
+  displayName: 'Build and Publish Blazor App'
+  jobs:
+  - job: Build
+    steps:
+    - task: UseDotNet@2
+      displayName: 'Install .NET 8 SDK'
+      inputs:
+        packageType: 'sdk'
+        version: '8.x.x'  # Adjust to your actual .NET 8 version
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Restore NuGet Packages'
+      inputs:
+        command: 'restore'
+        projects: '**/*.csproj'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Build Solution'
+      inputs:
+        command: 'build'
+        arguments: '--configuration $(buildConfiguration)'
+        projects: '**/*.csproj'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish Project'
+      inputs:
+        command: 'publish'
+        projects: '**/*.csproj'
+        arguments: '--configuration $(buildConfiguration) --output $(publishDir)'
+        publishWebProjects: false
+        zipAfterPublish: false
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifact'
+      inputs:
+        PathtoPublish: '$(publishDir)'
+        ArtifactName: 'drop'
+
+- stage: DeployToIIS
+  displayName: 'Deploy to IIS Server'
+  dependsOn: BuildAndPublish
+  jobs:
+  - job: Deploy
+    steps:
+    - download: current
+      artifact: drop
+
+    - task: PowerShell@2
+      displayName: 'Copy to IIS Server'
+      inputs:
+        targetType: 'inline'
+        script: |
+          $source = "$(Pipeline.Workspace)\drop"
+          $destination = "C:\inetpub\wwwroot\Sandbox2"
+          Write-Host "Copying files from $source to $destination"
+          robocopy $source $destination /E /PURGE /NFL /NDL /NJH /NJS /NP /R:2 /W:5
+
+    - task: PowerShell@2
+      displayName: 'Restart IIS App Pool'
+      inputs:
+        targetType: 'inline'
+        script: |
+          Import-Module WebAdministration
+          Restart-WebAppPool -Name "DefaultAppPool"
