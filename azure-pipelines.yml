@@ -18,7 +18,7 @@ stages:
       displayName: 'Install .NET 8 SDK'
       inputs:
         packageType: 'sdk'
-        version: '8.x.x'  # Adjust to your actual .NET 8 version
+        version: '8.0.408'
 
     - task: DotNetCoreCLI@2
       displayName: 'Restore NuGet Packages'
