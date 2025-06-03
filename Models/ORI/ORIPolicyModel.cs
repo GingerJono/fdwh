@@ -39,6 +39,7 @@ namespace Sandbox.Models.ORI
         public List<ORIPolicyAllocationYOA> PolicyAllocationsYOA { get; set; } = new();
         public List<ORIPolicyAllocationClass> RemovedPolicyAllocationsClass { get; set; } = new();
         public List<ORIPolicyAllocationYOA> RemovedPolicyAllocationsYOA { get; set; } = new();
+        public List<AggDeductible> RemovedAggDeductibles { get; set; } = new();
         public List<Narrative> Narratives { get; set; } = new();
         public List<ORIPolicyReinstatementModel> Reinstatements { get; set; } = new();
         public List<PolicySecurity> PolicySecurities { get; set; } = new();
@@ -47,7 +48,7 @@ namespace Sandbox.Models.ORI
         public List<ClassYearOfAccountSplits> ClassYearOfAccountSplits { get; set; } = new();
 
         // Agg Deductibles
-        public List<AggDeductibleModel> AggDeductibles { get; set; } = new();
+        public List<AggDeductible> AggDeductibles { get; set; } = new();
 
     }
 
@@ -140,6 +141,19 @@ namespace Sandbox.Models.ORI
     {
         public string? Class { get; set; }
         public Dictionary<int, decimal> YearOfAccountSplits { get; set; } = new();
+    }
+
+    public class AggDeductible
+    {
+        public string? ORIPolicyReference { get; set; }
+        public decimal Deductible { get; set; }
+        public int ApplicationPriority { get; set; } // 1 for first, 2 for second, etc.
+        public DateTime LastUpdated { get; set; }
+        public string? LastUpdatedBy { get; set; }
+        public string? Peril { get; set; } // Optional, can be null if not applicable
+        public string? PerilRegion { get; set; }
+        public string? Note { get; set; } // Optional, can be null if not applicable
+        public int IsDeleted { get; set; }
     }
 
 }

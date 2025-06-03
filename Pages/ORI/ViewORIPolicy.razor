@@ -81,7 +81,7 @@ else
 	</div>
 
 	<!-- Inclusions & Exclusions Table -->
-	<div class="card shadow mb-4">
+	<div class="card shadow mb-4 border">
 		<div class="card-header">Inclusions & Exclusions</div>
 		<div class="card-body">
 			<div class="alert alert-info small" role="alert">
@@ -144,7 +144,7 @@ else
 	</div>
 	<div class="row">
 		<div class="col-md-6">
-			<div class="card shadow mb-4">
+			<div class="card shadow mb-4 border">
 				<div class="card-header">Policy Allocations by Class</div>
 				<div class="card-body">
 					@if (PolicyDetails?.PolicyAllocationsClass?.Any() == true)
@@ -173,7 +173,7 @@ else
 					}
 				</div>
 			</div>
-			<div class="card shadow mb-4">
+			<div class="card shadow mb-4 border">
 				<div class="card-header">Policy Allocations by Year of Account</div>
 				<div class="card-body">
 					@if (PolicyDetails?.PolicyAllocationsYOA?.Any() == true)
@@ -202,7 +202,7 @@ else
 					}
 				</div>
 			</div>
-			<div class="card shadow mb-4">
+			<div class="card shadow mb-4 border">
 				<div class="card-header">Policy Allocations Splits</div>
 				<div class="card-body">
 					@if (PolicyDetails?.ClassYearOfAccountSplits?.Any() == true)
@@ -251,7 +251,7 @@ else
 		</div>
 
 		<div class="col-md-6">
-			<div class="card shadow md-4">
+			<div class="card shadow md-4 border">
 				<div class="card-header">Reinstatements</div>
 				<div class="card-body">
 					@if (PolicyDetails?.Reinstatements.Any() == true)
@@ -288,7 +288,7 @@ else
 					}
 				</div>
 			</div>
-			<div class="card shadow md-4">
+			<div class="card shadow md-4 border">
 				<div class="card-header">Agg Deductibles</div>
 				<div class="card-body">
 					@if (PolicyDetails?.AggDeductibles.Any() == true)
@@ -328,8 +328,8 @@ else
 	</div>
 
 	<div class="row">
-		<div class="col-md-6">			
-			<div class="card shadow mb-4">
+		<div class="col-md-6">
+			<div class="card shadow mb-4 border">
 				<div class="card-header">Narratives</div>
 				<div class="card-body">
 					@if (PolicyDetails?.Narratives?.Any() == true)
@@ -364,7 +364,7 @@ else
 			</div>
 		</div>
 		<div class="col-md-6">
-			<div class="card shadow mb-4">
+			<div class="card shadow mb-4 border">
 				<div class="card-header">Securities</div>
 				<div class="card-body">
 					@if (PolicyDetails?.PolicySecurities?.Any() == true)
@@ -397,7 +397,7 @@ else
 					}
 				</div>
 			</div>
-			<div class="card shadow mb-4">
+			<div class="card shadow mb-4 border">
 				<div class="card-header">USM Summary</div>
 				<div class="card-body">
 
@@ -430,9 +430,7 @@ else
 			</div>
 		</div>
 	</div>
-
-
-	<div class="card shadow mb-4">
+	<div class="card shadow mb-4 border">
 		<div class="card-header">USMs Linked to This Policy</div>
 		<div class="card-body">
 			@if (USMs?.Any() == true)

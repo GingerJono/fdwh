@@ -296,12 +296,12 @@ namespace Sandbox.Services
             }
         }
 
-        private async Task<IEnumerable<AggDeductibleModel>> GetAggDeductibles(SqlConnection connection, string ORIPolicyReference)
+        private async Task<IEnumerable<AggDeductible>> GetAggDeductibles(SqlConnection connection, string ORIPolicyReference)
         {
             var parameters = new DynamicParameters();
             parameters.Add("@ORIPolicyReference", ORIPolicyReference, DbType.String);
 
-            var result = await connection.QueryAsync<AggDeductibleModel>(
+            var result = await connection.QueryAsync<AggDeductible>(
                 "ORI.spGetAggDeductibles",
                 parameters,
                 commandType: CommandType.StoredProcedure);
@@ -523,8 +523,23 @@ namespace Sandbox.Services
                     }
                 }
 
+                // Step 5: Remove Agg Deductibles
+                if (model.RemovedAggDeductibles != null && model.RemovedAggDeductibles.Any())
+                {
+                    foreach (var aggDeductible in model.RemovedAggDeductibles)
+                    {
+                        var parameters = new DynamicParameters();
+                        parameters.Add("@ORIPolicyReference", model.ORIPolicyReference);
+                        parameters.Add("@ApplicationPriority", aggDeductible.ApplicationPriority);
+                        parameters.Add("@Peril", aggDeductible.Peril);
+                        parameters.Add("@PerilRegion", aggDeductible.PerilRegion);
+                        parameters.Add("@LastUpdatedBy", userNameFinal);
+                        await db.ExecuteAsync("ORI.spDeleteAggDeductibles", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
+                    }
+                }
 
-                // Step 5: Process Class Allocations
+
+                // Step 6: Process Class Allocations
                 if (model.PolicyAllocationsClass != null && model.PolicyAllocationsClass.Any())
                 {
                     foreach (var allocation in model.PolicyAllocationsClass)
@@ -533,7 +548,7 @@ namespace Sandbox.Services
                     }
                 }
 
-                // Step 6: Process YOA Allocations
+                // Step 7: Process YOA Allocations
                 if (model.PolicyAllocationsYOA != null && model.PolicyAllocationsYOA.Any())
                 {
                     foreach (var allocation in model.PolicyAllocationsYOA)
@@ -542,7 +557,24 @@ namespace Sandbox.Services
                     }
                 }
 
-                // Step 7: Update Policy Metadata
+                // Step 8: Process Agg Deductibles
+                if (model.AggDeductibles != null && model.AggDeductibles.Any())
+                {
+                    foreach (var aggDeductible in model.AggDeductibles)
+                    {
+                        var parameters = new DynamicParameters();
+                        parameters.Add("@ORIPolicyReference", model.ORIPolicyReference);
+                        parameters.Add("@Deductible", aggDeductible.Deductible);
+                        parameters.Add("@ApplicationPriority", aggDeductible.ApplicationPriority);
+                        parameters.Add("@Peril", aggDeductible.Peril);
+                        parameters.Add("@PerilRegion", aggDeductible.PerilRegion);
+                        parameters.Add("@Note", aggDeductible.Note);
+                        parameters.Add("@LastUpdatedBy", userNameFinal);
+                        await db.ExecuteAsync("ORI.spUpsertAggDeductibles", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
+                    }
+                }
+
+                // Step 9: Update Policy Metadata
                 var metaDataParameters = new DynamicParameters();
                 metaDataParameters.Add("@ORIPolicyReference", model.ORIPolicyReference);
                 metaDataParameters.Add("@FXRateApplicationDate", model.FXRateApplicationDate);
