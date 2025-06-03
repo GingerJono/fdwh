@@ -9,32 +9,26 @@ namespace Sandbox.Models.ORI
 {
     public class ORIPolicyModel
     {
-        public string ORIPillar { get; set; }
-        public string FXRateApplicationDate { get; set; }
-        public string FXTreatment { get; set; }
-        public bool AllowBlocks { get; set; }
-        public string ORIPolicyReference { get; set; }
-        public string PolicyDescription { get; set; }
-        public string ContractCurrency { get; set; }
+        public string? FXRateApplicationDate { get; set; }
+        public string? FXTreatment { get; set; }
+        public required string ORIPolicyReference { get; set; }
+        public string? PolicyDescription { get; set; }
+        public string? ContractCurrency { get; set; }
         public DateTime Inception { get; set; }
         public DateTime Expiry { get; set; }
-        public string BasisOfCoverCode { get; set; }
-        public string BasisOfCover { get; set; }
+        public string? BasisOfCover { get; set; }
         public decimal? OrderPercent { get; set; }
-        public string OfWholeOrOrder { get; set; }
+        public string? OfWholeOrOrder { get; set; }
         public decimal? Limit { get; set; }
         public decimal? DeductibleRetention { get; set; }
-        public decimal? Aggregate { get; set; }
-        public int? BrokerNumber { get; set; }
-        public string BrokerPseudonym { get; set; }
+        public string? BrokerPseudonym { get; set; }
         public decimal Premium { get; set; }
-        public string PolicyTypeCode { get; set; }
-        public string PolicyType { get; set; }
-        public string SecurityLeader { get; set; }
+        public string? PolicyType { get; set; }
+        public string? SecurityLeader { get; set; }
         public int InuringPriority { get; set; }
-        public string CededPremiumCalculation { get; set; }
+        public string? CededPremiumCalculation { get; set; }
 
-        public string DMSLink { get; set; }
+        public string? DMSLink { get; set; }
 
         // Single List for inclusions and exclusions
         public List<ORIFilterItem> Filters { get; set; } = new();
@@ -45,6 +39,7 @@ namespace Sandbox.Models.ORI
         public List<ORIPolicyAllocationYOA> PolicyAllocationsYOA { get; set; } = new();
         public List<ORIPolicyAllocationClass> RemovedPolicyAllocationsClass { get; set; } = new();
         public List<ORIPolicyAllocationYOA> RemovedPolicyAllocationsYOA { get; set; } = new();
+        public List<AggDeductible> RemovedAggDeductibles { get; set; } = new();
         public List<Narrative> Narratives { get; set; } = new();
         public List<ORIPolicyReinstatementModel> Reinstatements { get; set; } = new();
         public List<PolicySecurity> PolicySecurities { get; set; } = new();
@@ -52,23 +47,26 @@ namespace Sandbox.Models.ORI
         // Class/Year of Account Allocation Splits
         public List<ClassYearOfAccountSplits> ClassYearOfAccountSplits { get; set; } = new();
 
+        // Agg Deductibles
+        public List<AggDeductible> AggDeductibles { get; set; } = new();
+
     }
 
     public class ORIFilterItemDefinition
     {
-        public string Code { get; set; }  // "DomicileCountry", "InwardPolicyReference", etc.
-        public string DisplayName { get; set; }  // "Domicile Country", "Inward Policy Reference"
+        public string? Code { get; set; }  // "DomicileCountry", "InwardPolicyReference", etc.
+        public string? DisplayName { get; set; }  // "Domicile Country", "Inward Policy Reference"
     }
 
     // New Model to represent a row in the new Filters table
     public class ORIFilterItem
     {
-        public string InclusionExclusion { get; set; }  // "Inclusion" or "Exclusion"
-        public string IncludedOrExcludedItem { get; set; } // Predefined object
-        public string IncludedOrExcludedValue { get; set; } // Actual value e.g., "US", "001810H19AA"
-        public string Note { get; set; }
+        public string? InclusionExclusion { get; set; }  // "Inclusion" or "Exclusion"
+        public string? IncludedOrExcludedItem { get; set; } // Predefined object
+        public string? IncludedOrExcludedValue { get; set; } // Actual value e.g., "US", "001810H19AA"
+        public string? Note { get; set; }
         public DateTime? LastUpdated { get; set; }
-        public string LastUpdatedBy { get; set; }
+        public string? LastUpdatedBy { get; set; }
 
     }
 
@@ -76,59 +74,59 @@ namespace Sandbox.Models.ORI
     public class Narrative
     {
         public int Sequence_no { get; set; }
-        public string Notes { get; set; } // Add this for the note
+        public string? Notes { get; set; } // Add this for the note
         public DateTime? Date_entered { get; set; }
-        public string underwriter_initials { get; set; } // Add this for the note
+        public string? underwriter_initials { get; set; } // Add this for the note
     }
 
     public class PolicySecurity
     {
-        public string LORS { get; set; }
+        public required string LORS { get; set; }
         public decimal Share { get; set; }
-        public string SecurityStatus { get; set; }
-        public string SecurityName { get; set; }
+        public string? SecurityStatus { get; set; }
+        public string? SecurityName { get; set; }
     }
     public class DomicileCountry
     {
-        public string Code { get; set; } // e.g., "US"
-        public string Name { get; set; } // e.g., "United States"
+        public string? Code { get; set; } // e.g., "US"
+        public string? Name { get; set; } // e.g., "United States"
     }
     public class ClassItem
     {
-        public string ClassCode { get; set; }
-        public string Description { get; set; }
+        public string? ClassCode { get; set; }
+        public string? Description { get; set; }
     }
     public class Peril
     {
-        public string Name { get; set; }
+        public string? Name { get; set; }
     }
 
     public class ReservingClass
     {
-        public string ClassCode { get; set; }
-        public string ReservingClassCode { get; set; }
-        public string ReservingClassName { get; set; }
+        public string? ClassCode { get; set; }
+        public string? ReservingClassCode { get; set; }
+        public string? ReservingClassName { get; set; }
     }
 
     public class RiskCode
     {
-        public string Code { get; set; }
-        public string Description { get; set; }
+        public string? Code { get; set; }
+        public string? Description { get; set; }
     }
 
     public class StatCode
     {
-        public string Code { get; set; }
-        public string Description { get; set; }
+        public string? Code { get; set; }
+        public string? Description { get; set; }
     }
 
     // New classes to represent the allocation tables
     public class ORIPolicyAllocationClass
     {
-        public string Class { get; set; }
+        public string? Class { get; set; }
         public decimal Allocation { get; set; }
         public DateTime? LastUpdated { get; set; }
-        public string LastUpdatedBy { get; set; }
+        public string? LastUpdatedBy { get; set; }
     }
 
     public class ORIPolicyAllocationYOA
@@ -136,13 +134,26 @@ namespace Sandbox.Models.ORI
         public int YearOfAccount { get; set; }
         public decimal Allocation { get; set; }
         public DateTime? LastUpdated { get; set; }
-        public string LastUpdatedBy { get; set; }
+        public string? LastUpdatedBy { get; set; }
     }
 
     public class ClassYearOfAccountSplits
     {
-        public string Class { get; set; }
+        public string? Class { get; set; }
         public Dictionary<int, decimal> YearOfAccountSplits { get; set; } = new();
+    }
+
+    public class AggDeductible
+    {
+        public string? ORIPolicyReference { get; set; }
+        public decimal Deductible { get; set; }
+        public int ApplicationPriority { get; set; } // 1 for first, 2 for second, etc.
+        public DateTime LastUpdated { get; set; }
+        public string? LastUpdatedBy { get; set; }
+        public string? Peril { get; set; } // Optional, can be null if not applicable
+        public string? PerilRegion { get; set; }
+        public string? Note { get; set; } // Optional, can be null if not applicable
+        public int IsDeleted { get; set; }
     }
 
 }

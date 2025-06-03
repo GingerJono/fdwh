@@ -79,7 +79,7 @@ else
 
 	<div class="row">
 		<div class="col-md-6">
-			<div class="card shadow mb-4">
+			<div class="card shadow mb-4 border">
 				<div class="card-header d-flex justify-content-between align-items-center">
 					<span>Incurred Claims Mapping (@Run?.ORIPolIncurredClaimsMapping?.Count())</span>
 					<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.ORIPolIncurredClaimsMapping, $"IncurredClaimsMapping_{Run.RunID}.csv"))">
@@ -95,7 +95,7 @@ else
 			</div>
 		</div>
 		<div class="col-md-6">
-			<div class="card shadow mb-4">
+			<div class="card shadow mb-4 border">
 				<div class="card-header d-flex justify-content-between align-items-center">
 					<span>Ultimate Claims Mapping (@Run?.ORIPolUltimateClaimsMapping?.Count())</span>
 					<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.ORIPolUltimateClaimsMapping, $"UltimateClaimsMapping_{Run.RunID}.csv"))">
@@ -114,7 +114,7 @@ else
 
 	<div class="row">
 		<div class="col-md-6">
-			<div class="card shadow mb-4">
+			<div class="card shadow mb-4 border">
 				<div class="card-header d-flex justify-content-between align-items-center">
 					<span>Incurred Claims By Event(@Run?.IncurredClaimsByEvent?.Count())</span>
 					<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.IncurredClaimsByEvent, $"IncurredClaimsByEvent_{Run.RunID}.csv"))">
@@ -130,7 +130,7 @@ else
 			</div>
 		</div>
 		<div class="col-md-6">
-			<div class="card shadow mb-4">
+			<div class="card shadow mb-4 border">
 				<div class="card-header d-flex justify-content-between align-items-center">
 					<span>Ultimate Claims By Event (@Run?.UltimateClaimsByEvent?.Count())</span>
 					<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.UltimateClaimsByEvent, $"UltimateClaimsByEvent_{Run.RunID}.csv"))">
@@ -149,7 +149,7 @@ else
 
 	<div class="row">
 		<div class="col-md-6">
-			<div class="card shadow mb-4">
+			<div class="card shadow mb-4 border">
 				<div class="card-header d-flex justify-content-between align-items-center">
 					<span>Allocated Paid Recoveries (@Run?.AllocatedIncurredRecoveries?.Count())</span>
 					<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.AllocatedPaidRecoveries, $"AllocatedPaidRecoveries_{Run.RunID}.csv"))">
@@ -165,7 +165,7 @@ else
 			</div>
 		</div>
 		<div class="col-md-6">
-			<div class="card shadow mb-4">
+			<div class="card shadow mb-4 border">
 				<div class="card-header d-flex justify-content-between align-items-center">
 					<span>Allocated Incurred Recoveries (@Run?.AllocatedIncurredRecoveries?.Count())</span>
 					<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.AllocatedIncurredRecoveries, $"AllocatedIncurredRecoveries_{Run.RunID}.csv"))">
@@ -184,7 +184,7 @@ else
 
 	<div class="row">
 		<div class="col-md-6">
-			<div class="card shadow mb-4">
+			<div class="card shadow mb-4 border">
 				<div class="card-header d-flex justify-content-between align-items-center">
 					<span>Allocated Ultimate Recoveries (@Run?.AllocatedUltimateRecoveries?.Count())</span>
 					<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.AllocatedUltimateRecoveries, $"AllocatedUltimateRecoveries_{Run.RunID}.csv"))">
@@ -200,7 +200,7 @@ else
 			</div>
 		</div>
 		<div class="col-md-6">
-			<div class="card shadow mb-4">
+			<div class="card shadow mb-4 border">
 				<div class="card-header d-flex justify-content-between align-items-center">
 					<span>Merged Allocated Recoveries (@Run?.AllocatedRecoveriesMerged?.Count())</span>
 					<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.AllocatedRecoveriesMerged, $"AllocatedRecoveriesMerged_{Run.RunID}.csv"))">

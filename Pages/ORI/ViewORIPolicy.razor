@@ -81,7 +81,7 @@ else
 	</div>
 
 	<!-- Inclusions & Exclusions Table -->
-	<div class="card shadow mb-4">
+	<div class="card shadow mb-4 border">
 		<div class="card-header">Inclusions & Exclusions</div>
 		<div class="card-body">
 			<div class="alert alert-info small" role="alert">
@@ -144,7 +144,7 @@ else
 	</div>
 	<div class="row">
 		<div class="col-md-6">
-			<div class="card shadow mb-4">
+			<div class="card shadow mb-4 border">
 				<div class="card-header">Policy Allocations by Class</div>
 				<div class="card-body">
 					@if (PolicyDetails?.PolicyAllocationsClass?.Any() == true)
@@ -153,9 +153,7 @@ else
 							<thead>
 								<tr>
 									<th>Class</th>
-									<th>Allocation</th>
-									<th>Last Updated</th>
-									<th>Updated By</th>
+									<th class="text-end">Allocation</th>									
 								</tr>
 							</thead>
 							<tbody>
@@ -163,9 +161,7 @@ else
 								{
 									<tr>
 										<td>@allocation.Class</td>
-										<td>@allocation.Allocation.ToString("N2")</td>
-										<td>@allocation.LastUpdated?.ToString("yyyy-MM-dd HH:mm")</td>
-										<td>@allocation.LastUpdatedBy</td>
+										<td class="text-end">@allocation.Allocation.ToString("N2")</td>
 									</tr>
 								}
 							</tbody>
@@ -177,7 +173,7 @@ else
 					}
 				</div>
 			</div>
-			<div class="card shadow mb-4">
+			<div class="card shadow mb-4 border">
 				<div class="card-header">Policy Allocations by Year of Account</div>
 				<div class="card-body">
 					@if (PolicyDetails?.PolicyAllocationsYOA?.Any() == true)
@@ -186,9 +182,7 @@ else
 							<thead>
 								<tr>
 									<th>Year of Account</th>
-									<th>Allocation</th>
-									<th>Last Updated</th>
-									<th>Updated By</th>
+									<th class="text-end">Allocation</th>									
 								</tr>
 							</thead>
 							<tbody>
@@ -196,9 +190,7 @@ else
 								{
 									<tr>
 										<td>@allocation.YearOfAccount</td>
-										<td>@allocation.Allocation.ToString("N2")</td>
-										<td>@allocation.LastUpdated?.ToString("yyyy-MM-dd HH:mm")</td>
-										<td>@allocation.LastUpdatedBy</td>
+										<td class="text-end">@allocation.Allocation.ToString("N2")</td>
 									</tr>
 								}
 							</tbody>
@@ -210,10 +202,7 @@ else
 					}
 				</div>
 			</div>
-		</div>
-
-		<div class="col-md-6">
-			<div class="card shadow mb-4">
+			<div class="card shadow mb-4 border">
 				<div class="card-header">Policy Allocations Splits</div>
 				<div class="card-body">
 					@if (PolicyDetails?.ClassYearOfAccountSplits?.Any() == true)
@@ -232,7 +221,7 @@ else
 								@foreach (var row in PolicyDetails.ClassYearOfAccountSplits)
 								{
 									<tr>
-										<td>@row.Class</td>
+										<td class="text-end">@row.Class</td>
 										@foreach (var yoa in PolicyYearsOfAccount)
 										{
 											var value = row.YearOfAccountSplits.TryGetValue(yoa, out var split) ? split : 0m;
@@ -244,8 +233,8 @@ else
 											var bgColor = $"rgb({r}, {g}, {b})";
 											var textColor = value > 60 ? "white" : "black";
 
-											<td style="@($"background-color:{bgColor}; color:{textColor};")">
-												@value.ToString("N2")%
+											<td class="text-end" style="@($"background-color:{bgColor}; color:{textColor};")">
+												@value.ToString("N2")
 											</td>
 										}
 									</tr>
@@ -260,11 +249,9 @@ else
 				</div>
 			</div>
 		</div>
-	</div>
 
-	<div class="row">
 		<div class="col-md-6">
-			<div class="card shadow md-4">
+			<div class="card shadow md-4 border">
 				<div class="card-header">Reinstatements</div>
 				<div class="card-body">
 					@if (PolicyDetails?.Reinstatements.Any() == true)
@@ -288,7 +275,7 @@ else
 										<td>@reinstatement.ReinstatementOrder</td>
 										<td>@reinstatement.ProRateByTime</td>
 										<td>@reinstatement.ReinstatementTerms</td>
-										<td class="text-end">@reinstatement.ReinstatementPercent</td>
+										<td class="text-end">@reinstatement.ReinstatementPercent.ToString("N2")</td>
 										<td class="text-end">@reinstatement.NumberOfReinstatements</td>
 									</tr>
 								}
@@ -301,7 +288,48 @@ else
 					}
 				</div>
 			</div>
-			<div class="card shadow mb-4">
+			<div class="card shadow md-4 border">
+				<div class="card-header">Agg Deductibles</div>
+				<div class="card-body">
+					@if (PolicyDetails?.AggDeductibles.Any() == true)
+					{
+						<table class=" table table-sm table-striped text-nowrap">
+							<thead>
+								<tr>
+									<th>Peril</th>
+									<th>Peril Region</th>
+									<th>Note</th>
+									<th class="text-end">Application Priority</th>
+									<th class="text-end">Deductible</th>
+									
+								</tr>
+							</thead>
+							<tbody>
+								@foreach (var aggDeductible in PolicyDetails.AggDeductibles)
+								{
+									<tr>										
+										<td>@aggDeductible.Peril</td>
+										<td>@aggDeductible.PerilRegion</td>
+										<td>@aggDeductible.Note</td>
+										<td class="text-end">@aggDeductible.ApplicationPriority</td>
+										<td class="text-end">@aggDeductible.Deductible.ToString("N2")</td>
+									</tr>
+								}
+							</tbody>
+						</table>
+					}
+					else
+					{
+						<p class="text-muted">No Agg Deductibles.</p>
+					}
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-md-6">
+			<div class="card shadow mb-4 border">
 				<div class="card-header">Narratives</div>
 				<div class="card-body">
 					@if (PolicyDetails?.Narratives?.Any() == true)
@@ -311,7 +339,7 @@ else
 								<tr>
 									<th>Sequence</th>
 									<th>Note</th>
-									<th>Entered</th>
+									<th class="text-nowrap">Entered</th>
 									<th>Initials</th>
 								</tr>
 							</thead>
@@ -321,7 +349,7 @@ else
 									<tr>
 										<td>@note.Sequence_no</td>
 										<td>@note.Notes</td>
-										<td>@note.Date_entered?.ToString("yyyy-MM-dd")</td>
+										<td class="text-nowrap">@note.Date_entered?.ToString("yyyy-MM-dd")</td>
 										<td>@note.underwriter_initials</td>
 									</tr>
 								}
@@ -336,28 +364,28 @@ else
 			</div>
 		</div>
 		<div class="col-md-6">
-			<div class="card shadow mb-4">
-				<div class="card-header">Security</div>
+			<div class="card shadow mb-4 border">
+				<div class="card-header">Securities</div>
 				<div class="card-body">
 					@if (PolicyDetails?.PolicySecurities?.Any() == true)
 					{
-						<table class="table table-sm table-striped">
+						<table class="table table-sm table-striped text-nowrap">
 							<thead>
 								<tr>
-									<th>LORS</th>
-									<th>Share</th>
+									<th>LORS</th>									
 									<th>Status</th>
 									<th>Name</th>
+									<th class="text-end">Share</th>
 								</tr>
 							</thead>
 							<tbody>
 								@foreach (var sec in PolicyDetails.PolicySecurities)
 								{
 									<tr>
-										<td>@sec.LORS</td>
-										<td>@sec.Share.ToString("P2")</td>
+										<td>@sec.LORS</td>										
 										<td>@sec.SecurityStatus</td>
 										<td>@sec.SecurityName</td>
+										<td>@sec.Share.ToString("N2")</td>
 									</tr>
 								}
 							</tbody>
@@ -369,11 +397,11 @@ else
 					}
 				</div>
 			</div>
-			<div class="card shadow mb-4">
+			<div class="card shadow mb-4 border">
 				<div class="card-header">USM Summary</div>
 				<div class="card-body">
 
-					<table class="table table-bordered table-sm">
+					<table class="table table-bordered table-sm text-nowrap">
 						<thead>
 							<tr>
 								<th>Category</th>
@@ -392,7 +420,7 @@ else
 									{
 										var filtered = USMs.Where(x => GetCategory(x) == category && x.SettCcy == ccy);
 										var total = filtered.Sum(x => x.LineAmountSCC ?? 0);
-										<td>@total.ToString("N2")</td>
+										<td class="text-end">@total.ToString("N2")</td>
 									}
 								</tr>
 							}
@@ -402,14 +430,12 @@ else
 			</div>
 		</div>
 	</div>
-
-
-	<div class="card shadow mb-4">
+	<div class="card shadow mb-4 border">
 		<div class="card-header">USMs Linked to This Policy</div>
 		<div class="card-body">
 			@if (USMs?.Any() == true)
 			{
-				<table class="table table-bordered table-striped">
+				<table class="table table-bordered table-striped text-nowrap">
 					<thead>
 						<tr>
 							<th>USM ID</th>
@@ -565,8 +591,8 @@ else
 				{
 					Class = x.Class,
 					YearOfAccountSplits = PolicyDetails.PolicyAllocationsYOA.ToDictionary(
-									ya => ya.YearOfAccount,
-									ya => Math.Round(x.Allocation * ya.Allocation / 100, 2)) // Keep 2 decimal places
+										ya => ya.YearOfAccount,
+										ya => Math.Round(x.Allocation * ya.Allocation / 100, 2)) // Keep 2 decimal places
 				}).ToList();
 		}
 		else
