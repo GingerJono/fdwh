@@ -45,53 +45,34 @@ stages:
         zipAfterPublish: false
 
     - task: PowerShell@2
-      displayName: 'Patch web.config to use correct DLL and log checksum'
+      displayName: 'Patch web.config to point to correct DLL safely'
       inputs:
         targetType: 'inline'
         script: |
-          $publishRoot = "$(publishDir)"
-          Write-Host "Searching for web.config inside $publishRoot..."
+          $webConfigPath = "$(targetPath)\web.config"
+          $correctDll = ".\Sandbox.dll"
 
-          # Find the first web.config
-          $webConfigPath = Get-ChildItem -Path $publishRoot -Recurse -Filter "web.config" | Select-Object -First 1
-
-          if (-not $webConfigPath) {
-            Write-Error "web.config not found under $publishRoot"
-            exit 1
+          if (-Not (Test-Path $webConfigPath)) {
+              Write-Error "web.config not found at $webConfigPath"
+              exit 1
           }
 
-          $publishDir = Split-Path -Path $webConfigPath.FullName -Parent
-          Write-Host "Found web.config at: $($webConfigPath.FullName)"
+          [xml]$xml = Get-Content $webConfigPath
 
-          # Compute original checksum
-          $originalHash = Get-FileHash $webConfigPath.FullName -Algorithm SHA256
-          Write-Host "Original SHA256: $($originalHash.Hash)"
-
-          # Find the main DLL
-          $mainDll = Get-ChildItem -Path $publishDir -Filter *.dll | Where-Object {
-            $_.Name -notmatch '\.Views\.dll$' -and $_.Name -notmatch '^Microsoft\.' -and $_.Name -notmatch '^System\.'
-          } | Select-Object -First 1
-
-          if (-not $mainDll) {
-            Write-Error "No valid .dll found in $publishDir"
-            exit 1
+          $aspNetCore = $xml.configuration.'system.webServer'.aspNetCore
+          if (-not $aspNetCore) {
+              Write-Error "aspNetCore element not found in web.config"
+              exit 1
           }
 
-          Write-Host "Found main dll: $($mainDll.Name)"
+          $aspNetCore.arguments = $correctDll
+          $aspNetCore.stdoutLogEnabled = "true"
+          $aspNetCore.stdoutLogFile = ".\logs\stdout"
+          $aspNetCore.hostingModel = "inprocess"
 
-          # Patch web.config
-          (Get-Content $webConfigPath.FullName) -replace 'arguments=".*?"', "arguments=`".\$($mainDll.Name)`" stdoutLogEnabled=`"true`" stdoutLogFile=`".\logs\stdout`"" | Set-Content $webConfigPath.FullName
+          $xml.Save($webConfigPath)
 
-          # Compute new checksum
-          $patchedHash = Get-FileHash $webConfigPath.FullName -Algorithm SHA256
-          Write-Host "Patched SHA256:  $($patchedHash.Hash)"
-
-          if ($originalHash.Hash -ne $patchedHash.Hash) {
-            Write-Host "✅ web.config was modified."
-          } else {
-            Write-Warning "⚠ web.config patch had no effect (already correct)."
-          }
-
+          Write-Host "web.config safely patched to use $correctDll"
 
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifact'
