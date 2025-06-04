@@ -98,7 +98,7 @@ stages:
           }
 
     - task: PowerShell@2
-      displayName: 'Patch web.config to point to correct DLL safely'
+      displayName: 'Patch web.config: update existing aspNetCore'
       inputs:
         targetType: 'inline'
         script: |
@@ -111,32 +111,21 @@ stages:
           }
 
           [xml]$xml = Get-Content $webConfigPath
+          $aspNetCore = $xml.SelectSingleNode("//aspNetCore")
 
-          if (-not $xml.configuration) {
-              $xml.AppendChild($xml.CreateElement("configuration")) | Out-Null
-          }
-
-          $systemWebServer = $xml.configuration.'system.webServer'
-          if (-not $systemWebServer) {
-              $systemWebServer = $xml.CreateElement("system.webServer")
-              $xml.configuration.AppendChild($systemWebServer) | Out-Null
-          }
-
-          $aspNetCore = $systemWebServer.aspNetCore
           if (-not $aspNetCore) {
-              Write-Host "Creating <aspNetCore> element..."
-              $aspNetCore = $xml.CreateElement("aspNetCore")
-              $systemWebServer.AppendChild($aspNetCore) | Out-Null
+              Write-Error "<aspNetCore> element not found in web.config"
+              exit 1
           }
 
-          $aspNetCore.SetAttribute("processPath", "dotnet")
           $aspNetCore.SetAttribute("arguments", $correctDll)
           $aspNetCore.SetAttribute("stdoutLogEnabled", "true")
           $aspNetCore.SetAttribute("stdoutLogFile", ".\logs\stdout")
           $aspNetCore.SetAttribute("hostingModel", "inprocess")
 
           $xml.Save($webConfigPath)
-          Write-Host "✅ Patched web.config successfully"
+          Write-Host "✅ Patched web.config successfully: arguments=$correctDll"
+
 
     - task: PowerShell@2
       displayName: 'Start IIS App Pool'
