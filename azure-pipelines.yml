@@ -2,11 +2,13 @@ trigger:
 - master  
 
 pool:
-  name: duwpmdev01 
+  name: duwpmdev01  # Azure DevOps agent pool
 
 variables:
   buildConfiguration: 'Release'
   publishDir: '$(Build.ArtifactStagingDirectory)/published'
+  targetPath: 'C:\inetpub\wwwroot\Sandbox2'
+  iisAppPool: 'Sandbox2AppPool'
 
 stages:
 - stage: BuildAndPublish
@@ -58,12 +60,20 @@ stages:
       artifact: drop
 
     - task: PowerShell@2
-      displayName: 'Stop IIS App Pool'
+      displayName: 'Stop IIS App Pool if running'
       inputs:
         targetType: 'inline'
         script: |
           Import-Module WebAdministration
-          Stop-WebAppPool -Name "Sandbox2AppPool"
+          $poolName = "$(iisAppPool)"
+          $appPool = Get-Item "IIS:\AppPools\$poolName"
+
+          if ($appPool.state -eq "Started") {
+              Write-Host "App pool '$poolName' is currently running. Stopping it..."
+              Stop-WebAppPool -Name $poolName
+          } else {
+              Write-Host "App pool '$poolName' is not running. No need to stop."
+          }
 
     - task: PowerShell@2
       displayName: 'Copy Files to IIS Folder with Exit Code Handling'
@@ -71,7 +81,7 @@ stages:
         targetType: 'inline'
         script: |
           $source = "$(Pipeline.Workspace)\drop"
-          $destination = "C:\inetpub\wwwroot\Sandbox2"
+          $destination = "$(targetPath)"
           
           $rc = robocopy $source $destination /E /PURGE /R:3 /W:5 /NFL /NDL /NJH /NJS /NP
           $exitCode = $LASTEXITCODE
@@ -90,5 +100,4 @@ stages:
         targetType: 'inline'
         script: |
           Import-Module WebAdministration
-          Start-WebAppPool -Name "Sandbox2AppPool"
-
+          Start-WebAppPool -Name "$(iisAppPool)"
