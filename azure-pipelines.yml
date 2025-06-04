@@ -66,13 +66,23 @@ stages:
           Stop-WebAppPool -Name "Sandbox2AppPool"
 
     - task: PowerShell@2
-      displayName: 'Copy files to IIS'
+      displayName: 'Copy Files to IIS Folder with Exit Code Handling'
       inputs:
         targetType: 'inline'
         script: |
           $source = "$(Pipeline.Workspace)\drop"
           $destination = "C:\inetpub\wwwroot\Sandbox2"
-          robocopy $source $destination /E /PURGE /R:3 /W:5 /NFL /NDL /NJH /NJS /NP
+          
+          $rc = robocopy $source $destination /E /PURGE /R:3 /W:5 /NFL /NDL /NJH /NJS /NP
+          $exitCode = $LASTEXITCODE
+
+          if ($exitCode -ge 8) {
+              Write-Error "Robocopy failed with exit code $exitCode"
+              exit $exitCode
+          } else {
+              Write-Host "Robocopy succeeded with exit code $exitCode"
+              exit 0
+          }
 
     - task: PowerShell@2
       displayName: 'Start IIS App Pool'
