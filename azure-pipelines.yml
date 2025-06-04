@@ -45,30 +45,53 @@ stages:
         zipAfterPublish: false
 
     - task: PowerShell@2
-      displayName: 'Patch web.config to use correct DLL'
+      displayName: 'Patch web.config to use correct DLL and log checksum'
       inputs:
         targetType: 'inline'
         script: |
-          $publishDir = "$(publishDir)"
-          $webConfigPath = Join-Path $publishDir "web.config"
+          $publishRoot = "$(publishDir)"
+          Write-Host "Searching for web.config inside $publishRoot..."
 
-          if (-Not (Test-Path $webConfigPath)) {
-            Write-Error "web.config not found in $publishDir"
+          # Find the first web.config
+          $webConfigPath = Get-ChildItem -Path $publishRoot -Recurse -Filter "web.config" | Select-Object -First 1
+
+          if (-not $webConfigPath) {
+            Write-Error "web.config not found under $publishRoot"
             exit 1
           }
 
-          $mainDll = Get-ChildItem $publishDir -Filter *.dll | Where-Object {
-            $_.Name -notmatch '\.Views\.dll$' -and $_.Name -notmatch '^Microsoft\.' -and $_.Name -notmatch '^System\.' 
+          $publishDir = Split-Path -Path $webConfigPath.FullName -Parent
+          Write-Host "Found web.config at: $($webConfigPath.FullName)"
+
+          # Compute original checksum
+          $originalHash = Get-FileHash $webConfigPath.FullName -Algorithm SHA256
+          Write-Host "Original SHA256: $($originalHash.Hash)"
+
+          # Find the main DLL
+          $mainDll = Get-ChildItem -Path $publishDir -Filter *.dll | Where-Object {
+            $_.Name -notmatch '\.Views\.dll$' -and $_.Name -notmatch '^Microsoft\.' -and $_.Name -notmatch '^System\.'
           } | Select-Object -First 1
 
-          if (-Not $mainDll) {
-            Write-Error "Could not find a main .dll in $publishDir"
+          if (-not $mainDll) {
+            Write-Error "No valid .dll found in $publishDir"
             exit 1
           }
 
-          Write-Host "Updating web.config to point to $($mainDll.Name)..."
+          Write-Host "Found main dll: $($mainDll.Name)"
 
-          (Get-Content $webConfigPath) -replace 'arguments=".*?"', "arguments=`".\$($mainDll.Name)`" stdoutLogEnabled=`"true`" stdoutLogFile=`".\logs\stdout`"" | Set-Content $webConfigPath
+          # Patch web.config
+          (Get-Content $webConfigPath.FullName) -replace 'arguments=".*?"', "arguments=`".\$($mainDll.Name)`" stdoutLogEnabled=`"true`" stdoutLogFile=`".\logs\stdout`"" | Set-Content $webConfigPath.FullName
+
+          # Compute new checksum
+          $patchedHash = Get-FileHash $webConfigPath.FullName -Algorithm SHA256
+          Write-Host "Patched SHA256:  $($patchedHash.Hash)"
+
+          if ($originalHash.Hash -ne $patchedHash.Hash) {
+            Write-Host "✅ web.config was modified."
+          } else {
+            Write-Warning "⚠ web.config patch had no effect (already correct)."
+          }
+
 
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifact'
