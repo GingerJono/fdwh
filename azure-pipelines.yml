@@ -58,19 +58,27 @@ stages:
       artifact: drop
 
     - task: PowerShell@2
-      displayName: 'Copy to IIS Server'
+      displayName: 'Stop IIS App Pool'
+      inputs:
+        targetType: 'inline'
+        script: |
+          Import-Module WebAdministration
+          Stop-WebAppPool -Name "duwpmdev01"
+
+    - task: PowerShell@2
+      displayName: 'Copy files to IIS'
       inputs:
         targetType: 'inline'
         script: |
           $source = "$(Pipeline.Workspace)\drop"
           $destination = "C:\inetpub\wwwroot\Sandbox2"
-          Write-Host "Copying files from $source to $destination"
-          robocopy $source $destination /E /PURGE /NFL /NDL /NJH /NJS /NP /R:2 /W:5
+          robocopy $source $destination /E /PURGE /R:3 /W:5 /NFL /NDL /NJH /NJS /NP
 
     - task: PowerShell@2
-      displayName: 'Restart IIS App Pool'
+      displayName: 'Start IIS App Pool'
       inputs:
         targetType: 'inline'
         script: |
           Import-Module WebAdministration
-          Restart-WebAppPool -Name "Sandbox2AppPool"
+          Start-WebAppPool -Name "duwpmdev01"
+
