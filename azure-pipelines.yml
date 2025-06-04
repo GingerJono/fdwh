@@ -44,44 +44,6 @@ stages:
         publishWebProjects: false
         zipAfterPublish: false
 
-    - task: PowerShell@2
-      displayName: 'Patch web.config to point to correct DLL safely'
-      inputs:
-        targetType: 'inline'
-        script: |
-          $webConfigPath = "$(targetPath)\web.config"
-          $correctDll = ".\Sandbox.dll"
-
-          if (-Not (Test-Path $webConfigPath)) {
-              Write-Error "web.config not found at $webConfigPath"
-              exit 1
-          }
-
-          [xml]$xml = Get-Content $webConfigPath
-
-          $systemWebServer = $xml.configuration.'system.webServer'
-          $aspNetCore = $systemWebServer.aspNetCore
-
-          if (-not $aspNetCore) {
-              Write-Warning "aspNetCore element not found — creating it..."
-              $aspNetCore = $xml.CreateElement("aspNetCore")
-              $aspNetCore.SetAttribute("processPath", "dotnet")
-              $aspNetCore.SetAttribute("arguments", $correctDll)
-              $aspNetCore.SetAttribute("stdoutLogEnabled", "true")
-              $aspNetCore.SetAttribute("stdoutLogFile", ".\logs\stdout")
-              $aspNetCore.SetAttribute("hostingModel", "inprocess")
-              $systemWebServer.AppendChild($aspNetCore) | Out-Null
-          } else {
-              $aspNetCore.arguments = $correctDll
-              $aspNetCore.stdoutLogEnabled = "true"
-              $aspNetCore.stdoutLogFile = ".\logs\stdout"
-              $aspNetCore.hostingModel = "inprocess"
-          }
-
-          $xml.Save($webConfigPath)
-          Write-Host "✅ web.config updated to use $correctDll"
-
-
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifact'
       inputs:
@@ -134,6 +96,47 @@ stages:
               Write-Host "Robocopy succeeded with exit code $exitCode"
               exit 0
           }
+
+    - task: PowerShell@2
+      displayName: 'Patch web.config to point to correct DLL safely'
+      inputs:
+        targetType: 'inline'
+        script: |
+          $webConfigPath = "$(targetPath)\web.config"
+          $correctDll = ".\Sandbox.dll"
+
+          if (-Not (Test-Path $webConfigPath)) {
+              Write-Error "web.config not found at $webConfigPath"
+              exit 1
+          }
+
+          [xml]$xml = Get-Content $webConfigPath
+
+          if (-not $xml.configuration) {
+              $xml.AppendChild($xml.CreateElement("configuration")) | Out-Null
+          }
+
+          $systemWebServer = $xml.configuration.'system.webServer'
+          if (-not $systemWebServer) {
+              $systemWebServer = $xml.CreateElement("system.webServer")
+              $xml.configuration.AppendChild($systemWebServer) | Out-Null
+          }
+
+          $aspNetCore = $systemWebServer.aspNetCore
+          if (-not $aspNetCore) {
+              Write-Host "Creating <aspNetCore> element..."
+              $aspNetCore = $xml.CreateElement("aspNetCore")
+              $systemWebServer.AppendChild($aspNetCore) | Out-Null
+          }
+
+          $aspNetCore.SetAttribute("processPath", "dotnet")
+          $aspNetCore.SetAttribute("arguments", $correctDll)
+          $aspNetCore.SetAttribute("stdoutLogEnabled", "true")
+          $aspNetCore.SetAttribute("stdoutLogFile", ".\logs\stdout")
+          $aspNetCore.SetAttribute("hostingModel", "inprocess")
+
+          $xml.Save($webConfigPath)
+          Write-Host "✅ Patched web.config successfully"
 
     - task: PowerShell@2
       displayName: 'Start IIS App Pool'
