@@ -80,9 +80,12 @@ stages:
       inputs:
         targetType: 'inline'
         script: |
-          $source = "$(Pipeline.Workspace)\drop"
+          $source = Get-ChildItem "$(Pipeline.Workspace)\drop" -Directory | Select-Object -First 1 | ForEach-Object { $_.FullName }
           $destination = "$(targetPath)"
           
+          Write-Host "Deploying from: $source"
+          Write-Host "Deploying to:   $destination"
+
           $rc = robocopy $source $destination /E /PURGE /R:3 /W:5 /NFL /NDL /NJH /NJS /NP
           $exitCode = $LASTEXITCODE
 
@@ -93,6 +96,7 @@ stages:
               Write-Host "Robocopy succeeded with exit code $exitCode"
               exit 0
           }
+
 
     - task: PowerShell@2
       displayName: 'Start IIS App Pool'
