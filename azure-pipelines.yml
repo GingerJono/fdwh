@@ -63,7 +63,7 @@ stages:
         targetType: 'inline'
         script: |
           Import-Module WebAdministration
-          Stop-WebAppPool -Name "duwpmdev01"
+          Stop-WebAppPool -Name "Sandbox2AppPool"
 
     - task: PowerShell@2
       displayName: 'Copy files to IIS'
@@ -80,5 +80,5 @@ stages:
         targetType: 'inline'
         script: |
           Import-Module WebAdministration
-          Start-WebAppPool -Name "duwpmdev01"
+          Start-WebAppPool -Name "Sandbox2AppPool"
 
