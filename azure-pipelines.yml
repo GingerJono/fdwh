@@ -26,20 +26,20 @@ stages:
       displayName: 'Restore NuGet Packages'
       inputs:
         command: 'restore'
-        projects: '**/*.csproj'
+        projects: 'Sandbox.csproj'
 
     - task: DotNetCoreCLI@2
       displayName: 'Build Solution'
       inputs:
         command: 'build'
         arguments: '--configuration $(buildConfiguration)'
-        projects: '**/*.csproj'
+        projects: 'Sandbox.csproj'
 
     - task: DotNetCoreCLI@2
       displayName: 'Publish Project'
       inputs:
         command: 'publish'
-        projects: '**/*.csproj'
+        projects: 'Sandbox.csproj'
         arguments: '--configuration $(buildConfiguration) --output $(publishDir)'
         publishWebProjects: false
         zipAfterPublish: false
