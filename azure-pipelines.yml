@@ -53,7 +53,7 @@ stages:
         script: |
           [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
           
-          $uri = "https://dev.azure.com/<org>/<project>/_apis/wit/workitems?`$top=1&`$orderby=rev desc&api-version=7.0"
+          $uri = "https://dev.azure.com/DaleBI/DaleSandboxApp/_apis/wit/workitems?`$top=1&`$orderby=rev desc&api-version=7.0"
           $headers = @{ Authorization = "Bearer $env:SYSTEM_ACCESSTOKEN" }
 
           try {
