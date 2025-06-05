@@ -43,6 +43,29 @@ stages:
         arguments: '--configuration $(buildConfiguration) --output $(publishDir)'
         publishWebProjects: false
         zipAfterPublish: false
+    - task: PowerShell@2
+      displayName: 'Extract Latest Work Item ID and Save to JSON'
+      inputs:
+        targetType: 'inline'
+        script: |
+          # Fetch work items associated with this build
+          $buildId = "$(Build.BuildId)"
+          $uri = "$(System.TeamFoundationCollectionUri)$(System.TeamProject)/_apis/build/builds/$buildId/workitems?api-version=6.0"
+          $headers = @{ Authorization = "Bearer $(System.AccessToken)" }
+          $response = Invoke-RestMethod -Uri $uri -Headers $headers -Method Get
+
+          if ($response.value.Count -eq 0) {
+            Write-Host "No linked work items found."
+            $latestId = "None"
+          } else {
+            $latestId = $response.value[0].id
+            Write-Host "Latest Work Item ID: $latestId"
+          }
+
+          # Write to JSON file to include in publish dir
+          $obj = @{ LatestWorkItemId = "$latestId" }
+          $json = $obj | ConvertTo-Json -Compress
+          $json | Out-File "$(publishDir)\build-info.json" -Encoding utf8
 
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifact'
