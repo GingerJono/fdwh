@@ -66,7 +66,7 @@ stages:
               $workItemUrl = $response.value[0].url
               $workItemId = $workItemUrl -replace '^.+/workItems/', ''
               $output = @{ workItemId = $workItemId }
-              $output | ConvertTo-Json | Set-Content -Path "$(Build.ArtifactStagingDirectory)/published/buildinfo.json"
+              $output | ConvertTo-Json | Set-Content -Path "$(Build.ArtifactStagingDirectory)/published/wwwroot/buildinfo.json"
               Write-Host "✅ Work item $workItemId saved to buildinfo.json"
           } catch {
               Write-Error "❌ Failed to fetch associated work item: $_"
