@@ -1,25 +1,40 @@
 @using Sandbox.Helpers
+@using Sandbox.Models
 @inject SandboxContext SandboxContext
+@inject HttpClient Http
 
 <footer class="footer mt-auto py-3 bg-white text-center">
-    <div class="container">
-        <span class="bi bi-heart-fill text-danger"></span>
-        <span class="muted">
-            app server: @SandboxContext.WebServerName.
-            database server: @SandboxContext.DatabaseServer.
-            database: @SandboxContext.DatabaseName.
-            user: @SandboxContext.EffectiveUserName.
-        </span>
-        <span class="bi bi-heart-fill text-danger"></span>
-    </div>
+	<div class="container">
+		<span class="bi bi-heart-fill text-danger"></span>
+		<span class="muted">
+			app server: @SandboxContext.WebServerName.
+			database server: @SandboxContext.DatabaseServer.
+			database: @SandboxContext.DatabaseName.
+			user: @SandboxContext.EffectiveUserName.
+			latest work item: @latestWorkItemId.
+		</span>
+		<span class="bi bi-heart-fill text-danger"></span>
+	</div>
 </footer>
 
 
 @code {
-    private int currentYear;
-    protected override void OnInitialized()
-    {
-        base.OnInitialized();
-        currentYear = DateTime.Now.Year;
-    }
+	private int currentYear;
+	private string latestWorkItemId = "loading...";
+
+	protected override async Task OnInitializedAsync()
+	{
+		base.OnInitialized();
+		currentYear = DateTime.Now.Year;
+
+		try
+		{
+			var info = await Http.GetFromJsonAsync<BuildInfo>("build-info.json");
+			latestWorkItemId = info?.LatestWorkItemId ?? "not found";
+		}
+		catch
+		{
+			latestWorkItemId = "unavailable";
+		}
+	}
 }
