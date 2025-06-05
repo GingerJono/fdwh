@@ -45,33 +45,33 @@ stages:
         zipAfterPublish: false
 
     - task: PowerShell@2
-      displayName: 'Extract Latest Work Item ID and Save to JSON'
-      env:
-        SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+      displayName: 'Extract Associated Work Item ID'
       inputs:
         targetType: 'inline'
         script: |
           [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-          
-          $uri = "https://dev.azure.com/DaleBI/DaleSandboxApp/_apis/wit/workitems?`$top=1&`$orderby=rev desc&api-version=7.0"
+          $org = "DaleSandboxApp"
+          $project = "YourProjectName"
+          $buildId = $env:BUILD_BUILDID
+          $uri = "https://dev.azure.com/$org/$project/_apis/build/builds/$buildId/workitems?api-version=7.0"
           $headers = @{ Authorization = "Bearer $env:SYSTEM_ACCESSTOKEN" }
-
           try {
               $response = Invoke-RestMethod -Uri $uri -Headers $headers -Method Get
-              $workItemId = $response.value[0].id
+              if ($response.count -eq 0) {
+                  Write-Warning "⚠️ No work items associated with this build."
+                  exit 0
+              }
+              $workItemUrl = $response.value[0].url
+              $workItemId = $workItemUrl -replace '^.+/workItems/', ''
               $output = @{ workItemId = $workItemId }
-              $output | ConvertTo-Json | Set-Content -Path "$(publishDir)\buildinfo.json"
-              Write-Host "✅ Latest Work Item ID saved to buildinfo.json: $workItemId"
+              $output | ConvertTo-Json | Set-Content -Path "$(Build.ArtifactStagingDirectory)/published/buildinfo.json"
+              Write-Host "✅ Work item $workItemId saved to buildinfo.json"
           } catch {
-              Write-Error "❌ Failed to fetch latest work item: $_"
+              Write-Error "❌ Failed to fetch associated work item: $_"
               exit 1
           }
-
-    - task: PublishBuildArtifacts@1
-      displayName: 'Publish Artifact'
-      inputs:
-        PathtoPublish: '$(publishDir)'
-        ArtifactName: 'drop'
+      env:
+        SYSTEM_ACCESSTOKEN: $(System.AccessToken)
 
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifact'
@@ -154,7 +154,6 @@ stages:
 
           $xml.Save($webConfigPath)
           Write-Host "✅ Patched web.config successfully: arguments=$correctDll"
-
 
     - task: PowerShell@2
       displayName: 'Start IIS App Pool'
