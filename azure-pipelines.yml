@@ -43,29 +43,35 @@ stages:
         arguments: '--configuration $(buildConfiguration) --output $(publishDir)'
         publishWebProjects: false
         zipAfterPublish: false
+
     - task: PowerShell@2
       displayName: 'Extract Latest Work Item ID and Save to JSON'
+      env:
+        SYSTEM_ACCESSTOKEN: $(System.AccessToken)
       inputs:
         targetType: 'inline'
         script: |
-          # Fetch work items associated with this build
-          $buildId = "$(Build.BuildId)"
-          $uri = "$(System.TeamFoundationCollectionUri)$(System.TeamProject)/_apis/build/builds/$buildId/workitems?api-version=6.0"
-          $headers = @{ Authorization = "Bearer $(System.AccessToken)" }
-          $response = Invoke-RestMethod -Uri $uri -Headers $headers -Method Get
+          [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+          
+          $uri = "https://dev.azure.com/<org>/<project>/_apis/wit/workitems?`$top=1&`$orderby=rev desc&api-version=7.0"
+          $headers = @{ Authorization = "Bearer $env:SYSTEM_ACCESSTOKEN" }
 
-          if ($response.value.Count -eq 0) {
-            Write-Host "No linked work items found."
-            $latestId = "None"
-          } else {
-            $latestId = $response.value[0].id
-            Write-Host "Latest Work Item ID: $latestId"
+          try {
+              $response = Invoke-RestMethod -Uri $uri -Headers $headers -Method Get
+              $workItemId = $response.value[0].id
+              $output = @{ workItemId = $workItemId }
+              $output | ConvertTo-Json | Set-Content -Path "$(publishDir)\buildinfo.json"
+              Write-Host "✅ Latest Work Item ID saved to buildinfo.json: $workItemId"
+          } catch {
+              Write-Error "❌ Failed to fetch latest work item: $_"
+              exit 1
           }
 
-          # Write to JSON file to include in publish dir
-          $obj = @{ LatestWorkItemId = "$latestId" }
-          $json = $obj | ConvertTo-Json -Compress
-          $json | Out-File "$(publishDir)\build-info.json" -Encoding utf8
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifact'
+      inputs:
+        PathtoPublish: '$(publishDir)'
+        ArtifactName: 'drop'
 
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifact'
