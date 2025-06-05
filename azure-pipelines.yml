@@ -46,12 +46,14 @@ stages:
 
     - task: PowerShell@2
       displayName: 'Extract Associated Work Item ID'
+      env:
+        SYSTEM_ACCESSTOKEN: $(System.AccessToken)
       inputs:
         targetType: 'inline'
         script: |
           [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-          $org = "DaleSandboxApp"
-          $project = "YourProjectName"
+          $org = "DaleBI"
+          $project = "DaleSandboxApp"
           $buildId = $env:BUILD_BUILDID
           $uri = "https://dev.azure.com/$org/$project/_apis/build/builds/$buildId/workitems?api-version=7.0"
           $headers = @{ Authorization = "Bearer $env:SYSTEM_ACCESSTOKEN" }
@@ -69,9 +71,7 @@ stages:
           } catch {
               Write-Error "❌ Failed to fetch associated work item: $_"
               exit 1
-          }
-      env:
-        SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+          }      
 
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifact'
