@@ -1,0 +1,165 @@
+trigger:
+- master  
+
+pool:
+  name: duwpmdev01  # Azure DevOps agent pool
+
+variables:
+  buildConfiguration: 'Release'
+  publishDir: '$(Build.ArtifactStagingDirectory)/published'
+  targetPath: 'C:\inetpub\wwwroot\Sandbox2'
+  iisAppPool: 'Sandbox2AppPool'
+
+stages:
+- stage: BuildAndPublish
+  displayName: 'Build and Publish Blazor App'
+  jobs:
+  - job: Build
+    steps:
+    - task: UseDotNet@2
+      displayName: 'Install .NET 8 SDK'
+      inputs:
+        packageType: 'sdk'
+        version: '8.0.408'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Restore NuGet Packages'
+      inputs:
+        command: 'restore'
+        projects: 'Sandbox.csproj'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Build Solution'
+      inputs:
+        command: 'build'
+        arguments: '--configuration $(buildConfiguration)'
+        projects: 'Sandbox.csproj'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish Project'
+      inputs:
+        command: 'publish'
+        projects: 'Sandbox.csproj'
+        arguments: '--configuration $(buildConfiguration) --output $(publishDir)'
+        publishWebProjects: false
+        zipAfterPublish: false
+
+    - task: PowerShell@2
+      displayName: 'Extract Latest Work Item ID and Save to JSON'
+      env:
+        SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+      inputs:
+        targetType: 'inline'
+        script: |
+          [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+          
+          $uri = "https://dev.azure.com/<org>/<project>/_apis/wit/workitems?`$top=1&`$orderby=rev desc&api-version=7.0"
+          $headers = @{ Authorization = "Bearer $env:SYSTEM_ACCESSTOKEN" }
+
+          try {
+              $response = Invoke-RestMethod -Uri $uri -Headers $headers -Method Get
+              $workItemId = $response.value[0].id
+              $output = @{ workItemId = $workItemId }
+              $output | ConvertTo-Json | Set-Content -Path "$(publishDir)\buildinfo.json"
+              Write-Host "✅ Latest Work Item ID saved to buildinfo.json: $workItemId"
+          } catch {
+              Write-Error "❌ Failed to fetch latest work item: $_"
+              exit 1
+          }
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifact'
+      inputs:
+        PathtoPublish: '$(publishDir)'
+        ArtifactName: 'drop'
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifact'
+      inputs:
+        PathtoPublish: '$(publishDir)'
+        ArtifactName: 'drop'
+
+- stage: DeployToIIS
+  displayName: 'Deploy to IIS Server'
+  dependsOn: BuildAndPublish
+  jobs:
+  - job: Deploy
+    steps:
+    - download: current
+      artifact: drop
+
+    - task: PowerShell@2
+      displayName: 'Stop IIS App Pool if running'
+      inputs:
+        targetType: 'inline'
+        script: |
+          Import-Module WebAdministration
+          $poolName = "$(iisAppPool)"
+          $appPool = Get-Item "IIS:\AppPools\$poolName"
+
+          if ($appPool.state -eq "Started") {
+              Write-Host "App pool '$poolName' is currently running. Stopping it..."
+              Stop-WebAppPool -Name $poolName
+          } else {
+              Write-Host "App pool '$poolName' is not running. No need to stop."
+          }
+
+    - task: PowerShell@2
+      displayName: 'Copy Files to IIS Folder with Exit Code Handling'
+      inputs:
+        targetType: 'inline'
+        script: |
+          $source = Get-ChildItem "$(Pipeline.Workspace)\drop" -Directory | Select-Object -First 1 | ForEach-Object { $_.FullName }
+          $destination = "$(targetPath)"
+          
+          Write-Host "Deploying from: $source"
+          Write-Host "Deploying to:   $destination"
+
+          $rc = robocopy $source $destination /E /PURGE /R:3 /W:5 /NFL /NDL /NJH /NJS /NP
+          $exitCode = $LASTEXITCODE
+
+          if ($exitCode -ge 8) {
+              Write-Error "Robocopy failed with exit code $exitCode"
+              exit $exitCode
+          } else {
+              Write-Host "Robocopy succeeded with exit code $exitCode"
+              exit 0
+          }
+
+    - task: PowerShell@2
+      displayName: 'Patch web.config: update existing aspNetCore'
+      inputs:
+        targetType: 'inline'
+        script: |
+          $webConfigPath = "$(targetPath)\web.config"
+          $correctDll = ".\Sandbox.dll"
+
+          if (-Not (Test-Path $webConfigPath)) {
+              Write-Error "web.config not found at $webConfigPath"
+              exit 1
+          }
+
+          [xml]$xml = Get-Content $webConfigPath
+          $aspNetCore = $xml.SelectSingleNode("//aspNetCore")
+
+          if (-not $aspNetCore) {
+              Write-Error "<aspNetCore> element not found in web.config"
+              exit 1
+          }
+
+          $aspNetCore.SetAttribute("arguments", $correctDll)
+          $aspNetCore.SetAttribute("stdoutLogEnabled", "true")
+          $aspNetCore.SetAttribute("stdoutLogFile", ".\logs\stdout")
+          $aspNetCore.SetAttribute("hostingModel", "inprocess")
+
+          $xml.Save($webConfigPath)
+          Write-Host "✅ Patched web.config successfully: arguments=$correctDll"
+
+
+    - task: PowerShell@2
+      displayName: 'Start IIS App Pool'
+      inputs:
+        targetType: 'inline'
+        script: |
+          Import-Module WebAdministration
+          Start-WebAppPool -Name "$(iisAppPool)"

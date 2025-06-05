@@ -73,13 +73,11 @@ else if (PolicyDetails != null)
 		</div>
 	</div>
 
-
-
 	<EditForm Model="PolicyDetails" OnValidSubmit="HandleValidSubmit">
 		<DataAnnotationsValidator />
 		<ValidationSummary />
 
-		<div class="card mb-4">
+		<div class="card mb-4 border">
 			<div class="card-header">Policy Inclusions/Exclusions</div>
 			<div class="card-body">
 				<blockquote class="blockquote custom-blockquote primary mb-0">
@@ -198,10 +196,9 @@ else if (PolicyDetails != null)
 				</table>
 			</div>
 		</div>
-
 		<div class="row">
 			<div class="col-md-6">
-				<div class="card mb-4">
+				<div class="card shadow mb-4 border">
 					<div class="card-header">Policy Details</div>
 					<div class="card-body">
 						<table class="table table-bordered">
@@ -254,20 +251,114 @@ else if (PolicyDetails != null)
 						</table>
 					</div>
 				</div>
+				<div class="card shadow md-4">
+					<div class="card-header">Agg Deductibles</div>
+					<div class="card-body">
+						@if (PolicyDetails?.AggDeductibles.Any() == true)
+						{
+							<div class="mt-1">
+								<table class=" table table-sm table-striped text-nowrap">
+									<thead>
+										<tr>
+											<th>Peril</th>
+											<th>Peril Region</th>
+											<th>Note</th>
+											<th class="text-end">Application Priority</th>
+											<th class="text-end">Deductible</th>
+											<th>Actions</th>
+										</tr>
+									</thead>
+									<tbody>
+										@foreach (var aggDeductible in PolicyDetails.AggDeductibles)
+										{
+											<tr>
+												<td>
+													<InputText @bind-Value="@aggDeductible.Peril" class="form-control" readonly />
+												</td>
+												<td>
+													<InputText @bind-Value="@aggDeductible.PerilRegion" class="form-control" readonly />
+												</td>
+												<td>
+													<InputText @bind-Value="@aggDeductible.Note" class="form-control" readonly />
+												</td>
+												<td class="text-end">
+													<InputNumber @bind-Value="@aggDeductible.ApplicationPriority" class="form-control text-end" readonly />
+												</td>
+												<td class="text-end">
+													<InputNumber @bind-Value="@aggDeductible.Deductible" class="form-control text-end" readonly />
+												</td>
+												<td>
+													<button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveAggDeductible(aggDeductible)">
+														Remove
+													</button>
+												</td>
+											</tr>
+										}
+									</tbody>
+								</table>
+							</div>
+						}
+						else
+						{
+							<p class="text-muted">No Agg Deductibles.</p>
+						}
+						<div class="mt-3">
+							<h5>Add New Agg Deductible</h5>							
+							<table class=" table table-sm table-striped text-nowrap">
+								<thead>
+									<tr>
+										<th>Peril</th>
+										<th>Peril Region</th>
+										<th>Note</th>
+										<th class="text-end">Application Priority</th>
+										<th class="text-end">Deductible</th>
+										<th>Actions</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>
+											<InputText @bind-Value="@newAggDeductible.Peril" class="form-control" />
+										</td>
+										<td>
+											<InputText @bind-Value="@newAggDeductible.PerilRegion" class="form-control" />
+										</td>
+										<td>
+											<InputText @bind-Value="@newAggDeductible.Note" class="form-control" />
+										</td>
+										<td class="text-end">
+											<InputNumber @bind-Value="@newAggDeductible.ApplicationPriority" class="form-control text-end" />
+										</td>
+										<td class="text-end">
+											<InputNumber @bind-Value="@newAggDeductible.Deductible" class="form-control text-end" />
+										</td>
+										<td>
+											<button type="button" class="btn btn-primary" @onclick="() => AddAggDeductible()">
+												Add
+											</button>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+							@if (!string.IsNullOrEmpty(validationMessage))
+							{
+								<div class="text-danger">@validationMessage</div>
+							}
+						</div>
+					</div>
+				</div>
 			</div>
 			<div class="col-md-6">
-				<div class="card mb-4">
+				<div class="card shadow mb-4 border">
 					<div class="card-header">Policy Allocations by Class</div>
 					<div class="card-body">
-						@if (PolicyDetails.PolicyAllocationsClass != null && PolicyDetails.PolicyAllocationsClass.Any())
+						@if (PolicyDetails?.PolicyAllocationsClass != null && PolicyDetails.PolicyAllocationsClass.Any())
 						{
 							<table class="table table-striped">
 								<thead>
 									<tr>
 										<th>Class</th>
-										<th>Allocation</th>
-										<th>Last Updated</th>
-										<th>Updated By</th>
+										<th class="text-end">Allocation</th>
 										<th>Actions</th>
 									</tr>
 								</thead>
@@ -279,10 +370,8 @@ else if (PolicyDetails != null)
 												<InputText @bind-Value="allocation.Class" class="form-control" readonly />
 											</td>
 											<td>
-												<InputNumber @bind-Value="allocation.Allocation" class="form-control" readonly />
+												<InputNumber @bind-Value="allocation.Allocation" class="form-control text-end" readonly />
 											</td>
-											<td>@allocation.LastUpdated?.ToString("yyyy-MM-dd HH:mm")</td>
-											<td>@allocation.LastUpdatedBy</td>
 											<td>
 												<button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveClassAllocation(allocation)">
 													Remove
@@ -299,34 +388,44 @@ else if (PolicyDetails != null)
 						}
 						<div class="mt-3">
 							<h5>Add New Class Allocation</h5>
-							<div class="row g-3">
-								<div class="col-md-4">
-									<label class="form-label">Class</label>
-									<InputText @bind-Value="newClassAllocation.Class" class="form-control" />
-								</div>
-								<div class="col-md-4">
-									<label class="form-label">Allocation</label>
-									<InputNumber @bind-Value="newClassAllocation.Allocation" class="form-control" />
-								</div>
-								<div class="col-md-4">
-									<button type="button" class="btn btn-primary" @onclick="AddClassAllocation">Add Class Allocation</button>
-								</div>
-							</div>
+							<table class="table table-striped">
+								<thead>
+									<tr>
+										<th>Class</th>
+										<th class="text-end">Allocation</th>
+										<th>Actions</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>
+											<InputText @bind-Value="newClassAllocation.Class" class="form-control" />
+										</td>
+										<td>
+											<InputNumber @bind-Value="newClassAllocation.Allocation" class="form-control text-end" />
+										</td>
+										<td>
+											<button type="button" class="btn btn-primary" @onclick="() => AddClassAllocation()">
+												Add
+											</button>
+										</td>
+									</tr>
+
+								</tbody>
+							</table>
 						</div>
 					</div>
 				</div>
-				<div class="card mb-4">
+				<div class="card shadow mb-4 border">
 					<div class="card-header">Policy Allocations by Year of Account</div>
 					<div class="card-body">
-						@if (PolicyDetails.PolicyAllocationsYOA != null && PolicyDetails.PolicyAllocationsYOA.Any())
+						@if (PolicyDetails?.PolicyAllocationsYOA != null && PolicyDetails.PolicyAllocationsYOA.Any())
 						{
 							<table class="table table-striped">
 								<thead>
 									<tr>
 										<th>Year of Account</th>
-										<th>Allocation</th>
-										<th>Last Updated</th>
-										<th>Updated By</th>
+										<th class="text-end">Allocation</th>
 										<th>Actions</th>
 									</tr>
 								</thead>
@@ -338,10 +437,8 @@ else if (PolicyDetails != null)
 												<InputNumber @bind-Value="allocation.YearOfAccount" class="form-control" readonly />
 											</td>
 											<td>
-												<InputNumber @bind-Value="allocation.Allocation" class="form-control" readonly />
+												<InputNumber @bind-Value="allocation.Allocation" class="form-control text-end" readonly />
 											</td>
-											<td>@allocation.LastUpdated?.ToString("yyyy-MM-dd HH:mm")</td>
-											<td>@allocation.LastUpdatedBy</td>
 											<td>
 												<button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveYOAAllocation(allocation)">
 													Remove
@@ -358,19 +455,30 @@ else if (PolicyDetails != null)
 						}
 						<div class="mt-3">
 							<h5>Add New YOA Allocation</h5>
-							<div class="row g-3">
-								<div class="col-md-4">
-									<label class="form-label">Year of Account</label>
-									<InputNumber @bind-Value="newYOAAllocation.YearOfAccount" class="form-control" />
-								</div>
-								<div class="col-md-4">
-									<label class="form-label">Allocation</label>
-									<InputNumber @bind-Value="newYOAAllocation.Allocation" class="form-control" />
-								</div>
-								<div class="col-md-4">
-									<button type="button" class="btn btn-primary" @onclick="AddYOAAllocation">Add YOA Allocation</button>
-								</div>
-							</div>
+							<table class="table table-striped">
+								<thead>
+									<tr>
+										<th>Year of Account</th>
+										<th class="text-end">Allocation</th>
+										<th>Actions</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>
+											<InputNumber @bind-Value="newYOAAllocation.YearOfAccount" class="form-control" />
+										</td>
+										<td>
+											<InputNumber @bind-Value="newYOAAllocation.Allocation" class="form-control text-end" />
+										</td>
+										<td>
+											<button type="button" class="btn btn-primary" @onclick="() => AddYOAAllocation()">
+												Add
+											</button>
+										</td>
+									</tr>
+								</tbody>
+							</table>
 						</div>
 					</div>
 				</div>
@@ -388,15 +496,32 @@ else if (PolicyDetails != null)
 @code {
 	[Inject] private NavigationManager Navigation { get; set; }
 	[Parameter] public required string ORIPolicyReference { get; set; }
-
-	// Basic Date picker //
+	private Dictionary<string, List<DropdownItem>> DropdownValues = new();
 	public Flatpickr? fxRateApplicationDatePickr;
 
-	private Dictionary<string, List<DropdownItem>> DropdownValues = new();
+	private List<ORIPolicyListModel> AllPolicies = new();
+	private List<ORIPolicyListModel> FilteredPolicies = new();
 	private ORIPolicyModel PolicyDetails { get; set; }
-	private List<FXTreatmentModel> FXTreatments { get; set; }
-	private bool IsLoading = true;
+	private List<FXTreatmentModel> FXTreatments { get; set; } = new();
+	private List<ORIFilterItemDefinition> FilterItemsList = new();
 
+	private bool IsLoading = true;
+	private bool IsLoadingDropdown = false;
+	private string? ErrorMessage;
+	private string? validationMessage;
+	private string? SelectedPolicyToCopyFrom;
+	private string? PolicySearchTerm;
+
+	private HashSet<string> KnownDropdownTypes = new()
+	{
+		"Class",
+		"DomicileCountry",
+		"Peril",
+		"RiskCode",
+		"ReservingClass",
+		"StatCode1",
+		"StatCode2"
+	};
 
 	private DateTime selectedFXRateApplicationDate
 	{
@@ -418,8 +543,6 @@ else if (PolicyDetails != null)
 		}
 	}
 
-
-	private string ErrorMessage;
 	private ORIFilterItem newFilter = new ORIFilterItem
 		{
 			InclusionExclusion = "Inclusion", // Default value
@@ -432,7 +555,9 @@ else if (PolicyDetails != null)
 	private ORIPolicyAllocationClass newClassAllocation = new ORIPolicyAllocationClass();
 	private ORIPolicyAllocationYOA newYOAAllocation = new ORIPolicyAllocationYOA();
 
-	private List<ORIFilterItemDefinition> FilterItemsList = new();
+	// New agg deductible property
+	private AggDeductible newAggDeductible = new AggDeductible();
+
 	protected override async Task OnInitializedAsync()
 	{
 		if (string.IsNullOrWhiteSpace(ORIPolicyReference))
@@ -456,6 +581,7 @@ else if (PolicyDetails != null)
 			{
 				FilterItemsList = await ORIService.GetIncludedOrExcludedItems();
 				FXTreatments = await ORIService.GetFXTreatments();
+				SetNextAvailableAggDeductiblePriority();
 			}
 			else
 			{
@@ -477,7 +603,6 @@ else if (PolicyDetails != null)
 	{
 		selectedFXRateApplicationDate = date;
 	}
-
 
 	private async Task HandleValidSubmit()
 	{
@@ -501,7 +626,6 @@ else if (PolicyDetails != null)
 	{
 		Navigation.NavigateTo($"ViewORIPolicy/{PolicyDetails.ORIPolicyReference}", forceLoad: true);
 	}
-
 
 	private void AddFilter()
 	{
@@ -541,6 +665,7 @@ else if (PolicyDetails != null)
 		// Force UI update
 		StateHasChanged();
 	}
+
 	private void RemoveFilter(ORIFilterItem filter)
 	{
 		if (PolicyDetails.Filters.Contains(filter))
@@ -553,7 +678,6 @@ else if (PolicyDetails != null)
 			PolicyDetails.RemovedFilters.Add(filter); // Track deleted filters
 		}
 	}
-
 
 	private string GetGhostButtonClass(string item)
 	{
@@ -570,19 +694,6 @@ else if (PolicyDetails != null)
 			_ => "orange-ghost"
 		};
 	}
-
-	private HashSet<string> KnownDropdownTypes = new()
-	{
-		"Class",
-		"DomicileCountry",
-		"Peril",
-		"RiskCode",
-		"ReservingClass",
-		"StatCode1",
-		"StatCode2"
-	};
-
-	private bool IsLoadingDropdown = false;
 
 	private async Task HandleItemChanged(string selected)
 	{
@@ -611,9 +722,6 @@ else if (PolicyDetails != null)
 		}
 	}
 
-
-	private string SelectedPolicyToCopyFrom;
-	private string PolicySearchTerm;
 	private async Task LoadAllPolicies()
 	{
 		AllPolicies = (await ORIService.GetORIPolicies()).ToList();
@@ -640,10 +748,6 @@ else if (PolicyDetails != null)
 		}
 	}
 
-
-	private List<ORIPolicyListModel> AllPolicies = new();
-	private List<ORIPolicyListModel> FilteredPolicies = new();
-
 	private void FilterPolicies()
 	{
 		FilteredPolicies = string.IsNullOrWhiteSpace(PolicySearchTerm)
@@ -654,7 +758,6 @@ else if (PolicyDetails != null)
 					(p.PolicyDescription?.Contains(PolicySearchTerm, StringComparison.OrdinalIgnoreCase) ?? false))
 				.ToList();
 	}
-
 
 	private void SelectPolicy(string policyRef)
 	{
@@ -719,6 +822,63 @@ else if (PolicyDetails != null)
 				PolicyDetails.RemovedPolicyAllocationsYOA = new List<ORIPolicyAllocationYOA>();
 			}
 			PolicyDetails.RemovedPolicyAllocationsYOA.Add(allocation);
+			StateHasChanged();
+		}
+	}
+
+	// Methods for adding and reming agg deductibles
+	private void SetNextAvailableAggDeductiblePriority()
+	{
+		int nextPriority = 1;
+		var usedPriorities = PolicyDetails.AggDeductibles.Select(d => d.ApplicationPriority).ToHashSet();
+
+		while (usedPriorities.Contains(nextPriority))
+		{
+			nextPriority++;
+		}
+
+		newAggDeductible.ApplicationPriority = nextPriority;
+	}
+
+
+	private void AddAggDeductible()
+	{
+		if (newAggDeductible.Deductible != 0)
+		{
+			if (PolicyDetails.AggDeductibles == null)
+			{
+				PolicyDetails.AggDeductibles = new List<AggDeductible>();
+			}
+
+			if (PolicyDetails.AggDeductibles.Any(d => d.ApplicationPriority == newAggDeductible.ApplicationPriority))
+			{
+				// Optionally show validation message (you could wire this to UI)
+				validationMessage = $"Application Priority {newAggDeductible.ApplicationPriority} already exists.";
+				return;
+			}
+
+			newAggDeductible.LastUpdated = DateTime.Now;
+			newAggDeductible.LastUpdatedBy = "CurrentUser"; // Replace with actual user
+			PolicyDetails.AggDeductibles.Add(newAggDeductible);
+			SetNextAvailableAggDeductiblePriority();
+
+			newAggDeductible = new AggDeductible(); // Reset
+			StateHasChanged();
+		}
+	}
+
+	private void RemoveAggDeductible(AggDeductible aggDeductible)
+	{
+		if (PolicyDetails.AggDeductibles.Contains(aggDeductible))
+		{
+			PolicyDetails.AggDeductibles.Remove(aggDeductible);
+			SetNextAvailableAggDeductiblePriority();
+
+			if (PolicyDetails.RemovedAggDeductibles == null)
+			{
+				PolicyDetails.RemovedAggDeductibles = new List<AggDeductible>();
+			}
+			PolicyDetails.RemovedAggDeductibles.Add(aggDeductible);
 			StateHasChanged();
 		}
 	}
