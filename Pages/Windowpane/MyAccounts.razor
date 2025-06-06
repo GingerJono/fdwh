@@ -32,7 +32,7 @@
                     @foreach (var prog in Model.Programs)
                     {
                         <tr>
-                            <td><a href="/ViewProgram/@prog.ProgramRef">@prog.ProgramRef</a></td>
+                            <td><a href="@($"{NavigationManager.BaseUri}ViewProgram/{prog.ProgramRef}")">@prog.ProgramRef</a></td>
                             <td>@prog.Inception.ToString("dd/MM/yyyy")</td>
                             <td>@prog.Assured</td>
                             <td>@prog.GrossEPI.ToString("C0")</td>
@@ -56,16 +56,22 @@
     private bool isLoading = true;
     private bool hasLoaded = false;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (hasLoaded) return;
+        if (firstRender && !hasLoaded)
+        {
+            await LoadDataAsync();
+            StateHasChanged(); // force UI to re-render after async load
+        }
+    }
 
+    private async Task LoadDataAsync()
+    {
         var username = HttpContextAccessor.HttpContext?.User?.Identity?.Name;
 
         if (string.IsNullOrWhiteSpace(username))
         {
-            // Wait briefly to allow context to populate, in case it's mid-lifecycle
-            await Task.Delay(250);
+            await Task.Delay(250); // slight delay to allow lifecycle catch-up
             username = HttpContextAccessor.HttpContext?.User?.Identity?.Name;
 
             if (string.IsNullOrWhiteSpace(username))
