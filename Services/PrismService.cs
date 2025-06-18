@@ -34,14 +34,12 @@ namespace Sandbox.Services
                 {
                     // Load child collections in parallel
                     var logsTask = GetRunLogs(runID);
-                    var incurredClaimsMappingTask = GetORIPolIncurredClaimsMapping(runID);
-                    var ultimateClaimsMappingTask = GetORIPolUltimateClaimsMapping(runID);
+                    var incurredClaimsMappingTask = GetORIPolicyIncurredClaimsMapping(runID);
+                    var ultimateClaimsMappingTask = GetORIPolicyUltimateClaimsMapping(runID);
                     var incurredByEventTask = GetIncurredClaimsByORIPolicyByEvent(runID);
                     var ultimateByEventTask = GetUltimateClaimsByORIPolicyByEvent(runID);
-                    var allocatedPaidTask = GetAllocatedPaidRecoveries(runID);
-                    var allocatedIncurredTask = GetAllocatedIncurredRecoveries(runID);
-                    var allocatedUltimateTask = GetAllocatedUltimateRecoveries(runID);
-                    var allocatedMergedTask = GetAllocatedRecoveriesMerged(runID);
+                    var combinedCommutedRecoveriesAndRIPSTask = GetCombinedCommutedRecoveriesAndRIPs(runID);
+                    
 
                     await Task.WhenAll(
                         logsTask,
@@ -49,23 +47,17 @@ namespace Sandbox.Services
                         ultimateClaimsMappingTask,
                         incurredByEventTask,
                         ultimateByEventTask,
-                        allocatedPaidTask,
-                        allocatedIncurredTask,
-                        allocatedUltimateTask,
-                        allocatedMergedTask
+                        combinedCommutedRecoveriesAndRIPSTask                        
                     );
 
                     //Assign the collections
                     run.Logs = logsTask.Result;
-                    run.ORIPolIncurredClaimsMapping = incurredClaimsMappingTask.Result;
-                    run.ORIPolUltimateClaimsMapping = ultimateClaimsMappingTask.Result;
+                    run.ORIPolicyIncurredClaimsMapping = incurredClaimsMappingTask.Result;
+                    run.ORIPolicyUltimateClaimsMapping = ultimateClaimsMappingTask.Result;
                     run.IncurredClaimsByEvent = incurredByEventTask.Result;
                     run.UltimateClaimsByEvent = ultimateByEventTask.Result;
-                    run.AllocatedPaidRecoveries = allocatedPaidTask.Result;
-                    run.AllocatedIncurredRecoveries = allocatedIncurredTask.Result;
-                    run.AllocatedUltimateRecoveries = allocatedUltimateTask.Result;
-                    run.AllocatedRecoveriesMerged = allocatedMergedTask.Result;
-
+                    run.CombinedCommutedRecoveriesAndRIPs = combinedCommutedRecoveriesAndRIPSTask.Result;
+                    
                     return run;
                 }
 
@@ -107,7 +99,7 @@ namespace Sandbox.Services
 
         // Get Outputs
 
-        public async Task<List<ORIPolIncurredClaimsMappingModel>> GetORIPolIncurredClaimsMapping(int runID)
+        public async Task<List<ORIPolicyIncurredClaimsMappingModel>> GetORIPolicyIncurredClaimsMapping(int runID)
         {
             using (var connection = new SqlConnection(_configuration.GetConnectionString("PrismConnection")))
             {
@@ -118,8 +110,8 @@ namespace Sandbox.Services
 
                 try
                 {
-                    var results = await connection.QueryAsync<ORIPolIncurredClaimsMappingModel>(
-                        "outputs.spGet01_ORIPolIncurredClaimsMapping",
+                    var results = await connection.QueryAsync<ORIPolicyIncurredClaimsMappingModel>(
+                        "outputs.spGetd01_ORIPolIncurredClaimsMapping",
                         parameters,
                         commandType: CommandType.StoredProcedure);
 
@@ -133,7 +125,7 @@ namespace Sandbox.Services
             }
         }
 
-        public async Task<List<ORIPolUltimateClaimsMappingModel>> GetORIPolUltimateClaimsMapping(int runID)
+        public async Task<List<ORIPolicyUltimateClaimsMappingModel>> GetORIPolicyUltimateClaimsMapping(int runID)
         {
             using (var connection = new SqlConnection(_configuration.GetConnectionString("PrismConnection")))
             {
@@ -143,8 +135,8 @@ namespace Sandbox.Services
                 parameters.Add("RunID", runID, DbType.Int32);
                 try
                 {
-                    var results = await connection.QueryAsync<ORIPolUltimateClaimsMappingModel>(
-                    "outputs.spGet02_ORIPolUltimateClaimsMapping",
+                    var results = await connection.QueryAsync<ORIPolicyUltimateClaimsMappingModel>(
+                    "outputs.spGetd02_ORIPolUltimateClaimsMapping",
                     parameters,
                     commandType: CommandType.StoredProcedure);
 
@@ -170,7 +162,7 @@ namespace Sandbox.Services
                 try
                 {
                     var results = await connection.QueryAsync<IncurredClaimsByORIPolicyByEventModel>(
-                    "outputs.spGet03_IncurredClaimsByORIPolicyByEvent",
+                    "outputs.spGetd03_IncurredClaimsByORIPolicyByEvent",
                     parameters,
                     commandType: CommandType.StoredProcedure);
 
@@ -196,7 +188,7 @@ namespace Sandbox.Services
                 try
                 {
                     var results = await connection.QueryAsync<UltimateClaimsByORIPolicyByEventModel>(
-                    "outputs.spGet04_UltimateClaimsByORIPolicyByEvent",
+                    "outputs.spGetd04_UltimateClaimsByORIPolicyByEvent",
                     parameters,
                     commandType: CommandType.StoredProcedure);
 
@@ -210,22 +202,19 @@ namespace Sandbox.Services
             }
         }
 
-        public async Task<List<AllocatedPaidRecoveriesByORIPolicyEventClassYOAModel>> GetAllocatedPaidRecoveries(int runID)
+        public async Task<List<CombinedCommutedRecoveriesAndRIPsModel>> GetCombinedCommutedRecoveriesAndRIPs(int runID)
         {
             using (var connection = new SqlConnection(_configuration.GetConnectionString("PrismConnection")))
             {
                 await connection.OpenAsync();
-
                 var parameters = new DynamicParameters();
                 parameters.Add("RunID", runID, DbType.Int32);
-
                 try
                 {
-                    var results = await connection.QueryAsync<AllocatedPaidRecoveriesByORIPolicyEventClassYOAModel>(
-                    "outputs.spGet05_AllocatedPaidRecoveriesByORIPolicyByEventByClassByYOA",
+                    var results = await connection.QueryAsync<CombinedCommutedRecoveriesAndRIPsModel>(
+                    "outputs.spGetd11_CombinedCommutedRecoveriesAndRIPs",
                     parameters,
                     commandType: CommandType.StoredProcedure);
-
                     return results.ToList();
                 }
                 catch (Exception ex)
@@ -234,84 +223,8 @@ namespace Sandbox.Services
                     throw;
                 }
             }
-        }
 
-        public async Task<List<AllocatedIncurredRecoveriesByORIPolicyEventClassYOAModel>> GetAllocatedIncurredRecoveries(int runID)
-        {
-            using (var connection = new SqlConnection(_configuration.GetConnectionString("PrismConnection")))
-            {
-                await connection.OpenAsync();
 
-                var parameters = new DynamicParameters();
-                parameters.Add("RunID", runID, DbType.Int32);
-
-                try
-                {
-                    var results = await connection.QueryAsync<AllocatedIncurredRecoveriesByORIPolicyEventClassYOAModel>(
-                    "outputs.spGet06_AllocatedIncurredRecoveriesByORIPolicyByEventByClassByYOA",
-                    parameters,
-                    commandType: CommandType.StoredProcedure);
-
-                    return results.ToList();
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Error in GetORIPolIncurredClaimsMapping: " + ex.Message);
-                    throw;
-                }
-            }
-        }
-
-        public async Task<List<AllocatedUltimateRecoveriesByORIPolicyEventClassYOAModel>> GetAllocatedUltimateRecoveries(int runID)
-        {
-            using (var connection = new SqlConnection(_configuration.GetConnectionString("PrismConnection")))
-            {
-                await connection.OpenAsync();
-
-                var parameters = new DynamicParameters();
-                parameters.Add("RunID", runID, DbType.Int32);
-
-                try
-                {
-                    var results = await connection.QueryAsync<AllocatedUltimateRecoveriesByORIPolicyEventClassYOAModel>(
-                    "outputs.spGet07_AllocatedUltimateRecoveriesByORIPolicyByEventByClassByYOA",
-                    parameters,
-                    commandType: CommandType.StoredProcedure);
-
-                    return results.ToList();
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Error in GetORIPolIncurredClaimsMapping: " + ex.Message);
-                    throw;
-                }
-            }
-        }
-
-        public async Task<List<AllocatedRecoveryModel>> GetAllocatedRecoveriesMerged(int runID)
-        {
-            using (var connection = new SqlConnection(_configuration.GetConnectionString("PrismConnection")))
-            {
-                await connection.OpenAsync();
-
-                var parameters = new DynamicParameters();
-                parameters.Add("RunID", runID, DbType.Int32);
-
-                try
-                {
-                    var results = await connection.QueryAsync<AllocatedRecoveryModel>(
-                    "outputs.spGet08_AllocatedRecoveriesMerged",
-                    parameters,
-                    commandType: CommandType.StoredProcedure);
-
-                    return results.ToList();
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Error in GetORIPolIncurredClaimsMapping: " + ex.Message);
-                    throw;
-                }
-            }
         }
     }
 }
