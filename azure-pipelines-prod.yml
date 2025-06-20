@@ -1,5 +1,5 @@
 trigger:
-- master  
+- prod-deploy
 
 pool:
   name: duwpmlsw03  # Azure DevOps agent pool
