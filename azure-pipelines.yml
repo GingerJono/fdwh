@@ -3,6 +3,8 @@ trigger:
 
 pool:
   name: iis-deployment-pool  # Azure DevOps agent pool
+  demands:
+    - agent.name -equals DUWPMDEV01
 
 variables:
   buildConfiguration: 'Release'
