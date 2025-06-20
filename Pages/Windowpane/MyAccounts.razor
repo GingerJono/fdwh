@@ -1,8 +1,10 @@
 ﻿@page "/MyAccounts"
 @using Sandbox.Models.Windowpane
 @using Sandbox.Services
+@using Sandbox.Helpers
 @inject WindowpaneService WindowpaneService
 @inject NavigationManager NavigationManager
+@inject SandboxContext SandboxContext
 
 <div class="card">
     <div class="card-header bg-none fw-semibold">
@@ -49,36 +51,24 @@
     </div>
 </div>
 
-@inject IHttpContextAccessor HttpContextAccessor
-
 @code {
     private MyAccountsModel Model { get; set; } = new();
     private bool isLoading = true;
     private bool hasLoaded = false;
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnInitializedAsync()
     {
-        if (firstRender && !hasLoaded)
-        {
-            await LoadDataAsync();
-            StateHasChanged(); // force UI to re-render after async load
-        }
+        await LoadDataAsync();
     }
 
     private async Task LoadDataAsync()
     {
-        var username = HttpContextAccessor.HttpContext?.User?.Identity?.Name;
+        var username = SandboxContext.EffectiveUserName;
 
         if (string.IsNullOrWhiteSpace(username))
         {
-            await Task.Delay(250); // slight delay to allow lifecycle catch-up
-            username = HttpContextAccessor.HttpContext?.User?.Identity?.Name;
-
-            if (string.IsNullOrWhiteSpace(username))
-            {
                 Console.WriteLine("Username not resolved in MyAccounts. Aborting data load.");
                 return;
-            }
         }
 
         isLoading = true;
