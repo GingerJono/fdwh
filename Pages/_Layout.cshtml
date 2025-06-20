@@ -124,22 +124,23 @@
         <!-- TomSelect JS -->
         <script src="@($"{NavigationManager.BaseUri}assets/libs/tom-select/dist/js/tom-select.complete.min.js")"></script>
 
-        <script async defer>
+        <script>
             window.onload = function () {
                 setTimeout(() => {
-                    let javascriptLinks = [
-                        "/assets/js/custom.js"
-                    ]
+                    const base = "@NavigationManager.BaseUri";
+                    const javascriptLinks = [
+                        `${base}assets/js/custom.js`
+                    ];
 
-                    javascriptLinks.map((link)=>{
-                        var scriptElement = document.createElement('script');
+                    javascriptLinks.forEach(link => {
+                        const scriptElement = document.createElement('script');
                         scriptElement.src = link;
                         document.head.appendChild(scriptElement);
-                    })
-
+                    });
                 }, 100);
             };
         </script>
+
 
         <script>
             document.addEventListener("DOMContentLoaded", function () {

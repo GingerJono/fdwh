@@ -51,27 +51,35 @@ stages:
       inputs:
         targetType: 'inline'
         script: |
-          [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-          $org = "DaleBI"
-          $project = "DaleSandboxApp"
-          $buildId = $env:BUILD_BUILDID
-          $uri = "https://dev.azure.com/$org/$project/_apis/build/builds/$buildId/workitems?api-version=7.0"
-          $headers = @{ Authorization = "Bearer $env:SYSTEM_ACCESSTOKEN" }
-          try {
-              $response = Invoke-RestMethod -Uri $uri -Headers $headers -Method Get
-              if ($response.count -eq 0) {
-                  Write-Warning "⚠️ No work items associated with this build."
-                  exit 0
-              }
-              $workItemUrl = $response.value[0].url
-              $workItemId = $workItemUrl -replace '^.+/workItems/', ''
-              $output = @{ workItemId = $workItemId }
-              $output | ConvertTo-Json | Set-Content -Path "$(Build.ArtifactStagingDirectory)/published/wwwroot/buildinfo.json"
-              Write-Host "✅ Work item $workItemId saved to buildinfo.json"
-          } catch {
-              Write-Error "❌ Failed to fetch associated work item: $_"
-              exit 1
-          }      
+            [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+            $org = "DaleBI"
+            $project = "DaleSandboxApp"
+            $buildId = $env:BUILD_BUILDID
+            $uri = "https://dev.azure.com/$org/$project/_apis/build/builds/$buildId/workitems?api-version=7.0"
+            $headers = @{ Authorization = "Bearer $env:SYSTEM_ACCESSTOKEN" }
+    
+            try {
+                $response = Invoke-RestMethod -Uri $uri -Headers $headers -Method Get
+                if ($response.count -eq 0) {
+                    Write-Warning "⚠️ No work items associated with this build."
+                    exit 0
+                }
+    
+                $workItemUrl = $response.value[0].url
+                $workItemId = $workItemUrl -replace '^.+/workItems/', ''
+                $output = @{ workItemId = $workItemId }
+    
+                $buildInfoDir = "$(Build.ArtifactStagingDirectory)/published/wwwroot"
+                if (-not (Test-Path $buildInfoDir)) {
+                    New-Item -Path $buildInfoDir -ItemType Directory -Force | Out-Null
+                }
+    
+                $output | ConvertTo-Json | Set-Content -Path "$buildInfoDir/buildinfo.json"
+                Write-Host "✅ Work item $workItemId saved to buildinfo.json"
+            } catch {
+                Write-Error "❌ Failed to fetch associated work item: $_"
+                exit 1
+            }
 
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifact'
