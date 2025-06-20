@@ -142,63 +142,58 @@
         </script>
 
         <script>
-            // Load scripts after DOM content is loaded
             document.addEventListener("DOMContentLoaded", function () {
-                var scriptUrls = [
+                const base = "@NavigationManager.BaseUri";
+                const scriptUrls = [
+                    `${base}_content/FlatpickrBlazor/flatpickr.min.js`,
+                    `${base}_content/FlatpickrBlazor/flatpickr.blazor.js`,
+                    `${base}_content/FlatpickrBlazor/l10n/de.js`,
+                    `${base}_content/FlatpickrBlazor/plugins/monthSelect/index.js`,
+                    `${base}_content/FlatpickrBlazor/plugins/minMaxTimePlugin.js`,
 
-                    "_content/FlatpickrBlazor/flatpickr.min.js",
-                    "_content/FlatpickrBlazor/flatpickr.blazor.js",
-                    "_content/FlatpickrBlazor/l10n/de.js",
-                    "_content/FlatpickrBlazor/plugins/monthSelect/index.js",
-                    "_content/FlatpickrBlazor/plugins/minMaxTimePlugin.js",
+                    `${base}_content/Soenneker.Blazor.TomSelect/tomselectinterop.js`,
+                    `${base}_content/Soenneker.Blazor.FilePond/filepondinterop.js`,
+                    `${base}_content/Blazored.TextEditor/quill-blot-formatter.min.js`,
+                    `${base}_content/Blazored.TextEditor/Blazored-BlazorQuill.js`,
+                    `${base}_content/NoUiSlider.Blazor/dist/bundle.js`,
+                    `${base}_content/BlazorCleave/BlazorCleave.js`,
+                    `${base}_content/BlazorCleave/cleave-phone.i18n.js`,
 
-                    "_content/Soenneker.Blazor.TomSelect/tomselectinterop.js",
-
-                    "_content/Soenneker.Blazor.FilePond/filepondinterop.js",
-
-                    "_content/Blazored.TextEditor/quill-blot-formatter.min.js",
-                    "_content/Blazored.TextEditor/Blazored-BlazorQuill.js",
-
-                    "_content/NoUiSlider.Blazor/dist/bundle.js",
-
-                    "_content/BlazorCleave/BlazorCleave.js",
-                    "_content/BlazorCleave/cleave-phone.i18n.js",
-
-                    "../assets/libs/filepond/dist/filepond.min.js",
-                    "../assets/libs/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.js",
-                    "../assets/libs/filepond-plugin-image-exif-orientation/dist/filepond-plugin-image-exif-orientation.min.js",
-                    "../assets/libs/filepond-plugin-file-validate-size/dist/filepond-plugin-file-validate-size.min.js",
-                    "../assets/libs/filepond-plugin-file-encode/dist/filepond-plugin-file-encode.min.js",
-                    "../assets/libs/filepond-plugin-image-edit/dist/filepond-plugin-image-edit.min.js",
-                    "../assets/libs/filepond-plugin-file-validate-type/dist/filepond-plugin-file-validate-type.min.js",
-                    "../assets/libs/filepond-plugin-file-validate-type/dist/filepond-plugin-file-validate-type.min.js",
-                    "../assets/libs/filepond-plugin-image-crop/dist/filepond-plugin-image-crop.min.js",
-                    "../assets/libs/filepond-plugin-image-resize/dist/filepond-plugin-image-resize.min.js",
-                    "../assets/libs/filepond-plugin-image-transform/dist/filepond-plugin-image-transform.min.js",
-                    "../assets/libs/dropzone/dist/dropzone-min.js",
-                    "../assets/libs/rater-js/index.js",
-                    "../assets/libs/glightbox/dist/js/glightbox.min.js",
-                    "../assets/libs/jsvectormap/dist/jsvectormap.min.js",
-                    "../assets/libs/jsvectormap/dist/maps/world-merc.js",
-                    "../assets/libs/gmaps/gmaps.min.js",
-                    "../assets/libs/plyr/dist/plyr.min.js",
-                    "../assets/libs/shepherd.js/dist/js/shepherd.min.js",
-                    "../assets/libs/moment/moment.js",
-                    "../assets/libs/animejs/lib/anime.min.js",
-                    "../assets/libs/fullcalendar/index.global.min.js",
-                    "../assets/libs/dragula/dist/dragula.min.js",
-                    "../assets/libs/vanilla-wizard/dist/js/wizard.min.js",
-                    "../assets/libs/intl-tel-input/build/js/intlTelInput.min.js",
-                    "../assets/libs/dual-listbox/dist/dual-listbox.js",
-                    "../assets/libs/@@yaireo/tagify/dist/tagify.js",
-                    "../assets/libs/gridjs/dist/gridjs.umd.js",
-                    "../assets/libs/chart.js/dist/chart.umd.js",
-                    "../assets/libs/fg-emoji-picker/fgEmojiPicker.js",
-                    "../assets/js/form-wizard.js",
-                    "../assets/libs/quill/dist/quill.js",
+                    `${base}assets/libs/filepond/dist/filepond.min.js`,
+                    `${base}assets/libs/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.js`,
+                    `${base}assets/libs/filepond-plugin-image-exif-orientation/dist/filepond-plugin-image-exif-orientation.min.js`,
+                    `${base}assets/libs/filepond-plugin-file-validate-size/dist/filepond-plugin-file-validate-size.min.js`,
+                    `${base}assets/libs/filepond-plugin-file-encode/dist/filepond-plugin-file-encode.min.js`,
+                    `${base}assets/libs/filepond-plugin-image-edit/dist/filepond-plugin-image-edit.min.js`,
+                    `${base}assets/libs/filepond-plugin-file-validate-type/dist/filepond-plugin-file-validate-type.min.js`,
+                    `${base}assets/libs/filepond-plugin-image-crop/dist/filepond-plugin-image-crop.min.js`,
+                    `${base}assets/libs/filepond-plugin-image-resize/dist/filepond-plugin-image-resize.min.js`,
+                    `${base}assets/libs/filepond-plugin-image-transform/dist/filepond-plugin-image-transform.min.js`,
+                    `${base}assets/libs/dropzone/dist/dropzone-min.js`,
+                    `${base}assets/libs/rater-js/index.js`,
+                    `${base}assets/libs/glightbox/dist/js/glightbox.min.js`,
+                    `${base}assets/libs/jsvectormap/dist/jsvectormap.min.js`,
+                    `${base}assets/libs/jsvectormap/dist/maps/world-merc.js`,
+                    `${base}assets/libs/gmaps/gmaps.min.js`,
+                    `${base}assets/libs/plyr/dist/plyr.min.js`,
+                    `${base}assets/libs/shepherd.js/dist/js/shepherd.min.js`,
+                    `${base}assets/libs/moment/moment.js`,
+                    `${base}assets/libs/animejs/lib/anime.min.js`,
+                    `${base}assets/libs/fullcalendar/index.global.min.js`,
+                    `${base}assets/libs/dragula/dist/dragula.min.js`,
+                    `${base}assets/libs/vanilla-wizard/dist/js/wizard.min.js`,
+                    `${base}assets/libs/intl-tel-input/build/js/intlTelInput.min.js`,
+                    `${base}assets/libs/dual-listbox/dist/dual-listbox.js`,
+                    `${base}assets/libs/@@yaireo/tagify/dist/tagify.js`,
+                    `${base}assets/libs/gridjs/dist/gridjs.umd.js`,
+                    `${base}assets/libs/chart.js/dist/chart.umd.js`,
+                    `${base}assets/libs/fg-emoji-picker/fgEmojiPicker.js`,
+                    `${base}assets/js/form-wizard.js`,
+                    `${base}assets/libs/quill/dist/quill.js`,
                 ];
+
                 scriptUrls.forEach(function (url) {
-                    var script = document.createElement("script");
+                    const script = document.createElement("script");
                     script.src = url;
                     document.body.appendChild(script);
                 });

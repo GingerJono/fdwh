@@ -1,3 +1,4 @@
+@inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
 @using Sandbox._Spk
 
@@ -14,8 +15,8 @@
             <div class="header-element">
                 <div class="horizontal-logo">
                     <a href="/index" class="header-logo" target="_blank">
-                        <img src="../assets/images/brand-logos/toggle-logo.png" alt="logo" class="toggle-logo">
-                        <img src="../assets/images/brand-logos/toggle-dark.png" alt="logo" class="toggle-dark">
+                        <img src="@($"{NavigationManager.BaseUri}assets/images/brand-logos/toggle-logo.png")" alt="logo" class="toggle-logo">
+                        <img src="@($"{NavigationManager.BaseUri}assets /images/brand-logos/toggle-dark.png")" alt="logo" class="toggle-dark">
                     </a>
                 </div>
             </div>
