@@ -2,7 +2,7 @@ trigger:
 - prod-deploy
 
 pool:
-  name: duwpmlsw03  # Azure DevOps agent pool
+  name: iis-deployment-pool  # Azure DevOps agent pool
 
 variables:
   buildConfiguration: 'Release'

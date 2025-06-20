@@ -2,7 +2,7 @@ trigger:
 - master  
 
 pool:
-  name: duwpmdev01  # Azure DevOps agent pool
+  name: iis-deployment-pool  # Azure DevOps agent pool
 
 variables:
   buildConfiguration: 'Release'
