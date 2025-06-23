@@ -312,7 +312,7 @@ app.UseAuthorization();
 
 app.MapFallbackToPage("/_Host");
 
-app.MapGet("/Windowpane/DownloadDFProformaExcelFile", (string policyRef, WindowpaneService windowpaneService) =>
+app.MapGet("Windowpane/DownloadDFProformaExcelFile", (string policyRef, WindowpaneService windowpaneService) =>
 {
 	var fileContent = windowpaneService.GenerateDFProformaExcelFile(policyRef);
 	var contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";

@@ -151,7 +151,10 @@
 		<!-- Proforma -->
 		<div class="tab-pane fade" id="pills-proforma">
 			<div class="row mb-3">
-				<a class="btn btn-primary" href="@($"/Windowpane/DownloadDFProformaExcelFile?policyRef={Model.ID}")">Download D&F Pro-Forma</a>
+				<a class="btn btn-primary"
+				   href="@($"{NavigationManager.BaseUri}Windowpane/DownloadDFProformaExcelFile?policyRef={Model.ID}")">
+					Download D&F Pro-Forma
+				</a>
 			</div>
 			<div class="row">
 				<div class="col">
