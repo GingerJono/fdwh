@@ -1,94 +1,211 @@
 ﻿@page "/ViewPolicy/{ID}"
 @using Sandbox.Models.Windowpane
 @using Sandbox.Services
-@inject WindowpaneService WindowpaneService
+@using CardModel
 @inject NavigationManager NavigationManager
+@inject WindowpaneService WindowpaneService
 
 @if (Model?.ID != null)
 {
-    <!-- Breadcrumbs -->
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item">
-            <a @onclick="@(() => NavigationManager.NavigateTo("/Windowpane/Search"))">SEARCH</a>
-        </li>
-        <li class="breadcrumb-item">
-            <a @onclick="@(() => NavigationManager.NavigateTo("/Windowpane/ViewPolicy"))">VIEW POLICY</a>
-        </li>
-        <li class="breadcrumb-item active">@Model.ID</li>
-    </ol>
+	<ol class="breadcrumb">
+		<li class="breadcrumb-item">
+			<a @onclick="@(() => NavigationManager.NavigateTo("/Windowpane/Search"))">SEARCH</a>
+		</li>
+		<li class="breadcrumb-item">
+			<a @onclick="@(() => NavigationManager.NavigateTo("/Windowpane/ViewPolicy"))">VIEW POLICY</a>
+		</li>
+		<li class="breadcrumb-item active">@Model.ID</li>
+	</ol>
 
-    <!-- Header -->
-    <div class="row display-flex">
-        <div class="col-lg-2 col-4 mb-4">
-            <div class="card mb-3 overflow-hidden h-100 fs-13px border-0 bg-gradient-red-pink">
-                <div class="card-body position-relative">
-                    <h5 class="text-white text-opacity-80 mb-3 fs-16px">Policy Ref</h5>
-                    <h3 class="text-white mt-n1">@Model.ID</h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-4 col-8 mb-4">
-            <div class="card mb-3 overflow-hidden h-100 fs-13px border-0 bg-gradient-custom-orange">
-                <div class="card-body position-relative">
-                    <h5 class="text-white text-opacity-80 mb-3 fs-16px">Assured</h5>
-                    <h3 class="text-white mt-n1">@HeaderData.GetValueOrDefault("Assured")</h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-2 col-4 mb-4">
-            <div class="card mb-3 overflow-hidden h-100 fs-13px border-0 bg-gradient-custom-teal">
-                <div class="card-body position-relative">
-                    <h5 class="text-white text-opacity-80 mb-3 fs-16px">Inception</h5>
-                    <h3 class="text-white mt-n1">@HeaderData.GetValueOrDefault("Inception")</h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-2 col-4 mb-4">
-            <div class="card mb-3 overflow-hidden h-100 fs-13px border-0 bg-gradient-custom-blue">
-                <div class="card-body position-relative">
-                    <h5 class="text-white text-opacity-80 mb-3 fs-16px">UW</h5>
-                    <h3 class="text-white mt-n1">@HeaderData.GetValueOrDefault("UW")</h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-2 col-4 mb-4">
-            <div class="card mb-3 overflow-hidden h-100 fs-13px border-0 bg-gradient-custom-indigo">
-                <div class="card-body position-relative">
-                    <h5 class="text-white text-opacity-80 mb-3 fs-16px">Status</h5>
-                    <h3 class="text-white mt-n1">@HeaderData.GetValueOrDefault("Status")</h3>
-                </div>
-            </div>
-        </div>
-    </div>
+	<!-- Header cards -->
+	<div class="row display-flex">
+		<div class="col-lg-2 col-4 mb-4">
+			<div class="card mb-3 overflow-hidden h-100 border-0 bg-primary-gradient bg-opacity-100">
+				<div class="card-body position-relative">
+					<h5 class="text-white text-opacity-80 mb-3">Policy Ref</h5>
+					<h3 class="text-white mt-n1">@Model.ID</h3>
+				</div>
+			</div>
+		</div>
+		<div class="col-lg-4 col-8 mb-4">
+			<div class="card mb-3 overflow-hidden h-100 border-0 bg-primary-gradient bg-opacity-75">
+				<div class="card-body position-relative">
+					<h5 class="text-white text-opacity-80 mb-3">Assured</h5>
+					<h3 class="text-white mt-n1">@HeaderData.GetValueOrDefault("Assured")</h3>
+				</div>
+			</div>
+		</div>
+		<div class="col-lg-2 col-4 mb-4">
+			<div class="card mb-3 overflow-hidden h-100 border-0 bg-primary-gradient bg-opacity-100">
+				<div class="card-body position-relative">
+					<h5 class="text-white text-opacity-80 mb-3">Inception</h5>
+					<h3 class="text-white mt-n1">@HeaderData.GetValueOrDefault("Inception")</h3>
+				</div>
+			</div>
+		</div>
+		<div class="col-lg-2 col-4 mb-4">
+			<div class="card mb-3 overflow-hidden h-100 border-0 bg-primary-gradient bg-opacity-75">
+				<div class="card-body position-relative">
+					<h5 class="text-white text-opacity-80 mb-3">UW</h5>
+					<h3 class="text-white mt-n1">@HeaderData.GetValueOrDefault("UW")</h3>
+				</div>
+			</div>
+		</div>
+		<div class="col-lg-2 col-4 mb-4">
+			<div class="card mb-3 overflow-hidden h-100 border-0 bg-primary-gradient bg-opacity-100">
+				<div class="card-body position-relative">
+					<h5 class="text-white text-opacity-80 mb-3">Status</h5>
+					<h3 class="text-white mt-n1">@HeaderData.GetValueOrDefault("Status")</h3>
+				</div>
+			</div>
+		</div>
+	</div>
 
-    <!-- Tabs Navigation -->
-    <WindowpaneNavTabs For="Policy" />
+	<!-- Tabs -->
+	<ul class="nav nav-pills mb-3" id="pills-tab">
+		@foreach (var tab in Tabs)
+		{
+			<li class="nav-item">
+				<button class="nav-link @(tab == ActiveTab ? "active" : "")"
+				        data-bs-toggle="pill"
+				        data-bs-target="@($"#pills-{tab.ToLower()}")"
+				        type="button">@tab</button>
+			</li>
+		}
+	</ul>
 
-    <!-- Tabs Content -->
-    <WindowpaneTabPanels For="Policy" ID="@Model.ID" />
+	<div class="tab-content" id="pills-tabContent">
+		<!-- Snapshot -->
+		<div class="tab-pane fade show active" id="pills-snapshot">
+			<div class="row">
+				@foreach (var card in SnapshotCards)
+				{
+					<DataCard DivClasses="mb-4" HeaderTitle="@card.Header" MethodName="@card.Method" ID="@Model.ID" />
+				}
+			</div>
+		</div>
+
+		<!-- Premium -->
+		<div class="tab-pane fade" id="pills-premium">
+			<div class="row">
+				<DataCard DivClasses="mb-4" HeaderTitle="Currencies" MethodName="GetPolicyPremiumCurrencies" ID="@Model.ID" />
+				<DataCard DivClasses="mb-4" HeaderTitle="History" MethodName="GetPolicyPremiumHistory" ID="@Model.ID" />
+				<DataCard DivClasses="mb-4" HeaderTitle="Patterns" MethodName="GetPolicyPremiumPatterns" ID="@Model.ID" />
+				<DataCard DivClasses="mb-4" HeaderTitle="Signings" MethodName="GetPolicyPremiumSignings" ID="@Model.ID" />
+			</div>
+		</div>
+
+		<!-- Claims -->
+		<div class="tab-pane fade" id="pills-claims">
+			<div class="row">
+				<DataCard DivClasses="mb-4" HeaderTitle="Development" MethodName="GetPolicyClaimsDevelopment" ID="@Model.ID" />
+				<DataCard DivClasses="mb-4" HeaderTitle="Events" MethodName="GetPolicyClaimsEvents" ID="@Model.ID" />
+				<DataCard DivClasses="mb-4" HeaderTitle="List" MethodName="GetPolicyClaimsList" ID="@Model.ID" />
+			</div>
+		</div>
+
+		<!-- Aggregates -->
+		<div class="tab-pane fade" id="pills-aggregates">
+			<div class="row">
+				<DataCard DivClasses="mb-4" HeaderTitle="Country" MethodName="GetPolicyAggregatesCountry" ID="@Model.ID" />
+				<DataCard DivClasses="mb-4" HeaderTitle="County" MethodName="GetPolicyAggregatesCounty" ID="@Model.ID" />
+				<DataCard DivClasses="mb-4" HeaderTitle="Historical" MethodName="GetPolicyAggregatesHistorical" ID="@Model.ID" />
+				<DataCard DivClasses="mb-4" HeaderTitle="State" MethodName="GetPolicyAggregatesState" ID="@Model.ID" />
+			</div>
+		</div>
+
+		<!-- Pricing -->
+		<div class="tab-pane fade" id="pills-pricing">
+			<div class="row">
+				<DataCard DivClasses="mb-4" HeaderTitle="ELRs" MethodName="GetPolicyPricingELRs" ID="@Model.ID" />
+				<DataCard DivClasses="mb-4" HeaderTitle="OptalitixQuotes" MethodName="GetPolicyPricingOptalitixQuotes" ID="@Model.ID" />
+				<DataCard DivClasses="mb-4" HeaderTitle="PremiumSplits" MethodName="GetPolicyPricingPremiumSplits" ID="@Model.ID" />
+				<DataCard DivClasses="mb-4" HeaderTitle="RateChange" MethodName="GetPolicyPricingRateChange" ID="@Model.ID" />
+			</div>
+		</div>
+
+		<!-- Exceptions -->
+		<div class="tab-pane fade" id="pills-exceptions">
+			<div class="row">
+				<DataCard DivClasses="mb-4" HeaderTitle="Checked" MethodName="GetPolicyExceptionsChecked" ID="@Model.ID" />
+				<DataCard DivClasses="mb-4" HeaderTitle="Unchecked" MethodName="GetPolicyExceptionsUnchecked" ID="@Model.ID" />
+			</div>
+		</div>
+
+		<!-- Audit -->
+		<div class="tab-pane fade" id="pills-audit">
+			<div class="row">
+				<DataCard DivClasses="mb-4" HeaderTitle="AuditLog" MethodName="GetPolicyAuditAuditLog" ID="@Model.ID" />
+				<DataCard DivClasses="mb-4" HeaderTitle="LifeCycle" MethodName="GetPolicyAuditLifeCycle" ID="@Model.ID" />
+			</div>
+		</div>
+
+		<!-- Notes -->
+		<div class="tab-pane fade" id="pills-notes">
+			<div class="row">
+				<DataCard DivClasses="mb-4" HeaderTitle="NDEXNotes" MethodName="GetPolicyNotesNDEXNotes" ID="@Model.ID" />
+				<DataCard DivClasses="mb-4" HeaderTitle="WorkbenchNotes" MethodName="GetPolicyNotesWorkbenchNotes" ID="@Model.ID" />
+			</div>
+		</div>
+
+		<!-- Proforma -->
+		<div class="tab-pane fade" id="pills-proforma">
+			<div class="row mb-3">
+				<a class="btn btn-primary" href="@($"/Windowpane/DownloadDFProformaExcelFile?policyRef={Model.ID}")">Download D&F Pro-Forma</a>
+			</div>
+			<div class="row">
+				<div class="col">
+					<p><i>Note: below cards show unformatted data which is mapped to a formatted version in the Excel export.</i></p>
+					<DataCard DivClasses="mb-4" HeaderTitle="DFProFormaSummary" MethodName="GetDFProFormaSummary" ID="@Model.ID" />
+					<DataCard DivClasses="mb-4" HeaderTitle="DFProFormaPerformance" MethodName="GetDFProFormaPerformance" ID="@Model.ID" />
+				</div>
+			</div>
+		</div>
+	</div>
 }
 else
 {
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item active">VIEW POLICY</li>
-    </ol>
+	<ol class="breadcrumb">
+		<li class="breadcrumb-item active">VIEW POLICY</li>
+	</ol>
 
-    <h1 class="page-header mb-3">View Policy.</h1>
+	<h1 class="page-header mb-3">View Policy.</h1>
 }
 
 @code {
-    [Parameter] public string ID { get; set; }
+	[Parameter] public string ID { get; set; }
 
-    private WindowpaneViewXModel Model { get; set; } = new();
-    private Dictionary<string, string> HeaderData { get; set; } = new();
+	private WindowpaneViewXModel Model { get; set; } = new();
+	private Dictionary<string, string> HeaderData { get; set; } = new();
+	private string ActiveTab => "snapshot";
+	private List<string> Tabs => new() { "Snapshot", "Premium", "Claims", "Aggregates", "Pricing", "Exceptions", "Audit", "Notes", "Proforma" };
 
-    protected override void OnInitialized()
-    {
-        if (!string.IsNullOrWhiteSpace(ID))
-        {
-            Model.ID = ID;
-            HeaderData = WindowpaneService.GetPolicyHeaderKeyValuePairs(ID)
-                ?? new Dictionary<string, string>();
-        }
-    }
+	private List<(string Header, string Method)> SnapshotCards => new()
+	{
+		("Summary", "GetPolicySnapshotSummary"),
+		("Dates", "GetPolicySnapshotDates"),
+		("Companies", "GetPolicySnapshotCompanies"),
+		("Deductions", "GetPolicySnapshotDeductions"),
+		("Documents", "GetPolicySnapshotDocuments"),
+		("Geographical", "GetPolicySnapshotGeographical"),
+		("History", "GetPolicySnapshotHistory"),
+		("KeyStats", "GetPolicySnapshotKeyStats"),
+		("LinesLimits", "GetPolicySnapshotLinesLimits"),
+		("Period", "GetPolicySnapshotPeriod"),
+		("RelatedPolicies", "GetPolicySnapshotRelatedPolicies"),
+		("Review", "GetPolicySnapshotReview"),
+		("RiskCodes", "GetPolicySnapshotRiskCodes"),
+		("Segmentation", "GetPolicySnapshotSegmentation"),
+		("Statuses", "GetPolicySnapshotStatuses"),
+	};
+
+	protected override void OnInitialized()
+	{
+		if (!string.IsNullOrWhiteSpace(ID))
+		{
+			Model.ID = ID;
+			HeaderData = WindowpaneService.GetProgramHeaderKeyValuePairs(ID)
+				?? new Dictionary<string, string>();
+		}
+	}
 }

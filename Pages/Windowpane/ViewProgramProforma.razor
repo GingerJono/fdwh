@@ -20,37 +20,33 @@
 		display: flex;
 		flex-wrap: wrap;
 	}
-	.row.display-flex > [class*='col-'] {
-		flex-grow: 1;
-	}
+
+		.row.display-flex > [class*='col-'] {
+			flex-grow: 1;
+		}
 
 	.bg-printable {
-		background-color:#FFF;
+		background-color: #FFF;
 	}
 
-	.bg-printable > div > h5, .bg-printable > div > h3, .bg-printable > div > p {
-		color: #000;
-	}
-
-	div.row {
-		break-inside: avoid;
-	}
-	display-none {
-		display: none !important;
-	}
+		.bg-printable > div > h5,
+		.bg-printable > div > h3,
+		.bg-printable > div > p {
+			color: #000;
+		}
 
 	.table > :not(caption) > * > * {
 		padding: 0.25rem !important;
 	}
-	display-none {
-		display: none;
-	}
+
 	.app-content {
 		padding: 1rem;
 	}
+
 	.app {
 		padding-top: 0;
 	}
+
 	.row > * {
 		padding-right: 0;
 	}
@@ -63,12 +59,12 @@
 			<a @onclick="@(() => NavigationManager.NavigateTo("/Windowpane/Search"))">SEARCH</a>
 		</li>
 		<li class="breadcrumb-item">
-			<a @onclick="@(() => NavigationManager.NavigateTo("/Windowpane/ViewProgramProforma"))">VIEW PROGRAM</a>
+			<a @onclick="@(() => NavigationManager.NavigateTo("/Windowpane/ViewProgram"))">VIEW PROGRAM</a>
 		</li>
 		<li class="breadcrumb-item active">@Model.ID</li>
 	</ol>
 
-	<!-- Header cards using HeaderData -->
+	<!-- Header cards -->
 	<div class="row display-flex">
 		<div class="col-lg-2 col-4 mb-2">
 			<div class="card overflow-hidden h-100 fs-13px bg-printable">
@@ -114,13 +110,61 @@
 		</div>
 	</div>
 
-	<WindowpaneTabPanels ID="@Model.ID" TabName="proforma" IsPrintable="true" />
+	<!-- Snapshot section -->
+	<div class="tab-pane fade show active" id="pills-snapshot">
+		<div class="row display-flex mb-2">
+			<div class="col-6 col-md-4">
+				<DataCard DivClasses="mb-2 h-100" HeaderTitle="Key Stats" MethodName="GetProgramSnapshotKeyStats" ID="@Model.ID" />
+			</div>
+			<div class="col-6 col-md-4">
+				<DataCard DivClasses="mb-2 h-100" HeaderTitle="Dates" MethodName="GetProgramSnapshotDates" ID="@Model.ID" />
+			</div>
+			<div class="col-6 col-md-4">
+				<DataCard DivClasses="mb-2 h-100" HeaderTitle="Companies" MethodName="GetProgramSnapshotCompanies" ID="@Model.ID" />
+			</div>
+		</div>
+		<div class="row mb-2">
+			<div class="col">
+				<DataCard DivClasses="mb-2 h-100" HeaderTitle="Lines" MethodName="GetProgramSnapshotLines" ID="@Model.ID" />
+			</div>
+		</div>
+		<div class="row display-flex mb-2">
+			<div class="col-6 col-md-4">
+				<DataCard DivClasses="mb-2 h-100" HeaderTitle="Geographical" MethodName="GetProgramSnapshotGeographical" ID="@Model.ID" />
+			</div>
+			<div class="col-6 col-md-4">
+				<DataCard DivClasses="mb-2 h-100" HeaderTitle="Deductions" MethodName="GetProgramSnapshotDeductions" ID="@Model.ID" />
+			</div>
+			<div class="col-6 col-md-4">
+				<DataCard DivClasses="mb-2 h-100" HeaderTitle="Segmentation" MethodName="GetProgramSnapshotSegmentation" ID="@Model.ID" />
+			</div>
+		</div>
+		<div class="row mb-2">
+			<div class="col-6">
+				<DataCard DivClasses="mb-2 h-100" HeaderTitle="Risk Code Matrix" MethodName="GetProgramSnapshotRiskCodes" ID="@Model.ID" />
+			</div>
+			<div class="col-6">
+				<DataCard DivClasses="mb-2 h-100" HeaderTitle="Documents" MethodName="GetProgramSnapshotDocuments" ID="@Model.ID" />
+			</div>
+		</div>
+		<div class="row mb-2">
+			<div class="col">
+				<DataCard DivClasses="mb-2 h-100" HeaderTitle="History" MethodName="GetProgramSnapshotHistory" ID="@Model.ID" />
+			</div>
+		</div>
+		<div class="row mb-2">
+			<div class="col">
+				<DataCard DivClasses="mb-2 h-100" HeaderTitle="NDEX Notes" MethodName="GetProgramSnapshotNDEXNotes" ID="@Model.ID" />
+			</div>
+		</div>
+	</div>
 }
 else
 {
 	<ol class="breadcrumb">
 		<li class="breadcrumb-item active">VIEW PROGRAM</li>
 	</ol>
+
 	<h1 class="page-header mb-3">View Program.</h1>
 }
 

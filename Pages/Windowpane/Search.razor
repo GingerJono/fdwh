@@ -7,157 +7,159 @@
 
 <style>
 	a {
-        color: rgba(var(--bs-link-color-rgb), var(--bs-link-opacity, 1));
-        text-decoration: underline;
-    }
+		color: rgba(var(--bs-link-color-rgb), var(--bs-link-opacity, 1));
+		text-decoration: underline;
+	}
 
-    .border-bottom-0 {
-        border-bottom: 0
-    }
+	.border-bottom-0 {
+		border-bottom: 0
+	}
 
-    .border-top-0 {
-        border-top: 0;
-        border-bottom: 1px solid rgba(var(--bs-link-color-rgb), var(--bs-link-opacity, 1));    
-   }
+	.border-top-0 {
+		border-top: 0;
+		border-bottom: 1px solid rgba(var(--bs-link-color-rgb), var(--bs-link-opacity, 1));
+	}
 
-    td {
-        border:0
-    }
+	td {
+		border: 0
+	}
 </style>
 
 <h1 class="page-header mb-3">
-    Search <small>Policies, Claims, Programs.</small>
+	Search <small>Policies, Claims, Programs.</small>
 </h1>
 
-<div class="typeahead__query input-group" @onkeydown="HandleKeyDown">
-    <span class="input-group-text"><i class="bi bi-search"></i></span>
-    <input class="form-control"
-           @bind="SearchTerm"
-           @bind:event="oninput"
-           placeholder="Search for Policy Ref, UMR, Assured"
-           autocomplete="off" />
-    <button class="btn btn-primary" @onclick="PerformSearch">Search</button>
+<div class="row mb-4">
+	<div class="typeahead__query input-group" @onkeydown="HandleKeyDown">
+		<span class="input-group-text"><i class="bi bi-search"></i></span>
+		<input class="form-control"
+			   @bind="SearchTerm"
+			   @bind:event="oninput"
+			   placeholder="Search for Policy Ref, UMR, Assured"
+			   autocomplete="off" />
+		<button class="btn btn-primary" @onclick="PerformSearch">Search</button>
+	</div>
 </div>
 
 @if (Model != null)
 {
-    <div class="row">
-        <div class="col">
-            <div class="card">
-                <div class="card-header">Policies</div>
-                <div class="card-body">
-                    <table class="table searchresults">
-                        <thead><tr><th>Ref</th><th>Class</th><th>Rsv Class</th><th>Inception</th><th>UMR</th><th>Status</th></tr></thead>
-                        <tbody>
-                            @if (Model.Policies?.Any() == true)
-                            {
-                                @foreach (var policy in Model.Policies)
-                                {
-                                    <tr class="border-bottom-0">
-                                        <td><a href="@($"{NavigationManager.BaseUri}ViewPolicy/{policy.PolicyRef}")">@policy.PolicyRef</a></td>
-                                        <td>@policy.Class</td>
-                                        <td>@policy.ReservingClass</td>
-                                        <td>@policy.InceptionDate</td>
-                                        <td>@policy.UMR</td>
-                                        <td>@policy.Status</td>
-                                    </tr>
-                                    <tr class="border-top-0"><td colspan="6" class="py-0"><h5>@policy.Assured</h5> <small>@policy.RiskDescription</small></td></tr>
-                                }
-                            }
-                            else
-                            {
-                                <tr><td colspan="6">No policies found</td></tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-        <div class="col">
-            <div class="card">
-                <div class="card-header">Programs</div>
-                <div class="card-body">
-                    <table class="table searchresults">
-                        <thead><tr><th>Ref</th><th>Class</th><th>Rsv Class</th><th>Inception</th><th>Status</th></tr></thead>
-                        <tbody>
-                            @if (Model.Programs?.Any() == true)
-                            {
-                                @foreach (var program in Model.Programs)
-                                {
-                                    <tr class="border-bottom-0">
-                                        <td><a href="@($"{NavigationManager.BaseUri}ViewProgram/{program.ProgramRef}")">@program.ProgramRef</a></td>
-                                        <td>@program.Class</td>
-                                        <td>@program.ReservingClass</td>
-                                        <td>@program.InceptionDate</td>
-                                        <td>@program.Status</td>
-                                    </tr>
-                                    <tr class="border-top-0"><td colspan="5" class="py-0"><h5>@program.Assured</h5></td></tr>
-                                }
-                            }
-                            else
-                            {
-                                <tr><td colspan="5">No programs found</td></tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-        <div class="col">
-            <div class="card">
-                <div class="card-header">Claims</div>
-                <div class="card-body">
-                    <table class="table searchresults">
-                        <thead><tr><th>Ref</th><th>Class</th><th>Rsv Class</th><th>Loss Date</th><th>Status</th></tr></thead>
-                        <tbody>
-                            @if (Model.Claims?.Any() == true)
-                            {
-                                @foreach (var claim in Model.Claims)
-                                {
-                                    <tr class="border-bottom-0">
-                                        <td><a href="@($"{NavigationManager.BaseUri}ViewClaim/{claim.ClaimRef}")">@claim.ClaimRef</a></td>
-                                        <td>@claim.Class</td>
-                                        <td>@claim.ReservingClass</td>
-                                        <td>@claim.LossDate</td>
-                                        <td>@claim.ClaimStatus</td>
-                                    </tr>
-                                    <tr class="border-top-0"><td colspan="5" class="py-0"><h5>@claim.Assured</h5><br /><small>@claim.Narrative</small></td></tr>
-                                }
-                            }
-                            else
-                            {
-                                <tr><td colspan="5">No claims found</td></tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
+	<div class="row">
+		<div class="col">
+			<div class="card">
+				<div class="card-header">Policies</div>
+				<div class="card-body">
+					<table class="table searchresults">
+						<thead><tr><th>Ref</th><th>Class</th><th>Rsv Class</th><th>Inception</th><th>UMR</th><th>Status</th></tr></thead>
+						<tbody>
+							@if (Model.Policies?.Any() == true)
+							{
+								@foreach (var policy in Model.Policies)
+								{
+									<tr class="border-bottom-0">
+										<td><a href="@($"{NavigationManager.BaseUri}ViewPolicy/{policy.PolicyRef}")">@policy.PolicyRef</a></td>
+										<td>@policy.Class</td>
+										<td>@policy.ReservingClass</td>
+										<td>@policy.InceptionDate</td>
+										<td>@policy.UMR</td>
+										<td>@policy.Status</td>
+									</tr>
+									<tr class="border-top-0"><td colspan="6" class="py-0"><h5>@policy.Assured</h5> <small>@policy.RiskDescription</small></td></tr>
+								}
+							}
+							else
+							{
+								<tr><td colspan="6">No policies found</td></tr>
+							}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+		<div class="col">
+			<div class="card">
+				<div class="card-header">Programs</div>
+				<div class="card-body">
+					<table class="table searchresults">
+						<thead><tr><th>Ref</th><th>Class</th><th>Rsv Class</th><th>Inception</th><th>Status</th></tr></thead>
+						<tbody>
+							@if (Model.Programs?.Any() == true)
+							{
+								@foreach (var program in Model.Programs)
+								{
+									<tr class="border-bottom-0">
+										<td><a href="@($"{NavigationManager.BaseUri}ViewProgram/{program.ProgramRef}")">@program.ProgramRef</a></td>
+										<td>@program.Class</td>
+										<td>@program.ReservingClass</td>
+										<td>@program.InceptionDate</td>
+										<td>@program.Status</td>
+									</tr>
+									<tr class="border-top-0"><td colspan="5" class="py-0"><h5>@program.Assured</h5></td></tr>
+								}
+							}
+							else
+							{
+								<tr><td colspan="5">No programs found</td></tr>
+							}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+		<div class="col">
+			<div class="card">
+				<div class="card-header">Claims</div>
+				<div class="card-body">
+					<table class="table searchresults">
+						<thead><tr><th>Ref</th><th>Class</th><th>Rsv Class</th><th>Loss Date</th><th>Status</th></tr></thead>
+						<tbody>
+							@if (Model.Claims?.Any() == true)
+							{
+								@foreach (var claim in Model.Claims)
+								{
+									<tr class="border-bottom-0">
+										<td><a href="@($"{NavigationManager.BaseUri}ViewClaim/{claim.ClaimRef}")">@claim.ClaimRef</a></td>
+										<td>@claim.Class</td>
+										<td>@claim.ReservingClass</td>
+										<td>@claim.LossDate</td>
+										<td>@claim.ClaimStatus</td>
+									</tr>
+									<tr class="border-top-0"><td colspan="5" class="py-0"><h5>@claim.Assured</h5><br /><small>@claim.Narrative</small></td></tr>
+								}
+							}
+							else
+							{
+								<tr><td colspan="5">No claims found</td></tr>
+							}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
 }
 
 @code {
-    private string SearchTerm { get; set; }
-    private WindowpaneSearchModel Model { get; set; } = new();
+	private string SearchTerm { get; set; }
+	private WindowpaneSearchModel Model { get; set; } = new();
 
-    private async Task PerformSearch()
-    {
-        if (!string.IsNullOrWhiteSpace(SearchTerm))
-        {
-            Model = new WindowpaneSearchModel
-                {
-                    Policies = (await WindowpaneService.SearchPolicies(SearchTerm))?.ToList() ?? new List<SearchPolicyModel>(),
-                    Claims = (await WindowpaneService.SearchClaims(SearchTerm))?.ToList() ?? new List<SearchClaimModel>(),
-                    Programs = (await WindowpaneService.SearchPrograms(SearchTerm))?.ToList() ?? new List<SearchProgramModel>()
-                };
-        }
-    }
+	private async Task PerformSearch()
+	{
+		if (!string.IsNullOrWhiteSpace(SearchTerm))
+		{
+			Model = new WindowpaneSearchModel
+				{
+					Policies = (await WindowpaneService.SearchPolicies(SearchTerm))?.ToList() ?? new List<SearchPolicyModel>(),
+					Claims = (await WindowpaneService.SearchClaims(SearchTerm))?.ToList() ?? new List<SearchClaimModel>(),
+					Programs = (await WindowpaneService.SearchPrograms(SearchTerm))?.ToList() ?? new List<SearchProgramModel>()
+				};
+		}
+	}
 
-    private async Task HandleKeyDown(KeyboardEventArgs e)
-    {
-        if (e.Key == "Enter")
-        {
-            await PerformSearch();
-        }
-    }
+	private async Task HandleKeyDown(KeyboardEventArgs e)
+	{
+		if (e.Key == "Enter")
+		{
+			await PerformSearch();
+		}
+	}
 }
