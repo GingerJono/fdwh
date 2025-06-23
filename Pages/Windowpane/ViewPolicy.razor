@@ -4,6 +4,7 @@
 @using CardModel
 @inject NavigationManager NavigationManager
 @inject WindowpaneService WindowpaneService
+@inject IJSRuntime JSRuntime
 
 @if (Model?.ID != null)
 {
@@ -62,26 +63,55 @@
 	</div>
 
 	<!-- Tabs -->
-	<ul class="nav nav-pills mb-3" id="pills-tab">
-		@foreach (var tab in Tabs)
-		{
-			<li class="nav-item">
-				<button class="nav-link @(tab == ActiveTab ? "active" : "")"
-				        data-bs-toggle="pill"
-				        data-bs-target="@($"#pills-{tab.ToLower()}")"
-				        type="button">@tab</button>
-			</li>
-		}
+	<ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+		<li class="nav-item" role="presentation">
+			<button class="nav-link active" id="pills-snapshot-tab" data-bs-toggle="pill" data-bs-target="#pills-snapshot" type="button" role="tab">Snapshot</button>
+		</li>
+		<li class="nav-item" role="presentation">
+			<button class="nav-link" id="pills-premium-tab" data-bs-toggle="pill" data-bs-target="#pills-premium" type="button" role="tab">Premium</button>
+		</li>
+		<li class="nav-item" role="presentation">
+			<button class="nav-link" id="pills-claims-tab" data-bs-toggle="pill" data-bs-target="#pills-claims" type="button" role="tab">Claims</button>
+		</li>
+		<li class="nav-item" role="presentation">
+			<button class="nav-link" id="pills-aggregates-tab" data-bs-toggle="pill" data-bs-target="#pills-aggregates" type="button" role="tab">Aggregates</button>
+		</li>
+		<li class="nav-item" role="presentation">
+			<button class="nav-link" id="pills-pricing-tab" data-bs-toggle="pill" data-bs-target="#pills-pricing" type="button" role="tab">Pricing</button>
+		</li>
+		<li class="nav-item" role="presentation">
+			<button class="nav-link" id="pills-exceptions-tab" data-bs-toggle="pill" data-bs-target="#pills-exceptions" type="button" role="tab">Exceptions</button>
+		</li>
+		<li class="nav-item" role="presentation">
+			<button class="nav-link" id="pills-audit-tab" data-bs-toggle="pill" data-bs-target="#pills-audit" type="button" role="tab">Audit</button>
+		</li>
+		<li class="nav-item" role="presentation">
+			<button class="nav-link" id="pills-notes-tab" data-bs-toggle="pill" data-bs-target="#pills-notes" type="button" role="tab">Notes</button>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link bg-info text-white" href="@($"{NavigationManager.BaseUri}ViewProgramProforma/{ID}")" target="_blank">Proforma</a>
+		</li>
 	</ul>
 
 	<div class="tab-content" id="pills-tabContent">
 		<!-- Snapshot -->
-		<div class="tab-pane fade show active" id="pills-snapshot">
+		<div class="tab-pane fade show active" id="pills-snapshot" role="tabpanel" aria-labelledby="pills-snapshot-tab">
 			<div class="row">
-				@foreach (var card in SnapshotCards)
-				{
-					<DataCard DivClasses="mb-4" HeaderTitle="@card.Header" MethodName="@card.Method" ID="@Model.ID" />
-				}
+				<DataCard DivClasses="mb-4" HeaderTitle="Summary" MethodName="GetPolicySnapshotSummary" ID="@Model.ID" />
+				<DataCard DivClasses="mb-4" HeaderTitle="Dates" MethodName="GetPolicySnapshotDates" ID="@Model.ID" />
+				<DataCard DivClasses="mb-4" HeaderTitle="Companies" MethodName="GetPolicySnapshotCompanies" ID="@Model.ID" />
+				<DataCard DivClasses="mb-4" HeaderTitle="Deductions" MethodName="GetPolicySnapshotDeductions" ID="@Model.ID" />
+				<DataCard DivClasses="mb-4" HeaderTitle="Documents" MethodName="GetPolicySnapshotDocuments" ID="@Model.ID" />
+				<DataCard DivClasses="mb-4" HeaderTitle="Geographical" MethodName="GetPolicySnapshotGeographical" ID="@Model.ID" />
+				<DataCard DivClasses="mb-4" HeaderTitle="History" MethodName="GetPolicySnapshotHistory" ID="@Model.ID" />
+				<DataCard DivClasses="mb-4" HeaderTitle="KeyStats" MethodName="GetPolicySnapshotKeyStats" ID="@Model.ID" />
+				<DataCard DivClasses="mb-4" HeaderTitle="LinesLimits" MethodName="GetPolicySnapshotLinesLimits" ID="@Model.ID" />
+				<DataCard DivClasses="mb-4" HeaderTitle="Period" MethodName="GetPolicySnapshotPeriod" ID="@Model.ID" />
+				<DataCard DivClasses="mb-4" HeaderTitle="RelatedPolicies" MethodName="GetPolicySnapshotRelatedPolicies" ID="@Model.ID" />
+				<DataCard DivClasses="mb-4" HeaderTitle="Review" MethodName="GetPolicySnapshotReview" ID="@Model.ID" />
+				<DataCard DivClasses="mb-4" HeaderTitle="RiskCodes" MethodName="GetPolicySnapshotRiskCodes" ID="@Model.ID" />
+				<DataCard DivClasses="mb-4" HeaderTitle="Segmentation" MethodName="GetPolicySnapshotSegmentation" ID="@Model.ID" />
+				<DataCard DivClasses="mb-4" HeaderTitle="Statuses" MethodName="GetPolicySnapshotStatuses" ID="@Model.ID" />
 			</div>
 		</div>
 
@@ -207,7 +237,7 @@ else
 		if (!string.IsNullOrWhiteSpace(ID))
 		{
 			Model.ID = ID;
-			HeaderData = WindowpaneService.GetProgramHeaderKeyValuePairs(ID)
+			HeaderData = WindowpaneService.GetPolicyHeaderKeyValuePairs(ID)
 				?? new Dictionary<string, string>();
 		}
 	}
