@@ -84,7 +84,15 @@ public class MenuDataServiceSandbox
 					active: false,
 					dirChange: false
 				),
-				}
+                new MainMenuItems (
+                    path: "PrismAdjustments",
+                    type: "link",
+                    title: "Adjustments",
+                    selected: false,
+                    active: false,
+                    dirChange: false
+                ),
+                }
 			),
 		new MainMenuItems(
 			type: "sub",
