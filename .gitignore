@@ -45,3 +45,6 @@ wwwroot/dist/
 # Docker
 docker-compose.override.yml
 .env
+
+# Uploads
+/wwwroot/uploads/prismadjustments
