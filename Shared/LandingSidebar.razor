@@ -1,5 +1,5 @@
 ﻿@inject LandingMenuDataService LandingMenuDataService
-@inject NavigationManager Navigation
+@inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
 @using Sandbox._Spk
 
@@ -14,8 +14,8 @@
                 <div class="landing-logo-container">
                     <div class="horizontal-logo">
                         <a href="/index" class="header-logo" target="_blank">
-                            <img src="../assets/images/brand-logos/desktop-logo.png" alt="logo" class="desktop-logo">
-                            <img src="../assets/images/brand-logos/desktop-white.png" alt="logo" class="desktop-white">
+                            <img src="@($"{NavigationManager.BaseUri}assets/images/brand-logos/desktop-logo.png")" alt="logo" class="desktop-logo">
+                            <img src="@($"{NavigationManager.BaseUri}assets/images/brand-logos/desktop-white.png")" alt="logo" class="desktop-white">
                         </a>
                     </div>
                 </div>
@@ -34,7 +34,7 @@
                             @if (MainMenuItems.Type == "link")
                             {
                                 <a href="@MainMenuItems.Path"
-                                    @onclick="async (e) => { await SetSubmenu((MainMenuItems, null)); Navigation.NavigateTo(MainMenuItems.Path); }"
+                                    @onclick="async (e) => { await SetSubmenu((MainMenuItems, null)); NavigationManager.NavigateTo(MainMenuItems.Path); }"
                                     class="side-menu__item @(MainMenuItems.Selected ? "active" : "")">
                                     <span class="side-menu__label">@MainMenuItems.Title
                                         @if (!string.IsNullOrEmpty(MainMenuItems.BadgeValue))
@@ -75,7 +75,7 @@
     {
         menuVal = LandingMenuDataService.GetMenuData();
         await Random(menuVal);
-        var currentUri = new Uri(Navigation.Uri);
+        var currentUri = new Uri(NavigationManager.Uri);
         var currentPath = currentUri.AbsolutePath;
         var currentItem = FindMenuItemByPath(menuVal, currentPath != "/" ? currentPath : "#home");
         if (currentItem != null)

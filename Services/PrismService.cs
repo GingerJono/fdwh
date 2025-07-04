@@ -2,6 +2,10 @@
 using Dapper;
 using Microsoft.Data.SqlClient;
 using Sandbox.Models.Prism;
+using Sandbox.Models.ORI;
+using ClosedXML.Excel;
+using System.Numerics;
+using System.Diagnostics;
 
 namespace Sandbox.Services
 {
@@ -34,14 +38,12 @@ namespace Sandbox.Services
                 {
                     // Load child collections in parallel
                     var logsTask = GetRunLogs(runID);
-                    var incurredClaimsMappingTask = GetORIPolIncurredClaimsMapping(runID);
-                    var ultimateClaimsMappingTask = GetORIPolUltimateClaimsMapping(runID);
+                    var incurredClaimsMappingTask = GetORIPolicyIncurredClaimsMapping(runID);
+                    var ultimateClaimsMappingTask = GetORIPolicyUltimateClaimsMapping(runID);
                     var incurredByEventTask = GetIncurredClaimsByORIPolicyByEvent(runID);
                     var ultimateByEventTask = GetUltimateClaimsByORIPolicyByEvent(runID);
-                    var allocatedPaidTask = GetAllocatedPaidRecoveries(runID);
-                    var allocatedIncurredTask = GetAllocatedIncurredRecoveries(runID);
-                    var allocatedUltimateTask = GetAllocatedUltimateRecoveries(runID);
-                    var allocatedMergedTask = GetAllocatedRecoveriesMerged(runID);
+                    var combinedCommutedRecoveriesAndRIPSTask = GetCombinedCommutedRecoveriesAndRIPs(runID);
+                    
 
                     await Task.WhenAll(
                         logsTask,
@@ -49,23 +51,17 @@ namespace Sandbox.Services
                         ultimateClaimsMappingTask,
                         incurredByEventTask,
                         ultimateByEventTask,
-                        allocatedPaidTask,
-                        allocatedIncurredTask,
-                        allocatedUltimateTask,
-                        allocatedMergedTask
+                        combinedCommutedRecoveriesAndRIPSTask                        
                     );
 
                     //Assign the collections
                     run.Logs = logsTask.Result;
-                    run.ORIPolIncurredClaimsMapping = incurredClaimsMappingTask.Result;
-                    run.ORIPolUltimateClaimsMapping = ultimateClaimsMappingTask.Result;
+                    run.ORIPolicyIncurredClaimsMapping = incurredClaimsMappingTask.Result;
+                    run.ORIPolicyUltimateClaimsMapping = ultimateClaimsMappingTask.Result;
                     run.IncurredClaimsByEvent = incurredByEventTask.Result;
                     run.UltimateClaimsByEvent = ultimateByEventTask.Result;
-                    run.AllocatedPaidRecoveries = allocatedPaidTask.Result;
-                    run.AllocatedIncurredRecoveries = allocatedIncurredTask.Result;
-                    run.AllocatedUltimateRecoveries = allocatedUltimateTask.Result;
-                    run.AllocatedRecoveriesMerged = allocatedMergedTask.Result;
-
+                    run.CombinedCommutedRecoveriesAndRIPs = combinedCommutedRecoveriesAndRIPSTask.Result;
+                    
                     return run;
                 }
 
@@ -107,7 +103,7 @@ namespace Sandbox.Services
 
         // Get Outputs
 
-        public async Task<List<ORIPolIncurredClaimsMappingModel>> GetORIPolIncurredClaimsMapping(int runID)
+        public async Task<List<ORIPolicyIncurredClaimsMappingModel>> GetORIPolicyIncurredClaimsMapping(int runID)
         {
             using (var connection = new SqlConnection(_configuration.GetConnectionString("PrismConnection")))
             {
@@ -118,8 +114,8 @@ namespace Sandbox.Services
 
                 try
                 {
-                    var results = await connection.QueryAsync<ORIPolIncurredClaimsMappingModel>(
-                        "outputs.spGet01_ORIPolIncurredClaimsMapping",
+                    var results = await connection.QueryAsync<ORIPolicyIncurredClaimsMappingModel>(
+                        "outputs.spGetd01_ORIPolIncurredClaimsMapping",
                         parameters,
                         commandType: CommandType.StoredProcedure);
 
@@ -133,7 +129,7 @@ namespace Sandbox.Services
             }
         }
 
-        public async Task<List<ORIPolUltimateClaimsMappingModel>> GetORIPolUltimateClaimsMapping(int runID)
+        public async Task<List<ORIPolicyUltimateClaimsMappingModel>> GetORIPolicyUltimateClaimsMapping(int runID)
         {
             using (var connection = new SqlConnection(_configuration.GetConnectionString("PrismConnection")))
             {
@@ -143,8 +139,8 @@ namespace Sandbox.Services
                 parameters.Add("RunID", runID, DbType.Int32);
                 try
                 {
-                    var results = await connection.QueryAsync<ORIPolUltimateClaimsMappingModel>(
-                    "outputs.spGet02_ORIPolUltimateClaimsMapping",
+                    var results = await connection.QueryAsync<ORIPolicyUltimateClaimsMappingModel>(
+                    "outputs.spGetd02_ORIPolUltimateClaimsMapping",
                     parameters,
                     commandType: CommandType.StoredProcedure);
 
@@ -170,7 +166,7 @@ namespace Sandbox.Services
                 try
                 {
                     var results = await connection.QueryAsync<IncurredClaimsByORIPolicyByEventModel>(
-                    "outputs.spGet03_IncurredClaimsByORIPolicyByEvent",
+                    "outputs.spGetd03_IncurredClaimsByORIPolicyByEvent",
                     parameters,
                     commandType: CommandType.StoredProcedure);
 
@@ -196,7 +192,7 @@ namespace Sandbox.Services
                 try
                 {
                     var results = await connection.QueryAsync<UltimateClaimsByORIPolicyByEventModel>(
-                    "outputs.spGet04_UltimateClaimsByORIPolicyByEvent",
+                    "outputs.spGetd04_UltimateClaimsByORIPolicyByEvent",
                     parameters,
                     commandType: CommandType.StoredProcedure);
 
@@ -210,22 +206,19 @@ namespace Sandbox.Services
             }
         }
 
-        public async Task<List<AllocatedPaidRecoveriesByORIPolicyEventClassYOAModel>> GetAllocatedPaidRecoveries(int runID)
+        public async Task<List<CombinedCommutedRecoveriesAndRIPsModel>> GetCombinedCommutedRecoveriesAndRIPs(int runID)
         {
             using (var connection = new SqlConnection(_configuration.GetConnectionString("PrismConnection")))
             {
                 await connection.OpenAsync();
-
                 var parameters = new DynamicParameters();
                 parameters.Add("RunID", runID, DbType.Int32);
-
                 try
                 {
-                    var results = await connection.QueryAsync<AllocatedPaidRecoveriesByORIPolicyEventClassYOAModel>(
-                    "outputs.spGet05_AllocatedPaidRecoveriesByORIPolicyByEventByClassByYOA",
+                    var results = await connection.QueryAsync<CombinedCommutedRecoveriesAndRIPsModel>(
+                    "outputs.spGetd11_CombinedCommutedRecoveriesAndRIPs",
                     parameters,
                     commandType: CommandType.StoredProcedure);
-
                     return results.ToList();
                 }
                 catch (Exception ex)
@@ -234,84 +227,120 @@ namespace Sandbox.Services
                     throw;
                 }
             }
+
+
         }
 
-        public async Task<List<AllocatedIncurredRecoveriesByORIPolicyEventClassYOAModel>> GetAllocatedIncurredRecoveries(int runID)
+        public async Task<List<ORIAdjustmentUploadModel>> GetORIAdjustmentUploads()
         {
-            using (var connection = new SqlConnection(_configuration.GetConnectionString("PrismConnection")))
+            using (var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection")))
             {
                 await connection.OpenAsync();
 
-                var parameters = new DynamicParameters();
-                parameters.Add("RunID", runID, DbType.Int32);
-
                 try
                 {
-                    var results = await connection.QueryAsync<AllocatedIncurredRecoveriesByORIPolicyEventClassYOAModel>(
-                    "outputs.spGet06_AllocatedIncurredRecoveriesByORIPolicyByEventByClassByYOA",
-                    parameters,
-                    commandType: CommandType.StoredProcedure);
+                    var results = await connection.QueryAsync<ORIAdjustmentUploadModel>(
+                        "ORI.spGetORIAdjustmentUploads",
+                        commandType: CommandType.StoredProcedure);
 
                     return results.ToList();
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Error in GetORIPolIncurredClaimsMapping: " + ex.Message);
+                    Console.WriteLine("Error in GetORIAdjustmentUploads: " + ex.Message);
                     throw;
                 }
             }
         }
 
-        public async Task<List<AllocatedUltimateRecoveriesByORIPolicyEventClassYOAModel>> GetAllocatedUltimateRecoveries(int runID)
+        public async Task<int> UploadAdjustmentsAsync(Stream excelStream, string uploadedBy, string adjustmentFileName)
         {
-            using (var connection = new SqlConnection(_configuration.GetConnectionString("PrismConnection")))
+            using var workbook = new XLWorkbook(excelStream);
+            using var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
+            await connection.OpenAsync();
+            using var transaction = connection.BeginTransaction();
+
+            try
             {
-                await connection.OpenAsync();
+                // Insert and get the new AdjustmentID, storing the original filename
+                var adjustmentID = await connection.ExecuteScalarAsync<int>(
+                    @"INSERT INTO ORI.AdjustmentUploads (UploadedBy, AdjustmentFileName)
+                      OUTPUT INSERTED.AdjustmentID
+                      VALUES (@User, @FileName);",
+                    new { User = uploadedBy, FileName = adjustmentFileName },
+                    transaction);
 
-                var parameters = new DynamicParameters();
-                parameters.Add("RunID", runID, DbType.Int32);
+                // Insert sheets
+                await InsertSheetAsync(workbook.Worksheet("Incurred Claims"), "ORI.AdjustmentsInputIncurredClaims", adjustmentID, uploadedBy, connection, transaction);
+                await InsertSheetAsync(workbook.Worksheet("ORI Policies"), "ORI.AdjustmentsInputORIPolicies", adjustmentID, uploadedBy, connection, transaction);
+                await InsertSheetAsync(workbook.Worksheet("Ultimate Claims"), "ORI.AdjustmentsInputUltimateClaims", adjustmentID, uploadedBy, connection, transaction);
 
-                try
+                // Save file to wwwroot/uploads/prismadjustments with AdjustmentID prepended
+                var safeFileName = Path.GetFileName(adjustmentFileName);
+                var finalFileName = $"{adjustmentID}_{safeFileName}";
+
+                var uploadFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "prismadjustments");
+                Directory.CreateDirectory(uploadFolder);
+
+                var savedPath = Path.Combine(uploadFolder, finalFileName);
+                excelStream.Position = 0;
+                using (var fileStream = new FileStream(savedPath, FileMode.Create))
                 {
-                    var results = await connection.QueryAsync<AllocatedUltimateRecoveriesByORIPolicyEventClassYOAModel>(
-                    "outputs.spGet07_AllocatedUltimateRecoveriesByORIPolicyByEventByClassByYOA",
-                    parameters,
-                    commandType: CommandType.StoredProcedure);
+                    await excelStream.CopyToAsync(fileStream);
+                }
 
-                    return results.ToList();
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Error in GetORIPolIncurredClaimsMapping: " + ex.Message);
-                    throw;
-                }
+                transaction.Commit();
+                return adjustmentID;
+            }
+            catch
+            {
+                transaction.Rollback();
+                throw;
             }
         }
 
-        public async Task<List<AllocatedRecoveryModel>> GetAllocatedRecoveriesMerged(int runID)
+        private async Task InsertSheetAsync(IXLWorksheet sheet, string tableName, int adjustmentID, string user, SqlConnection conn, SqlTransaction tx)
         {
-            using (var connection = new SqlConnection(_configuration.GetConnectionString("PrismConnection")))
+            var dataTable = new DataTable();
+
+            foreach (var headerCell in sheet.Row(1).Cells())
+                dataTable.Columns.Add(headerCell.GetValue<string>());
+
+            if (!dataTable.Columns.Contains("AdjustmentID"))
+                dataTable.Columns.Add("AdjustmentID", typeof(long)).SetOrdinal(0);
+
+            foreach (var row in sheet.RowsUsed().Skip(1))
             {
-                await connection.OpenAsync();
+                var dataRow = dataTable.NewRow();
 
-                var parameters = new DynamicParameters();
-                parameters.Add("RunID", runID, DbType.Int32);
-
-                try
+                // Start from column 1 because AdjustmentID is not in the Excel file
+                for (int colIndex = 1; colIndex < dataTable.Columns.Count; colIndex++)
                 {
-                    var results = await connection.QueryAsync<AllocatedRecoveryModel>(
-                    "outputs.spGet08_AllocatedRecoveriesMerged",
-                    parameters,
-                    commandType: CommandType.StoredProcedure);
+                    var colName = dataTable.Columns[colIndex].ColumnName;
+                    var cellValue = row.Cell(colIndex).Value;
 
-                    return results.ToList();
+                    var cell = row.Cell(colIndex);
+                    dataRow[colName] = (cell.IsEmpty() || string.IsNullOrWhiteSpace(cell.GetFormattedString()))
+                        ? DBNull.Value
+                        : cell.Value;
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Error in GetORIPolIncurredClaimsMapping: " + ex.Message);
-                    throw;
-                }
+
+                // Assign AdjustmentID (first column)
+                dataRow["AdjustmentID"] = adjustmentID;
+
+                dataTable.Rows.Add(dataRow);
             }
+
+
+            using var bulk = new SqlBulkCopy(conn, SqlBulkCopyOptions.Default, tx)
+            {
+                DestinationTableName = tableName,
+                BatchSize = 5000
+            };          
+
+            await bulk.WriteToServerAsync(dataTable);
         }
+
+
     }
 }

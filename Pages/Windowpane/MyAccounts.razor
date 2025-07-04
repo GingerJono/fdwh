@@ -1,8 +1,10 @@
 ﻿@page "/MyAccounts"
 @using Sandbox.Models.Windowpane
 @using Sandbox.Services
+@using Sandbox.Helpers
 @inject WindowpaneService WindowpaneService
 @inject NavigationManager NavigationManager
+@inject SandboxContext SandboxContext
 
 <div class="card">
     <div class="card-header bg-none fw-semibold">
@@ -32,7 +34,7 @@
                     @foreach (var prog in Model.Programs)
                     {
                         <tr>
-                            <td><a href="/ViewProgram/@prog.ProgramRef">@prog.ProgramRef</a></td>
+                            <td><a href="@($"{NavigationManager.BaseUri}ViewProgram/{prog.ProgramRef}")">@prog.ProgramRef</a></td>
                             <td>@prog.Inception.ToString("dd/MM/yyyy")</td>
                             <td>@prog.Assured</td>
                             <td>@prog.GrossEPI.ToString("C0")</td>
@@ -49,8 +51,6 @@
     </div>
 </div>
 
-@inject IHttpContextAccessor HttpContextAccessor
-
 @code {
     private MyAccountsModel Model { get; set; } = new();
     private bool isLoading = true;
@@ -58,21 +58,17 @@
 
     protected override async Task OnInitializedAsync()
     {
-        if (hasLoaded) return;
+        await LoadDataAsync();
+    }
 
-        var username = HttpContextAccessor.HttpContext?.User?.Identity?.Name;
+    private async Task LoadDataAsync()
+    {
+        var username = SandboxContext.EffectiveUserName;
 
         if (string.IsNullOrWhiteSpace(username))
         {
-            // Wait briefly to allow context to populate, in case it's mid-lifecycle
-            await Task.Delay(250);
-            username = HttpContextAccessor.HttpContext?.User?.Identity?.Name;
-
-            if (string.IsNullOrWhiteSpace(username))
-            {
                 Console.WriteLine("Username not resolved in MyAccounts. Aborting data load.");
                 return;
-            }
         }
 
         isLoading = true;

@@ -9,7 +9,7 @@ using CurrieTechnologies.Razor.SweetAlert2;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Negotiate;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Data.SqlClient;
@@ -103,6 +103,7 @@ using OffcanvasData;
 using AccordionData;
 using Sandbox.Helpers;
 using Sandbox.Services;
+using System.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -247,16 +248,11 @@ builder.Services.AddSession(options =>
 builder.Services.AddHttpClient();
 builder.Services.AddHttpContextAccessor();
 
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
-    {
-        options.LoginPath = "/login";
-        options.AccessDeniedPath = "/accessdenied";
-        options.Cookie.Name = "YourAppCookieName";
-        options.Cookie.HttpOnly = true;
-        options.Cookie.SameSite = SameSiteMode.Strict;
-        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-    });
+// Authentication
+builder.Services.AddAuthentication(NegotiateDefaults.AuthenticationScheme)
+    .AddNegotiate();
+
+builder.Services.AddAuthorization();
 
 // do app context
 var connString = builder.Configuration.GetConnectionString("DaleSandboxConnection");
@@ -311,5 +307,14 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapFallbackToPage("/_Host");
+
+app.MapGet("Windowpane/DownloadDFProformaExcelFile", (string policyRef, WindowpaneService windowpaneService) =>
+{
+	var fileContent = windowpaneService.GenerateDFProformaExcelFile(policyRef);
+	var contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+	var fileName = "DFProformaExcelFile.xlsx";
+
+	return Results.File(fileContent, contentType, fileName);
+});
 
 app.Run();

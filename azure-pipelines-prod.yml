@@ -1,10 +1,10 @@
 trigger:
-- master  
+- prod-deploy
 
 pool:
   name: iis-deployment-pool  # Azure DevOps agent pool
   demands:
-    - agent.name -equals DUWPMDEV01
+    - agent.name -equals DUWPMLSW03
 
 variables:
   buildConfiguration: 'Release'
@@ -52,7 +52,6 @@ stages:
         SYSTEM_ACCESSTOKEN: $(System.AccessToken)
       inputs:
         targetType: 'inline'
-
         script: |
             [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
             $org = "DaleBI"

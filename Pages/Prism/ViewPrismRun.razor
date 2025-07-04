@@ -58,11 +58,14 @@ else
 						<p><em>No Run details found.</em></p>
 					}
 				</div>
-				@if (!string.IsNullOrEmpty(Run.Notes))
+				@if (!string.IsNullOrEmpty(Run?.Notes))
 				{
 					<div class="row">
-
-						<div class="col-md-12"><strong>Notes</strong><div class="fs-4 text">@Run.Notes</div></div>
+						<div class="col-md-4"><strong>Notes</strong><div class="fs-4 text">@Run.Notes</div></div>
+						@if(!string.IsNullOrEmpty(Run.ErrorMessage))
+						{
+							<div class="col-md-4"><strong>Error</strong><div class="fs-4 text">@Run.ErrorMessage</div></div>
+						}
 					</div>
 				}
 			</div>
@@ -81,13 +84,13 @@ else
 		<div class="col-md-6">
 			<div class="card shadow mb-4 border">
 				<div class="card-header d-flex justify-content-between align-items-center">
-					<span>Incurred Claims Mapping (@Run?.ORIPolIncurredClaimsMapping?.Count())</span>
-					<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.ORIPolIncurredClaimsMapping, $"IncurredClaimsMapping_{Run.RunID}.csv"))">
+					<span>Incurred Claims Mapping (@Run?.ORIPolicyIncurredClaimsMapping?.Count())</span>
+					<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.ORIPolicyIncurredClaimsMapping, $"IncurredClaimsMapping_{Run.RunID}.csv"))">
 						<i class="bi bi-download me-1"></i>
 					</button>
 				</div>
 				<div class="card-body">
-					@if (Run.ORIPolIncurredClaimsMapping == null)
+					@if (Run?.ORIPolicyIncurredClaimsMapping == null)
 					{
 						<p><em>No data found</em></p>
 					}
@@ -97,13 +100,13 @@ else
 		<div class="col-md-6">
 			<div class="card shadow mb-4 border">
 				<div class="card-header d-flex justify-content-between align-items-center">
-					<span>Ultimate Claims Mapping (@Run?.ORIPolUltimateClaimsMapping?.Count())</span>
-					<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.ORIPolUltimateClaimsMapping, $"UltimateClaimsMapping_{Run.RunID}.csv"))">
+					<span>Ultimate Claims Mapping (@Run?.ORIPolicyUltimateClaimsMapping?.Count())</span>
+					<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.ORIPolicyUltimateClaimsMapping, $"UltimateClaimsMapping_{Run.RunID}.csv"))">
 						<i class="bi bi-download me-1"></i>
 					</button>
 				</div>
 				<div class="card-body">
-					@if (Run.ORIPolUltimateClaimsMapping == null)
+					@if (Run?.ORIPolicyUltimateClaimsMapping == null)
 					{
 						<p><em>No data found</em></p>
 					}
@@ -151,71 +154,20 @@ else
 		<div class="col-md-6">
 			<div class="card shadow mb-4 border">
 				<div class="card-header d-flex justify-content-between align-items-center">
-					<span>Allocated Paid Recoveries (@Run?.AllocatedIncurredRecoveries?.Count())</span>
-					<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.AllocatedPaidRecoveries, $"AllocatedPaidRecoveries_{Run.RunID}.csv"))">
+					<span>Combined Commuted Recoveries and RIPS (@Run?.CombinedCommutedRecoveriesAndRIPs?.Count())</span>
+					<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.CombinedCommutedRecoveriesAndRIPs, $"AllocatedPaidRecoveries_{Run.RunID}.csv"))">
 						<i class="bi bi-download me-1"></i>
 					</button>
 				</div>
 				<div class="card-body">
-					@if (Run.AllocatedPaidRecoveries == null)
+					@if (Run?.CombinedCommutedRecoveriesAndRIPs == null)
 					{
 						<p><em>No data found</em></p>
 					}
 				</div>
 			</div>
-		</div>
-		<div class="col-md-6">
-			<div class="card shadow mb-4 border">
-				<div class="card-header d-flex justify-content-between align-items-center">
-					<span>Allocated Incurred Recoveries (@Run?.AllocatedIncurredRecoveries?.Count())</span>
-					<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.AllocatedIncurredRecoveries, $"AllocatedIncurredRecoveries_{Run.RunID}.csv"))">
-						<i class="bi bi-download me-1"></i>
-					</button>
-				</div>
-				<div class="card-body">
-					@if (Run.AllocatedIncurredRecoveries == null)
-					{
-						<p><em>No data found</em></p>
-					}
-				</div>
-			</div>
-		</div>
-	</div>
-
-	<div class="row">
-		<div class="col-md-6">
-			<div class="card shadow mb-4 border">
-				<div class="card-header d-flex justify-content-between align-items-center">
-					<span>Allocated Ultimate Recoveries (@Run?.AllocatedUltimateRecoveries?.Count())</span>
-					<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.AllocatedUltimateRecoveries, $"AllocatedUltimateRecoveries_{Run.RunID}.csv"))">
-						<i class="bi bi-download me-1"></i>
-					</button>
-				</div>
-				<div class="card-body">
-					@if (Run.AllocatedUltimateRecoveries == null)
-					{
-						<p><em>No data found</em></p>
-					}
-				</div>
-			</div>
-		</div>
-		<div class="col-md-6">
-			<div class="card shadow mb-4 border">
-				<div class="card-header d-flex justify-content-between align-items-center">
-					<span>Merged Allocated Recoveries (@Run?.AllocatedRecoveriesMerged?.Count())</span>
-					<button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.AllocatedRecoveriesMerged, $"AllocatedRecoveriesMerged_{Run.RunID}.csv"))">
-						<i class="bi bi-download me-1"></i>
-					</button>
-				</div>
-				<div class="card-body">
-					@if (Run.AllocatedRecoveriesMerged == null)
-					{
-						<p><em>No data found</em></p>
-					}
-				</div>
-			</div>
-		</div>
-	</div>
+		</div>		
+	</div>	
 
 	<div class="row">
 		<h3>Logs (@Run?.Logs.Count())</h3>
@@ -366,14 +318,11 @@ else
 				}
 			}
 
-			AddCsv(run.ORIPolIncurredClaimsMapping, $"IncurredClaimsMapping_{Run.RunID}.csv");
-			AddCsv(run.ORIPolUltimateClaimsMapping, $"UltimateClaimsMapping_{Run.RunID}.csv");
+			AddCsv(run.ORIPolicyIncurredClaimsMapping, $"IncurredClaimsMapping_{Run.RunID}.csv");
+			AddCsv(run.ORIPolicyUltimateClaimsMapping, $"UltimateClaimsMapping_{Run.RunID}.csv");
 			AddCsv(run.IncurredClaimsByEvent, $"IncurredClaimsByEvent_{Run.RunID}.csv");
 			AddCsv(run.UltimateClaimsByEvent, $"UltimateClaimsByEvent_{Run.RunID}.csv");
-			AddCsv(run.AllocatedPaidRecoveries, $"AllocatedPaidRecoveries_{Run.RunID}.csv");
-			AddCsv(run.AllocatedIncurredRecoveries, $"AllocatedIncurredRecoveries_{Run.RunID}.csv");
-			AddCsv(run.AllocatedUltimateRecoveries, $"AllocatedUltimateRecoveries_{Run.RunID}.csv");
-			AddCsv(run.AllocatedRecoveriesMerged, $"AllocatedRecoveriesMerged_{Run.RunID}.csv");
+			AddCsv(run.CombinedCommutedRecoveriesAndRIPs, $"CombinedCommutedRecoveriesAndRIPs_{Run.RunID}.csv");			
 		}
 
 		zipStream.Position = 0;

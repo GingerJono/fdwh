@@ -106,15 +106,22 @@
 								<input class="form-control form-control-sm" placeholder="Filter Broker..." value="@FilterBroker" @oninput="e => OnBrokerChanged(e.Value?.ToString())" />
 							</th>
 							<th class="align-top">
-								Status
-								<input class="form-control form-control-sm" placeholder="Filter Status..." value="@FilterStatus" @oninput="e => OnStatusChanged(e.Value?.ToString())" />
+								Policy Status
+								<input class="form-control form-control-sm" placeholder="Policy Filter Status..." value="@FilterPolicyStatus" @oninput="e => OnPolicyStatusChanged(e.Value?.ToString())" />
 							</th>
 							<th class="align-top">
-								Status
+								Filters Status
+								<input class="form-control form-control-sm" placeholder="Filter Filters Status..." value="@FilterFiltersStatus" @oninput="e => OnFiltersStatusChanged(e.Value?.ToString())" />
 							</th>
-							<th class="align-top">YOA Allocation %</th>
-							<th class="align-top">Class Allocation %</th>
-							<th>Actions</th>
+							<th class="align-top">
+								YOA Allocation %
+								<input class="form-control form-control-sm" placeholder="Filter YOA Allocation..." value="@FilterYOAAllocation" @oninput="e => OnYOAAllocationChanged(e.Value?.ToString())" />
+							</th>
+							<th class="align-top">
+								Class Allocation %
+								<input class="form-control form-control-sm" placeholder="Filter Class Allocation..." value="@FilterClassAllocation" @oninput="e => OnClassAllocationChanged(e.Value?.ToString())" />
+							</th>
+							<th class="align-top">Actions</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -214,7 +221,10 @@
 	private string FilterDescription = "";
 	private string FilterPolicyType = "";
 	private string FilterBroker = "";
-	private string FilterStatus = "";
+	private string FilterPolicyStatus = "";
+	private string FilterFiltersStatus = "";
+	private string FilterYOAAllocation = "";
+	private string FilterClassAllocation = "";
 
 	private const int MaxVisiblePages = 10;
 	private int TotalPages => Math.Max(1, (int)Math.Ceiling((double)TotalRecords / PageSize));
@@ -230,7 +240,10 @@
 	(string.IsNullOrWhiteSpace(FilterDescription) || p.PolicyDescription?.Contains(FilterDescription, StringComparison.OrdinalIgnoreCase) == true) &&
 	(string.IsNullOrWhiteSpace(FilterPolicyType) || p.PolicyType?.Contains(FilterPolicyType, StringComparison.OrdinalIgnoreCase) == true) &&
 	(string.IsNullOrWhiteSpace(FilterBroker) || p.Broker?.Contains(FilterBroker, StringComparison.OrdinalIgnoreCase) == true) &&
-	(string.IsNullOrWhiteSpace(FilterStatus) || p.Status?.Contains(FilterStatus, StringComparison.OrdinalIgnoreCase) == true));
+	(string.IsNullOrWhiteSpace(FilterPolicyStatus) || p.Status?.Contains(FilterPolicyStatus, StringComparison.OrdinalIgnoreCase) == true) &&
+	(string.IsNullOrWhiteSpace(FilterFiltersStatus) || p.FiltersStatus?.Contains(FilterFiltersStatus, StringComparison.OrdinalIgnoreCase) == true) &&
+	(string.IsNullOrWhiteSpace(FilterYOAAllocation) || p.YOAAllocations.ToString().StartsWith(FilterYOAAllocation, StringComparison.OrdinalIgnoreCase) == true) &&
+	(string.IsNullOrWhiteSpace(FilterClassAllocation) || p.ClassAllocations.ToString().StartsWith(FilterClassAllocation, StringComparison.OrdinalIgnoreCase) == true));
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -290,5 +303,8 @@
 	private async Task OnDescriptionChanged(string value) { FilterDescription = value; await ApplyFilters(); }
 	private async Task OnPolicyTypeChanged(string value) { FilterPolicyType = value; await ApplyFilters(); }
 	private async Task OnBrokerChanged(string value) { FilterBroker = value; await ApplyFilters(); }
-	private async Task OnStatusChanged(string value) { FilterStatus = value; await ApplyFilters(); }
+	private async Task OnPolicyStatusChanged(string value) { FilterPolicyStatus = value; await ApplyFilters(); }
+	private async Task OnFiltersStatusChanged(string value) { FilterFiltersStatus = value; await ApplyFilters(); }
+	private async Task OnYOAAllocationChanged(string value) { FilterYOAAllocation = value; await ApplyFilters(); }
+	private async Task OnClassAllocationChanged(string value) { FilterClassAllocation = value; await ApplyFilters(); }
 }

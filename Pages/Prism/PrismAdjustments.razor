@@ -1,0 +1,162 @@
+﻿@page "/prismadjustments"
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Authorization
+@using Sandbox.Services
+@using Sandbox.Models.ORI
+@inject PrismService PrismService
+@inject AuthenticationStateProvider AuthProvider
+
+<div class="d-flex justify-content-between align-items-center mt-4 mb-4">
+    <h3 class="page-header m-0">Prism Adjustments</h3>
+    <div class="d-flex gap-2 ms-auto">
+        <a class="btn btn-primary" href="files/PrismAdjustmentsTemplate.xlsx" title="Download Adjustment Template"  download>
+            <i class="bi bi-download me-1"></i>
+        </a>
+    </div>
+</div>
+
+<div class="card p-4 shadow-sm">
+    <div class="card-header">Upload Adjustments</div>
+    <div class="card-body">
+        <div class="mb-3 d-flex align-items-center gap-3">
+            <label class="btn btn-primary m-0">
+                Choose File
+                <InputFile OnChange="HandleFileSelected" accept=".xlsx" class="d-none" />
+            </label>
+            @if (!string.IsNullOrEmpty(selectedFileName))
+            {
+                <span>@selectedFileName</span>
+            }
+        </div>
+
+        @if (!string.IsNullOrEmpty(selectedFileName))
+        {
+            <p><strong>Selected:</strong> @selectedFileName</p>
+        }
+
+        @if (!string.IsNullOrEmpty(uploadMessage))
+        {
+            <div class="alert @(uploadSuccess ? "alert-success" : "alert-danger") mt-3" role="alert">
+                @uploadMessage
+            </div>
+        }
+
+        @if (isUploading)
+        {
+            <div class="position-fixed top-0 bottom-0 start-0 end-0 d-flex justify-content-center align-items-center bg-light bg-opacity-75" style="z-index: 1050;">
+                <div class="spinner-border text-primary" role="status" style="width: 4rem; height: 4rem;">
+                    <span class="visually-hidden">Uploading...</span>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+<div class="card shadow mb-4 border">
+    <div class="card-header">Adjustment History</div>
+    <div class="table-responsive">
+        <table class="table table-striped table-fixed text-nowrap">
+            <colgroup>
+                <col style="width: 10%" />
+                <col style="width: 20%" />
+                <col style="width: 30%" />
+                <col style="width: 20%" />
+                <col style="width: 20%" />
+            </colgroup>
+            <thead>
+                <tr>
+                    <th>Adjustment ID</th>
+                    <th>Uploaded By</th>
+                    <th>Upload Date</th>
+                    <th>Original Filename</th>
+                    <th>Download</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var adj in Uploads)
+                {
+                    <tr>
+                        <td>@adj.AdjustmentID</td>
+                        <td>@adj.UploadedBy</td>
+                        <td>@adj.UploadedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td>@adj.AdjustmentFileName</td>
+                        <td>
+                            <a class="btn btn-sm btn-outline-primary"
+                               href="@($"/uploads/prismadjustments/{adj.AdjustmentID}_{adj.AdjustmentFileName}")"
+                               target="_blank"
+                               download>
+                                Download
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="card p-4 shadow-sm">
+    
+    <div class="card-body">
+    </div>
+</div>
+@code {
+    private IBrowserFile? uploadedFile;
+    private string? selectedFileName;
+    private string? uploadMessage;
+    private bool isUploading = false;
+    private bool uploadSuccess = false;
+
+    private List<ORIAdjustmentUploadModel> Uploads = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            Uploads = await PrismService.GetORIAdjustmentUploads();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ Failed to load uploads: {ex.Message}");
+        }
+    }
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        var userName = authState.User.Identity?.Name ?? "Unknown";
+
+        uploadedFile = e.File;
+        selectedFileName = uploadedFile.Name;
+
+        if (uploadedFile == null || Path.GetExtension(uploadedFile.Name).ToLower() != ".xlsx")
+        {
+            uploadMessage = "❌ Please upload a valid Excel (.xlsx) file.";
+            uploadSuccess = false;
+            return;
+        }
+
+        try
+        {
+            isUploading = true;
+            uploadMessage = string.Empty;
+
+            using var memoryStream = new MemoryStream();
+            await uploadedFile.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024).CopyToAsync(memoryStream);
+            memoryStream.Position = 0;
+
+            await PrismService.UploadAdjustmentsAsync(memoryStream, userName, selectedFileName);
+
+            uploadMessage = $"✅ Upload successful: {uploadedFile.Name}";
+            uploadSuccess = true;
+            selectedFileName = null;
+        }
+        catch (Exception ex)
+        {
+            uploadMessage = $"❌ Upload failed: {ex.Message}";
+            uploadSuccess = false;
+        }
+        finally
+        {
+            isUploading = false;
+        }
+    }
+}
