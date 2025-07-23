@@ -9,7 +9,7 @@
 <div class="d-flex justify-content-between align-items-center mt-4 mb-4">
     <h3 class="page-header m-0">Prism Adjustments</h3>
     <div class="d-flex gap-2 ms-auto">
-        <a class="btn btn-primary" href="files/PrismAdjustmentsTemplate.xlsx" title="Download Adjustment Template"  download>
+        <a class="btn btn-primary" href="templates/PrismAdjustmentsTemplate.xlsx" title="Download Adjustment Template"  download>
             <i class="bi bi-download me-1"></i>
         </a>
     </div>
@@ -148,6 +148,9 @@
             uploadMessage = $"✅ Upload successful: {uploadedFile.Name}";
             uploadSuccess = true;
             selectedFileName = null;
+
+            Uploads = await PrismService.GetORIAdjustmentUploads();
+            StateHasChanged();
         }
         catch (Exception ex)
         {

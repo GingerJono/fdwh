@@ -42,4 +42,9 @@
     <Folder Include="Data\Uploads\" />
     <Folder Include="wwwroot\uploads\prismadjustments\" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Update="wwwroot\templates\PrismAdjustmentsTemplate.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 </Project>
