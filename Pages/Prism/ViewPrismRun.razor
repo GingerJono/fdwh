@@ -80,6 +80,40 @@ else
         </div>
     </div>
 
+    <div class="row">       
+        <div class="col-md-6">
+            <div class="card shadow mb-4 border">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Allocated Premium Signed (@Run?.AllocatedPremiumSigned?.Count())</span>
+                    <button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.AllocatedPremiumSigned, $"AllocatedPremiumSigned_{Run.RunID}.csv"))">
+                        <i class="bi bi-download me-1"></i>
+                    </button>
+                </div>
+                <div class="card-body">
+                    @if (Run?.AllocatedPremiumSigned == null)
+                    {
+                        <p><em>No data found</em></p>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow mb-4 border">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Allocated Premium Written (@Run?.AllocatedPremiumWritten?.Count())</span>
+                    <button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.AllocatedPremiumWritten, $"AllocatedPremiumWritten_{Run.RunID}.csv"))">
+                        <i class="bi bi-download me-1"></i>
+                    </button>
+                </div>
+                <div class="card-body">
+                    @if (Run?.AllocatedPremiumWritten == null)
+                    {
+                        <p><em>No data found</em></p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="row">
         <div class="col-md-6">
             <div class="card shadow mb-4 border">
@@ -91,22 +125,6 @@ else
                 </div>
                 <div class="card-body">
                     @if (Run?.AllocatedRecoveriesAndRIPs == null)
-                    {
-                        <p><em>No data found</em></p>
-                    }
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card shadow mb-4 border">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <span>Allocated Premium (@Run?.AllocatedPremium?.Count())</span>
-                    <button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.AllocatedPremium, $"AllocatedPremiums_{Run.RunID}.csv"))">
-                        <i class="bi bi-download me-1"></i>
-                    </button>
-                </div>
-                <div class="card-body">
-                    @if (Run?.AllocatedPremium == null)
                     {
                         <p><em>No data found</em></p>
                     }
@@ -406,7 +424,8 @@ else
                 }
             }
 
-            AddCsv(run.AllocatedPremium, $"AllocatedPremium_{Run.RunID}.csv");
+            AddCsv(run.AllocatedPremiumSigned, $"AllocatedPremiumSigned_{Run.RunID}.csv");
+            AddCsv(run.AllocatedPremiumWritten, $"AllocatedPremiumWritten_{Run.RunID}.csv");
             AddCsv(run.AllocatedRecoveriesAndRIPs, $"AllocatedRecoveriesAndRIPs_{Run.RunID}.csv");
             AddCsv(run.ORIPolicyIncurredClaimsByEvent, $"ORIPolicyIncurredClaimsByEvent_{Run.RunID}.csv");
             AddCsv(run.ORIActualRecoveries, $"ORIActualRecoveries_{run.RunID}.csv");

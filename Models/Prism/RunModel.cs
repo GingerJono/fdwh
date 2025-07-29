@@ -15,7 +15,8 @@
         public string? ErrorMessage { get; set; }  = string.Empty;
         public List<RunLogModel> Logs { get; set; } = new();
 
-        public List<AllocatedPremiumModel> AllocatedPremium { get; set; } = new();
+        public List<AllocatedPremiumSignedModel> AllocatedPremiumSigned { get; set; } = new();
+        public List<AllocatedPremiumWrittenModel> AllocatedPremiumWritten { get; set; } = new();
         public List<AllocatedRecoveriesAndRIPsModel> AllocatedRecoveriesAndRIPs { get; set; } = new(); 
         public List<ORIPolicyIncurredClaimsByEventModel> ORIPolicyIncurredClaimsByEvent { get; set; } = new();
         public List<ORIActualRecoveriesModel> ORIActualRecoveries { get; set; } = new();
@@ -28,7 +29,8 @@
         {
             get
             {
-                return this.AllocatedPremium.Count != 0
+                return this.AllocatedPremiumSigned.Count != 0
+                    ||this.AllocatedPremiumWritten.Count != 0                    
                     || this.AllocatedRecoveriesAndRIPs.Count != 0
                     || this.ORIPolicyIncurredClaimsByEvent.Count != 0
                     || this.ORIActualRecoveries.Count != 0

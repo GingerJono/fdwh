@@ -38,7 +38,8 @@ namespace Sandbox.Services
                 {
                     // Load child collections in parallel
                     var logsTask = GetRunLogs(runID);
-                    var allocatedPremiumTask = GetAllocatedPremium(runID);
+                    var allocatedPremiumSignedTask = GetAllocatedPremiumSigned(runID);
+                    var allocatedPremiumWrittenTask = GetAllocatedPremiumWritten(runID);
                     var allocatedRecoveriesAndRIPsTask = GetAllocatedRecoveriesAndRIPs(runID);
                     var oriPolicyIncurredClaimsByEventTask = GetORIPolicyIncurredClaimsByEvent(runID);
 
@@ -51,7 +52,8 @@ namespace Sandbox.Services
 
                     await Task.WhenAll(
                         logsTask,
-                        allocatedPremiumTask,
+                        allocatedPremiumSignedTask,
+                        allocatedPremiumWrittenTask,
                         allocatedRecoveriesAndRIPsTask,
                         oriPolicyIncurredClaimsByEventTask,
                         oriActualRecoveriesTask,
@@ -64,7 +66,8 @@ namespace Sandbox.Services
 
                     // Assign the collections
                     run.Logs = logsTask.Result;
-                    run.AllocatedPremium = allocatedPremiumTask.Result;
+                    run.AllocatedPremiumSigned = allocatedPremiumSignedTask.Result;
+                    run.AllocatedPremiumWritten = allocatedPremiumWrittenTask.Result;
                     run.AllocatedRecoveriesAndRIPs = allocatedRecoveriesAndRIPsTask.Result;
                     run.ORIPolicyIncurredClaimsByEvent = oriPolicyIncurredClaimsByEventTask.Result;
 
@@ -115,7 +118,7 @@ namespace Sandbox.Services
         }
 
         // Get Outputs
-        public async Task<List<AllocatedPremiumModel>> GetAllocatedPremium(int runID)
+        public async Task<List<AllocatedPremiumSignedModel>> GetAllocatedPremiumSigned(int runID)
         {
             using (var connection = new SqlConnection(_configuration.GetConnectionString("PrismConnection")))
             {
@@ -126,8 +129,8 @@ namespace Sandbox.Services
 
                 try
                 {
-                    var results = await connection.QueryAsync<AllocatedPremiumModel>(
-                        "outputs.spGetreporting_AllocatedPremium",
+                    var results = await connection.QueryAsync<AllocatedPremiumSignedModel>(
+                        "outputs.spGetreporting_AllocatedPremiumSigned",
                         parameters,
                         commandType: CommandType.StoredProcedure);
 
@@ -140,6 +143,33 @@ namespace Sandbox.Services
                 }
             }
         }
+
+        public async Task<List<AllocatedPremiumWrittenModel>> GetAllocatedPremiumWritten(int runID)
+        {
+            using (var connection = new SqlConnection(_configuration.GetConnectionString("PrismConnection")))
+            {
+                await connection.OpenAsync();
+
+                var parameters = new DynamicParameters();
+                parameters.Add("RunID", runID, DbType.Int64);
+
+                try
+                {
+                    var results = await connection.QueryAsync<AllocatedPremiumWrittenModel>(
+                        "outputs.spGetreporting_AllocatedPremiumWritten",
+                        parameters,
+                        commandType: CommandType.StoredProcedure);
+
+                    return results.ToList();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error in GetAllocatedPremium: " + ex.Message);
+                    throw;
+                }
+            }
+        }
+
 
         public async Task<List<AllocatedRecoveriesAndRIPsModel>> GetAllocatedRecoveriesAndRIPs(int runID)
         {
