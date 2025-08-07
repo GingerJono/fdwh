@@ -19,7 +19,7 @@
         public string? PolicyType { get; set; }
         public string? LloydsLOBCode { get; set; }
         public string? YOA { get; set; }
-        public double? GGWPGBPatQtrFX { get; set; }
+        public double? GrossGrossWrittenPremiumGBPAtQtrFX { get; set; }
         public long RunID { get; set; }
         public long? AdjustmentID { get; set; }
     }

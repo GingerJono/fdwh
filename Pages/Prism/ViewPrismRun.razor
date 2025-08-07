@@ -157,22 +157,7 @@ else
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="card shadow mb-4 border">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <span>ORI Policy to Incurred Claims Mapping (@Run?.ORIPolicyToIncurredClaimsMapping?.Count())</span>
-                    <button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.ORIPolicyToIncurredClaimsMapping, $"ORIPolicyToIncurredClaimsMapping_{Run.RunID}.csv"))">
-                        <i class="bi bi-download me-1"></i>
-                    </button>
-                </div>
-                <div class="card-body">
-                    @if (Run?.ORIPolicyToIncurredClaimsMapping == null)
-                    {
-                        <p><em>No data found</em></p>
-                    }
-                </div>
-            </div>
-        </div>
+       
     </div>
     <div class="row">
         <div class="col-md-6">
@@ -247,6 +232,22 @@ else
     </div>
 
     <div class="row">
+         <div class="col-md-6">
+            <div class="card shadow mb-4 border">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>ORI Policy to Incurred Claims Mapping (@Run?.ORIPolicyToIncurredClaimsMapping?.Count())</span>
+                    <button class="btn btn-primary" @onclick="@(() => ExportToCsv(Run.ORIPolicyToIncurredClaimsMapping, $"ORIPolicyToIncurredClaimsMapping_{Run.RunID}.csv"))">
+                        <i class="bi bi-download me-1"></i>
+                    </button>
+                </div>
+                <div class="card-body">
+                    @if (Run?.ORIPolicyToIncurredClaimsMapping == null)
+                    {
+                        <p><em>No data found</em></p>
+                    }
+                </div>
+            </div>
+        </div>
         <div class="col-md-6">
             <div class="card shadow mb-4 border">
                 <div class="card-header d-flex justify-content-between align-items-center">
@@ -432,6 +433,7 @@ else
             AddCsv(run.ORIActualRIPs, $"ORIActualRIPs_{run.RunID}.csv");
             AddCsv(run.ORIPolicies, $"ORIPolicies_{run.RunID}.csv");
             AddCsv(run.ORIPolicyToIncurredClaimsMapping, $"ORIPolicyToIncurredClaimsMapping_{run.RunID}.csv");
+            AddCsv(run.ORIPolicyToUltimateClaimsMapping, $"ORIPolicyToUltimateClaimsMapping_{run.RunID}.csv");
             AddCsv(run.ORIPolicyToInwardPolicyMapping, $"ORIPolicyToInwardPolicyMapping_{run.RunID}.csv");
             AddCsv(run.ORIPolicyToUltimateClaimsMapping, $"ORIPolicyToUltimateClaimsMapping_{run.RunID}.csv");
         }

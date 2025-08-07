@@ -19,6 +19,7 @@
         public List<AllocatedPremiumWrittenModel> AllocatedPremiumWritten { get; set; } = new();
         public List<AllocatedRecoveriesAndRIPsModel> AllocatedRecoveriesAndRIPs { get; set; } = new(); 
         public List<ORIPolicyIncurredClaimsByEventModel> ORIPolicyIncurredClaimsByEvent { get; set; } = new();
+        public List<ORIPolicyUltimateClaimsByEventModel> ORIPolicyUltimateClaimsByEvent { get; set; } = new();
         public List<ORIActualRecoveriesModel> ORIActualRecoveries { get; set; } = new();
         public List<ORIActualRIPsModel> ORIActualRIPs { get; set; } = new();
         public List<ORIPoliciesModel> ORIPolicies { get; set; } = new();
@@ -33,6 +34,7 @@
                     ||this.AllocatedPremiumWritten.Count != 0                    
                     || this.AllocatedRecoveriesAndRIPs.Count != 0
                     || this.ORIPolicyIncurredClaimsByEvent.Count != 0
+                    || this.ORIPolicyUltimateClaimsByEvent.Count != 0
                     || this.ORIActualRecoveries.Count != 0
                     || this.ORIActualRIPs.Count != 0
                     || this.ORIPolicies.Count != 0

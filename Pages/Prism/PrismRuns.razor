@@ -6,8 +6,52 @@
 @inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager // This line is used to generate URLs dynamically //
 @inject PrismService PrismService
 
-<div class="row mt-4 mb-4">
-	<h3>Prism Run Manager</h3>
+<!-- Modal -->
+@if (showModal)
+{
+	<div class="modal show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Start New Prism Run</h5>
+					<button type="button" class="btn-close" @onclick="CloseModal"></button>
+				</div>
+				<div class="modal-body">
+					<label>Processing Month</label>
+					<select class="form-control" @bind="selectedProcessingMonth">
+						@foreach (var month in ProcessingMonths)
+						{
+							<option value="@month">@month</option>
+						}
+					</select>
+
+					<label class="mt-3">Notes</label>
+					<textarea class="form-control" @bind="runNotes" placeholder="Add note..."></textarea>
+				</div>
+				<div class="modal-footer">					
+					@if (IsLoadingRuns)
+					{
+						<div class="d-flex align-items-center">
+							<div class="spinner-border text-primary me-2" role="status">
+								<span class="visually-hidden">Loading...</span>
+							</div>
+							<span>Starting Prism run...</span>
+						</div>
+					}
+					else
+					{
+						<button class="btn btn-danger" @onclick="CloseModal">Cancel</button>
+						<button class="btn btn-success" @onclick="ExecutePrismRun">Run</button>
+					}
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+<div class="d-flex justify-content-between align-items-center mt-4 mb-4">
+	<h3 class="mb-0">Prism Run Manager</h3>
+	<button class="btn btn-primary" @onclick="ShowRunModal">New Run</button>
 </div>
 
 <div class="row mb-4">
@@ -136,8 +180,15 @@
 	private int StartPage => Math.Max(1, ((CurrentPage - 1) / MaxVisiblePages) * MaxVisiblePages + 1);
 	private int EndPage => Math.Min(StartPage + MaxVisiblePages - 1, TotalPages);
 
+	private bool showModal = false;
+	private List<string> ProcessingMonths = new();
+	private string selectedProcessingMonth = string.Empty;
+	private string runNotes = string.Empty;
+	private bool IsLoadingRuns = false;
+
 	protected override async Task OnInitializedAsync()
 	{
+		ProcessingMonths = await PrismService.GetProcessingMonths();
 		AllRuns = await PrismService.GetRuns();
 		ApplyPagination();
 	}
@@ -177,5 +228,48 @@
 			CurrentPage = 1;
 			ApplyPagination();
 		}
+	}
+
+	private void ShowRunModal()
+	{
+		showModal = true;
+	}
+
+	private void CloseModal()
+	{
+		showModal = false;
+		selectedProcessingMonth = string.Empty;
+		runNotes = string.Empty;
+	}
+
+	private async Task ExecutePrismRun()
+	{
+		IsLoadingRuns = true;
+
+		_ = PrismService.StartRun(selectedProcessingMonth, runNotes)
+		.ContinueWith(task =>
+		{
+			if (task.Exception != null)
+			{
+				Console.WriteLine("Prism run failed: " + task.Exception.InnerException?.Message);
+				// Optionally log or show a toast
+			}			
+		});	
+		
+		await Task.Delay(TimeSpan.FromSeconds(30));
+
+		// Refresh the list of runs
+		AllRuns = await PrismService.GetRuns();
+
+		IsLoadingRuns = false;
+		StateHasChanged(); // Refresh UI
+
+		CloseModal();
+	}
+
+	public class PrismRunInput
+	{
+		public string ProcessingMonth { get; set; } = string.Empty;
+		public string Notes { get; set; } = string.Empty;
 	}
 }

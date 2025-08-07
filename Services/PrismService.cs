@@ -18,6 +18,52 @@ namespace Sandbox.Services
             _configuration = configuration;
             _httpContextAccessor = httpContextAccessor;
         }
+        public async Task<List<string>> GetProcessingMonths()
+        {
+            using (var connection = new SqlConnection(_configuration.GetConnectionString("PrismConnection")))
+            {
+                await connection.OpenAsync();
+
+                try
+                {
+                    var results = await connection.QueryAsync<string>(
+                        "dbo.spGetProcessingMonths",  
+                        commandType: CommandType.StoredProcedure);
+
+                    return results.ToList();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error in GetProcessingMonths: " + ex.Message);
+                    throw;
+                }
+            }
+        }
+
+        public async Task StartRun(string processingMonth, string notes)
+        {
+            using (var connection = new SqlConnection(_configuration.GetConnectionString("PrismConnection")))
+            {
+                await connection.OpenAsync();
+
+                var parameters = new DynamicParameters();
+                parameters.Add("@ProcessingMonth", processingMonth, DbType.String);
+                parameters.Add("@Notes", notes, DbType.String);
+
+                try
+                {
+                    await connection.ExecuteAsync(
+                        "dbo.spStartRun",
+                        parameters,
+                        commandType: CommandType.StoredProcedure);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error in StartPrismRun: " + ex.Message);
+                    throw;
+                }
+            }
+        }
 
         // Get Runs and Logs
         public async Task<RunModel> GetRun(int runID)
@@ -42,7 +88,7 @@ namespace Sandbox.Services
                     var allocatedPremiumWrittenTask = GetAllocatedPremiumWritten(runID);
                     var allocatedRecoveriesAndRIPsTask = GetAllocatedRecoveriesAndRIPs(runID);
                     var oriPolicyIncurredClaimsByEventTask = GetORIPolicyIncurredClaimsByEvent(runID);
-
+                    var oriPolicyUltimatedClaimsByEventTask = GetORIPolicyUltimateClaimsByEvent(runID);
                     var oriActualRecoveriesTask = GetORIActualRecoveries(runID);
                     var oriActualRIPsTask = GetORIActualRIPs(runID);
                     var oriPoliciesTask = GetORIPolicies(runID);
@@ -70,7 +116,7 @@ namespace Sandbox.Services
                     run.AllocatedPremiumWritten = allocatedPremiumWrittenTask.Result;
                     run.AllocatedRecoveriesAndRIPs = allocatedRecoveriesAndRIPsTask.Result;
                     run.ORIPolicyIncurredClaimsByEvent = oriPolicyIncurredClaimsByEventTask.Result;
-
+                    run.ORIPolicyUltimateClaimsByEvent = oriPolicyUltimatedClaimsByEventTask.Result;
                     run.ORIActualRecoveries = oriActualRecoveriesTask.Result;
                     run.ORIActualRIPs = oriActualRIPsTask.Result;
                     run.ORIPolicies = oriPoliciesTask.Result;
@@ -218,6 +264,31 @@ namespace Sandbox.Services
                 catch (Exception ex)
                 {
                     Console.WriteLine("Error in GetORIPolicyIncurredClaimsByEvent: " + ex.Message);
+                    throw;
+                }
+            }
+        }
+        public async Task<List<ORIPolicyUltimateClaimsByEventModel>> GetORIPolicyUltimateClaimsByEvent(int runID)
+        {
+            using (var connection = new SqlConnection(_configuration.GetConnectionString("PrismConnection")))
+            {
+                await connection.OpenAsync();
+
+                var parameters = new DynamicParameters();
+                parameters.Add("RunID", runID, DbType.Int64);
+
+                try
+                {
+                    var results = await connection.QueryAsync<ORIPolicyUltimateClaimsByEventModel>(
+                        "outputs.spGetanalytics_ORIPolicyUltimateClaimsByEvent",
+                        parameters,
+                        commandType: CommandType.StoredProcedure);
+
+                    return results.ToList();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error in GetORIPolicyUltimateClaimsByEvent: " + ex.Message);
                     throw;
                 }
             }
@@ -379,8 +450,6 @@ namespace Sandbox.Services
             }
         }
 
-
-
         public async Task<List<ORIAdjustmentUploadModel>> GetORIAdjustmentUploads()
         {
             using (var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection")))
@@ -449,7 +518,6 @@ namespace Sandbox.Services
                 throw;
             }
         }
-
         private async Task InsertSheetAsync(IXLWorksheet sheet, string tableName, int adjustmentID, string user, SqlConnection conn, SqlTransaction tx)
         {
             var dataTable = new DataTable();
