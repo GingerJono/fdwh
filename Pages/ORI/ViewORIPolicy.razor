@@ -448,10 +448,10 @@ else
 							<th>CA Category</th>
 							<th>Is RIP</th>
 							<th>Is PC</th>
-							<th>Total YOA Allocation</th>
+							@* <th>Total YOA Allocation</th>
 							<th>Total Class Allocation</th>
 							<th>Total Security Allocation</th>
-							<th>Total Event Allocation</th>
+							<th>Total Event Allocation</th> *@
 							<th class="text-end">Line Amount (SCC)</th>
 							<th>Actions</th>
 						</tr>
@@ -470,10 +470,10 @@ else
 								<td>@usm.USMCaCategoryDesc</td>
 								<td>@(usm.IsRIP ? "Yes" : "No")</td>
 								<td>@(usm.IsPC ? "Yes" : "No")</td>
-								<td>@usm.TotalYOAAllocation.ToString("N2")</td>
+								@* <td>@usm.TotalYOAAllocation.ToString("N2")</td>
 								<td>@usm.TotalClassAllocation.ToString("N2")</td>
 								<td>@usm.TotalSecurityAllocation.ToString("N2")</td>
-								<td>@usm.TotalEventAllocation.ToString("N2")</td>
+								<td>@usm.TotalEventAllocation.ToString("N2")</td> *@
 								<td class="text-end">@usm.LineAmountSCC?.ToString("N2")</td>
 								<td>
 									<button class="btn btn-sm btn-outline-primary"
