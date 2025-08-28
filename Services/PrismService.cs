@@ -494,6 +494,7 @@ namespace Sandbox.Services
                 await InsertSheetAsync(workbook.Worksheet("ORI Policies"), "ORI.AdjustmentsInputORIPolicies", adjustmentID, uploadedBy, connection, transaction);
                 await InsertSheetAsync(workbook.Worksheet("Ultimate Claims"), "ORI.AdjustmentsInputUltimateClaims", adjustmentID, uploadedBy, connection, transaction);
                 await InsertSheetAsync(workbook.Worksheet("Allocated Recoveries and RIPs"), "ORI.AdjustmentsOutputAllocatedRecoveriesAndRIPs", adjustmentID, uploadedBy, connection, transaction);
+                await InsertSheetAsync(workbook.Worksheet("Claims By Event"), "ORI.AdjustmentsPreAllocationORIPolicyClaimsByEvent", adjustmentID, uploadedBy, connection, transaction);
 
                 // Save file to wwwroot/uploads/prismadjustments with AdjustmentID prepended
                 var safeFileName = Path.GetFileName(adjustmentFileName);
