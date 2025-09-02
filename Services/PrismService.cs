@@ -472,7 +472,7 @@ namespace Sandbox.Services
             }
         }
 
-        public async Task<int> UploadAdjustmentsAsync(Stream excelStream, string uploadedBy, string adjustmentFileName)
+        public async Task<int> UploadAdjustmentsAsync(Stream excelStream, string uploadedBy, string adjustmentFileName, string processingMonth)
         {
             using var workbook = new XLWorkbook(excelStream);
             using var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
@@ -483,10 +483,10 @@ namespace Sandbox.Services
             {
                 // Insert and get the new AdjustmentID, storing the original filename
                 var adjustmentID = await connection.ExecuteScalarAsync<int>(
-                    @"INSERT INTO ORI.AdjustmentUploads (UploadedBy, AdjustmentFileName)
+                    @"INSERT INTO ORI.AdjustmentUploads (UploadedBy, AdjustmentFileName, ProcessingMonth)
                       OUTPUT INSERTED.AdjustmentID
-                      VALUES (@User, @FileName);",
-                    new { User = uploadedBy, FileName = adjustmentFileName },
+                      VALUES (@User, @FileName, @ProcessingMonth);",
+                    new { User = uploadedBy, FileName = adjustmentFileName, ProcessingMonth = processingMonth },
                     transaction);
 
                 // Insert sheets

@@ -9,7 +9,7 @@
 <div class="d-flex justify-content-between align-items-center mt-4 mb-4">
     <h3 class="page-header m-0">Prism Adjustments</h3>
     <div class="d-flex gap-2 ms-auto">
-        <a class="btn btn-primary" href="templates/PrismAdjustmentsTemplate.xlsx" title="Download Adjustment Template"  download>
+        <a class="btn btn-primary" href="templates/PrismAdjustmentsTemplate.xlsx" title="Download Adjustment Template" download>
             <i class="bi bi-download me-1"></i>
         </a>
     </div>
@@ -19,10 +19,11 @@
     <div class="card-header">Upload Adjustments</div>
     <div class="card-body">
         <div class="mb-3 d-flex align-items-center gap-3">
-            <label class="btn btn-primary m-0">
+            @* <label class="btn btn-primary m-0">
                 Choose File
                 <InputFile OnChange="HandleFileSelected" accept=".xlsx" class="d-none" />
-            </label>
+            </label> *@
+            <button class="btn btn-primary" @onclick="OpenUploadModal">Choose File</button>
             @if (!string.IsNullOrEmpty(selectedFileName))
             {
                 <span>@selectedFileName</span>
@@ -72,7 +73,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var adj in Uploads)
+                @foreach (var adj in uploads)
                 {
                     <tr>
                         <td>@adj.AdjustmentID</td>
@@ -94,10 +95,70 @@
     </div>
 </div>
 <div class="card p-4 shadow-sm">
-    
+
     <div class="card-body">
     </div>
 </div>
+
+@* Upload Modal *@
+@if (showUploadModal)
+{
+    <div class="modal fade show" style="display:block;" tabindex="-1" role="dialog" aria-modal="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content shadow">
+                <div class="modal-header">
+                    <h5 class="modal-title">Upload Adjustments</h5>
+                    <button type="button" class="btn-close" aria-label="Close" @onclick="CloseUploadModal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Processing Month (YYYYMM)</label>
+                        <select class="form-select" @bind="selectedProcessingMonth">
+                            <option value="">-- Select Processing Month --</option>
+                            @foreach (var pm in processingMonths)
+                            {
+                                <option value="@pm">@pm</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Excel File (.xlsx)</label>
+                        <InputFile OnChange="OnFileSelected" accept=".xlsx,.xls" />
+                        @if (!string.IsNullOrWhiteSpace(selectedFileName))
+                        {
+                            <div class="form-text">Selected: @selectedFileName</div>
+                        }
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(modalError))
+                    {
+                        <div class="alert alert-warning" role="alert">@modalError</div>
+                    }
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="CloseUploadModal" disabled="@isUploading">Cancel</button>
+                    <button class="btn btn-primary" @onclick="UploadAsync" disabled="@(!canUpload || isUploading)">
+                        @if (isUploading)
+                        {
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            <span class="ms-2">Uploading…</span>
+                        }
+                        else
+                        {
+                            <span>Upload</span>
+                        }
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+}
+
+
 @code {
     private IBrowserFile? uploadedFile;
     private string? selectedFileName;
@@ -105,13 +166,19 @@
     private bool isUploading = false;
     private bool uploadSuccess = false;
 
-    private List<ORIAdjustmentUploadModel> Uploads = new();
+    private bool showUploadModal = false;
+    private List<string> processingMonths = new();
+    private string? selectedProcessingMonth;
+    private string? modalError;
+
+    private List<ORIAdjustmentUploadModel> uploads = new();
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            Uploads = await PrismService.GetORIAdjustmentUploads();
+            uploads = await PrismService.GetORIAdjustmentUploads();
+            processingMonths = await PrismService.GetProcessingMonths();
         }
         catch (Exception ex)
         {
@@ -119,42 +186,74 @@
         }
     }
 
-    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    private void OpenUploadModal()
     {
-        var authState = await AuthProvider.GetAuthenticationStateAsync();
-        var userName = authState.User.Identity?.Name ?? "Unknown";
+        modalError = null;
+        selectedProcessingMonth = null;
+        uploadedFile = null;
+        selectedFileName = null;
+        showUploadModal = true;
+    }
 
-        uploadedFile = e.File;
-        selectedFileName = uploadedFile.Name;
-
-        if (uploadedFile == null || Path.GetExtension(uploadedFile.Name).ToLower() != ".xlsx")
+    private void CloseUploadModal()
+    {
+        if (!isUploading)
         {
-            uploadMessage = "❌ Please upload a valid Excel (.xlsx) file.";
-            uploadSuccess = false;
+            showUploadModal = false;
+        }
+    }
+
+    private void OnFileSelected(InputFileChangeEventArgs e)
+    {
+        uploadedFile = e.File;
+        selectedFileName = uploadedFile?.Name;
+    }
+
+    private bool canUpload =>
+        !string.IsNullOrWhiteSpace(selectedProcessingMonth) &&
+        uploadedFile is not null;
+
+    private async Task UploadAsync()
+    {
+        modalError = null;
+        uploadMessage = null;
+
+        if (string.IsNullOrWhiteSpace(selectedProcessingMonth))
+        {
+            modalError = "Please select a processing month.";
+            return;
+        }
+        if (uploadedFile is null)
+        {
+            modalError = "Please choose a file.";
             return;
         }
 
         try
         {
             isUploading = true;
-            uploadMessage = string.Empty;
+
+            var auth = await AuthProvider.GetAuthenticationStateAsync();
+            var userName = auth.User?.Identity?.Name ?? "unknown";
 
             using var memoryStream = new MemoryStream();
             await uploadedFile.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024).CopyToAsync(memoryStream);
             memoryStream.Position = 0;
 
-            await PrismService.UploadAdjustmentsAsync(memoryStream, userName, selectedFileName);
+            var adjustmentId = await PrismService.UploadAdjustmentsAsync(memoryStream, userName, selectedFileName, selectedProcessingMonth);
 
-            uploadMessage = $"✅ Upload successful: {uploadedFile.Name}";
+            uploadMessage = $"Upload completed. Adjustment ID: {adjustmentId}";
             uploadSuccess = true;
-            selectedFileName = null;
 
-            Uploads = await PrismService.GetORIAdjustmentUploads();
-            StateHasChanged();
+            // Close modal
+            showUploadModal = false;
+
+            // TODO: refresh any listings if you show them on this page
+            // e.g., Uploads = await PrismService.GetORIAdjustmentUploads();
         }
         catch (Exception ex)
         {
-            uploadMessage = $"❌ Upload failed: {ex.Message}";
+            modalError = $"Upload failed: {ex.Message}";
             uploadSuccess = false;
         }
         finally
@@ -162,4 +261,5 @@
             isUploading = false;
         }
     }
+}
 }
