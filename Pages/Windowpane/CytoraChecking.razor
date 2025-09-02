@@ -1,0 +1,71 @@
+﻿@page "/CytoraChecking"
+@inject Sandbox.Services.WindowpaneService WindowpaneService
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager
+@using Sandbox.Models.Windowpane
+
+<div class="row mt-4 mb-4">
+    <h3>Cytora Checking Jobs</h3>
+</div>
+
+@if (Checks == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="card shadow mb-4 border">
+        <div class="table-responsive">
+            <table class="table table-striped table-fixed text-nowrap">
+                <thead>
+                    <tr>
+                        <th>Job ID</th>
+                        <th>Status</th>
+                        <th>File Name</th>
+                        <th>Email Subject</th>
+                        <th>Email From</th>
+                        <th>Email Date</th>
+                        <th>Output Insured</th>
+                        <th>Output Broker</th>
+                        <th>Output Policy Type</th>
+                        <th>Output Inception</th>
+                        <th>Output Expiry</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var c in Checks)
+                    {
+                        <tr>
+                            <td>@c.JobID</td>
+                            <td>@c.ProcessingStatus</td>
+                            <td>@c.FileName</td>
+                            <td>@c.EmailSubject</td>
+                            <td>@c.EmailFrom</td>
+                            <td>@c.EmailDateSent?.ToString("yyyy-MM-dd")</td>
+                            <td>@c.OutputInsuredName</td>
+                            <td>@c.OutputBrokerCompany</td>
+                            <td>@c.OutputPolicyType</td>
+                            <td>@c.OutputInceptionDate?.ToString("yyyy-MM-dd")</td>
+                            <td>@c.OutputExpiryDate?.ToString("yyyy-MM-dd")</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary"
+                                        @onclick='() => NavigationManager.NavigateTo($"ViewCytoraCheck/{c.JobID}")'>
+                                    View
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@code {
+    private List<CytoraCheck> Checks;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Checks = (await WindowpaneService.GetCytoraChecksAsync()).ToList();
+    }
+}

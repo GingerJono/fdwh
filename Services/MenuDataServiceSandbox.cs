@@ -123,6 +123,14 @@ public class MenuDataServiceSandbox
 					active: false,
 					dirChange: false
 				),
+				new MainMenuItems (
+					path: "CytoraChecking",
+					type: "link",
+					title: "Cytora Checking",
+					selected: false,
+					active: false,
+					dirChange: false
+				),
 			}
 		)
 	};

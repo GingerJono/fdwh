@@ -1,0 +1,95 @@
+﻿@page "/ViewCytoraCheck/{JobID:int}"
+@inject Sandbox.Services.WindowpaneService WindowpaneService
+@using Sandbox.Models.Windowpane
+
+@if (IsLoading)
+{
+    <p>Loading job details...</p>
+}
+else if (!string.IsNullOrEmpty(ErrorMessage))
+{
+    <p class="text-danger">@ErrorMessage</p>
+}
+else if (Check != null)
+{
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/CytoraChecking">Cytora Checking</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Job @Check.JobID</li>
+        </ol>
+    </nav>
+
+    <div class="card shadow mb-4 border border-dark">
+        <div class="card-body">
+            <h5 class="mb-3">General</h5>
+            <p><strong>Status:</strong> @Check.ProcessingStatus</p>
+            <p><strong>Start:</strong> @Check.ProcessingStart</p>
+            <p><strong>End:</strong> @Check.ProcessingEnd</p>
+            <p><strong>Notes:</strong> @Check.ProcessingNotes</p>
+
+            <h5 class="mt-4 mb-3">Email</h5>
+            <p><strong>Subject:</strong> @Check.EmailSubject</p>
+            <p><strong>From:</strong> @Check.EmailFrom</p>
+            <p><strong>To:</strong> @Check.EmailTo</p>
+            <p><strong>Date Sent:</strong> @Check.EmailDateSent</p>
+            <p><strong>File Size (MB):</strong> @Check.EmailFileSizeInMB</p>
+
+            <h5 class="mt-4 mb-3">Cytora Output</h5>
+            <p><strong>Insured:</strong> @Check.OutputInsuredName (@Check.OutputInsuredDomicile / @Check.OutputInsuredState)</p>
+            <p><strong>Reinsured:</strong> @Check.OutputReinsuredName (@Check.OutputReinsuredDomicile / @Check.OutputReinsuredState)</p>
+            <p><strong>Broker:</strong> @Check.OutputBrokerCompany – @Check.OutputBrokerContact</p>
+            <p><strong>Line of Business:</strong> @Check.OutputLineOfBusiness</p>
+            <p><strong>Policy Type:</strong> @Check.OutputPolicyType</p>
+            <p><strong>Underwriter:</strong> @Check.OutputUnderwriter</p>
+            <p><strong>Inception:</strong> @Check.OutputInceptionDate</p>
+            <p><strong>Expiry:</strong> @Check.OutputExpiryDate</p>
+            <p><strong>Risk Location:</strong> @Check.OutputRiskLocation</p>
+            <p><strong>Additional Parties:</strong> @Check.OutputAdditionalParties</p>
+            <p><strong>Submission Summary:</strong> @Check.OutputSubmissionSummary</p>
+            <p><strong>New/Renewal:</strong> @Check.OutputNewRenewal</p>
+            <p><strong>Renewed From:</strong> @Check.OutputRenewedFrom</p>
+            <p><strong>Renewal Terms Comparison:</strong> @Check.OutputRenewalTermsComparison</p>
+
+            <h5 class="mt-4 mb-3">NDEX Cross-Check</h5>
+            <p><strong>Insured:</strong> @Check.NDEXInsuredName (@Check.NDEXDomicileCountry / @Check.NDEXInsuredState)</p>
+            <p><strong>Reinsured:</strong> @Check.NDEXReinsuredName (@Check.NDEXReinsuredDomicile / @Check.NDEXReinsuredState)</p>
+            <p><strong>Broker:</strong> @Check.NDEXBrokerCompany – @Check.NDEXBrokerContact</p>
+            <p><strong>Line of Business:</strong> @Check.NDEXLineOfBusiness</p>
+            <p><strong>Policy Type:</strong> @Check.NDEXPolicyType</p>
+            <p><strong>Underwriter:</strong> @Check.NDEXUnderwriter</p>
+            <p><strong>Inception:</strong> @Check.NDEXInceptionDate</p>
+            <p><strong>Expiry:</strong> @Check.NDEXExpiryDate</p>
+            <p><strong>Risk Location:</strong> @Check.NDEXRiskLocation</p>
+            <p><strong>New/Renewal:</strong> @Check.NDEXNewRenewal</p>
+            <p><strong>Renewed From:</strong> @Check.NDEXRenewedFrom</p>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public int JobID { get; set; }
+    private CytoraCheck Check { get; set; }
+    private bool IsLoading { get; set; } = true;
+    private string ErrorMessage { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            Check = await WindowpaneService.GetCytoraCheckByJobIdAsync(JobID);
+            if (Check == null)
+            {
+                ErrorMessage = $"No record found for JobID {JobID}.";
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = "Error loading job details.";
+            Console.WriteLine(ex);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+}

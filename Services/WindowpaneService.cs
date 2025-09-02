@@ -448,28 +448,22 @@ namespace Sandbox.Services
 			}
 		}
 
-		// example of methods declare in non-abstract fashion
+		public async Task<IEnumerable<CytoraCheck>> GetCytoraChecksAsync()
+		{
+			using var db = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
+			return await db.QueryAsync<CytoraCheck>(
+				"SELECT * FROM vwCytoraChecking"
+			);
+		}
 
-		//public async Task<Dictionary<string, string>> GetPolicySnapshotSummary(string policyRef)
-		//{
-		//	return await SqlExtractor.GetColumnarData(
-		//		_configuration,
-		//		"DaleSandboxConnection",
-		//		"Windowpane.spPolicySnapshotSummary",
-		//		new { PolicyRef = policyRef }
-		//	);
-		//}
-
-		//public async Task<List<Dictionary<string, object>>> GetPolicySnapshotDates(string policyRef)
-		//{
-		//	return await SqlExtractor.GetTabularData(
-		//		_configuration,
-		//		"DaleSandboxConnection",
-		//		"Windowpane.spPolicySnapshotDates",
-		//		new { PolicyRef = policyRef }
-		//	);
-		//}
-
+		public async Task<CytoraCheck> GetCytoraCheckByJobIdAsync(int jobId)
+		{
+			using var db = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
+			return await db.QueryFirstOrDefaultAsync<CytoraCheck>(
+				"SELECT * FROM vwCytoraChecking WHERE JobID = @JobID",
+				new { JobID = jobId }
+			);
+		}
 		#endregion
 	}
 }
