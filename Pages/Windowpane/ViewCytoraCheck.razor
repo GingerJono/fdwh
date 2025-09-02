@@ -1,6 +1,7 @@
 ﻿@page "/ViewCytoraCheck/{JobID:int}"
 @inject Sandbox.Services.WindowpaneService WindowpaneService
 @using Sandbox.Models.Windowpane
+@using Markdig
 
 @if (IsLoading)
 {
@@ -19,49 +20,78 @@ else if (Check != null)
         </ol>
     </nav>
 
+    <!-- Email Section -->
     <div class="card shadow mb-4 border border-dark">
         <div class="card-body">
-            <h5 class="mb-3">General</h5>
-            <p><strong>Status:</strong> @Check.ProcessingStatus</p>
-            <p><strong>Start:</strong> @Check.ProcessingStart</p>
-            <p><strong>End:</strong> @Check.ProcessingEnd</p>
-            <p><strong>Notes:</strong> @Check.ProcessingNotes</p>
-
-            <h5 class="mt-4 mb-3">Email</h5>
+            <h5>Email</h5>
             <p><strong>Subject:</strong> @Check.EmailSubject</p>
             <p><strong>From:</strong> @Check.EmailFrom</p>
             <p><strong>To:</strong> @Check.EmailTo</p>
             <p><strong>Date Sent:</strong> @Check.EmailDateSent</p>
             <p><strong>File Size (MB):</strong> @Check.EmailFileSizeInMB</p>
+        </div>
+    </div>
 
-            <h5 class="mt-4 mb-3">Cytora Output</h5>
-            <p><strong>Insured:</strong> @Check.OutputInsuredName (@Check.OutputInsuredDomicile / @Check.OutputInsuredState)</p>
-            <p><strong>Reinsured:</strong> @Check.OutputReinsuredName (@Check.OutputReinsuredDomicile / @Check.OutputReinsuredState)</p>
-            <p><strong>Broker:</strong> @Check.OutputBrokerCompany – @Check.OutputBrokerContact</p>
-            <p><strong>Line of Business:</strong> @Check.OutputLineOfBusiness</p>
-            <p><strong>Policy Type:</strong> @Check.OutputPolicyType</p>
-            <p><strong>Underwriter:</strong> @Check.OutputUnderwriter</p>
-            <p><strong>Inception:</strong> @Check.OutputInceptionDate</p>
-            <p><strong>Expiry:</strong> @Check.OutputExpiryDate</p>
-            <p><strong>Risk Location:</strong> @Check.OutputRiskLocation</p>
-            <p><strong>Additional Parties:</strong> @Check.OutputAdditionalParties</p>
-            <p><strong>Submission Summary:</strong> @Check.OutputSubmissionSummary</p>
-            <p><strong>New/Renewal:</strong> @Check.OutputNewRenewal</p>
-            <p><strong>Renewed From:</strong> @Check.OutputRenewedFrom</p>
-            <p><strong>Renewal Terms Comparison:</strong> @Check.OutputRenewalTermsComparison</p>
+    <!-- Outputs Comparison -->
+    <div class="card shadow mb-4 border">
+        <div class="card-body">
+            <h5>Outputs Comparison</h5>
+            <table class="table table-bordered table-sm text-nowrap">
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>NDEX</th>
+                        <th>Cytora</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>Insured</td><td>@Check.NDEXInsuredName (@Check.NDEXDomicileCountry / @Check.NDEXInsuredState)</td><td>@Check.OutputInsuredName (@Check.OutputInsuredDomicile / @Check.OutputInsuredState)</td></tr>
+                    <tr><td>Reinsured</td><td>@Check.NDEXReinsuredName (@Check.NDEXReinsuredDomicile / @Check.NDEXReinsuredState)</td><td>@Check.OutputReinsuredName (@Check.OutputReinsuredDomicile / @Check.OutputReinsuredState)</td></tr>
+                    <tr><td>Broker</td><td>@Check.NDEXBrokerCompany – @Check.NDEXBrokerContact</td><td>@Check.OutputBrokerCompany – @Check.OutputBrokerContact</td></tr>
+                    <tr><td>Line of Business</td><td>@Check.NDEXLineOfBusiness</td><td>@Check.OutputLineOfBusiness</td></tr>
+                    <tr><td>Policy Type</td><td>@Check.NDEXPolicyType</td><td>@Check.OutputPolicyType</td></tr>
+                    <tr><td>Underwriter</td><td>@Check.NDEXUnderwriter</td><td>@Check.OutputUnderwriter</td></tr>
+                    <tr><td>Inception</td><td>@Check.NDEXInceptionDate?.ToString("yyyy-MM-dd")</td><td>@Check.OutputInceptionDate?.ToString("yyyy-MM-dd")</td></tr>
+                    <tr><td>Expiry</td><td>@Check.NDEXExpiryDate?.ToString("yyyy-MM-dd")</td><td>@Check.OutputExpiryDate?.ToString("yyyy-MM-dd")</td></tr>
+                    <tr><td>Risk Location</td><td>@Check.NDEXRiskLocation</td><td>@Check.OutputRiskLocation</td></tr>
+                    <tr><td>New/Renewal</td><td>@Check.NDEXNewRenewal</td><td>@Check.OutputNewRenewal</td></tr>
+                    <tr><td>Renewed From</td><td>@Check.NDEXRenewedFrom</td><td>@Check.OutputRenewedFrom</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 
-            <h5 class="mt-4 mb-3">NDEX Cross-Check</h5>
-            <p><strong>Insured:</strong> @Check.NDEXInsuredName (@Check.NDEXDomicileCountry / @Check.NDEXInsuredState)</p>
-            <p><strong>Reinsured:</strong> @Check.NDEXReinsuredName (@Check.NDEXReinsuredDomicile / @Check.NDEXReinsuredState)</p>
-            <p><strong>Broker:</strong> @Check.NDEXBrokerCompany – @Check.NDEXBrokerContact</p>
-            <p><strong>Line of Business:</strong> @Check.NDEXLineOfBusiness</p>
-            <p><strong>Policy Type:</strong> @Check.NDEXPolicyType</p>
-            <p><strong>Underwriter:</strong> @Check.NDEXUnderwriter</p>
-            <p><strong>Inception:</strong> @Check.NDEXInceptionDate</p>
-            <p><strong>Expiry:</strong> @Check.NDEXExpiryDate</p>
-            <p><strong>Risk Location:</strong> @Check.NDEXRiskLocation</p>
-            <p><strong>New/Renewal:</strong> @Check.NDEXNewRenewal</p>
-            <p><strong>Renewed From:</strong> @Check.NDEXRenewedFrom</p>
+    <!-- Markdown Columns -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card shadow mb-4 border">
+                <div class="card-header">Submission Summary</div>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(Check.OutputSubmissionSummary))
+                    {
+                        @((MarkupString)Markdown.ToHtml(Check.OutputSubmissionSummary ?? string.Empty))
+                    }
+                    else
+                    {
+                        <p class="text-muted">No submission summary.</p>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow mb-4 border">
+                <div class="card-header">Renewal Terms Comparison</div>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(Check.OutputRenewalTermsComparison))
+                    {
+                        @((MarkupString)Markdown.ToHtml(Check.OutputRenewalTermsComparison ?? string.Empty))
+                    }
+                    else
+                    {
+                        <p class="text-muted">No renewal terms comparison.</p>
+                    }
+                </div>
+            </div>
         </div>
     </div>
 }

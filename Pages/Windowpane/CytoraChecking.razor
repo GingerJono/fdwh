@@ -1,10 +1,24 @@
 ﻿@page "/CytoraChecking"
 @inject Sandbox.Services.WindowpaneService WindowpaneService
 @inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager
+@inject Sandbox.Services.CytoraCheckingFilterState FilterState
 @using Sandbox.Models.Windowpane
 
 <div class="row mt-4 mb-4">
     <h3>Cytora Checking Jobs</h3>
+</div>
+
+<div class="row mb-3">
+    <div class="col-md-2">
+        <label for="minJobId" class="form-label">Min JobID</label>
+        <input id="minJobId" type="number" class="form-control"
+               @bind="FilterState.MinJobID" @bind:event="oninput" />
+    </div>
+    <div class="col-md-2">
+        <label for="maxJobId" class="form-label">Max JobID</label>
+        <input id="maxJobId" type="number" class="form-control"
+               @bind="FilterState.MaxJobID" @bind:event="oninput" />
+    </div>
 </div>
 
 @if (Checks == null)
@@ -20,33 +34,21 @@ else
                     <tr>
                         <th>Job ID</th>
                         <th>Status</th>
-                        <th>File Name</th>
                         <th>Email Subject</th>
                         <th>Email From</th>
                         <th>Email Date</th>
-                        <th>Output Insured</th>
-                        <th>Output Broker</th>
-                        <th>Output Policy Type</th>
-                        <th>Output Inception</th>
-                        <th>Output Expiry</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var c in Checks)
+                    @foreach (var c in FilteredChecks)
                     {
                         <tr>
                             <td>@c.JobID</td>
                             <td>@c.ProcessingStatus</td>
-                            <td>@c.FileName</td>
                             <td>@c.EmailSubject</td>
                             <td>@c.EmailFrom</td>
                             <td>@c.EmailDateSent?.ToString("yyyy-MM-dd")</td>
-                            <td>@c.OutputInsuredName</td>
-                            <td>@c.OutputBrokerCompany</td>
-                            <td>@c.OutputPolicyType</td>
-                            <td>@c.OutputInceptionDate?.ToString("yyyy-MM-dd")</td>
-                            <td>@c.OutputExpiryDate?.ToString("yyyy-MM-dd")</td>
                             <td>
                                 <button class="btn btn-sm btn-outline-primary"
                                         @onclick='() => NavigationManager.NavigateTo($"ViewCytoraCheck/{c.JobID}")'>
@@ -63,6 +65,14 @@ else
 
 @code {
     private List<CytoraCheck> Checks;
+
+    private IEnumerable<CytoraCheck> FilteredChecks =>
+        Checks?
+            .Where(c =>
+                (!FilterState.MinJobID.HasValue || c.JobID >= FilterState.MinJobID.Value) &&
+                (!FilterState.MaxJobID.HasValue || c.JobID <= FilterState.MaxJobID.Value))
+            .OrderByDescending(c => c.JobID)
+        ?? Enumerable.Empty<CytoraCheck>();
 
     protected override async Task OnInitializedAsync()
     {

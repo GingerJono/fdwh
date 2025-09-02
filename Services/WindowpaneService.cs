@@ -466,4 +466,9 @@ namespace Sandbox.Services
 		}
 		#endregion
 	}
+	public class CytoraCheckingFilterState
+	{
+		public int? MinJobID { get; set; }
+		public int? MaxJobID { get; set; }
+	}
 }

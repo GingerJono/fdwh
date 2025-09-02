@@ -104,6 +104,7 @@ using AccordionData;
 using Sandbox.Helpers;
 using Sandbox.Services;
 using System.Diagnostics;
+using static Sandbox.Services.WindowpaneService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -135,6 +136,7 @@ builder.Services.AddScoped<ReportingService>();
 builder.Services.AddScoped<ORIService>();
 builder.Services.AddScoped<PrismService>();
 builder.Services.AddScoped<CookieManager>();
+builder.Services.AddScoped<CytoraCheckingFilterState>();
 
 //Dashboards Start//
 builder.Services.AddScoped<Index1Service>();
