@@ -248,8 +248,8 @@
             // Close modal
             showUploadModal = false;
 
-            // TODO: refresh any listings if you show them on this page
-            // e.g., Uploads = await PrismService.GetORIAdjustmentUploads();
+            uploads = await PrismService.GetORIAdjustmentUploads();
+            StateHasChanged(); ;
         }
         catch (Exception ex)
         {
