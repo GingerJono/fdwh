@@ -7,6 +7,6 @@
         public DateTime UploadedAt { get; set; }
         public string? AdjustmentFileName { get; set; }
 
-        // Add any additional columns returned by your SP
+        public string ProcessingMonth { get; set; }
     }
 }

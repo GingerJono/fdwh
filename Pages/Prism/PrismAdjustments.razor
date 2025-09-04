@@ -52,22 +52,22 @@
         }
     </div>
 </div>
-@if (uploads.Count == 0)
-{
-    <div class="p-4">No uploads found.</div>
-}
-else
-{
-    <div class="card shadow mb-4 border">
-        <div class="card-header">Adjustment History</div>
+<div class="card shadow mb-4 border">
+    <div class="card-header">Adjustment History</div>
+    @if (uploads.Count == 0)
+    {
+        <div class="p-4">No uploads found.</div>
+    }
+    else
+    {
         <div class="table-responsive">
-
             <table class="table table-striped table-fixed text-nowrap">
                 <colgroup>
                     <col style="width: 10%" />
                     <col style="width: 20%" />
                     <col style="width: 30%" />
                     <col style="width: 20%" />
+                    <col style="width: 10%" />
                     <col style="width: 20%" />
                 </colgroup>
                 <thead>
@@ -76,6 +76,7 @@ else
                         <th>Uploaded By</th>
                         <th>Upload Date</th>
                         <th>Original Filename</th>
+                        <th>Processing Month</th>
                         <th>Download</th>
                     </tr>
                 </thead>
@@ -87,6 +88,7 @@ else
                             <td>@adj.UploadedBy</td>
                             <td>@adj.UploadedAt.ToString("yyyy-MM-dd HH:mm")</td>
                             <td>@adj.AdjustmentFileName</td>
+                            <td>@adj.ProcessingMonth</td>
                             <td>
                                 <a class="btn btn-sm btn-outline-primary"
                                    href="@($"/uploads/prismadjustments/{adj.AdjustmentID}_{adj.AdjustmentFileName}")"
@@ -99,10 +101,9 @@ else
                     }
                 </tbody>
             </table>
-
         </div>
-    </div>
-}
+    }
+</div>
 
 @* Upload Modal *@
 @if (showUploadModal)
