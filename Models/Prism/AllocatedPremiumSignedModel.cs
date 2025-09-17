@@ -8,7 +8,7 @@
 
         public string? Class { get; set; }
         public string? YOA { get; set; }
-        public string? LORS_Id { get; set; }
+        public string? LORSId { get; set; }
 
         public double? AllocatedPremiumBySecurity { get; set; }
         
