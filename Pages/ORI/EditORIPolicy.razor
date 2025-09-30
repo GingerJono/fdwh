@@ -347,6 +347,88 @@ else if (PolicyDetails != null)
 						</div>
 					</div>
 				</div>
+
+				<div class="card mb-4 border">
+					<div class="card-header">PC / Overrider / Expenses</div>
+					<div class="card-body">
+						<table class="table table-bordered">
+							<tbody>
+								<tr>
+									<th>Overrider</th>
+									<td>
+										<InputNumber @bind-Value="PolicyDetails.Overrider"
+													 class="form-control" />
+									</td>
+								</tr>
+								<tr>
+									<th>PC</th>
+									<td>
+										<InputNumber @bind-Value="PolicyDetails.PC"
+													 class="form-control" />
+									</td>
+								</tr>
+								<tr>
+									<th>UW Expenses</th>
+									<td>
+										<InputNumber @bind-Value="PolicyDetails.UWExpenses"
+													 class="form-control" />
+									</td>
+								</tr>
+								<tr>
+									<th>QS Basis</th>
+									<td>
+										<InputSelect @bind-Value="PolicyDetails.QSBasis" class="form-control">
+											<option value="">Select...</option>
+											<option value="Gross">Gross</option>
+											<option value="Net">Net</option>
+										</InputSelect>
+									</td>
+								</tr>
+								<tr>
+									<th>Overrider Basis</th>
+									<td>
+										<InputSelect @bind-Value="PolicyDetails.OverriderBasis" class="form-control">
+											<option value="">Select...</option>
+											<option value="Gross">Gross</option>
+											<option value="Net">Net</option>
+										</InputSelect>
+									</td>
+								</tr>
+								<tr>
+									<th>UW Expenses Basis</th>
+									<td>
+										<InputSelect @bind-Value="PolicyDetails.UWExpensesBasis" class="form-control">
+											<option value="">Select...</option>
+											<option value="Gross">Gross</option>
+											<option value="Net">Net</option>
+										</InputSelect>
+									</td>
+								</tr>
+								<tr>
+									<th>PC Profit Basis</th>
+									<td>
+										<InputSelect @bind-Value="PolicyDetails.PCProfitBasis" class="form-control">
+											<option value="">Select...</option>
+											<option value="Gross">Gross</option>
+											<option value="Net">Net</option>
+										</InputSelect>
+									</td>
+								</tr>
+								<tr>
+									<th>Nil PC Override</th>
+									<td>
+										<InputSelect @bind-Value="PolicyDetails.NilPCOverride" class="form-control">
+											<option value="">Select...</option>
+											<option value="Y">Y</option>
+											<option value="N">N</option>
+										</InputSelect>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+
 			</div>
 			<div class="col-md-6">
 				<div class="card shadow mb-4 border">

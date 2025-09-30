@@ -28,7 +28,17 @@ namespace Sandbox.Models.ORI
         public int InuringPriority { get; set; }
         public string? CededPremiumCalculation { get; set; }
 
-        public string? DMSLink { get; set; }
+		public string? ORIPillar { get; set; }
+		public decimal? Overrider { get; set; }
+		public decimal? PC { get; set; }
+		public decimal? UWExpenses { get; set; }
+		public string? QSBasis { get; set; }
+		public string? OverriderBasis { get; set; }
+		public string? UWExpensesBasis { get; set; }
+		public string? PCProfitBasis { get; set; }
+		public string? NilPCOverride { get; set; }
+
+		public string? DMSLink { get; set; }
 
         // Single List for inclusions and exclusions
         public List<ORIFilterItem> Filters { get; set; } = new();

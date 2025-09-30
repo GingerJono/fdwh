@@ -574,16 +574,24 @@ namespace Sandbox.Services
                     }
                 }
 
-                // Step 9: Update Policy Metadata
-                var metaDataParameters = new DynamicParameters();
-                metaDataParameters.Add("@ORIPolicyReference", model.ORIPolicyReference);
-                metaDataParameters.Add("@FXRateApplicationDate", model.FXRateApplicationDate);
-                metaDataParameters.Add("@FXTreatment", model.FXTreatment);
-                metaDataParameters.Add("@InuringPriority", model.InuringPriority);
-                metaDataParameters.Add("@CededPremiumCalculation", model.CededPremiumCalculation);
-                await db.ExecuteAsync("ORI.spUpsertPolicyDetails", metaDataParameters, commandType: CommandType.StoredProcedure, transaction: transaction);
+				// Step 9: Update Policy Metadata
+				var metaDataParameters = new DynamicParameters();
+				metaDataParameters.Add("@ORIPolicyReference", model.ORIPolicyReference);
+				metaDataParameters.Add("@FXRateApplicationDate", model.FXRateApplicationDate);
+				metaDataParameters.Add("@FXTreatment", model.FXTreatment);
+				metaDataParameters.Add("@InuringPriority", model.InuringPriority);
+				metaDataParameters.Add("@CededPremiumCalculation", model.CededPremiumCalculation);
+				metaDataParameters.Add("@Overrider", model.Overrider);
+				metaDataParameters.Add("@PC", model.PC);
+				metaDataParameters.Add("@UWExpenses", model.UWExpenses);
+				metaDataParameters.Add("@QSBasis", model.QSBasis);
+				metaDataParameters.Add("@OverriderBasis", model.OverriderBasis);
+				metaDataParameters.Add("@UWExpensesBasis", model.UWExpensesBasis);
+				metaDataParameters.Add("@PCProfitBasis", model.PCProfitBasis);
+				metaDataParameters.Add("@NilPCOverride", model.NilPCOverride);
+				await db.ExecuteAsync("ORI.spUpsertPolicyDetails", metaDataParameters, commandType: CommandType.StoredProcedure, transaction: transaction);
 
-                transaction.Commit();
+				transaction.Commit();
                 Console.WriteLine($"[SUCCESS] ORI Policy Metadata saved successfully for {model.ORIPolicyReference}");
             }
             catch (Exception ex)
