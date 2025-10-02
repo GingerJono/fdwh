@@ -409,6 +409,40 @@ else
 					</div>
 				</div>
 			</div>
+			<div class="card shadow mb-4 border">
+				<div class="card-header">Syndicate Splits</div>
+				<div class="card-body">
+					@if (PolicyDetails?.SyndicateSplits?.Any() == true)
+					{
+						<table class="table table-sm table-striped">
+							<thead>
+								<tr>
+									<th>Syndicate</th>
+									<th class="text-end">Percentage</th>
+									<th class="text-nowrap">Last Updated</th>
+									<th>Updated By</th>
+								</tr>
+							</thead>
+							<tbody>
+								@foreach (var split in PolicyDetails.SyndicateSplits)
+								{
+									<tr>
+										<td>@split.Syndicate</td>
+										<td class="text-end">@split.Percentage.ToString("N2")</td>
+										<td class="text-nowrap">@split.LastUpdated?.ToString("yyyy-MM-dd HH:mm")</td>
+										<td>@split.LastUpdatedBy</td>
+									</tr>
+								}
+							</tbody>
+						</table>
+					}
+					else
+					{
+						<p class="text-muted">No syndicate splits defined for this policy.</p>
+					}
+				</div>
+			</div>
+
 		</div>
 
 

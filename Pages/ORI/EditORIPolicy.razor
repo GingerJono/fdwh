@@ -346,7 +346,11 @@ else if (PolicyDetails != null)
 							}
 						</div>
 					</div>
+
+
 				</div>
+
+
 
 				<div class="card mb-4 border">
 					<div class="card-header">PC / Overrider / Expenses</div>
@@ -428,6 +432,81 @@ else if (PolicyDetails != null)
 						</table>
 					</div>
 				</div>
+
+				<div class="card shadow mb-4 border">
+					<div class="card-header">Syndicate Splits</div>
+					<div class="card-body">
+						@if (PolicyDetails?.SyndicateSplits != null && PolicyDetails.SyndicateSplits.Any())
+						{
+							<table class="table table-sm table-striped text-nowrap">
+								<thead>
+									<tr>
+										<th>Syndicate</th>
+										<th class="text-end">Percentage</th>
+										<th>Last Updated</th>
+										<th>Updated By</th>
+										<th>Actions</th>
+									</tr>
+								</thead>
+								<tbody>
+									@foreach (var split in PolicyDetails.SyndicateSplits)
+									{
+										<tr>
+											<td>
+												<InputText @bind-Value="split.Syndicate" class="form-control" readonly />
+											</td>
+											<td class="text-end">
+												<InputNumber @bind-Value="split.Percentage" class="form-control text-end" />
+											</td>
+											<td>@split.LastUpdated?.ToString("yyyy-MM-dd HH:mm")</td>
+											<td>@split.LastUpdatedBy</td>
+											<td>
+												<button type="button"
+														class="btn btn-danger btn-sm"
+														@onclick="() => RemoveSyndicateSplit(split)">
+													Remove
+												</button>
+											</td>
+										</tr>
+									}
+								</tbody>
+							</table>
+						}
+						else
+						{
+							<p class="text-muted">No syndicate splits defined for this policy.</p>
+						}
+
+						<div class="mt-3">
+							<h5>Add New Syndicate Split</h5>
+							<table class="table table-sm table-striped text-nowrap">
+								<thead>
+									<tr>
+										<th>Syndicate</th>
+										<th class="text-end">Percentage</th>
+										<th>Actions</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>
+											<InputText @bind-Value="newSyndicateSplit.Syndicate" class="form-control" />
+										</td>
+										<td>
+											<InputNumber @bind-Value="newSyndicateSplit.Percentage" class="form-control text-end" />
+										</td>
+										<td>
+											<button type="button" class="btn btn-primary" @onclick="AddSyndicateSplit">
+												Add
+											</button>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+
 
 			</div>
 			<div class="col-md-6">
@@ -965,5 +1044,44 @@ else if (PolicyDetails != null)
 			StateHasChanged();
 		}
 	}
+
+	// new property for binding
+	private SyndicateSplit newSyndicateSplit = new SyndicateSplit();
+
+	private void AddSyndicateSplit()
+	{
+		if (!string.IsNullOrWhiteSpace(newSyndicateSplit.Syndicate) && newSyndicateSplit.Percentage > 0)
+		{
+			if (PolicyDetails.SyndicateSplits == null)
+			{
+				PolicyDetails.SyndicateSplits = new List<SyndicateSplit>();
+			}
+
+			newSyndicateSplit.LastUpdated = DateTime.Now;
+			newSyndicateSplit.LastUpdatedBy = "CurrentUser"; // replace with actual user context
+
+			PolicyDetails.SyndicateSplits.Add(newSyndicateSplit);
+
+			newSyndicateSplit = new SyndicateSplit(); // reset
+			StateHasChanged();
+		}
+	}
+
+	private void RemoveSyndicateSplit(SyndicateSplit split)
+	{
+		if (PolicyDetails.SyndicateSplits.Contains(split))
+		{
+			PolicyDetails.SyndicateSplits.Remove(split);
+
+			if (PolicyDetails.RemovedSyndicateSplits == null)
+			{
+				PolicyDetails.RemovedSyndicateSplits = new List<SyndicateSplit>();
+			}
+			PolicyDetails.RemovedSyndicateSplits.Add(split); // track deletions
+
+			StateHasChanged();
+		}
+	}
+
 }
 

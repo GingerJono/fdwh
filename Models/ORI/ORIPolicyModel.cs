@@ -59,10 +59,13 @@ namespace Sandbox.Models.ORI
 
         // Agg Deductibles
         public List<AggDeductible> AggDeductibles { get; set; } = new();
+		public List<SyndicateSplit> SyndicateSplits { get; set; } = new();
+		public List<SyndicateSplit> RemovedSyndicateSplits { get; set; } = new();
 
-    }
 
-    public class ORIFilterItemDefinition
+	}
+
+	public class ORIFilterItemDefinition
     {
         public string? Code { get; set; }  // "DomicileCountry", "InwardPolicyReference", etc.
         public string? DisplayName { get; set; }  // "Domicile Country", "Inward Policy Reference"
@@ -165,6 +168,17 @@ namespace Sandbox.Models.ORI
         public string? Note { get; set; } // Optional, can be null if not applicable
         public int IsDeleted { get; set; }
     }
+
+	public class SyndicateSplit
+	{
+		public string ORIPolicyReference { get; set; }
+		public string Syndicate { get; set; }
+		public decimal Percentage { get; set; }
+		public DateTime? LastUpdated { get; set; }
+		public string LastUpdatedBy { get; set; }
+		public bool IsDeleted { get; set; }
+	}
+
 
 }
 
