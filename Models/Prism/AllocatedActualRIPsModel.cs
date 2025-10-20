@@ -1,6 +1,6 @@
 ﻿namespace Sandbox.Models.Prism
 {
-    public class AllocatedRecoveriesAndRIPsModel
+    public class AllocatedActualRIPsModel
     {
         public string ORIPolicyReference { get; set; } = string.Empty;
         public string EventCode { get; set; } = string.Empty;
@@ -10,13 +10,8 @@
         public string? ReservingClass { get; set; }
         public string? DistributionChannel { get; set; }
         public string? LORSId { get; set; }
-        public string? Security { get; set; }
-        public double? PaidBasisRecoveries { get; set; }
-        public double? IncurredBasisRecoveries { get; set; }
-        public double? UltimateBasisRecoveries { get; set; }
-        public double? PaidBasisRIPs { get; set; }
-        public double? IncurredBasisRIPs { get; set; }
-        public double? UltimateBasisRIPs { get; set; }
+        public string? Security { get; set; }       
+        public decimal ActualRIPs { get; set; } 
         public long RunID { get; set; }
     }
 }

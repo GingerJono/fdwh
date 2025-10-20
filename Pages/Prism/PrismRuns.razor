@@ -95,7 +95,9 @@
 						<tbody>
 							@foreach (var run in PagedRuns)
 							{
-								<tr>
+								var rowClass = run.Submitted ? "table-info" : "";  // or your own custom class
+
+								<tr class="@rowClass">
 									<td>@run.RunID</td>
 									<td>@run.RunUser</td>
 									<td>@run.Status</td>

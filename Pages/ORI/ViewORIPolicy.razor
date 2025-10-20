@@ -1,658 +1,743 @@
 ﻿@page "/ViewORIPolicy/{ORIPolicyReference}"
 @inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager
+@using Sandbox.Helpers
+@using Sandbox.Models.Prism
 @using Sandbox._Spk
 @using CardModel
 @inject IJSRuntime JSRuntime
 @using Sandbox.Models.ORI
 @using Sandbox.Services
 @inject ORIService ORIService
+@inject PrismService PrismService
+@inject IJSRuntime JS
 
 <style>
-	.table thead th {
-		background-color: #002855; /* dark navy blue */
-		color: white;
-		border-color: #dee2e6;
-	}
+    .table thead th {
+        background-color: #002855; /* dark navy blue */
+        color: white;
+        border-color: #dee2e6;
+    }
 
-	.card h2, .card h3 {
-		margin-bottom: 0.25rem;
-	}
+    .card h2, .card h3 {
+        margin-bottom: 0.25rem;
+    }
 
 </style>
 
 @if (IsLoading)
 {
-	<p>Loading policy details...</p>
+    <p>Loading policy details...</p>
 }
 else if (!string.IsNullOrEmpty(ErrorMessage))
 {
-	<p class="text-danger">@ErrorMessage</p>
+    <p class="text-danger">@ErrorMessage</p>
 }
 else
 {
-	<nav aria-label="breadcrumb">
-		<ol class="breadcrumb">
-			<li class="breadcrumb-item"><a href="/ORIPolicies">ORI POLICIES</a></li>
-			<li class="breadcrumb-item active" aria-current="page">VIEW ORI POLICY @PolicyDetails.ORIPolicyReference</li>
-		</ol>
-	</nav>
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/ORIPolicies">ORI POLICIES</a></li>
+        <li class="breadcrumb-item active" aria-current="page">VIEW ORI POLICY @PolicyDetails.ORIPolicyReference</li>
+    </ol>
+</nav>
 
-	<div class="d-flex justify-content-between align-items-center mb-4">
-		<h3 class="page-header m-0">
-			ORI Policy Reference: @(PolicyDetails?.ORIPolicyReference ?? "[Not Found]") (@PolicyDetails?.PolicyDescription)
-		</h3>
-		<div class="d-flex gap-2 ms-auto">
-			<a class="btn btn-secondary btn-lg"
-			   href="@PolicyDetails?.DMSLink"
-			   target="_blank"
-			   rel="noopener noreferrer">
-				<i class="bi bi-file-earmark-text"></i>
-			</a>
-			<button class="btn btn-primary btn-lg" @onclick="NavigateToEdit">Edit Policy</button>
-		</div>
-		@code {
-		private void NavigateToEdit()
-		{
-			NavigationManager.NavigateTo($"{nameof(EditORIPolicy)}/{PolicyDetails.ORIPolicyReference}");
-		}
-	}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="page-header m-0">
+            ORI Policy Reference: @(PolicyDetails?.ORIPolicyReference ?? "[Not Found]") (@PolicyDetails?.PolicyDescription)
+        </h3>
+        <div class="d-flex gap-2 ms-auto">
+            <a class="btn btn-secondary btn-lg"
+               href="@PolicyDetails?.DMSLink"
+               target="_blank"
+               rel="noopener noreferrer">
+                <i class="bi bi-file-earmark-text"></i>
+            </a>
+            <button class="btn btn-primary btn-lg" @onclick="NavigateToEdit">Edit Policy</button>
+        </div>
+    @code {
+        private void NavigateToEdit()
+        {
+            NavigationManager.NavigateTo($"{nameof(EditORIPolicy)}/{PolicyDetails.ORIPolicyReference}");
+        }
+    }
 </div>
 
-	<!-- Policy Details -->
-	<div class="card shadow mb-4 border border-dark">
-		<div class="card-body">
-			<div class="row">
-				<div class="col-md-2"><strong>Inception</strong><div class="fs-4 text">@PolicyDetails.Inception.ToString("yyyy-MM-dd")</div></div>
-				<div class="col-md-2"><strong>Expiry</strong><div class="fs-4 text">@PolicyDetails.Expiry.ToString("yyyy-MM-dd")</div></div>
-				<div class="col-md-2"><strong>Currency</strong><div class="fs-4 text">@PolicyDetails.ContractCurrency</div></div>
-				<div class="col-md-2"><strong>Premium</strong><div class="fs-4 text">@PolicyDetails.Premium.ToString("N2")</div></div>
-				<div class="col-md-2"><strong>Limit</strong><div class="fs-4 text">@PolicyDetails.Limit?.ToString("N2")</div></div>
-				<div class="col-md-2"><strong>Deductible</strong><div class="fs-4 text">@PolicyDetails.DeductibleRetention?.ToString("N2")</div></div>
-			</div>
-			<div class="row">
-				<div class="col-md-2"><strong>Policy Type</strong><div class="fs-4 text">@PolicyDetails.PolicyType</div></div>
-				<div class="col-md-2"><strong>Basis of Cover</strong><div class="fs-4 text">@PolicyDetails.BasisOfCover</div></div>
-				<div class="col-md-4"><strong>Leader</strong><div class="fs-4 text">@PolicyDetails.SecurityLeader</div></div>
-				<div class="col-md-1"><strong>Broker</strong><div class="fs-4 text">@PolicyDetails.BrokerPseudonym</div></div>
-				<div class="col-md-1"><strong>Inuring Priority</strong><div class="fs-4 text">@PolicyDetails.InuringPriority</div></div>
-				<div class="col-md-2"><strong>Order (@PolicyDetails.OfWholeOrOrder) % </strong><div class="fs-4 text">@PolicyDetails.OrderPercent?.ToString("N2")</div></div>
-			</div>
-		</div>
-	</div>
+<!-- Policy Details -->
+<div class="card shadow mb-4 border border-dark">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-2"><strong>Inception</strong><div class="fs-4 text">@PolicyDetails.Inception.ToString("yyyy-MM-dd")</div></div>
+            <div class="col-md-2"><strong>Expiry</strong><div class="fs-4 text">@PolicyDetails.Expiry.ToString("yyyy-MM-dd")</div></div>
+            <div class="col-md-2"><strong>Currency</strong><div class="fs-4 text">@PolicyDetails.ContractCurrency</div></div>
+            <div class="col-md-2"><strong>Premium</strong><div class="fs-4 text">@PolicyDetails.Premium.ToString("N2")</div></div>
+            <div class="col-md-2"><strong>Limit</strong><div class="fs-4 text">@PolicyDetails.Limit?.ToString("N2")</div></div>
+            <div class="col-md-2"><strong>Deductible</strong><div class="fs-4 text">@PolicyDetails.DeductibleRetention?.ToString("N2")</div></div>
+        </div>
+        <div class="row">
+            <div class="col-md-2"><strong>Policy Type</strong><div class="fs-4 text">@PolicyDetails.PolicyType</div></div>
+            <div class="col-md-2"><strong>Basis of Cover</strong><div class="fs-4 text">@PolicyDetails.BasisOfCover</div></div>
+            <div class="col-md-4"><strong>Leader</strong><div class="fs-4 text">@PolicyDetails.SecurityLeader</div></div>
+            <div class="col-md-1"><strong>Broker</strong><div class="fs-4 text">@PolicyDetails.BrokerPseudonym</div></div>
+            <div class="col-md-1"><strong>Inuring Priority</strong><div class="fs-4 text">@PolicyDetails.InuringPriority</div></div>
+            <div class="col-md-2"><strong>Order (@PolicyDetails.OfWholeOrOrder) % </strong><div class="fs-4 text">@PolicyDetails.OrderPercent?.ToString("N2")</div></div>
+        </div>
+    </div>
+</div>
 
-	<!-- Inclusions & Exclusions Table -->
-	<div class="card shadow mb-4 border">
-		<div class="card-header">Inclusions & Exclusions</div>
-		<div class="card-body">
-			<div class="alert alert-info small" role="alert">
-				<strong>Inclusion & Exclusion Logic:</strong>
-				<a href="#" class="float-end text-decoration-underline" data-bs-toggle="collapse" data-bs-target="#filterExplanation">Details</a>
-				<div class="collapse mt-2" id="filterExplanation">
-					<ul>
-						<li>"Excluded" means that the particular business item will not be applicable. </li>
-						<li>"Included" means that <strong>only those stated business values will</strong> be applicable (and any other value for that "item" will be excluded).</li>
-						<li>Outside of the terms below, the only other data point used to determine applicability of this ORI Contact to Inwards Policies/Claims is the "risk basis"(e.g.RAD, LOD) and inception/ expiry date.</li>
-					</ul>
-				</div>
-			</div>
+<!-- Inclusions & Exclusions Table -->
+<div class="card shadow mb-4 border">
+    <div class="card-header">Inclusions & Exclusions</div>
+    <div class="card-body">
+        <div class="alert alert-info small" role="alert">
+            <strong>Inclusion & Exclusion Logic:</strong>
+            <a href="#" class="float-end text-decoration-underline" data-bs-toggle="collapse" data-bs-target="#filterExplanation">Details</a>
+            <div class="collapse mt-2" id="filterExplanation">
+                <ul>
+                    <li>"Excluded" means that the particular business item will not be applicable. </li>
+                    <li>"Included" means that <strong>only those stated business values will</strong> be applicable (and any other value for that "item" will be excluded).</li>
+                    <li>Outside of the terms below, the only other data point used to determine applicability of this ORI Contact to Inwards Policies/Claims is the "risk basis"(e.g.RAD, LOD) and inception/ expiry date.</li>
+                </ul>
+            </div>
+        </div>
 
-			@if (PolicyDetails?.Filters?.Any() == true)
-			{
-				<table class="table table-striped">
-					<thead>
-						<tr>
-							<th>Type</th>
-							<th>Item</th>
-							<th>Value</th>
-							<th>Note</th>
-							<th>Last Updated</th>
-							<th>Updated By</th>
-						</tr>
-					</thead>
-					<tbody>
-						@foreach (var filter in PolicyDetails.Filters)
-						{
-							<tr>
-								<td>
-									<span class="btn btn-@(filter.InclusionExclusion == "Inclusion" ? "success" : "danger")-gradient rounded-pill btn-wave">
-										@filter.InclusionExclusion
-									</span>
-								</td>
-								<td>
-									<button type="button" class="btn btn-@GetGhostButtonClass(filter.IncludedOrExcludedItem) btn-wave">
-										@filter.IncludedOrExcludedItem
-									</button>
-								</td>
-								<td>
-									<span class="text-@(filter.InclusionExclusion == "Inclusion" ? "primary" : "danger")">
-										@filter.IncludedOrExcludedValue
-									</span>
-								</td>
-								<td>@filter.Note</td>
-								<td>@filter.LastUpdated?.ToString("yyyy-MM-dd HH:mm")</td>
-								<td>@filter.LastUpdatedBy</td>
-							</tr>
-						}
-					</tbody>
-				</table>
-			}
-			else
-			{
-				<p class="text-muted">No inclusions or exclusions defined.</p>
-			}
-		</div>
-	</div>
-	<div class="row">
-		<div class="col-md-6">
-			<div class="card shadow mb-4 border">
-				<div class="card-header">Policy Allocations by Class</div>
-				<div class="card-body">
-					@if (PolicyDetails?.PolicyAllocationsClass?.Any() == true)
-					{
-						<table class="table table-striped">
-							<thead>
-								<tr>
-									<th>Class</th>
-									<th class="text-end">Allocation</th>									
-								</tr>
-							</thead>
-							<tbody>
-								@foreach (var allocation in PolicyDetails.PolicyAllocationsClass)
-								{
-									<tr>
-										<td>@allocation.Class</td>
-										<td class="text-end">@allocation.Allocation.ToString("N2")</td>
-									</tr>
-								}
-							</tbody>
-						</table>
-					}
-					else
-					{
-						<p class="text-muted">No allocations by class defined for this policy.</p>
-					}
-				</div>
-			</div>
-			<div class="card shadow mb-4 border">
-				<div class="card-header">Policy Allocations by Year of Account</div>
-				<div class="card-body">
-					@if (PolicyDetails?.PolicyAllocationsYOA?.Any() == true)
-					{
-						<table class="table table-striped">
-							<thead>
-								<tr>
-									<th>Year of Account</th>
-									<th class="text-end">Allocation</th>									
-								</tr>
-							</thead>
-							<tbody>
-								@foreach (var allocation in PolicyDetails.PolicyAllocationsYOA)
-								{
-									<tr>
-										<td>@allocation.YearOfAccount</td>
-										<td class="text-end">@allocation.Allocation.ToString("N2")</td>
-									</tr>
-								}
-							</tbody>
-						</table>
-					}
-					else
-					{
-						<p class="text-muted">No allocations by year of account defined for this policy.</p>
-					}
-				</div>
-			</div>
-			<div class="card shadow mb-4 border">
-				<div class="card-header">Policy Allocations Splits</div>
-				<div class="card-body">
-					@if (PolicyDetails?.ClassYearOfAccountSplits?.Any() == true)
-					{
-						<table class="table">
-							<thead>
-								<tr>
-									<th>Class</th>
-									@foreach (var yearOfAccount in PolicyYearsOfAccount)
-									{
-										<th>@yearOfAccount</th>
-									}
-								</tr>
-							</thead>
-							<tbody>
-								@foreach (var row in PolicyDetails.ClassYearOfAccountSplits)
-								{
-									<tr>
-										<td class="text-end">@row.Class</td>
-										@foreach (var yoa in PolicyYearsOfAccount)
-										{
-											var value = row.YearOfAccountSplits.TryGetValue(yoa, out var split) ? split : 0m;
+        @if (PolicyDetails?.Filters?.Any() == true)
+        {
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Item</th>
+                        <th>Value</th>
+                        <th>Note</th>
+                        <th>Last Updated</th>
+                        <th>Updated By</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var filter in PolicyDetails.Filters)
+                    {
+                        <tr>
+                            <td>
+                                <span class="btn btn-@(filter.InclusionExclusion == "Inclusion" ? "success" : "danger")-gradient rounded-pill btn-wave">
+                                    @filter.InclusionExclusion
+                                </span>
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-@GetGhostButtonClass(filter.IncludedOrExcludedItem) btn-wave">
+                                    @filter.IncludedOrExcludedItem
+                                </button>
+                            </td>
+                            <td>
+                                <span class="text-@(filter.InclusionExclusion == "Inclusion" ? "primary" : "danger")">
+                                    @filter.IncludedOrExcludedValue
+                                </span>
+                            </td>
+                            <td>@filter.Note</td>
+                            <td>@filter.LastUpdated?.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td>@filter.LastUpdatedBy</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p class="text-muted">No inclusions or exclusions defined.</p>
+        }
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <div class="card shadow mb-4 border">
+            <div class="card-header">Policy Allocations by Class</div>
+            <div class="card-body">
+                @if (PolicyDetails?.PolicyAllocationsClass?.Any() == true)
+                {
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Class</th>
+                                <th class="text-end">Allocation</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var allocation in PolicyDetails.PolicyAllocationsClass)
+                            {
+                                <tr>
+                                    <td>@allocation.Class</td>
+                                    <td class="text-end">@allocation.Allocation.ToString("N2")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p class="text-muted">No allocations by class defined for this policy.</p>
+                }
+            </div>
+        </div>
+        <div class="card shadow mb-4 border">
+            <div class="card-header">Policy Allocations by Year of Account</div>
+            <div class="card-body">
+                @if (PolicyDetails?.PolicyAllocationsYOA?.Any() == true)
+                {
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Year of Account</th>
+                                <th class="text-end">Allocation</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var allocation in PolicyDetails.PolicyAllocationsYOA)
+                            {
+                                <tr>
+                                    <td>@allocation.YearOfAccount</td>
+                                    <td class="text-end">@allocation.Allocation.ToString("N2")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p class="text-muted">No allocations by year of account defined for this policy.</p>
+                }
+            </div>
+        </div>
+        <div class="card shadow mb-4 border">
+            <div class="card-header">Policy Allocations Splits</div>
+            <div class="card-body">
+                @if (PolicyDetails?.ClassYearOfAccountSplits?.Any() == true)
+                {
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Class</th>
+                                @foreach (var yearOfAccount in PolicyYearsOfAccount)
+                                {
+                                    <th>@yearOfAccount</th>
+                                }
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var row in PolicyDetails.ClassYearOfAccountSplits)
+                            {
+                                <tr>
+                                    <td class="text-end">@row.Class</td>
+                                    @foreach (var yoa in PolicyYearsOfAccount)
+                                    {
+                                        var value = row.YearOfAccountSplits.TryGetValue(yoa, out var split) ? split : 0m;
 
-											var weight = value / 100m; // 0 to 1
-											int r = (int)Math.Round(255 - (255 - 0) * weight);   // from 255 → 0
-											int g = (int)Math.Round(255 - (255 - 40) * weight);  // from 255 → 40
-											int b = (int)Math.Round(255 - (255 - 85) * weight);  // from 255 → 85
-											var bgColor = $"rgb({r}, {g}, {b})";
-											var textColor = value > 60 ? "white" : "black";
+                                        var weight = value / 100m; // 0 to 1
+                                        int r = (int)Math.Round(255 - (255 - 0) * weight);   // from 255 → 0
+                                        int g = (int)Math.Round(255 - (255 - 40) * weight);  // from 255 → 40
+                                        int b = (int)Math.Round(255 - (255 - 85) * weight);  // from 255 → 85
+                                        var bgColor = $"rgb({r}, {g}, {b})";
+                                        var textColor = value > 60 ? "white" : "black";
 
-											<td class="text-end" style="@($"background-color:{bgColor}; color:{textColor};")">
-												@value.ToString("N2")
-											</td>
-										}
-									</tr>
-								}
-							</tbody>
-						</table>
-					}
-					else
-					{
-						<p class="text-muted">No allocation splits available for this policy.</p>
-					}
-				</div>
-			</div>
-		</div>
+                                        <td class="text-end" style="@($"background-color:{bgColor}; color:{textColor};")">
+                                            @value.ToString("N2")
+                                        </td>
+                                    }
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p class="text-muted">No allocation splits available for this policy.</p>
+                }
+            </div>
+        </div>
+    </div>
 
-		<div class="col-md-6">
-			<div class="card shadow md-4 border">
-				<div class="card-header">Reinstatements</div>
-				<div class="card-body">
-					@if (PolicyDetails?.Reinstatements.Any() == true)
-					{
-						<table class=" table table-sm table-striped">
-							<thead>
-								<tr>
-									<th>Programme Reference</th>
-									<th>Order</th>
-									<th>Pro Rate by Time</th>
-									<th>Terms</th>
-									<th class="text-end">Percent</th>
-									<th class="text-end">Number</th>
-								</tr>
-							</thead>
-							<tbody>
-								@foreach (var reinstatement in PolicyDetails.Reinstatements)
-								{
-									<tr>
-										<td>@reinstatement.ProgrammeReference</td>
-										<td>@reinstatement.ReinstatementOrder</td>
-										<td>@reinstatement.ProRateByTime</td>
-										<td>@reinstatement.ReinstatementTerms</td>
-										<td class="text-end">@reinstatement.ReinstatementPercent.ToString("N2")</td>
-										<td class="text-end">@reinstatement.NumberOfReinstatements</td>
-									</tr>
-								}
-							</tbody>
-						</table>
-					}
-					else
-					{
-						<p class="text-muted">No reinstatements.</p>
-					}
-				</div>
-			</div>
-			<div class="card shadow md-4 border">
-				<div class="card-header">Agg Deductibles</div>
-				<div class="card-body">
-					@if (PolicyDetails?.AggDeductibles.Any() == true)
-					{
-						<table class=" table table-sm table-striped text-nowrap">
-							<thead>
-								<tr>
-									<th>Peril</th>
-									<th>Peril Region</th>
-									<th>Note</th>
-									<th class="text-end">Application Priority</th>
-									<th class="text-end">Deductible</th>
-									
-								</tr>
-							</thead>
-							<tbody>
-								@foreach (var aggDeductible in PolicyDetails.AggDeductibles)
-								{
-									<tr>										
-										<td>@aggDeductible.Peril</td>
-										<td>@aggDeductible.PerilRegion</td>
-										<td>@aggDeductible.Note</td>
-										<td class="text-end">@aggDeductible.ApplicationPriority</td>
-										<td class="text-end">@aggDeductible.Deductible.ToString("N2")</td>
-									</tr>
-								}
-							</tbody>
-						</table>
-					}
-					else
-					{
-						<p class="text-muted">No Agg Deductibles.</p>
-					}
-				</div>
-			</div>
-		</div>
-	</div>
+    <div class="col-md-6">
+        <div class="card shadow md-4 border">
+            <div class="card-header">Reinstatements</div>
+            <div class="card-body">
+                @if (PolicyDetails?.Reinstatements.Any() == true)
+                {
+                    <table class=" table table-sm table-striped">
+                        <thead>
+                            <tr>
+                                <th>Programme Reference</th>
+                                <th>Order</th>
+                                <th>Pro Rate by Time</th>
+                                <th>Terms</th>
+                                <th class="text-end">Percent</th>
+                                <th class="text-end">Number</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var reinstatement in PolicyDetails.Reinstatements)
+                            {
+                                <tr>
+                                    <td>@reinstatement.ProgrammeReference</td>
+                                    <td>@reinstatement.ReinstatementOrder</td>
+                                    <td>@reinstatement.ProRateByTime</td>
+                                    <td>@reinstatement.ReinstatementTerms</td>
+                                    <td class="text-end">@reinstatement.ReinstatementPercent.ToString("N2")</td>
+                                    <td class="text-end">@reinstatement.NumberOfReinstatements</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p class="text-muted">No reinstatements.</p>
+                }
+            </div>
+        </div>
+        <div class="card shadow md-4 border">
+            <div class="card-header">Agg Deductibles</div>
+            <div class="card-body">
+                @if (PolicyDetails?.AggDeductibles.Any() == true)
+                {
+                    <table class=" table table-sm table-striped text-nowrap">
+                        <thead>
+                            <tr>
+                                <th>Peril</th>
+                                <th>Peril Region</th>
+                                <th>Note</th>
+                                <th class="text-end">Application Priority</th>
+                                <th class="text-end">Deductible</th>
 
-	<div class="row">
-		<div class="col-md-6">
-			<div class="card shadow mb-4 border">
-				<div class="card-header">Narratives</div>
-				<div class="card-body">
-					@if (PolicyDetails?.Narratives?.Any() == true)
-					{
-						<table class="table table-sm table-striped">
-							<thead>
-								<tr>
-									<th>Sequence</th>
-									<th>Note</th>
-									<th class="text-nowrap">Entered</th>
-									<th>Initials</th>
-								</tr>
-							</thead>
-							<tbody>
-								@foreach (var note in PolicyDetails.Narratives)
-								{
-									<tr>
-										<td>@note.Sequence_no</td>
-										<td>@note.Notes</td>
-										<td class="text-nowrap">@note.Date_entered?.ToString("yyyy-MM-dd")</td>
-										<td>@note.underwriter_initials</td>
-									</tr>
-								}
-							</tbody>
-						</table>
-					}
-					else
-					{
-						<p class="text-muted">No narratives available.</p>
-					}
-				</div>
-			</div>
-		</div>
-		<div class="col-md-6">
-			<div class="card shadow mb-4 border">
-				<div class="card-header">Securities</div>
-				<div class="card-body">
-					@if (PolicyDetails?.PolicySecurities?.Any() == true)
-					{
-						<table class="table table-sm table-striped text-nowrap">
-							<thead>
-								<tr>
-									<th>LORS</th>									
-									<th>Status</th>
-									<th>Name</th>
-									<th class="text-end">Share</th>
-								</tr>
-							</thead>
-							<tbody>
-								@foreach (var sec in PolicyDetails.PolicySecurities)
-								{
-									<tr>
-										<td>@sec.LORS</td>										
-										<td>@sec.SecurityStatus</td>
-										<td>@sec.SecurityName</td>
-										<td>@sec.Share.ToString("N2")</td>
-									</tr>
-								}
-							</tbody>
-						</table>
-					}
-					else
-					{
-						<p class="text-muted">No security info available.</p>
-					}
-				</div>
-			</div>
-			<div class="card shadow mb-4 border">
-				<div class="card-header">USM Summary</div>
-				<div class="card-body">
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var aggDeductible in PolicyDetails.AggDeductibles)
+                            {
+                                <tr>
+                                    <td>@aggDeductible.Peril</td>
+                                    <td>@aggDeductible.PerilRegion</td>
+                                    <td>@aggDeductible.Note</td>
+                                    <td class="text-end">@aggDeductible.ApplicationPriority</td>
+                                    <td class="text-end">@aggDeductible.Deductible.ToString("N2")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p class="text-muted">No Agg Deductibles.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
 
-					<table class="table table-bordered table-sm text-nowrap">
-						<thead>
-							<tr>
-								<th>Category</th>
-								@foreach (var ccy in USMs.Select(x => x.SettCcy).Distinct().OrderBy(x => x))
-								{
-									<th>@ccy</th>
-								}
-							</tr>
-						</thead>
-						<tbody>
-							@foreach (var category in new[] { "RIP", "PC", "Prem", "Claim" })
-							{
-								<tr>
-									<td>@category</td>
-									@foreach (var ccy in USMs.Select(x => x.SettCcy).Distinct().OrderBy(x => x))
-									{
-										var filtered = USMs.Where(x => GetCategory(x) == category && x.SettCcy == ccy);
-										var total = filtered.Sum(x => x.LineAmountSCC ?? 0);
-										<td class="text-end">@total.ToString("N2")</td>
-									}
-								</tr>
-							}
-						</tbody>
-					</table>
-				</div>
-			</div>
-		</div>
-	</div>
-	<div class="card shadow mb-4 border">
-		<div class="card-header">USMs Linked to This Policy</div>
-		<div class="card-body">
-			@if (USMs?.Any() == true)
-			{
-				<table class="table table-bordered table-striped text-nowrap">
-					<thead>
-						<tr>
-							<th>USM ID</th>
-							<th>LPSO Number</th>
-							<th>LPSO Date</th>
-							<th>Version</th>
-							<th>Instalment</th>
-							<th>Syndicate</th>
-							<th>Line</th>
-							<th>CA Category</th>
-							<th>Is RIP</th>
-							<th>Is PC</th>
-							@* <th>Total YOA Allocation</th>
+<div class="row">
+    <div class="col-md-6">
+        <div class="card shadow mb-4 border">
+            <div class="card-header">Narratives</div>
+            <div class="card-body">
+                @if (PolicyDetails?.Narratives?.Any() == true)
+                {
+                    <table class="table table-sm table-striped">
+                        <thead>
+                            <tr>
+                                <th>Sequence</th>
+                                <th>Note</th>
+                                <th class="text-nowrap">Entered</th>
+                                <th>Initials</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var note in PolicyDetails.Narratives)
+                            {
+                                <tr>
+                                    <td>@note.Sequence_no</td>
+                                    <td>@note.Notes</td>
+                                    <td class="text-nowrap">@note.Date_entered?.ToString("yyyy-MM-dd")</td>
+                                    <td>@note.underwriter_initials</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p class="text-muted">No narratives available.</p>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow mb-4 border">
+            <div class="card-header">Securities</div>
+            <div class="card-body">
+                @if (PolicyDetails?.PolicySecurities?.Any() == true)
+                {
+                    <table class="table table-sm table-striped text-nowrap">
+                        <thead>
+                            <tr>
+                                <th>LORS</th>
+                                <th>Status</th>
+                                <th>Name</th>
+                                <th class="text-end">Share</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var sec in PolicyDetails.PolicySecurities)
+                            {
+                                <tr>
+                                    <td>@sec.LORS</td>
+                                    <td>@sec.SecurityStatus</td>
+                                    <td>@sec.SecurityName</td>
+                                    <td>@sec.Share.ToString("N2")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p class="text-muted">No security info available.</p>
+                }
+            </div>
+        </div>
+        <div class="card shadow mb-4 border">
+            <div class="card-header">USM Summary</div>
+            <div class="card-body">
+
+                <table class="table table-bordered table-sm text-nowrap">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            @foreach (var ccy in USMs.Select(x => x.SettCcy).Distinct().OrderBy(x => x))
+                            {
+                                <th>@ccy</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var category in new[] { "RIP", "PC", "Prem", "Claim" })
+                        {
+                            <tr>
+                                <td>@category</td>
+                                @foreach (var ccy in USMs.Select(x => x.SettCcy).Distinct().OrderBy(x => x))
+                                {
+                                    var filtered = USMs.Where(x => GetCategory(x) == category && x.SettCcy == ccy);
+                                    var total = filtered.Sum(x => x.LineAmountSCC ?? 0);
+                                    <td class="text-end">@total.ToString("N2")</td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="card shadow mb-4 border">
+    <div class="card-header">USMs Linked to This Policy</div>
+    <div class="card-body">
+        @if (USMs?.Any() == true)
+        {
+            <table class="table table-bordered table-striped text-nowrap">
+                <thead>
+                    <tr>
+                        <th>USM ID</th>
+                        <th>LPSO Number</th>
+                        <th>LPSO Date</th>
+                        <th>Version</th>
+                        <th>Instalment</th>
+                        <th>Syndicate</th>
+                        <th>Line</th>
+                        <th>CA Category</th>
+                        <th>Is RIP</th>
+                        <th>Is PC</th>
+                        @* <th>Total YOA Allocation</th>
 							<th>Total Class Allocation</th>
 							<th>Total Security Allocation</th>
 							<th>Total Event Allocation</th> *@
-							<th class="text-end">Line Amount (SCC)</th>
-							<th>Actions</th>
-						</tr>
-					</thead>
-					<tbody>
-						@foreach (var usm in USMs)
-						{
-							<tr>
-								<td>@usm.USMID</td>
-								<td>@usm.LPSONo</td>
-								<td>@usm.LPSODate?.ToString("yyyy-MM-dd")</td>
-								<td>@usm.LPSOVersionNo</td>
-								<td>@usm.InstalmentNo</td>
-								<td>@usm.SyndicateNo</td>
-								<td>@usm.SyndicateLineNo</td>
-								<td>@usm.USMCaCategoryDesc</td>
-								<td>@(usm.IsRIP ? "Yes" : "No")</td>
-								<td>@(usm.IsPC ? "Yes" : "No")</td>
-								@* <td>@usm.TotalYOAAllocation.ToString("N2")</td>
+                        <th class="text-end">Line Amount (SCC)</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var usm in USMs)
+                    {
+                        <tr>
+                            <td>@usm.USMID</td>
+                            <td>@usm.LPSONo</td>
+                            <td>@usm.LPSODate?.ToString("yyyy-MM-dd")</td>
+                            <td>@usm.LPSOVersionNo</td>
+                            <td>@usm.InstalmentNo</td>
+                            <td>@usm.SyndicateNo</td>
+                            <td>@usm.SyndicateLineNo</td>
+                            <td>@usm.USMCaCategoryDesc</td>
+                            <td>@(usm.IsRIP ? "Yes" : "No")</td>
+                            <td>@(usm.IsPC ? "Yes" : "No")</td>
+                            @* <td>@usm.TotalYOAAllocation.ToString("N2")</td>
 								<td>@usm.TotalClassAllocation.ToString("N2")</td>
 								<td>@usm.TotalSecurityAllocation.ToString("N2")</td>
 								<td>@usm.TotalEventAllocation.ToString("N2")</td> *@
-								<td class="text-end">@usm.LineAmountSCC?.ToString("N2")</td>
-								<td>
-									<button class="btn btn-sm btn-outline-primary"
-											@onclick="@(() => NavigationManager.NavigateTo($"ViewORIUSM/{usm.USMID}"))">
-										View
-									</button>
-								</td>
-							</tr>
-						}
-					</tbody>
-					<tfoot>
-						<tr>
-							<td colspan="10" class="text-end fw-bold">Total:</td>
-							<td class="text-end fw-bold">
-								@USMs.Sum(x => x.LineAmountSCC ?? 0).ToString("N2")
-							</td>
-							<td></td>
-						</tr>
-					</tfoot>
-				</table>
-			}
-			else
-			{
-				<p class="text-muted">No USMs linked to this policy.</p>
-			}
-		</div>
-	</div>
+                            <td class="text-end">@usm.LineAmountSCC?.ToString("N2")</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary"
+                                        @onclick="@(() => NavigationManager.NavigateTo($"ViewORIUSM/{usm.USMID}"))">
+                                    View
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="10" class="text-end fw-bold">Total:</td>
+                        <td class="text-end fw-bold">
+                            @USMs.Sum(x => x.LineAmountSCC ?? 0).ToString("N2")
+                        </td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        }
+        else
+        {
+            <p class="text-muted">No USMs linked to this policy.</p>
+        }
+    </div>
+</div>
 
-
-	@code {
-	private string GetCategory(ORIUSMListModel x)
-	{
-		if (x.IsRIP) return "RIP";
-		if (x.IsPC) return "PC";
-		if (!string.IsNullOrEmpty(x.USMCaCategoryDesc) && x.USMCaCategoryDesc.Contains("Prem", StringComparison.OrdinalIgnoreCase)) return "Prem";
-		if (!string.IsNullOrEmpty(x.USMCaCategoryDesc) && x.USMCaCategoryDesc.Contains("Claim", StringComparison.OrdinalIgnoreCase)) return "Claim";
-		return "Other";
-	}
+@code {
+    private string GetCategory(ORIUSMListModel x)
+    {
+        if (x.IsRIP) return "RIP";
+        if (x.IsPC) return "PC";
+        if (!string.IsNullOrEmpty(x.USMCaCategoryDesc) && x.USMCaCategoryDesc.Contains("Prem", StringComparison.OrdinalIgnoreCase)) return "Prem";
+        if (!string.IsNullOrEmpty(x.USMCaCategoryDesc) && x.USMCaCategoryDesc.Contains("Claim", StringComparison.OrdinalIgnoreCase)) return "Claim";
+        return "Other";
+    }
 }
 
-	<div class="card shadow mb-4">
-		<div class="card-header">LORS Files Linked to This Policy</div>
-		<div class="card-body">
-			@if (LORS?.Any() == true)
-			{
-				<table class="table table-bordered table-striped">
-					<thead>
-						<tr>
-							<th>File Name</th>
-							<th>Sequence</th>
-							<th>Processed Date</th>
-							<th class="text-end">Time</th>
-							<th class="text-end">Amount</th>
-							<th>Actions</th>
-						</tr>
-					</thead>
-					<tbody>
-						@foreach (var lors in LORS)
-						{
-							<tr>
-								<td>@lors.FileName</td>
-								<td>@lors.PolicySequence</td>
-								<td>@lors.ProcessedDate</td>
-								<td class="text-end">@(lors.ProcessedTime)</td>
-								<td class="text-end">@lors.Amount.ToString("N2")</td>
-								<td>
-									<button class="btn btn-sm btn-outline-primary"
-											@onclick="@(() => NavigationManager.NavigateTo($"ViewLORS/{lors.FileName}/{lors.PolicySequence}"))">
-										View
-									</button>
-								</td>
-							</tr>
-						}
-					</tbody>
-					<tfoot>
-						<tr>
-							<td colspan="4" class="text-end fw-bold">Total:</td>
-							<td class="text-end fw-bold">
-								@LORS.Sum(x => x.Amount).ToString("N2")
-							</td>
-							<td></td>
-						</tr>
-					</tfoot>
-				</table>
-			}
-			else
-			{
-				<p class="text-muted">No LORS files linked to this policy.</p>
-			}
-		</div>
-	</div>
+<div class="card shadow mb-4">
+    <div class="card-header">LORS Files Linked to This Policy</div>
+    <div class="card-body">
+        @if (LORS?.Any() == true)
+        {
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>File Name</th>
+                        <th>Sequence</th>
+                        <th>Processed Date</th>
+                        <th class="text-end">Time</th>
+                        <th class="text-end">Amount</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var lors in LORS)
+                    {
+                        <tr>
+                            <td>@lors.FileName</td>
+                            <td>@lors.PolicySequence</td>
+                            <td>@lors.ProcessedDate</td>
+                            <td class="text-end">@(lors.ProcessedTime)</td>
+                            <td class="text-end">@lors.Amount.ToString("N2")</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary"
+                                        @onclick="@(() => NavigationManager.NavigateTo($"ViewLORS/{lors.FileName}/{lors.PolicySequence}"))">
+                                    View
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="4" class="text-end fw-bold">Total:</td>
+                        <td class="text-end fw-bold">
+                            @LORS.Sum(x => x.Amount).ToString("N2")
+                        </td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        }
+        else
+        {
+            <p class="text-muted">No LORS files linked to this policy.</p>
+        }
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card shadow mb-4 border">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Subject Policies (@SubjectPolicies?.Count())</span>
+                <button class="btn btn-primary" @onclick="@(() => FileExportHelper.ExportToCsvAsync(SubjectPolicies, $"SubjectPolicies_{PolicyDetails.ORIPolicyReference}_2184.csv", JS))">
+                    <i class="bi bi-download me-1"></i>
+                </button>
+            </div>
+            <div class="card-body">
+                @if (SubjectPolicies == null)
+                {
+                    <p><em>No data found</em></p>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow mb-4 border">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Subject Claims (@SubjectClaims?.Count())</span>
+                <button class="btn btn-primary" @onclick="@(() => FileExportHelper.ExportToCsvAsync(SubjectClaims, $"SubjectClaims_{PolicyDetails.ORIPolicyReference}_2184.csv", JS))">
+                    <i class="bi bi-download me-1"></i>
+                </button>
+            </div>
+            <div class="card-body">
+                @if (SubjectClaims == null)
+                {
+                    <p><em>No data found</em></p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card shadow mb-4 border">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Run Logs for Policy (@RunLogsForPolicy?.Count())</span>
+
+            </div>
+            <div class="card-body">
+                @if (!RunLogsForPolicy.Any())
+                {
+                    <p><em>No logs found</em></p>
+                }
+                else
+                {
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Level</th>
+                                <th>Message</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var log in RunLogsForPolicy)
+                            {
+                                <tr>
+                                    <td class="text-nowrap">@log.LogTime.ToString("yyyy-MM-dd HH:mm")</td>
+                                    <td>@log.LogLevel</td>
+                                    <td>@log.Message</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+    </div>
+</div>
 
 }
 
 @code {
-	[Parameter] public string ORIPolicyReference { get; set; }
+    [Parameter] public string ORIPolicyReference { get; set; }
 
-	private ORIPolicyModel PolicyDetails { get; set; }
-	private bool IsLoading { get; set; } = true;
-	private string ErrorMessage { get; set; }
-	private List<ORIUSMListModel> USMs { get; set; } = new();
-	private List<LORSListModel> LORS { get; set; } = new();
-	private List<int> PolicyYearsOfAccount => PolicyDetails?.ClassYearOfAccountSplits?
-	.SelectMany(y => y.YearOfAccountSplits.Keys)
-	.Distinct()
-	.OrderBy(y => y)
-	.ToList() ?? new List<int>();
+    private ORIPolicyModel PolicyDetails { get; set; }
+    private bool IsLoading { get; set; } = true;
+    private string ErrorMessage { get; set; }
+    private List<ORIUSMListModel> USMs { get; set; } = new();
+    private List<LORSListModel> LORS { get; set; } = new();
+    private List<int> PolicyYearsOfAccount => PolicyDetails?.ClassYearOfAccountSplits?
+    .SelectMany(y => y.YearOfAccountSplits.Keys)
+    .Distinct()
+    .OrderBy(y => y)
+    .ToList() ?? new List<int>();
 
-	// COB/YoA Splits matrix
-	public List<ClassYearOfAccountSplits> GetClassYearOfAccountSplits()
-	{
-		if (PolicyDetails != null && PolicyDetails.PolicyAllocationsClass != null && PolicyDetails.PolicyAllocationsYOA != null)
-		{
-			return PolicyDetails.PolicyAllocationsClass.Select(x => new ClassYearOfAccountSplits
-				{
-					Class = x.Class,
-					YearOfAccountSplits = PolicyDetails.PolicyAllocationsYOA.ToDictionary(
-										ya => ya.YearOfAccount,
-										ya => Math.Round(x.Allocation * ya.Allocation / 100, 2)) // Keep 2 decimal places
-				}).ToList();
-		}
-		else
-		{
-			return null;
-		}
-	}
+    private List<SubjectClaimsModel> SubjectClaims { get; set; } = new();
+    private List<SubjectPoliciesModel> SubjectPolicies { get; set; } = new();
+    private List<RunLogModel> RunLogsForPolicy { get; set; } = new();
+
+    // COB/YoA Splits matrix
+    public List<ClassYearOfAccountSplits> GetClassYearOfAccountSplits()
+    {
+        if (PolicyDetails != null && PolicyDetails.PolicyAllocationsClass != null && PolicyDetails.PolicyAllocationsYOA != null)
+        {
+            return PolicyDetails.PolicyAllocationsClass.Select(x => new ClassYearOfAccountSplits
+            {
+                Class = x.Class,
+                YearOfAccountSplits = PolicyDetails.PolicyAllocationsYOA.ToDictionary(
+                                        ya => ya.YearOfAccount,
+                                        ya => Math.Round(x.Allocation * ya.Allocation / 100, 2)) // Keep 2 decimal places
+            }).ToList();
+        }
+        else
+        {
+            return null;
+        }
+    }
 
 
-	protected override async Task OnInitializedAsync()
-	{
-		if (string.IsNullOrWhiteSpace(ORIPolicyReference))
-		{
-			ErrorMessage = "Policy reference is required.";
-			IsLoading = false;
-			return;
-		}
+    protected override async Task OnInitializedAsync()
+    {
+        if (string.IsNullOrWhiteSpace(ORIPolicyReference))
+        {
+            ErrorMessage = "Policy reference is required.";
+            IsLoading = false;
+            return;
+        }
 
-		try
-		{
-			PolicyDetails = await ORIService.GetORIPolicyDetails(ORIPolicyReference);
+        try
+        {
+            PolicyDetails = await ORIService.GetORIPolicyDetails(ORIPolicyReference);
 
-			if (PolicyDetails != null)
-			{
-				USMs = (await ORIService.GetORIUSMsByPolicy(ORIPolicyReference)).ToList();
-				LORS = (await ORIService.GetLORSByPolicy(ORIPolicyReference)).ToList();
-				PolicyDetails.Reinstatements = (await ORIService.GetReinstatementsByPolicy(ORIPolicyReference)).ToList();
-				PolicyDetails.ClassYearOfAccountSplits = GetClassYearOfAccountSplits();
-			}
-			else
-			{
-				ErrorMessage = $"No policy details found for reference: {ORIPolicyReference}";
-			}
-		}
-		catch (Exception ex)
-		{
-			ErrorMessage = "An error occurred while fetching policy details.";
-			Console.WriteLine($"[ERROR] Failed to fetch policy details: {ex}");
-		}
-		finally
-		{
-			IsLoading = false;
-			Console.WriteLine($"[INFO] Data loading complete for {ORIPolicyReference}");
-		}
-	}
+            if (PolicyDetails != null)
+            {
+                USMs = (await ORIService.GetORIUSMsByPolicy(ORIPolicyReference)).ToList();
+                LORS = (await ORIService.GetLORSByPolicy(ORIPolicyReference)).ToList();
+                PolicyDetails.Reinstatements = (await ORIService.GetReinstatementsByPolicy(ORIPolicyReference)).ToList();
+                PolicyDetails.ClassYearOfAccountSplits = GetClassYearOfAccountSplits();
 
-	// Map IncludedOrExcludedItem to a consistent ghost button class
-	private string GetGhostButtonClass(string item)
-	{
-		return item switch
-		{
-			"DomicileCountry" => "primary-ghost",
-			"InwardPolicyReference" => "secondary-ghost",
-			"Peril" => "success-ghost",
-			"PlacementUMR" => "danger-ghost",
-			"RiskCode" => "warning-ghost",
-			"ReservingClass" => "info-ghost",
-			"StatCode1" => "purple-ghost",
-			"StatCode2" => "teal-ghost",
-			_ => "orange-ghost" // Default fallback
-		};
-	}
+                SubjectPolicies = await PrismService.GetSubjectPolicies(2184, ORIPolicyReference);
+                SubjectClaims = await PrismService.GetSubjectClaims(2184, ORIPolicyReference);
+
+                RunLogsForPolicy = await PrismService.GetRunLogsForORIPolicy(2184, ORIPolicyReference);
+            }
+            else
+            {
+                ErrorMessage = $"No policy details found for reference: {ORIPolicyReference}";
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = "An error occurred while fetching policy details.";
+            Console.WriteLine($"[ERROR] Failed to fetch policy details: {ex}");
+        }
+        finally
+        {
+            IsLoading = false;
+            Console.WriteLine($"[INFO] Data loading complete for {ORIPolicyReference}");
+        }
+    }
+
+    // Map IncludedOrExcludedItem to a consistent ghost button class
+    private string GetGhostButtonClass(string item)
+    {
+        return item switch
+        {
+            "DomicileCountry" => "primary-ghost",
+            "InwardPolicyReference" => "secondary-ghost",
+            "Peril" => "success-ghost",
+            "PlacementUMR" => "danger-ghost",
+            "RiskCode" => "warning-ghost",
+            "ReservingClass" => "info-ghost",
+            "StatCode1" => "purple-ghost",
+            "StatCode2" => "teal-ghost",
+            _ => "orange-ghost" // Default fallback
+        };
+    }
 }
