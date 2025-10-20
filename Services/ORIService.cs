@@ -268,7 +268,9 @@ namespace Sandbox.Services
                     // Get Agg Deductibles
                     policyDetails.AggDeductibles = (await GetAggDeductibles(connection, policyDetails.ORIPolicyReference)).ToList();
 
-                    return policyDetails;
+					policyDetails.SyndicateSplits = (await GetSyndicateSplits(connection, policyDetails.ORIPolicyReference)).ToList();
+
+					return policyDetails;
                 }
                 else
                 {
@@ -574,16 +576,59 @@ namespace Sandbox.Services
                     }
                 }
 
-                // Step 9: Update Policy Metadata
-                var metaDataParameters = new DynamicParameters();
-                metaDataParameters.Add("@ORIPolicyReference", model.ORIPolicyReference);
-                metaDataParameters.Add("@FXRateApplicationDate", model.FXRateApplicationDate);
-                metaDataParameters.Add("@FXTreatment", model.FXTreatment);
-                metaDataParameters.Add("@InuringPriority", model.InuringPriority);
-                metaDataParameters.Add("@CededPremiumCalculation", model.CededPremiumCalculation);
-                await db.ExecuteAsync("ORI.spUpsertPolicyDetails", metaDataParameters, commandType: CommandType.StoredProcedure, transaction: transaction);
 
-                transaction.Commit();
+				// Step 9: Process Syndicate Splits (removes first, then upserts)
+				if (model.RemovedSyndicateSplits != null && model.RemovedSyndicateSplits.Any())
+				{
+					foreach (var split in model.RemovedSyndicateSplits)
+					{
+						var parameters = new DynamicParameters();
+						parameters.Add("@ORIPolicyReference", model.ORIPolicyReference);
+						parameters.Add("@Syndicate", split.Syndicate);
+						parameters.Add("@LastUpdatedBy", userNameFinal);
+
+						await db.ExecuteAsync("ORI.spDeleteSyndicateSplit",
+							parameters,
+							commandType: CommandType.StoredProcedure,
+							transaction: transaction);
+					}
+				}
+
+				if (model.SyndicateSplits != null && model.SyndicateSplits.Any())
+				{
+					foreach (var split in model.SyndicateSplits)
+					{
+						var parameters = new DynamicParameters();
+						parameters.Add("@ORIPolicyReference", model.ORIPolicyReference);
+						parameters.Add("@Syndicate", split.Syndicate);
+						parameters.Add("@Percentage", split.Percentage);
+						parameters.Add("@LastUpdatedBy", userNameFinal);
+
+						await db.ExecuteAsync("ORI.spUpsertSyndicateSplit",
+							parameters,
+							commandType: CommandType.StoredProcedure,
+							transaction: transaction);
+					}
+				}
+
+				// Step 9: Update Policy Metadata
+				var metaDataParameters = new DynamicParameters();
+				metaDataParameters.Add("@ORIPolicyReference", model.ORIPolicyReference);
+				metaDataParameters.Add("@FXRateApplicationDate", model.FXRateApplicationDate);
+				metaDataParameters.Add("@FXTreatment", model.FXTreatment);
+				metaDataParameters.Add("@InuringPriority", model.InuringPriority);
+				metaDataParameters.Add("@CededPremiumCalculation", model.CededPremiumCalculation);
+				metaDataParameters.Add("@Overrider", model.Overrider);
+				metaDataParameters.Add("@PC", model.PC);
+				metaDataParameters.Add("@UWExpenses", model.UWExpenses);
+				metaDataParameters.Add("@QSBasis", model.QSBasis);
+				metaDataParameters.Add("@OverriderBasis", model.OverriderBasis);
+				metaDataParameters.Add("@UWExpensesBasis", model.UWExpensesBasis);
+				metaDataParameters.Add("@PCProfitBasis", model.PCProfitBasis);
+				metaDataParameters.Add("@NilPCOverride", model.NilPCOverride);
+				await db.ExecuteAsync("ORI.spUpsertPolicyDetails", metaDataParameters, commandType: CommandType.StoredProcedure, transaction: transaction);
+
+				transaction.Commit();
                 Console.WriteLine($"[SUCCESS] ORI Policy Metadata saved successfully for {model.ORIPolicyReference}");
             }
             catch (Exception ex)
@@ -1001,6 +1046,48 @@ namespace Sandbox.Services
                 throw new Exception($"No policy securities found for policy reference: {ORIPolicyReference}.");
             }
         }
-    }
+
+		public async Task UpsertSyndicateSplit(string ORIPolicyReference, string Syndicate, decimal Percentage, string lastUpdatedBy)
+		{
+			using var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
+			await connection.OpenAsync();
+
+			var parameters = new DynamicParameters();
+			parameters.Add("@ORIPolicyReference", ORIPolicyReference);
+			parameters.Add("@Syndicate", Syndicate);
+			parameters.Add("@Percentage", Percentage);
+			parameters.Add("@LastUpdatedBy", lastUpdatedBy);
+
+			await connection.ExecuteAsync("ORI.spUpsertSyndicateSplit", parameters, commandType: CommandType.StoredProcedure);
+		}
+
+		public async Task DeleteSyndicateSplit(string ORIPolicyReference, string Syndicate, string lastUpdatedBy)
+		{
+			using var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
+			await connection.OpenAsync();
+
+			var parameters = new DynamicParameters();
+			parameters.Add("@ORIPolicyReference", ORIPolicyReference);
+			parameters.Add("@Syndicate", Syndicate);
+			parameters.Add("@LastUpdatedBy", lastUpdatedBy);
+
+			await connection.ExecuteAsync("ORI.spDeleteSyndicateSplit", parameters, commandType: CommandType.StoredProcedure);
+		}
+
+		private async Task<IEnumerable<SyndicateSplit>> GetSyndicateSplits(SqlConnection connection, string ORIPolicyReference)
+		{
+			var parameters = new DynamicParameters();
+			parameters.Add("@ORIPolicyReference", ORIPolicyReference, DbType.String);
+
+			var result = await connection.QueryAsync<SyndicateSplit>(
+				"ORI.spGetSyndicateSplits",
+				parameters,
+				commandType: CommandType.StoredProcedure);
+
+			return result ?? Enumerable.Empty<SyndicateSplit>();
+		}
+
+
+	}
 }
 
