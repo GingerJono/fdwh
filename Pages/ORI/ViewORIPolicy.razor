@@ -252,6 +252,39 @@ else
                 }
             </div>
         </div>
+        <div class="card shadow mb-4 border">
+            <div class="card-header">Syndicate Splits</div>
+            <div class="card-body">
+                @if (PolicyDetails?.SyndicateSplits?.Any() == true)
+                {
+                    <table class="table table-sm table-striped">
+                        <thead>
+                            <tr>
+                                <th>Syndicate</th>
+                                <th class="text-end">Percentage</th>
+                                <th class="text-nowrap">Last Updated</th>
+                                <th>Updated By</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var split in PolicyDetails.SyndicateSplits)
+                            {
+                                <tr>
+                                    <td>@split.Syndicate</td>
+                                    <td class="text-end">@split.Percentage.ToString("N2")</td>
+                                    <td class="text-nowrap">@split.LastUpdated?.ToString("yyyy-MM-dd HH:mm")</td>
+                                    <td>@split.LastUpdatedBy</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p class="text-muted">No syndicate splits defined for this policy.</p>
+                }
+            </div>
+        </div>
     </div>
 
     <div class="col-md-6">
@@ -328,165 +361,127 @@ else
                 }
             </div>
         </div>
+        <div class="card shadow mb-4 border">
+            <div class="card-header">PC & Overrider Details</div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <strong>Overrider</strong>
+                        <div class="fs-5">@PolicyDetails.Overrider?.ToString("N2")</div>
+                    </div>
+                    <div class="col-md-4">
+                        <strong>PC</strong>
+                        <div class="fs-5">@PolicyDetails.PC?.ToString("N2")</div>
+                    </div>
+                    <div class="col-md-4">
+                        <strong>UW Expenses</strong>
+                        <div class="fs-5">@PolicyDetails.UWExpenses?.ToString("N2")</div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-3">
+                        <strong>QS Basis</strong>
+                        <div>@PolicyDetails.QSBasis</div>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Overrider Basis</strong>
+                        <div>@PolicyDetails.OverriderBasis</div>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>UW Expenses Basis</strong>
+                        <div>@PolicyDetails.UWExpensesBasis</div>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>PC Profit Basis</strong>
+                        <div>@PolicyDetails.PCProfitBasis</div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-3">
+                        <strong>Nil PC Override</strong>
+                        <div>@PolicyDetails.NilPCOverride</div>
+                    </div>
+                </div>
+            </div>
+        </div>        
+
+        <div class="card shadow mb-4 border">
+            <div class="card-header">Securities</div>
+            <div class="card-body">
+                @if (PolicyDetails?.PolicySecurities?.Any() == true)
+                {
+                    <table class="table table-sm table-striped text-nowrap">
+                        <thead>
+                            <tr>
+                                <th>LORS</th>
+                                <th>Status</th>
+                                <th>Name</th>
+                                <th class="text-end">Share</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var sec in PolicyDetails.PolicySecurities)
+                            {
+                                <tr>
+                                    <td>@sec.LORS</td>
+                                    <td>@sec.SecurityStatus</td>
+                                    <td>@sec.SecurityName</td>
+                                    <td>@sec.Share.ToString("N2")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p class="text-muted">No security info available.</p>
+                }
+            </div>
+        </div>
     </div>
 </div>
 
-	<div class="row">
-		<div class="col-md-6">
-			<div class="card shadow mb-4 border">
-				<div class="card-header">Narratives</div>
-				<div class="card-body">
-					@if (PolicyDetails?.Narratives?.Any() == true)
-					{
-						<table class="table table-sm table-striped">
-							<thead>
-								<tr>
-									<th>Sequence</th>
-									<th>Note</th>
-									<th class="text-nowrap">Entered</th>
-									<th>Initials</th>
-								</tr>
-							</thead>
-							<tbody>
-								@foreach (var note in PolicyDetails.Narratives)
-								{
-									<tr>
-										<td>@note.Sequence_no</td>
-										<td>@note.Notes</td>
-										<td class="text-nowrap">@note.Date_entered?.ToString("yyyy-MM-dd")</td>
-										<td>@note.underwriter_initials</td>
-									</tr>
-								}
-							</tbody>
-						</table>
-					}
-					else
-					{
-						<p class="text-muted">No narratives available.</p>
-					}
-				</div>
-			</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card shadow mb-4 border">
+            <div class="card-header">Narratives</div>
+            <div class="card-body">
+                @if (PolicyDetails?.Narratives?.Any() == true)
+                {
+                    <table class="table table-sm table-striped">
+                        <thead>
+                            <tr>
+                                <th>Sequence</th>
+                                <th>Note</th>
+                                <th class="text-nowrap">Entered</th>
+                                <th>Initials</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var note in PolicyDetails.Narratives)
+                            {
+                                <tr>
+                                    <td>@note.Sequence_no</td>
+                                    <td>@note.Notes</td>
+                                    <td class="text-nowrap">@note.Date_entered?.ToString("yyyy-MM-dd")</td>
+                                    <td>@note.underwriter_initials</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p class="text-muted">No narratives available.</p>
+                }
+            </div>
+        </div>
+    </div>
 
-
-			<div class="card shadow mb-4 border">
-				<div class="card-header">PC & Overrider Details</div>
-				<div class="card-body">
-					<div class="row">
-						<div class="col-md-4">
-							<strong>Overrider</strong>
-							<div class="fs-5">@PolicyDetails.Overrider?.ToString("N2")</div>
-						</div>
-						<div class="col-md-4">
-							<strong>PC</strong>
-							<div class="fs-5">@PolicyDetails.PC?.ToString("N2")</div>
-						</div>
-						<div class="col-md-4">
-							<strong>UW Expenses</strong>
-							<div class="fs-5">@PolicyDetails.UWExpenses?.ToString("N2")</div>
-						</div>
-					</div>
-					<div class="row mt-3">
-						<div class="col-md-3">
-							<strong>QS Basis</strong>
-							<div>@PolicyDetails.QSBasis</div>
-						</div>
-						<div class="col-md-3">
-							<strong>Overrider Basis</strong>
-							<div>@PolicyDetails.OverriderBasis</div>
-						</div>
-						<div class="col-md-3">
-							<strong>UW Expenses Basis</strong>
-							<div>@PolicyDetails.UWExpensesBasis</div>
-						</div>
-						<div class="col-md-3">
-							<strong>PC Profit Basis</strong>
-							<div>@PolicyDetails.PCProfitBasis</div>
-						</div>
-					</div>
-					<div class="row mt-3">
-						<div class="col-md-3">
-							<strong>Nil PC Override</strong>
-							<div>@PolicyDetails.NilPCOverride</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="card shadow mb-4 border">
-				<div class="card-header">Syndicate Splits</div>
-				<div class="card-body">
-					@if (PolicyDetails?.SyndicateSplits?.Any() == true)
-					{
-						<table class="table table-sm table-striped">
-							<thead>
-								<tr>
-									<th>Syndicate</th>
-									<th class="text-end">Percentage</th>
-									<th class="text-nowrap">Last Updated</th>
-									<th>Updated By</th>
-								</tr>
-							</thead>
-							<tbody>
-								@foreach (var split in PolicyDetails.SyndicateSplits)
-								{
-									<tr>
-										<td>@split.Syndicate</td>
-										<td class="text-end">@split.Percentage.ToString("N2")</td>
-										<td class="text-nowrap">@split.LastUpdated?.ToString("yyyy-MM-dd HH:mm")</td>
-										<td>@split.LastUpdatedBy</td>
-									</tr>
-								}
-							</tbody>
-						</table>
-					}
-					else
-					{
-						<p class="text-muted">No syndicate splits defined for this policy.</p>
-					}
-				</div>
-			</div>
-
-		</div>
-
-
-		<div class="col-md-6">
-			<div class="card shadow mb-4 border">
-				<div class="card-header">Securities</div>
-				<div class="card-body">
-					@if (PolicyDetails?.PolicySecurities?.Any() == true)
-					{
-						<table class="table table-sm table-striped text-nowrap">
-							<thead>
-								<tr>
-									<th>LORS</th>									
-									<th>Status</th>
-									<th>Name</th>
-									<th class="text-end">Share</th>
-								</tr>
-							</thead>
-							<tbody>
-								@foreach (var sec in PolicyDetails.PolicySecurities)
-								{
-									<tr>
-										<td>@sec.LORS</td>										
-										<td>@sec.SecurityStatus</td>
-										<td>@sec.SecurityName</td>
-										<td>@sec.Share.ToString("N2")</td>
-									</tr>
-								}
-							</tbody>
-						</table>
-					}
-					else
-					{
-						<p class="text-muted">No security info available.</p>
-					}
-				</div>
-			</div>
-
-
-			<div class="card shadow mb-4 border">
-				<div class="card-header">USM Summary</div>
-				<div class="card-body">
+    <div class="col-md-6">  
+        <div class="card shadow mb-4 border">
+            <div class="card-header">USM Summary</div>
+            <div class="card-body">
 
                 <table class="table table-bordered table-sm text-nowrap">
                     <thead>
@@ -653,7 +648,7 @@ else
 </div>
 
 <div class="row">
-    <div class="col-md-6">
+    <div class="col-md-4">
         <div class="card shadow mb-4 border">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span>Subject Policies (@SubjectPolicies?.Count())</span>
@@ -669,7 +664,7 @@ else
             </div>
         </div>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-4">
         <div class="card shadow mb-4 border">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span>Subject Claims (@SubjectClaims?.Count())</span>
@@ -681,6 +676,106 @@ else
                 @if (SubjectClaims == null)
                 {
                     <p><em>No data found</em></p>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow mb-4 border">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Claims by Event (@ClaimsByEvent?.Count())</span>
+                <button class="btn btn-primary" @onclick="@(() => FileExportHelper.ExportToCsvAsync(ClaimsByEvent, $"ClaimsByEvent_{PolicyDetails.ORIPolicyReference}_2184.csv", JS))">
+                    <i class="bi bi-download me-1"></i>
+                </button>
+            </div>
+            <div class="card-body">
+                @if (ClaimsByEvent == null)
+                {
+                    <p><em>No data found</em></p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card shadow mb-4 border">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Written Premium Allocations</span>
+
+            </div>
+            <div class="card-body">
+                @if (!WrittenPremiumDimensionAllocations.Any())
+                {
+                    <p><em>No Written Premium Allocations found</em></p>
+                }
+                else
+                {
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Currency</th>
+                                <th>Class</th>
+                                <th>YOA</th>
+                                <th>Reserving Class</th>
+                                <th>Distribution Channel</th>
+                                <th>Written Premium</th>
+                                <th class="text-end">Allocation</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var allocation in WrittenPremiumDimensionAllocations)
+                            {
+                                <tr>
+                                    <td class="text-nowrap">@allocation.Currency</td>
+                                    <td class="text-nowrap">@allocation.Class</td>
+                                    <td class="text-nowrap">@allocation.YOA</td>
+                                    <td class="text-nowrap">@allocation.ReservingClass</td>
+                                    <td class="text-nowrap">@allocation.DistributionChannel</td>
+                                    <td class="text-end">@allocation.WrittenPremium.ToString("N2")</td>
+                                    <td class="text-end">@allocation.Allocation.ToString("N2")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card shadow mb-4 border">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Unadjusted vs Adjusted Metrics (@UnAdjustedAdjustedMetrics?.Count())</span>
+
+            </div>
+            <div class="card-body">
+                @if (!UnAdjustedAdjustedMetrics.Any())
+                {
+                    <p><em>No unadjusted vs adjusted metrics found</em></p>
+                }
+                else
+                {
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th class="text-nowrap">Metric</th>
+                                <th class="text-end">Unadjusted Amount</th>
+                                <th class="text-end">Adjusted Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var metric in UnAdjustedAdjustedMetrics)
+                            {
+                                <tr>
+                                    <td class="text-nowrap">@metric.Metric</td>
+                                    <td class="text-end">@metric.Unadjusted.ToString("N2")</td>
+                                    <td class="text-end">@metric.Adjusted.ToString("N2")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
                 }
             </div>
         </div>
@@ -724,7 +819,6 @@ else
         </div>
     </div>
 </div>
-
 }
 
 @code {
@@ -743,7 +837,11 @@ else
 
     private List<SubjectClaimsModel> SubjectClaims { get; set; } = new();
     private List<SubjectPoliciesModel> SubjectPolicies { get; set; } = new();
+    private List<ClaimsByEventModel> ClaimsByEvent { get; set; } = new();
+    private List<WrittenPremiumDimensionAllocationsModel> WrittenPremiumDimensionAllocations { get; set; } = new();
+    private List<UnAdjustedAdjustedModel> UnAdjustedAdjustedMetrics { get; set; } = new();
     private List<RunLogModel> RunLogsForPolicy { get; set; } = new();
+
 
     // COB/YoA Splits matrix
     public List<ClassYearOfAccountSplits> GetClassYearOfAccountSplits()
@@ -787,7 +885,9 @@ else
 
                 SubjectPolicies = await PrismService.GetSubjectPolicies(2184, ORIPolicyReference);
                 SubjectClaims = await PrismService.GetSubjectClaims(2184, ORIPolicyReference);
-
+                ClaimsByEvent = await PrismService.GetClaimsByEvent(2184, ORIPolicyReference);
+                WrittenPremiumDimensionAllocations = await PrismService.GetWrittenPremiumDimensionAllocations(2184, ORIPolicyReference);
+                UnAdjustedAdjustedMetrics = await PrismService.GetUnadjustedAdjusted(2184, ORIPolicyReference);
                 RunLogsForPolicy = await PrismService.GetRunLogsForORIPolicy(2184, ORIPolicyReference);
             }
             else

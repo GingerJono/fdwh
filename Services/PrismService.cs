@@ -86,7 +86,7 @@ namespace Sandbox.Services
                     var logsTask = GetRunLogs(runID);
                     var allocatedPremiumSignedTask = GetAllocatedPremiumSigned(runID);
                     var allocatedPremiumWrittenTask = GetAllocatedPremiumWritten(runID);
-                    var allocatedOverridersAndProfitCommissionTask = AllocatedOverridersAndProfitCommission(runID);
+                    var allocatedOverridersAndProfitCommissionTask = GetAllocatedOverridersAndProfitCommission(runID);
                     var allocatedRecoveriesAndRIPsTask = GetAllocatedRecoveriesAndRIPs(runID);
                     var allocatedActualRecoveriesTask = GetAllocatedActualRecoveries(runID);
                     var allocatedActualRIPsTask = GetAllocatedActualRIPs(runID);
@@ -255,7 +255,7 @@ namespace Sandbox.Services
             }
         }
 
-        public async Task<List<AllocatedOverridersAndProfitCommissionModel>> AllocatedOverridersAndProfitCommission(int runID)
+        public async Task<List<AllocatedOverridersAndProfitCommissionModel>> GetAllocatedOverridersAndProfitCommission(int runID)
         {
             using (var connection = new SqlConnection(_configuration.GetConnectionString("PrismConnection")))
             {
@@ -349,6 +349,87 @@ namespace Sandbox.Services
                 {
                     var results = await connection.QueryAsync<SubjectPoliciesModel>(
                         "outputs.spGetanalytics_ORIPolicyToInwardPolicyMapping",
+                        parameters,
+                        commandType: CommandType.StoredProcedure);
+
+                    return results.ToList();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error in GetAllocatedRecoveriesAndRIPs: " + ex.Message);
+                    throw;
+                }
+            }
+        }
+
+        public async Task<List<ClaimsByEventModel>> GetClaimsByEvent(int runID, string oriPolicyReference)
+        {
+            using (var connection = new SqlConnection(_configuration.GetConnectionString("PrismConnection")))
+            {
+                await connection.OpenAsync();
+
+                var parameters = new DynamicParameters();
+                parameters.Add("RunID", runID, DbType.Int64);
+                parameters.Add("ORIPolicyReference", oriPolicyReference, DbType.String);
+
+                try
+                {
+                    var results = await connection.QueryAsync<ClaimsByEventModel>(
+                        "outputs.spGetanalytics_ORIPolicyClaimsByEvent",
+                        parameters,
+                        commandType: CommandType.StoredProcedure);
+
+                    return results.ToList();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error in GetAllocatedRecoveriesAndRIPs: " + ex.Message);
+                    throw;
+                }
+            }
+        }
+
+        public async Task<List<UnAdjustedAdjustedModel>> GetUnadjustedAdjusted(int runID, string oriPolicyReference)
+        {
+            using (var connection = new SqlConnection(_configuration.GetConnectionString("PrismConnection")))
+            {
+                await connection.OpenAsync();
+
+                var parameters = new DynamicParameters();
+                parameters.Add("RunID", runID, DbType.Int64);
+                parameters.Add("ORIPolicyReference", oriPolicyReference, DbType.String);
+
+                try
+                {
+                    var results = await connection.QueryAsync<UnAdjustedAdjustedModel>(
+                        "rec.spGet_UnadjustedAdjusted",
+                        parameters,
+                        commandType: CommandType.StoredProcedure);
+
+                    return results.ToList();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error in GetAllocatedRecoveriesAndRIPs: " + ex.Message);
+                    throw;
+                }
+            }
+        }
+
+        public async Task<List<WrittenPremiumDimensionAllocationsModel>> GetWrittenPremiumDimensionAllocations(int runID, string oriPolicyReference)
+        {
+            using (var connection = new SqlConnection(_configuration.GetConnectionString("PrismConnection")))
+            {
+                await connection.OpenAsync();
+
+                var parameters = new DynamicParameters();
+                parameters.Add("RunID", runID, DbType.Int64);
+                parameters.Add("ORIPolicyReference", oriPolicyReference, DbType.String);
+
+                try
+                {
+                    var results = await connection.QueryAsync<WrittenPremiumDimensionAllocationsModel>(
+                        "reporting.spGetWrittenPremiumDimensionAllocations",
                         parameters,
                         commandType: CommandType.StoredProcedure);
 
