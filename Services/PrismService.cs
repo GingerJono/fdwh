@@ -394,7 +394,7 @@ namespace Sandbox.Services
             using (var connection = new SqlConnection(_configuration.GetConnectionString("PrismConnection")))
             {
                 await connection.OpenAsync();
-
+               
                 var parameters = new DynamicParameters();
                 parameters.Add("RunID", runID, DbType.Int64);
                 parameters.Add("ORIPolicyReference", oriPolicyReference, DbType.String);
@@ -402,9 +402,11 @@ namespace Sandbox.Services
                 try
                 {
                     var results = await connection.QueryAsync<UnAdjustedAdjustedModel>(
-                        "rec.spGet_UnadjustedAdjusted",
-                        parameters,
-                        commandType: CommandType.StoredProcedure);
+                         "rec.spGet_UnadjustedAdjusted",
+                         parameters,
+                         commandType: CommandType.StoredProcedure,
+                         commandTimeout: 300  
+                     );
 
                     return results.ToList();
                 }
@@ -431,7 +433,9 @@ namespace Sandbox.Services
                     var results = await connection.QueryAsync<WrittenPremiumDimensionAllocationsModel>(
                         "reporting.spGetWrittenPremiumDimensionAllocations",
                         parameters,
-                        commandType: CommandType.StoredProcedure);
+                        commandType: CommandType.StoredProcedure,
+                        commandTimeout: 300
+                    );
 
                     return results.ToList();
                 }
