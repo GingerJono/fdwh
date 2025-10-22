@@ -1,6 +1,7 @@
 @page "/ViewEventMetadata/{EventCode}"
 @inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager
-@inject IJSRuntime JSRuntime
+@inject IJSRuntime JS
+@using Sandbox.Helpers
 @using Sandbox.Models.ORI
 @using Sandbox.Models.Prism
 @using Sandbox.Services
@@ -20,7 +21,7 @@ else if (EventDetails != null)
 {
 	<nav aria-label="breadcrumb">
 		<ol class="breadcrumb">
-			<li class="breadcrumb-item"><a href="/EventMetadata">EVENT METADATA</a></li>
+			<li class="breadcrumb-item"><a href="EventMetadata">EVENT METADATA</a></li>
 			<li class="breadcrumb-item active" aria-current="page">VIEW EVENT: @EventDetails.EventCode</li>
 		</ol>
 	</nav>
@@ -63,38 +64,18 @@ else if (EventDetails != null)
 		<div class="col-md-12">
 			<div class="card shadow mb-4 border">
 				<div class="card-header d-flex justify-content-between align-items-center">
-					<span>Run Logs for Policy (@RunLogsForEvent?.Count())</span>
-
+					<span>Run Logs for Event (@RunLogsForEvent?.Count())</span>
+					<button class="btn btn-primary" @onclick="@(() => FileExportHelper.ExportToCsvAsync(RunLogsForEvent, $"RunLogsForEvent_{EventCode}_2184.csv", JS))">
+						<i class="bi bi-download me-1"></i>
+					</button>
 				</div>
 				<div class="card-body">
-					@if (!RunLogsForEvent.Any())
+					@if (RunLogsForEvent == null)
 					{
 						<p><em>No logs found</em></p>
 					}
-					else
-					{
-						<table class="table table-striped">
-							<thead>
-								<tr>
-									<th>Time</th>
-									<th>Level</th>
-									<th>Message</th>
-								</tr>
-							</thead>
-							<tbody>
-								@foreach (var log in RunLogsForEvent)
-								{
-									<tr>
-										<td class="text-nowrap">@log.LogTime.ToString("yyyy-MM-dd HH:mm")</td>
-										<td>@log.LogLevel</td>
-										<td>@log.Message</td>
-									</tr>
-								}
-							</tbody>
-						</table>
-					}
 				</div>
-			</div>
+			</div>			
 		</div>
 	</div>
 }

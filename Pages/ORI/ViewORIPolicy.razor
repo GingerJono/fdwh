@@ -36,7 +36,7 @@ else
 {
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="/ORIPolicies">ORI POLICIES</a></li>
+        <li class="breadcrumb-item"><a href="ORIPolicies">ORI POLICIES</a></li>
         <li class="breadcrumb-item active" aria-current="page">VIEW ORI POLICY @PolicyDetails.ORIPolicyReference</li>
     </ol>
 </nav>
@@ -786,37 +786,17 @@ else
         <div class="card shadow mb-4 border">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span>Run Logs for Policy (@RunLogsForPolicy?.Count())</span>
-
+                <button class="btn btn-primary" @onclick="@(() => FileExportHelper.ExportToCsvAsync(RunLogsForPolicy, $"RunLogsForPolicy_{PolicyDetails.ORIPolicyReference}_2184.csv", JS))">
+                    <i class="bi bi-download me-1"></i>
+                </button>
             </div>
             <div class="card-body">
-                @if (!RunLogsForPolicy.Any())
+                @if (RunLogsForPolicy == null)
                 {
                     <p><em>No logs found</em></p>
                 }
-                else
-                {
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>Time</th>
-                                <th>Level</th>
-                                <th>Message</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var log in RunLogsForPolicy)
-                            {
-                                <tr>
-                                    <td class="text-nowrap">@log.LogTime.ToString("yyyy-MM-dd HH:mm")</td>
-                                    <td>@log.LogLevel</td>
-                                    <td>@log.Message</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                }
             </div>
-        </div>
+        </div>        
     </div>
 </div>
 }
