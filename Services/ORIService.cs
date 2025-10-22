@@ -1,10 +1,11 @@
 ﻿using Dapper;
 using Microsoft.Data.SqlClient;
-using System.Data;
 using Sandbox.Helpers;
-using Sandbox.Models.ORI;
-using System.Diagnostics;
 using Sandbox.Models;
+using Sandbox.Models.ORI;
+using Sandbox.Models.Prism;
+using System.Data;
+using System.Diagnostics;
 
 namespace Sandbox.Services
 {
@@ -1087,7 +1088,145 @@ namespace Sandbox.Services
 			return result ?? Enumerable.Empty<SyndicateSplit>();
 		}
 
+        // Difference Notes
+        public async Task AddDifferenceNoteAsync(DifferenceNoteModel note)
+        {
+            const string sql = @"
+            INSERT INTO ORI.DifferenceNotes
+            (ORIPolicyReference, Metric, RunID, UnadjustedAmount, NoteDate, NotedBy, ExpectedSolve, Notes, IsDeleted)
+            VALUES (@ORIPolicyReference, @Metric, @RunID, @UnadjustedAmount, GETDATE(), @NotedBy, @ExpectedSolve, @Notes, 0);";
 
-	}
+            using (var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection")))
+            {
+                await connection.OpenAsync();
+
+                var parameters = new DynamicParameters();
+                parameters.Add("ORIPolicyReference", note.ORIPolicyReference);
+                parameters.Add("Metric", note.Metric);
+                parameters.Add("RunID", note.RunID, DbType.Int64);
+                parameters.Add("UnadjustedAmount", note.UnadjustedAmount, DbType.Double);
+                parameters.Add("NotedBy", note.NotedBy);
+                parameters.Add("ExpectedSolve", note.ExpectedSolve, DbType.Boolean);
+                parameters.Add("Notes", note.Notes, DbType.String);
+
+                try
+                {
+                    await connection.ExecuteAsync(sql, parameters, commandType: CommandType.Text);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error in AddDifferenceNoteAsync: " + ex.Message);
+                    throw;
+                }
+            }
+        }
+
+        // SELECT (newest first, hide soft-deleted)
+        public async Task<List<DifferenceNoteModel>> GetDifferenceNotesAsync(string policyRef, int? runId = null)
+        {
+            var sql = @"
+            SELECT ORIPolicyReference, Metric, RunID, UnadjustedAmount, NoteDate, NotedBy, ExpectedSolve, Notes, IsDeleted
+            FROM ORI.DifferenceNotes
+            WHERE ORIPolicyReference = @ORIPolicyReference
+              AND ISNULL(IsDeleted, 0) = 0";
+
+            if (runId.HasValue)
+                sql += " AND RunID = @RunID";
+
+            sql += " ORDER BY NoteDate DESC;";
+
+            using (var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection")))
+            {
+                await connection.OpenAsync();
+
+                var parameters = new DynamicParameters();
+                parameters.Add("ORIPolicyReference", policyRef);
+                if (runId.HasValue) parameters.Add("RunID", runId.Value, DbType.Int64);
+
+                try
+                {
+                    var results = await connection.QueryAsync<DifferenceNoteModel>(sql, parameters, commandType: CommandType.Text);
+                    return results.ToList();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error in GetDifferenceNotesAsync: " + ex.Message);
+                    throw;
+                }
+            }
+        }
+
+        // UPDATE (only ExpectedSolve + Notes)
+        public async Task UpdateDifferenceNoteAsync(string policyRef, string metric, long runId, DateTime noteDate, bool expectedSolve, string? notes)
+        {
+            const string sql = @"
+            UPDATE ORI.DifferenceNotes
+            SET ExpectedSolve = @ExpectedSolve,
+                Notes = @Notes
+            WHERE ORIPolicyReference = @ORIPolicyReference
+              AND Metric = @Metric
+              AND RunID = @RunID
+              AND NoteDate = @NoteDate
+              AND ISNULL(IsDeleted, 0) = 0;";
+
+            using (var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection")))
+            {
+                await connection.OpenAsync();
+
+                var parameters = new DynamicParameters();
+                parameters.Add("ExpectedSolve", expectedSolve, DbType.Boolean);
+                parameters.Add("Notes", notes, DbType.String);
+                parameters.Add("ORIPolicyReference", policyRef);
+                parameters.Add("Metric", metric);
+                parameters.Add("RunID", runId, DbType.Int64);
+                parameters.Add("NoteDate", noteDate, DbType.DateTime);
+
+                try
+                {
+                    await connection.ExecuteAsync(sql, parameters, commandType: CommandType.Text);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error in UpdateDifferenceNoteAsync: " + ex.Message);
+                    throw;
+                }
+            }
+        }
+
+        // SOFT DELETE
+        public async Task SoftDeleteDifferenceNoteAsync(string policyRef, string metric, long runId, DateTime noteDate)
+        {
+            const string sql = @"
+            UPDATE ORI.DifferenceNotes
+            SET IsDeleted = 1
+            WHERE ORIPolicyReference = @ORIPolicyReference
+              AND Metric = @Metric
+              AND RunID = @RunID
+              AND NoteDate = @NoteDate
+              AND ISNULL(IsDeleted, 0) = 0;";
+
+            using (var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection")))
+            {
+                await connection.OpenAsync();
+
+                var parameters = new DynamicParameters();
+                parameters.Add("ORIPolicyReference", policyRef);
+                parameters.Add("Metric", metric);
+                parameters.Add("RunID", runId, DbType.Int64);
+                parameters.Add("NoteDate", noteDate, DbType.DateTime);
+
+                try
+                {
+                    await connection.ExecuteAsync(sql, parameters, commandType: CommandType.Text);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error in SoftDeleteDifferenceNoteAsync: " + ex.Message);
+                    throw;
+                }
+            }
+
+        }
+    }
 }
 

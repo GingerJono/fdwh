@@ -121,10 +121,10 @@ namespace Sandbox.Services
                     run.AllocatedActualRecoveries = allocatedActualRecoveriesTask.Result;
                     run.AllocatedActualRIPs = allocatedActualRIPsTask.Result;
                     run.SubjectClaims = subjectClaimsTask.Result;
-                    run.SubjectPolicies = subjectPoliciesTask.Result;                   
+                    run.SubjectPolicies = subjectPoliciesTask.Result;
                     run.ORIActualRecoveries = oriActualRecoveriesTask.Result;
                     run.ORIActualRIPs = oriActualRIPsTask.Result;
-                    run.ORIPolicies = oriPoliciesTask.Result;                    
+                    run.ORIPolicies = oriPoliciesTask.Result;
 
                     return run;
                 }
@@ -683,7 +683,5 @@ namespace Sandbox.Services
 
             await bulk.WriteToServerAsync(dataTable);
         }
-
-
     }
 }

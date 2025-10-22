@@ -1,5 +1,6 @@
 ﻿@page "/ViewORIPolicy/{ORIPolicyReference}"
 @inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthStateProvider
 @using Sandbox.Helpers
 @using Sandbox.Models.Prism
 @using Sandbox._Spk
@@ -403,7 +404,7 @@ else
                     </div>
                 </div>
             </div>
-        </div>        
+        </div>
 
         <div class="card shadow mb-4 border">
             <div class="card-header">Securities</div>
@@ -478,7 +479,7 @@ else
         </div>
     </div>
 
-    <div class="col-md-6">  
+    <div class="col-md-6">
         <div class="card shadow mb-4 border">
             <div class="card-header">USM Summary</div>
             <div class="card-body">
@@ -796,17 +797,159 @@ else
                     <p><em>No logs found</em></p>
                 }
             </div>
-        </div>        
+        </div>
+    </div>
+</div>
+<hr />
+
+<div class="card mb-3">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Reconciliation</span>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">Metric</label>
+                <select class="form-select" @bind="_selectedMetric">
+                    <option value="">-- Select metric --</option>
+                    @foreach (var m in MetricModel.AllMetrics.OrderBy(x => x.MetricOrder))
+                    {
+                        <option value="@m.Metric">@m.Metric</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Run ID at time of note</label>
+                <input class="form-control" @bind="_runIdInput" />
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Unadjusted value at time of note</label>
+                <input class="form-control" @bind="_unadjustedInput" />
+            </div>
+
+            <div class="col-md-2 d-flex align-items-center">
+                <div class="form-check mt-4">
+                    <input class="form-check-input" type="checkbox" id="expectedSolve" @bind="_expectedSolve" />
+                    <label class="form-check-label" for="expectedSolve">
+                        Expected Solve
+                    </label>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <label class="form-label">Notes</label>
+                <textarea class="form-control" rows="3" @bind="_notes" placeholder="Add details..."></textarea>
+            </div>
+
+        </div>
+
+        <div class="mt-3">
+            <button class="btn btn-primary"
+                    @onclick="SaveNoteAsync"
+                    disabled="@(
+                    string.IsNullOrWhiteSpace(_selectedMetric) ||
+                    string.IsNullOrWhiteSpace(_runIdInput) ||
+                    string.IsNullOrWhiteSpace(_unadjustedInput)
+                                                                                                                                                                                                )">
+                Save Note
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <div class="row g-3">
+            @if (_existingNotes?.Any() == true)
+            {
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped align-middle">
+                        <thead>
+                            <tr>
+                                <th>Note Date</th>
+                                <th>Metric</th>
+                                <th>RunID</th>
+                                <th>Unadjusted</th>
+                                <th>Noted By</th>
+                                <th style="width: 140px;">Expected Solve</th>
+                                <th>Notes</th>
+                                <th style="width: 160px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var n in _existingNotes)
+                            {
+                                var key = KeyFor(n);
+                                var isEditing = _editingKey == key;
+
+                                <tr>
+                                    <td>@n.NoteDate.ToString("yyyy-MM-dd HH:mm")</td>
+                                    <td>@n.Metric</td>
+                                    <td>@n.RunID</td>
+                                    <td>@n.UnadjustedAmount</td>
+                                    <td>@n.NotedBy</td>
+
+                                    <td>
+                                        @if (isEditing)
+                                        {
+                                            <input type="checkbox" class="form-check-input" @bind="_editExpectedSolve" />
+                                        }
+                                        else
+                                        {
+                                            @(n.ExpectedSolve ? "Yes" : "No")
+                                        }
+                                    </td>
+
+                                    <td style="white-space: pre-wrap">
+                                        @if (isEditing)
+                                        {
+                                            <textarea class="form-control" rows="2" @bind="_editNotes"></textarea>
+                                        }
+                                        else
+                                        {
+                                            @n.Notes
+                                        }
+                                    </td>
+
+                                    <td class="text-end">
+                                        @if (isEditing)
+                                        {
+                                            <button class="btn btn-sm btn-success me-1" @onclick="() => SaveEditAsync(n)">Save</button>
+                                            <button class="btn btn-sm btn-secondary" @onclick="CancelEdit">Cancel</button>
+                                        }
+                                        else
+                                        {
+                                            <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => BeginEdit(n)">Edit</button>
+                                            <button class="btn btn-sm btn-outline-danger"
+                                                    @onclick="() => DeleteAsync(n)">
+                                                Delete
+                                            </button>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-muted">No notes yet for this policy.</div>
+            }
+        </div>
     </div>
 </div>
 }
 
 @code {
-    [Parameter] public string ORIPolicyReference { get; set; }
+    [Parameter] public string ORIPolicyReference { get; set; } = string.Empty;
 
     private ORIPolicyModel PolicyDetails { get; set; }
     private bool IsLoading { get; set; } = true;
-    private string ErrorMessage { get; set; }
+    private string ErrorMessage { get; set; } = string.Empty;
     private List<ORIUSMListModel> USMs { get; set; } = new();
     private List<LORSListModel> LORS { get; set; } = new();
     private List<int> PolicyYearsOfAccount => PolicyDetails?.ClassYearOfAccountSplits?
@@ -854,6 +997,9 @@ else
 
         try
         {
+            var auth = await AuthStateProvider.GetAuthenticationStateAsync();
+            _username = auth.User?.Identity?.Name ?? "Unknown";
+
             PolicyDetails = await ORIService.GetORIPolicyDetails(ORIPolicyReference);
 
             if (PolicyDetails != null)
@@ -869,6 +1015,9 @@ else
                 WrittenPremiumDimensionAllocations = await PrismService.GetWrittenPremiumDimensionAllocations(2184, ORIPolicyReference);
                 UnAdjustedAdjustedMetrics = await PrismService.GetUnadjustedAdjusted(2184, ORIPolicyReference);
                 RunLogsForPolicy = await PrismService.GetRunLogsForORIPolicy(2184, ORIPolicyReference);
+
+
+                await LoadNotesAsync();
             }
             else
             {
@@ -902,5 +1051,102 @@ else
             "StatCode2" => "teal-ghost",
             _ => "orange-ghost" // Default fallback
         };
+    }
+
+    // page-provided context
+    [Parameter] public long CurrentRunId { get; set; }
+    [Parameter] public double UnadjustedValue { get; set; }
+
+    private string _username = "";
+    private List<DifferenceNoteModel> _existingNotes = new();
+
+    // add form fields
+    private string? _selectedMetric;
+    private bool _expectedSolve;
+    private string? _notes;
+    private string _runIdInput = "";
+    private string _unadjustedInput = "";
+
+    // inline edit state
+    private string? _editingKey;
+    private bool _editExpectedSolve;
+    private string? _editNotes;
+
+    private async Task LoadNotesAsync()
+    {
+        if (string.IsNullOrWhiteSpace(ORIPolicyReference))
+            return;
+
+        _existingNotes = (await ORIService.GetDifferenceNotesAsync(ORIPolicyReference)).ToList();
+        StateHasChanged();
+    }
+
+    private async Task SaveNoteAsync()
+    {
+        if (string.IsNullOrWhiteSpace(ORIPolicyReference) || string.IsNullOrWhiteSpace(_selectedMetric))
+            return;
+
+        var note = new DifferenceNoteModel
+        {
+            ORIPolicyReference = ORIPolicyReference!,
+            Metric = _selectedMetric!,
+            RunID = long.Parse(_runIdInput),
+            UnadjustedAmount = double.Parse(_unadjustedInput),
+            NotedBy = _username,
+            ExpectedSolve = _expectedSolve,
+            Notes = string.IsNullOrWhiteSpace(_notes) ? null : _notes!.Trim()
+        };
+
+        await ORIService.AddDifferenceNoteAsync(note);
+
+        // reset user-editable fields only
+        _expectedSolve = false;
+        _notes = null;
+
+        await LoadNotesAsync();
+    }
+
+    // ---- inline edit / delete ----
+
+    private static string KeyFor(DifferenceNoteModel n)
+        => $"{n.ORIPolicyReference}|{n.Metric}|{n.RunID}|{n.NoteDate:O}";
+
+    private void BeginEdit(DifferenceNoteModel n)
+    {
+        _editingKey = KeyFor(n);
+        _editExpectedSolve = n.ExpectedSolve;
+        _editNotes = n.Notes;
+    }
+
+    private async Task SaveEditAsync(DifferenceNoteModel original)
+    {
+        if (_editingKey != KeyFor(original)) return;
+
+        await ORIService.UpdateDifferenceNoteAsync(
+            policyRef: original.ORIPolicyReference,
+            metric: original.Metric,
+            runId: original.RunID,
+            noteDate: original.NoteDate,
+            expectedSolve: _editExpectedSolve,
+            notes: string.IsNullOrWhiteSpace(_editNotes) ? null : _editNotes!.Trim()
+        );
+
+        _editingKey = null;
+        await LoadNotesAsync();
+    }
+
+    private void CancelEdit() => _editingKey = null;
+
+    private async Task DeleteAsync(DifferenceNoteModel n)
+    {
+        // optional: add a JS confirm dialog if you prefer
+        await ORIService.SoftDeleteDifferenceNoteAsync(
+            policyRef: n.ORIPolicyReference,
+            metric: n.Metric,
+            runId: n.RunID,
+            noteDate: n.NoteDate
+        );
+
+        await LoadNotesAsync();
     }
 }
