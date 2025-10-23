@@ -65,7 +65,7 @@ else if (EventDetails != null)
 			<div class="card shadow mb-4 border">
 				<div class="card-header d-flex justify-content-between align-items-center">
 					<span>Run Logs for Event (@RunLogsForEvent?.Count())</span>
-					<button class="btn btn-primary" @onclick="@(() => FileExportHelper.ExportToCsvAsync(RunLogsForEvent, $"RunLogsForEvent_{EventCode}_2184.csv", JS))">
+					<button class="btn btn-primary" @onclick="@(() => FileExportHelper.ExportToCsvAsync(RunLogsForEvent, $"RunLogsForEvent_{EventCode}_{PrismRunID}.csv", JS))">
 						<i class="bi bi-download me-1"></i>
 					</button>
 				</div>
@@ -86,7 +86,7 @@ else if (EventDetails != null)
 	private EventMetadataModel EventDetails { get; set; }
 	private bool IsLoading { get; set; } = true;
 	private string ErrorMessage { get; set; }
-
+	[Parameter] public int PrismRunID { get; set; }
 	private List<RunLogModel> RunLogsForEvent { get; set; } = new();
 
 	protected override async Task OnInitializedAsync()
@@ -103,7 +103,7 @@ else if (EventDetails != null)
 			EventDetails = await ORIService.GetEventMetadata(EventCode);
 			if (EventDetails != null)
 			{
-				RunLogsForEvent = await PrismService.GetRunLogsForEvent(2184, EventCode);
+				RunLogsForEvent = await PrismService.GetRunLogsForEvent(PrismRunID, EventCode);
 			}
 			else
 			{

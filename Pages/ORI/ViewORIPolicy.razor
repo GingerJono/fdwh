@@ -653,7 +653,7 @@ else
         <div class="card shadow mb-4 border">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span>Subject Policies (@SubjectPolicies?.Count())</span>
-                <button class="btn btn-primary" @onclick="@(() => FileExportHelper.ExportToCsvAsync(SubjectPolicies, $"SubjectPolicies_{PolicyDetails.ORIPolicyReference}_2262.csv", JS))">
+                <button class="btn btn-primary" @onclick="@(() => FileExportHelper.ExportToCsvAsync(SubjectPolicies, $"SubjectPolicies_{PolicyDetails.ORIPolicyReference}_{PrismRunID}.csv", JS))">
                     <i class="bi bi-download me-1"></i>
                 </button>
             </div>
@@ -669,7 +669,7 @@ else
         <div class="card shadow mb-4 border">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span>Subject Claims (@SubjectClaims?.Count())</span>
-                <button class="btn btn-primary" @onclick="@(() => FileExportHelper.ExportToCsvAsync(SubjectClaims, $"SubjectClaims_{PolicyDetails.ORIPolicyReference}_2262.csv", JS))">
+                <button class="btn btn-primary" @onclick="@(() => FileExportHelper.ExportToCsvAsync(SubjectClaims, $"SubjectClaims_{PolicyDetails.ORIPolicyReference}_{PrismRunID}.csv", JS))">
                     <i class="bi bi-download me-1"></i>
                 </button>
             </div>
@@ -685,7 +685,7 @@ else
         <div class="card shadow mb-4 border">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span>Claims by Event (@ClaimsByEvent?.Count())</span>
-                <button class="btn btn-primary" @onclick="@(() => FileExportHelper.ExportToCsvAsync(ClaimsByEvent, $"ClaimsByEvent_{PolicyDetails.ORIPolicyReference}_2262.csv", JS))">
+                <button class="btn btn-primary" @onclick="@(() => FileExportHelper.ExportToCsvAsync(ClaimsByEvent, $"ClaimsByEvent_{PolicyDetails.ORIPolicyReference}_{PrismRunID}.csv", JS))">
                     <i class="bi bi-download me-1"></i>
                 </button>
             </div>
@@ -787,7 +787,7 @@ else
         <div class="card shadow mb-4 border">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span>Run Logs for Policy (@RunLogsForPolicy?.Count())</span>
-                <button class="btn btn-primary" @onclick="@(() => FileExportHelper.ExportToCsvAsync(RunLogsForPolicy, $"RunLogsForPolicy_{PolicyDetails.ORIPolicyReference}_2262.csv", JS))">
+                <button class="btn btn-primary" @onclick="@(() => FileExportHelper.ExportToCsvAsync(RunLogsForPolicy, $"RunLogsForPolicy_{PolicyDetails.ORIPolicyReference}_{PrismRunID}.csv", JS))">
                     <i class="bi bi-download me-1"></i>
                 </button>
             </div>
@@ -958,6 +958,7 @@ else
     .OrderBy(y => y)
     .ToList() ?? new List<int>();
 
+    [Parameter] public int PrismRunID { get; set; }
     private List<SubjectClaimsModel> SubjectClaims { get; set; } = new();
     private List<SubjectPoliciesModel> SubjectPolicies { get; set; } = new();
     private List<ClaimsByEventModel> ClaimsByEvent { get; set; } = new();
@@ -999,7 +1000,7 @@ else
         {
             var auth = await AuthStateProvider.GetAuthenticationStateAsync();
             _username = auth.User?.Identity?.Name ?? "Unknown";
-
+            PrismRunID = await PrismService.GetRunIDForSandbox();
             PolicyDetails = await ORIService.GetORIPolicyDetails(ORIPolicyReference);
 
             if (PolicyDetails != null)
@@ -1009,13 +1010,14 @@ else
                 PolicyDetails.Reinstatements = (await ORIService.GetReinstatementsByPolicy(ORIPolicyReference)).ToList();
                 PolicyDetails.ClassYearOfAccountSplits = GetClassYearOfAccountSplits();
 
-                SubjectPolicies = await PrismService.GetSubjectPolicies(2262, ORIPolicyReference);
-                SubjectClaims = await PrismService.GetSubjectClaims(2262, ORIPolicyReference);
-                ClaimsByEvent = await PrismService.GetClaimsByEvent(2262, ORIPolicyReference);
-                WrittenPremiumDimensionAllocations = await PrismService.GetWrittenPremiumDimensionAllocations(2262, ORIPolicyReference);
-                UnAdjustedAdjustedMetrics = await PrismService.GetUnadjustedAdjusted(2262, ORIPolicyReference);
-                RunLogsForPolicy = await PrismService.GetRunLogsForORIPolicy(2262, ORIPolicyReference);
+                SubjectPolicies = await PrismService.GetSubjectPolicies(PrismRunID, ORIPolicyReference);
+                SubjectClaims = await PrismService.GetSubjectClaims(PrismRunID, ORIPolicyReference);
+                ClaimsByEvent = await PrismService.GetClaimsByEvent(PrismRunID, ORIPolicyReference);
+                WrittenPremiumDimensionAllocations = await PrismService.GetWrittenPremiumDimensionAllocations(PrismRunID, ORIPolicyReference);
+                UnAdjustedAdjustedMetrics = await PrismService.GetUnadjustedAdjusted(PrismRunID, ORIPolicyReference);
+                RunLogsForPolicy = await PrismService.GetRunLogsForORIPolicy(PrismRunID, ORIPolicyReference);
 
+               
 
                 await LoadNotesAsync();
             }
@@ -1054,7 +1056,7 @@ else
     }
 
     // page-provided context
-    [Parameter] public long CurrentRunId { get; set; }
+   
     [Parameter] public double UnadjustedValue { get; set; }
 
     private string _username = "";
@@ -1079,6 +1081,11 @@ else
 
         _existingNotes = (await ORIService.GetDifferenceNotesAsync(ORIPolicyReference)).ToList();
         StateHasChanged();
+    }
+
+    protected override void OnParametersSet()
+    {
+        _runIdInput = PrismRunID.ToString();
     }
 
     private async Task SaveNoteAsync()

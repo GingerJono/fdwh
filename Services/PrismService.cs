@@ -68,21 +68,34 @@ namespace Sandbox.Services
         // Get Runs and Logs
         public async Task<RunModel> GetRun(int runID)
         {
-            using (var connection = new SqlConnection(_configuration.GetConnectionString("PrismConnection")))
+            try
             {
-                await connection.OpenAsync();
-
-                var parameters = new DynamicParameters();
-                parameters.Add("RunID", runID, DbType.Int64);
-
-                var run = await connection.QuerySingleOrDefaultAsync<RunModel>(
-                    "dbo.spGetRun",
-                    parameters,
-                    commandType: CommandType.StoredProcedure);
-
-                if (run != null)
+                using (var connection = new SqlConnection(_configuration.GetConnectionString("PrismConnection")))
                 {
-                    // Load child collections in parallel
+                    await connection.OpenAsync();
+
+                    var parameters = new DynamicParameters();
+                    parameters.Add("RunID", runID, DbType.Int64);
+
+                    RunModel run;
+
+                    try
+                    {
+                        run = await connection.QuerySingleOrDefaultAsync<RunModel>(
+                            "dbo.spGetRun",
+                            parameters,
+                            commandType: CommandType.StoredProcedure);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error executing spGetRun: {ex.Message}");
+                        throw;
+                    }
+
+                    if (run == null)
+                        return null;
+
+                    // Kick off child calls
                     var logsTask = GetRunLogs(runID);
                     var allocatedPremiumSignedTask = GetAllocatedPremiumSigned(runID);
                     var allocatedPremiumWrittenTask = GetAllocatedPremiumWritten(runID);
@@ -96,23 +109,33 @@ namespace Sandbox.Services
                     var oriActualRIPsTask = GetORIActualRIPs(runID);
                     var oriPoliciesTask = GetORIPolicies(runID);
 
+                    try
+                    {
+                        // Await all in parallel
+                        await Task.WhenAll(
+                            logsTask,
+                            allocatedPremiumSignedTask,
+                            allocatedPremiumWrittenTask,
+                            allocatedOverridersAndProfitCommissionTask,
+                            allocatedRecoveriesAndRIPsTask,
+                            allocatedActualRecoveriesTask,
+                            allocatedActualRIPsTask,
+                            subjectClaimsTask,
+                            subjectPoliciesTask,
+                            oriActualRecoveriesTask,
+                            oriActualRIPsTask,
+                            oriPoliciesTask
+                        );
+                    }
+                    catch (Exception ex)
+                    {
+                        // WhenAll wraps exceptions in AggregateException -> expose the real inner failure
+                        var inner = ex.InnerException?.Message ?? ex.Message;
+                        Console.WriteLine($"Error loading child collections for run {runID}: {inner}");
+                        throw;
+                    }
 
-                    await Task.WhenAll(
-                        logsTask,
-                        allocatedPremiumSignedTask,
-                        allocatedPremiumWrittenTask,
-                        allocatedOverridersAndProfitCommissionTask,
-                        allocatedRecoveriesAndRIPsTask,
-                        allocatedActualRecoveriesTask,
-                        allocatedActualRIPsTask,
-                        subjectClaimsTask,
-                        subjectPoliciesTask,
-                        oriActualRecoveriesTask,
-                        oriActualRIPsTask,
-                        oriPoliciesTask
-                    );
-
-                    // Assign the collections
+                    // Populate the run object
                     run.Logs = logsTask.Result;
                     run.AllocatedPremiumSigned = allocatedPremiumSignedTask.Result;
                     run.AllocatedPremiumWritten = allocatedPremiumWrittenTask.Result;
@@ -128,10 +151,37 @@ namespace Sandbox.Services
 
                     return run;
                 }
-
-                return null;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Unhandled error in GetRun({runID}): {ex.Message}");
+                throw;
             }
         }
+
+
+        public async Task<int> GetRunIDForSandbox()
+        {
+            using (var connection = new SqlConnection(_configuration.GetConnectionString("PrismConnection")))
+            {
+                await connection.OpenAsync();
+
+                try
+                {
+                    var result = await connection.ExecuteScalarAsync<int>(
+                        "dbo.spGetRunIDForSandbox",
+                        commandType: CommandType.StoredProcedure);
+
+                    return result;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error in GetRunIDForSandbox: " + ex.Message);
+                    throw;
+                }
+            }
+        }
+
 
         public async Task<List<RunModel>> GetRuns()
         {
