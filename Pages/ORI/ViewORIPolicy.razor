@@ -838,6 +838,15 @@ else
                 </div>
             </div>
 
+            <div class="col-md-2 d-flex align-items-center">
+                <div class="form-check mt-4">
+                    <input class="form-check-input" type="checkbox" id="prismCorrect" @bind="_prismCorrect" />
+                    <label class="form-check-label" for="prismCorrect">
+                        Prism Correct
+                    </label>
+                </div>
+            </div>
+
             <div class="col-12">
                 <label class="form-label">Notes</label>
                 <textarea class="form-control" rows="3" @bind="_notes" placeholder="Add details..."></textarea>
@@ -875,6 +884,7 @@ else
                                 <th>Unadjusted</th>
                                 <th>Noted By</th>
                                 <th style="width: 140px;">Expected Solve</th>
+                                <th>Prism Correct</th>
                                 <th>Notes</th>
                                 <th style="width: 160px;"></th>
                             </tr>
@@ -900,6 +910,17 @@ else
                                         else
                                         {
                                             @(n.ExpectedSolve ? "Yes" : "No")
+                                        }
+                                    </td>
+
+                                    <td>
+                                        @if (isEditing)
+                                        {
+                                            <input type="checkbox" class="form-check-input" @bind="_editPrismCorrect" />
+                                        }
+                                        else
+                                        {
+                                            @(n.PrismCorrect ? "Yes" : "No")
                                         }
                                     </td>
 
@@ -1065,6 +1086,7 @@ else
     // add form fields
     private string? _selectedMetric;
     private bool _expectedSolve;
+    private bool _prismCorrect;
     private string? _notes;
     private string _runIdInput = "";
     private string _unadjustedInput = "";
@@ -1072,6 +1094,7 @@ else
     // inline edit state
     private string? _editingKey;
     private bool _editExpectedSolve;
+    private bool _editPrismCorrect;
     private string? _editNotes;
 
     private async Task LoadNotesAsync()
@@ -1101,6 +1124,7 @@ else
             UnadjustedAmount = double.Parse(_unadjustedInput),
             NotedBy = _username,
             ExpectedSolve = _expectedSolve,
+            PrismCorrect = _prismCorrect,
             Notes = string.IsNullOrWhiteSpace(_notes) ? null : _notes!.Trim()
         };
 
@@ -1108,6 +1132,7 @@ else
 
         // reset user-editable fields only
         _expectedSolve = false;
+        _prismCorrect = false;
         _notes = null;
 
         await LoadNotesAsync();
@@ -1122,6 +1147,7 @@ else
     {
         _editingKey = KeyFor(n);
         _editExpectedSolve = n.ExpectedSolve;
+        _editPrismCorrect = n.PrismCorrect;
         _editNotes = n.Notes;
     }
 
@@ -1135,6 +1161,7 @@ else
             runId: original.RunID,
             noteDate: original.NoteDate,
             expectedSolve: _editExpectedSolve,
+            prismCorrect: _editPrismCorrect,
             notes: string.IsNullOrWhiteSpace(_editNotes) ? null : _editNotes!.Trim()
         );
 

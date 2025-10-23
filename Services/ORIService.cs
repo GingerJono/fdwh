@@ -1093,8 +1093,8 @@ namespace Sandbox.Services
         {
             const string sql = @"
             INSERT INTO ORI.DifferenceNotes
-            (ORIPolicyReference, Metric, RunID, UnadjustedAmount, NoteDate, NotedBy, ExpectedSolve, Notes, IsDeleted)
-            VALUES (@ORIPolicyReference, @Metric, @RunID, @UnadjustedAmount, GETDATE(), @NotedBy, @ExpectedSolve, @Notes, 0);";
+            (ORIPolicyReference, Metric, RunID, UnadjustedAmount, NoteDate, NotedBy, ExpectedSolve, PrismCorrect, Notes, IsDeleted)
+            VALUES (@ORIPolicyReference, @Metric, @RunID, @UnadjustedAmount, GETDATE(), @NotedBy, @ExpectedSolve, @PrismCorrect, @Notes, 0);";
 
             using (var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection")))
             {
@@ -1107,6 +1107,7 @@ namespace Sandbox.Services
                 parameters.Add("UnadjustedAmount", note.UnadjustedAmount, DbType.Double);
                 parameters.Add("NotedBy", note.NotedBy);
                 parameters.Add("ExpectedSolve", note.ExpectedSolve, DbType.Boolean);
+                parameters.Add("PrismCorrect", note.PrismCorrect, DbType.Boolean);
                 parameters.Add("Notes", note.Notes, DbType.String);
 
                 try
@@ -1125,7 +1126,7 @@ namespace Sandbox.Services
         public async Task<List<DifferenceNoteModel>> GetDifferenceNotesAsync(string policyRef, int? runId = null)
         {
             var sql = @"
-            SELECT ORIPolicyReference, Metric, RunID, UnadjustedAmount, NoteDate, NotedBy, ExpectedSolve, Notes, IsDeleted
+            SELECT ORIPolicyReference, Metric, RunID, UnadjustedAmount, NoteDate, NotedBy, ExpectedSolve, PrismCorrect, Notes, IsDeleted
             FROM ORI.DifferenceNotes
             WHERE ORIPolicyReference = @ORIPolicyReference
               AND ISNULL(IsDeleted, 0) = 0";
@@ -1157,11 +1158,12 @@ namespace Sandbox.Services
         }
 
         // UPDATE (only ExpectedSolve + Notes)
-        public async Task UpdateDifferenceNoteAsync(string policyRef, string metric, long runId, DateTime noteDate, bool expectedSolve, string? notes)
+        public async Task UpdateDifferenceNoteAsync(string policyRef, string metric, long runId, DateTime noteDate, bool expectedSolve, bool prismCorrect, string? notes)
         {
             const string sql = @"
             UPDATE ORI.DifferenceNotes
             SET ExpectedSolve = @ExpectedSolve,
+                PrismCorrect = @PrismCorrect
                 Notes = @Notes
             WHERE ORIPolicyReference = @ORIPolicyReference
               AND Metric = @Metric
@@ -1175,6 +1177,7 @@ namespace Sandbox.Services
 
                 var parameters = new DynamicParameters();
                 parameters.Add("ExpectedSolve", expectedSolve, DbType.Boolean);
+                parameters.Add("PrismCorrect", expectedSolve, DbType.Boolean);
                 parameters.Add("Notes", notes, DbType.String);
                 parameters.Add("ORIPolicyReference", policyRef);
                 parameters.Add("Metric", metric);
