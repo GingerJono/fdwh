@@ -18,6 +18,8 @@ namespace Sandbox.Models.ORI
         public DateTime Expiry { get; set; }
         public string? BasisOfCover { get; set; }
         public decimal? OrderPercent { get; set; }
+
+        public decimal? CessionPercent { get; set; }
         public string? OfWholeOrOrder { get; set; }
         public decimal? Limit { get; set; }
         public decimal? DeductibleRetention { get; set; }
