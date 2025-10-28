@@ -5,7 +5,7 @@
         public string ORIPolicyReference { get; set; } = string.Empty;
         public string? ContractCcy { get; set; }
         public DateTime? FXRateApplicationDate { get; set; }
-        public double? FXRateFromSettlementCcyToContractCcy { get; set; }
+        public double? FXRate { get; set; }
         public string? PolicyType { get; set; }
         public string? WholeOrOrder { get; set; }
         public string? ClaimReference { get; set; }
