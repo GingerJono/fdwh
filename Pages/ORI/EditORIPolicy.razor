@@ -207,19 +207,12 @@ else if (PolicyDetails != null)
 									<th>FX Rate Application Date</th>
 									<td>
 										<InputText @bind-Value="PolicyDetails.FXRateApplicationDate" class="form-control" readonly />
-
-										@* <div class="form-group">
-											<div class="input-group">
-												<div class="input-group-text text-muted"> <i class="ri-calendar-line"></i> </div>
-												<Flatpickr id="fxRateApplicationDatePickr" class="form-control" @ref="fxRateApplicationDatePickr" Value="@selectedFXRateApplicationDate" ValueChanged="OnFXRateDateChanged" DateFormat="Y-m-d" placeholder="Choose date" />
-											</div>
-										</div> *@
 									</td>
 								</tr>
 								<tr>
 									<th>FX Treatment</th>
 									<td>
-										<InputSelect class="form-control" @bind-Value=PolicyDetails.FXTreatment TValue="string">
+										<InputSelect class="form-control" @bind-Value="PolicyDetails.FXTreatment" TValue="string">
 											<option value="">Select an FX Treatment</option>
 											@if (FXTreatments != null)
 											{
@@ -240,13 +233,61 @@ else if (PolicyDetails != null)
 								<tr>
 									<th>Ceded Premium Calculation</th>
 									<td>
-										<InputSelect class="form-control" @bind-Value=PolicyDetails.CededPremiumCalculation TValue="string">
+										<InputSelect class="form-control" @bind-Value="PolicyDetails.CededPremiumCalculation" TValue="string">
 											<option value="">Select a Ceded Premium Calculation...</option>
-											<option value="GrossGross" class="form-control">Gross Gross</option>
-											<option value="GrossNet" class="form-control">Gross Net</option>
+											<option value="GrossGross">Gross Gross</option>
+											<option value="GrossNet">Gross Net</option>
 										</InputSelect>
 									</td>
 								</tr>
+
+								<!-- --- NEW OVERRIDE FIELDS --- -->
+								<tr>
+									<th>Inception Override</th>
+									<td><InputText @bind-Value="PolicyDetails.InceptionOverride" class="form-control" /></td>
+								</tr>
+								<tr>
+									<th>Expiry Override</th>
+									<td><InputText @bind-Value="PolicyDetails.ExpiryOverride" class="form-control" /></td>
+								</tr>
+								<tr>
+									<th>Basis of Cover Override</th>
+									<td><InputText @bind-Value="PolicyDetails.BasisOfCoverCodeOverride" class="form-control" /></td>
+								</tr>
+								<tr>
+									<th>Cession Override</th>
+									<td><InputNumber @bind-Value="PolicyDetails.CessionOverride" class="form-control" /></td>
+								</tr>
+								<tr>
+									<th>Order Override</th>
+									<td><InputNumber @bind-Value="PolicyDetails.OrderOverride" class="form-control" /></td>
+								</tr>
+								<tr>
+									<th>Whole / Order Override</th>
+									<td>
+										<InputSelect class="form-control" @bind-Value="PolicyDetails.WholeOrOrderOverride" TValue="string">
+											<option value="">Select...</option>
+											<option value="W">Whole</option>
+											<option value="O">Order</option>
+										</InputSelect>
+									</td>
+								</tr>
+								<tr>
+									<th>Limit Override</th>
+									<td><InputNumber @bind-Value="PolicyDetails.LimitOverride" class="form-control" /></td>
+								</tr>
+								<tr>
+									<th>Deductible / Retention Override</th>
+									<td><InputNumber @bind-Value="PolicyDetails.DeductibleRetentionOverride" class="form-control" /></td>
+								</tr>
+								<tr>
+									<th>Policy Type Override</th>
+									<td><InputText @bind-Value="PolicyDetails.PolicyTypeOverride" class="form-control" /></td>
+								</tr>
+								<tr>
+									<th>Policy Sub-Type Override</th>
+									<td><InputText @bind-Value="PolicyDetails.PolicySubTypeOverride" class="form-control" /></td>
+								</tr>																
 							</tbody>
 						</table>
 					</div>

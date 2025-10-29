@@ -626,8 +626,19 @@ namespace Sandbox.Services
 				metaDataParameters.Add("@OverriderBasis", model.OverriderBasis);
 				metaDataParameters.Add("@UWExpensesBasis", model.UWExpensesBasis);
 				metaDataParameters.Add("@PCProfitBasis", model.PCProfitBasis);
-				metaDataParameters.Add("@NilPCOverride", model.NilPCOverride);
-				await db.ExecuteAsync("ORI.spUpsertPolicyDetails", metaDataParameters, commandType: CommandType.StoredProcedure, transaction: transaction);
+				metaDataParameters.Add("@NilPCOverride", model.NilPCOverride); metaDataParameters.Add("@InceptionOverride", model.InceptionOverride);
+                metaDataParameters.Add("@ExpiryOverride", model.ExpiryOverride);
+                metaDataParameters.Add("@BasisOfCoverCodeOverride", model.BasisOfCoverCodeOverride);
+                metaDataParameters.Add("@OrderOverride", model.OrderOverride);
+                metaDataParameters.Add("@WholeOrOrderOverride", model.WholeOrOrderOverride);
+                metaDataParameters.Add("@LimitOverride", model.LimitOverride);
+                metaDataParameters.Add("@DeductibleRetentionOverride", model.DeductibleRetentionOverride);
+                metaDataParameters.Add("@PolicyTypeOverride", model.PolicyTypeOverride);
+                metaDataParameters.Add("@PolicySubTypeOverride", model.PolicySubTypeOverride);
+                metaDataParameters.Add("@CessionOverride", model.CessionOverride);
+                metaDataParameters.Add("@LastUpdatedBy", model.LastUpdatedBy);
+
+                await db.ExecuteAsync("ORI.spUpsertPolicyDetails", metaDataParameters, commandType: CommandType.StoredProcedure, transaction: transaction);
 
 				transaction.Commit();
                 Console.WriteLine($"[SUCCESS] ORI Policy Metadata saved successfully for {model.ORIPolicyReference}");
@@ -1163,7 +1174,7 @@ namespace Sandbox.Services
             const string sql = @"
             UPDATE ORI.DifferenceNotes
             SET ExpectedSolve = @ExpectedSolve,
-                PrismCorrect = @PrismCorrect
+                PrismCorrect = @PrismCorrect,
                 Notes = @Notes
             WHERE ORIPolicyReference = @ORIPolicyReference
               AND Metric = @Metric

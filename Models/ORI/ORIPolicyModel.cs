@@ -9,18 +9,17 @@ namespace Sandbox.Models.ORI
 {
     public class ORIPolicyModel
     {
-        public string? FXRateApplicationDate { get; set; }
-        public string? FXTreatment { get; set; }
         public required string ORIPolicyReference { get; set; }
+        public string? FXRateApplicationDate { get; set; }
+        public string? FXTreatment { get; set; }        
         public string? PolicyDescription { get; set; }
         public string? ContractCurrency { get; set; }
         public DateTime Inception { get; set; }
         public DateTime Expiry { get; set; }
-        public string? BasisOfCover { get; set; }
+        public string? BasisOfCoverCode { get; set; }
         public decimal? OrderPercent { get; set; }
-
         public decimal? CessionPercent { get; set; }
-        public string? OfWholeOrOrder { get; set; }
+        public string? WholeOrOrder { get; set; }
         public decimal? Limit { get; set; }
         public decimal? DeductibleRetention { get; set; }
         public string? BrokerPseudonym { get; set; }
@@ -29,7 +28,6 @@ namespace Sandbox.Models.ORI
         public string? SecurityLeader { get; set; }
         public int InuringPriority { get; set; }
         public string? CededPremiumCalculation { get; set; }
-
 		public string? ORIPillar { get; set; }
 		public decimal? Overrider { get; set; }
 		public decimal? PC { get; set; }
@@ -40,7 +38,20 @@ namespace Sandbox.Models.ORI
 		public string? PCProfitBasis { get; set; }
 		public string? NilPCOverride { get; set; }
 
-		public string? DMSLink { get; set; }
+        public string? InceptionOverride { get; set; }
+        public string? ExpiryOverride { get; set; }
+        public string? BasisOfCoverCodeOverride { get; set; }
+        public decimal? OrderOverride { get; set; }
+        public string? WholeOrOrderOverride { get; set; }
+        public decimal? LimitOverride { get; set; }
+        public decimal? DeductibleRetentionOverride { get; set; }
+        public string? PolicyTypeOverride { get; set; }
+        public string? PolicySubTypeOverride { get; set; }
+        public decimal? CessionOverride { get; set; }
+        public string? LastUpdatedBy { get; set; }
+        public string? LastUpdatedDate { get; set; }
+
+        public string? DMSLink { get; set; }
 
         // Single List for inclusions and exclusions
         public List<ORIFilterItem> Filters { get; set; } = new();
@@ -66,7 +77,6 @@ namespace Sandbox.Models.ORI
 
 
 	}
-
 	public class ORIFilterItemDefinition
     {
         public string? Code { get; set; }  // "DomicileCountry", "InwardPolicyReference", etc.
@@ -84,7 +94,6 @@ namespace Sandbox.Models.ORI
         public string? LastUpdatedBy { get; set; }
 
     }
-
 
     public class Narrative
     {
@@ -173,11 +182,11 @@ namespace Sandbox.Models.ORI
 
 	public class SyndicateSplit
 	{
-		public string ORIPolicyReference { get; set; }
-		public string Syndicate { get; set; }
+		public string? ORIPolicyReference { get; set; }
+		public string? Syndicate { get; set; }
 		public decimal Percentage { get; set; }
 		public DateTime? LastUpdated { get; set; }
-		public string LastUpdatedBy { get; set; }
+		public string? LastUpdatedBy { get; set; }
 		public bool IsDeleted { get; set; }
 	}
 
