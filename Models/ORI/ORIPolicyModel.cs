@@ -38,8 +38,8 @@ namespace Sandbox.Models.ORI
 		public string? PCProfitBasis { get; set; }
 		public string? NilPCOverride { get; set; }
 
-        public string? InceptionOverride { get; set; }
-        public string? ExpiryOverride { get; set; }
+        public DateTime? InceptionOverride { get; set; }
+        public DateTime? ExpiryOverride { get; set; }
         public string? BasisOfCoverCodeOverride { get; set; }
         public decimal? OrderOverride { get; set; }
         public string? WholeOrOrderOverride { get; set; }

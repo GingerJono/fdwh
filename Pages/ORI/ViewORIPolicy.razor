@@ -78,7 +78,7 @@ else
                 <strong>Inception</strong>
                 <div class="fs-4 text @(PolicyDetails.InceptionOverride != null ? "text-danger" : "")"
                      title="@(PolicyDetails.InceptionOverride != null ? $"Original: {PolicyDetails.Inception:dd/MM/yyyy}" : null)">
-                    @(PolicyDetails.InceptionOverride ?? PolicyDetails.Inception.ToString("dd/MM/yyyy"))
+                    @((PolicyDetails.InceptionOverride?.ToString("dd/MM/yyyy")) ?? PolicyDetails.Inception.ToString("dd/MM/yyyy"))
                 </div>
             </div>
 
@@ -86,7 +86,7 @@ else
                 <strong>Expiry</strong>
                 <div class="fs-4 text @(PolicyDetails.ExpiryOverride != null ? "text-danger" : "")"
                      title="@(PolicyDetails.ExpiryOverride != null ? $"Original: {PolicyDetails.Expiry:dd/MM/yyyy}" : null)">
-                    @(PolicyDetails.ExpiryOverride ?? PolicyDetails.Expiry.ToString("dd/MM/yyyy"))
+                    @((PolicyDetails.ExpiryOverride?.ToString("dd/MM/yyyy")) ?? PolicyDetails.Expiry.ToString("dd/MM/yyyy"))
                 </div>
             </div>
 
@@ -122,11 +122,18 @@ else
         </div>
 
         <div class="row">
-            <div class="col-md-2">
+            <div class="col-md-1">
                 <strong>Policy Type</strong>
                 <div class="fs-4 text @(PolicyDetails.PolicyTypeOverride != null ? "text-danger" : "")"
                      title="@(PolicyDetails.PolicyTypeOverride != null ? $"Original: {PolicyDetails.PolicyType}" : null)">
                     @(PolicyDetails.PolicyTypeOverride ?? PolicyDetails.PolicyType)
+                </div>
+            </div>
+            <div class="col-md-1">
+                <strong>Policy Sub Type</strong>
+                <div class="fs-4 text @(PolicyDetails.PolicySubTypeOverride != null ? "text-danger" : "")"
+                     title="@(PolicyDetails.PolicySubTypeOverride != null ? $"Original: {PolicyDetails.PolicySubTypeOverride}" : null)">
+                    @(PolicyDetails.PolicySubTypeOverride ?? PolicyDetails.PolicySubTypeOverride)
                 </div>
             </div>
 
