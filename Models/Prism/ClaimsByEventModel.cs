@@ -4,7 +4,7 @@
     {      
         public string ORIPolicyReference { get; set; } = string.Empty;
         public string EventCode { get; set; } = string.Empty;
-        public string? ContractCcy { get; set; }
+        public string? Currency { get; set; }
         public DateTime? FXRateApplicationDate { get; set; }
         public string? PolicyType { get; set; }
         public string? WholeOrOrder { get; set; }
