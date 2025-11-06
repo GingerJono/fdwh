@@ -245,6 +245,47 @@ else
 </div>
 <div class="row">
     <div class="col-md-6">
+        @if (PolicyDetails.PolicyType == "X")
+        {
+            <div class="card shadow mb-4 border">
+                <div class="card-header">
+                    Policy Premium
+                </div>
+                <div class="card-body">
+                    @if (policyPremiums is null || !policyPremiums.Any())
+                    {
+                        <p>No Policy Premiums added.</p>
+                    }
+                    else
+                    {
+                        <table class="table table-sm align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Period</th>
+                                    <th>Final</th>
+
+                                    <th class="text-end">Gross Subject Premium</th>
+                                    <th class="text-end">Adjustable Rate</th>
+                                    <th class="text-end">Minimum Premium</th>                                   
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var premium in policyPremiums.Where(p => !p.IsDeleted))
+                                {
+                                    <tr>
+                                        <td>@premium.Period</td>
+                                        <td>@(premium.IsFinalAdjusted ? "Yes" : "No")</td>
+                                        <td class="text-end">@premium.GrossSubjectPremium?.ToString("N2")</td>
+                                        <td class="text-end">@premium.AdjustableRate?.ToString("N4")</td>
+                                        <td class="text-end">@premium.MinimumPremium?.ToString("N2")</td>                                       
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                </div>
+            </div>
+        }
         <div class="card shadow mb-4 border">
             <div class="card-header">Policy Allocations by Class</div>
             <div class="card-body">
@@ -1082,7 +1123,7 @@ else
     private List<WrittenPremiumDimensionAllocationsModel> WrittenPremiumDimensionAllocations { get; set; } = new();
     private List<UnAdjustedAdjustedModel> UnAdjustedAdjustedMetrics { get; set; } = new();
     private List<RunLogModel> RunLogsForPolicy { get; set; } = new();
-
+    private List<ORIPolicyPremiumModel> policyPremiums = new();
 
     // COB/YoA Splits matrix
     public List<ClassYearOfAccountSplits> GetClassYearOfAccountSplits()
@@ -1134,7 +1175,7 @@ else
                 UnAdjustedAdjustedMetrics = await PrismService.GetUnadjustedAdjusted(PrismRunID, ORIPolicyReference);
                 RunLogsForPolicy = await PrismService.GetRunLogsForORIPolicy(PrismRunID, ORIPolicyReference);
 
-
+                policyPremiums = await ORIService.GetORIPolicyPremiumsAsync(ORIPolicyReference, null, includeDeleted: false);
 
                 await LoadNotesAsync();
             }

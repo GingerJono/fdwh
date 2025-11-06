@@ -15,1114 +15,1239 @@
 
 @if (IsLoading)
 {
-	<p>Loading policy details...</p>
+    <p>Loading policy details...</p>
 }
 else if (!string.IsNullOrEmpty(ErrorMessage))
 {
-	<p class="text-danger">@ErrorMessage</p>
+    <p class="text-danger">@ErrorMessage</p>
 }
 else if (PolicyDetails != null)
 {
-	<nav aria-label="breadcrumb">
-		<ol class="breadcrumb">
-			<li class="breadcrumb-item"><a href="ORIPolicies">ORI POLICIES</a></li>
-			<li class="breadcrumb-item"><a href="ViewORIPolicy/@PolicyDetails.ORIPolicyReference">VIEW ORI POLICY</a></li>
-			<li class="breadcrumb-item active" aria-current="page">EDIT ORI POLICY</li>
-		</ol>
-	</nav>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="ORIPolicies">ORI POLICIES</a></li>
+            <li class="breadcrumb-item"><a href="ViewORIPolicy/@PolicyDetails.ORIPolicyReference">VIEW ORI POLICY</a></li>
+            <li class="breadcrumb-item active" aria-current="page">EDIT ORI POLICY</li>
+        </ol>
+    </nav>
 
-	<h1>Editing ORI Policy Reference: @PolicyDetails.ORIPolicyReference</h1>
-	<div class="card mb-3">
-		<div class="card-header">Copy Terms from Another ORI Policy</div>
-		<div class="card-body">
-			<div class="row g-2 align-items-start">
-				<div class="col-md-10">
-					<input class="form-control"
-						   placeholder="Type to search ORI policies..."
-						   value="@PolicySearchTerm"
-						   @oninput="@(e => { PolicySearchTerm = e.Value?.ToString(); FilterPolicies(); })" />
-
-
-					@if (FilteredPolicies.Any())
-					{
-						<ul class="list-group mt-1 shadow-sm" style="max-height: 220px; overflow-y: auto; border: 1px solid #dee2e6;">
-							@foreach (var p in FilteredPolicies)
-							{
-								<li class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
-									style="cursor:pointer"
-									@onclick="@(() => SelectPolicy(p.ORIPolicyReference))">
-									<span><strong>@p.ORIPolicyReference</strong> – @p.PolicyDescription</span>
-									<i class="ri-arrow-right-line text-secondary"></i>
-								</li>
-							}
-						</ul>
-					}
-					else if (!string.IsNullOrWhiteSpace(PolicySearchTerm))
-					{
-						<p class="text-muted mt-1">No matching policies found.</p>
-					}
-				</div>
-				<div class="col-md-2 text-end">
-					<button class="btn btn-outline-primary w-100"
-							@onclick="CopyFromAnotherPolicy"
-							disabled="@string.IsNullOrWhiteSpace(SelectedPolicyToCopyFrom)">
-						Copy
-					</button>
-				</div>
-			</div>
-		</div>
-	</div>
-
-	<EditForm Model="PolicyDetails" OnValidSubmit="HandleValidSubmit">
-		<DataAnnotationsValidator />
-		<ValidationSummary />
-
-		<div class="card mb-4 border">
-			<div class="card-header">Policy Inclusions/Exclusions</div>
-			<div class="card-body">
-				<blockquote class="blockquote custom-blockquote primary mb-0">
-					<h6>The terms below are used to determine which policies, premiums and claims are applicable to the reinsurance contract.</h6>
-					<ul>
-						<li>"Excluded" means that the particular business item will not be applicable. </li>
-						<li>"Included" means that <strong>only those stated business values will</strong> be applicable (and any other value for that "item" will be excluded).</li>
-						<li>Outside of the terms below, the only other data point used to determine applicability of this ORI Contact to Inwards Policies/Claims is the "risk basis"(e.g.RAD, LOD) and inception/ expiry date.</li>
-					</ul>
-					<span class="quote-icon"><i class="ri-information-line"></i></span>
-				</blockquote>
-				<table class="table table-striped">
-					<thead>
-						<tr>
-							<th>Type</th>
-							<th>Item</th>
-							<th>Value</th>
-							<th>Note</th>
-							<th>Last Updated</th>
-							<th>Updated By</th>
-							<th>Actions</th>
-						</tr>
-					</thead>
-					<tbody>
-						@foreach (var filter in PolicyDetails.Filters)
-						{
-							<tr>
-								<td>
-									<span class="btn btn-@(filter.InclusionExclusion == "Inclusion" ? "success" : "danger")-gradient rounded-pill btn-wave">
-										@filter.InclusionExclusion
-									</span>
-								</td>
-								<td>
-									<button type="button" class="btn btn-@GetGhostButtonClass(filter.IncludedOrExcludedItem) btn-wave">
-										@filter.IncludedOrExcludedItem
-									</button>
-								</td>
-								<td>
-									<InputText class="form-control" @bind-Value="filter.IncludedOrExcludedValue" />
-								</td>
-								<td><InputText class="form-control" @bind-Value="filter.Note" /></td>
-								<td>@filter.LastUpdated?.ToString("yyyy-MM-dd HH:mm")</td>
-								<td>@filter.LastUpdatedBy</td>
-								<td>
-									<button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveFilter(filter)">Remove</button>
-								</td>
-							</tr>
-						}
-
-						<tr>
-							<td>
-								<InputSelect class="form-control" @bind-Value="newFilter.InclusionExclusion">
-									<option value="Inclusion">Inclusion</option>
-									<option value="Exclusion">Exclusion</option>
-								</InputSelect>
-							</td>
-							<td>
-
-								<InputSelect class="form-control"
-											 Value="@newFilter.IncludedOrExcludedItem"
-											 ValueChanged="HandleItemChanged"
-											 ValueExpression="() => newFilter.IncludedOrExcludedItem"
-											 TValue="string">
-									<option value="">Select a filter type</option>
-									@foreach (var item in FilterItemsList)
-									{
-										<option value="@item.Code">@item.DisplayName</option>
-									}
-								</InputSelect>
+    <h1>Editing ORI Policy Reference: @PolicyDetails.ORIPolicyReference</h1>
+    <div class="card mb-3">
+        <div class="card-header">Copy Terms from Another ORI Policy</div>
+        <div class="card-body">
+            <div class="row g-2 align-items-start">
+                <div class="col-md-10">
+                    <input class="form-control"
+                           placeholder="Type to search ORI policies..."
+                           value="@PolicySearchTerm"
+                           @oninput="@(e => { PolicySearchTerm = e.Value?.ToString(); FilterPolicies(); })" />
 
 
-							</td>
-							<td>
-								@if (KnownDropdownTypes.Contains(newFilter.IncludedOrExcludedItem))
-								{
-									if (IsLoadingDropdown)
-									{
-										@if (IsLoadingDropdown)
-										{
-											<select class="form-control" disabled>
-												<option>Fetching options...</option>
-											</select>
-										}
-									}
-									else
-									{
-										<InputSelect class="form-control"
-													 Value="@newFilter.IncludedOrExcludedValue"
-													 ValueChanged="v => newFilter.IncludedOrExcludedValue = v"
-													 ValueExpression="() => newFilter.IncludedOrExcludedValue"
-													 TValue="string">
-											<option value="">Select an option</option>
-											@foreach (var item in DropdownValues.GetValueOrDefault(newFilter.IncludedOrExcludedItem, new()))
-											{
-												<option value="@item.Code">@item.Name</option>
-											}
-										</InputSelect>
-									}
-								}
-								else
-								{
-									<InputText class="form-control" @bind-Value="newFilter.IncludedOrExcludedValue" placeholder="Enter value" />
-								}
-							</td>
+                    @if (FilteredPolicies.Any())
+                    {
+                        <ul class="list-group mt-1 shadow-sm" style="max-height: 220px; overflow-y: auto; border: 1px solid #dee2e6;">
+                            @foreach (var p in FilteredPolicies)
+                            {
+                                <li class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+                                    style="cursor:pointer"
+                                    @onclick="@(() => SelectPolicy(p.ORIPolicyReference))">
+                                    <span><strong>@p.ORIPolicyReference</strong> – @p.PolicyDescription</span>
+                                    <i class="ri-arrow-right-line text-secondary"></i>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else if (!string.IsNullOrWhiteSpace(PolicySearchTerm))
+                    {
+                        <p class="text-muted mt-1">No matching policies found.</p>
+                    }
+                </div>
+                <div class="col-md-2 text-end">
+                    <button class="btn btn-outline-primary w-100"
+                            @onclick="CopyFromAnotherPolicy"
+                            disabled="@string.IsNullOrWhiteSpace(SelectedPolicyToCopyFrom)">
+                        Copy
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <EditForm Model="PolicyDetails" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="card mb-4 border">
+            <div class="card-header">Policy Inclusions/Exclusions</div>
+            <div class="card-body">
+                <blockquote class="blockquote custom-blockquote primary mb-0">
+                    <h6>The terms below are used to determine which policies, premiums and claims are applicable to the reinsurance contract.</h6>
+                    <ul>
+                        <li>"Excluded" means that the particular business item will not be applicable. </li>
+                        <li>"Included" means that <strong>only those stated business values will</strong> be applicable (and any other value for that "item" will be excluded).</li>
+                        <li>Outside of the terms below, the only other data point used to determine applicability of this ORI Contact to Inwards Policies/Claims is the "risk basis"(e.g.RAD, LOD) and inception/ expiry date.</li>
+                    </ul>
+                    <span class="quote-icon"><i class="ri-information-line"></i></span>
+                </blockquote>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Item</th>
+                            <th>Value</th>
+                            <th>Note</th>
+                            <th>Last Updated</th>
+                            <th>Updated By</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var filter in PolicyDetails.Filters)
+                        {
+                            <tr>
+                                <td>
+                                    <span class="btn btn-@(filter.InclusionExclusion == "Inclusion" ? "success" : "danger")-gradient rounded-pill btn-wave">
+                                        @filter.InclusionExclusion
+                                    </span>
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-@GetGhostButtonClass(filter.IncludedOrExcludedItem) btn-wave">
+                                        @filter.IncludedOrExcludedItem
+                                    </button>
+                                </td>
+                                <td>
+                                    <InputText class="form-control" @bind-Value="filter.IncludedOrExcludedValue" />
+                                </td>
+                                <td><InputText class="form-control" @bind-Value="filter.Note" /></td>
+                                <td>@filter.LastUpdated?.ToString("yyyy-MM-dd HH:mm")</td>
+                                <td>@filter.LastUpdatedBy</td>
+                                <td>
+                                    <button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveFilter(filter)">Remove</button>
+                                </td>
+                            </tr>
+                        }
+
+                        <tr>
+                            <td>
+                                <InputSelect class="form-control" @bind-Value="newFilter.InclusionExclusion">
+                                    <option value="Inclusion">Inclusion</option>
+                                    <option value="Exclusion">Exclusion</option>
+                                </InputSelect>
+                            </td>
+                            <td>
+
+                                <InputSelect class="form-control"
+                                             Value="@newFilter.IncludedOrExcludedItem"
+                                             ValueChanged="HandleItemChanged"
+                                             ValueExpression="() => newFilter.IncludedOrExcludedItem"
+                                             TValue="string">
+                                    <option value="">Select a filter type</option>
+                                    @foreach (var item in FilterItemsList)
+                                    {
+                                        <option value="@item.Code">@item.DisplayName</option>
+                                    }
+                                </InputSelect>
 
 
-							<td>
-								<InputText class="form-control" @bind-Value="newFilter.Note" placeholder="Note (optional)" />
-							</td>
-							<td colspan="2"></td>
-							<td>
-								<button type="button" class="btn btn-primary btn-sm" @onclick="AddFilter">Add</button>
-							</td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
-		</div>
-		<div class="row">
-			<div class="col-md-6">
-				<div class="card shadow mb-4 border">
-					<div class="card-header">Policy Details</div>
-					<div class="card-body">
-						<table class="table table-bordered">
-							<tbody>
-								<tr>
-									<th>FX Rate Application Date</th>
-									<td>
-										<InputText @bind-Value="PolicyDetails.FXRateApplicationDate" class="form-control" readonly />
-									</td>
-								</tr>
-								<tr>
-									<th>FX Treatment</th>
-									<td>
-										<InputSelect class="form-control" @bind-Value="PolicyDetails.FXTreatment" TValue="string">
-											<option value="">Select an FX Treatment</option>
-											@if (FXTreatments != null)
-											{
-												@foreach (var item in FXTreatments)
-												{
-													<option value="@item.FXTreatment">@item.FXTreatment</option>
-												}
-											}
-										</InputSelect>
-									</td>
-								</tr>
-								<tr>
-									<th>Inuring Priority</th>
-									<td>
-										<InputNumber @bind-Value="PolicyDetails.InuringPriority" class="form-control" />
-									</td>
-								</tr>
-								<tr>
-									<th>Ceded Premium Calculation</th>
-									<td>
-										<InputSelect class="form-control" @bind-Value="PolicyDetails.CededPremiumCalculation" TValue="string">
-											<option value="">Select a Ceded Premium Calculation...</option>
-											<option value="GrossGross">Gross Gross</option>
-											<option value="GrossNet">Gross Net</option>
-										</InputSelect>
-									</td>
-								</tr>
-
-								<!-- --- NEW OVERRIDE FIELDS --- -->
-								<tr>
-									<th>Inception Override</th>
-									<td><InputDate @bind-Value="PolicyDetails.InceptionOverride" class="form-control" /></td>
-								</tr>
-								<tr>
-									<th>Expiry Override</th>
-									<td><InputDate @bind-Value="PolicyDetails.ExpiryOverride" class="form-control" /></td>
-								</tr>
-								<tr>
-									<th>Basis of Cover Override</th>
-									<td><InputText @bind-Value="PolicyDetails.BasisOfCoverCodeOverride" class="form-control" /></td>
-								</tr>
-								<tr>
-									<th>Cession Override</th>
-									<td><InputNumber @bind-Value="PolicyDetails.CessionOverride" class="form-control" /></td>
-								</tr>
-								<tr>
-									<th>Order Override</th>
-									<td><InputNumber @bind-Value="PolicyDetails.OrderOverride" class="form-control" /></td>
-								</tr>
-								<tr>
-									<th>Whole / Order Override</th>
-									<td>
-										<InputSelect class="form-control" @bind-Value="PolicyDetails.WholeOrOrderOverride" TValue="string">
-											<option value="">Select...</option>
-											<option value="W">Whole</option>
-											<option value="O">Order</option>
-										</InputSelect>
-									</td>
-								</tr>
-								<tr>
-									<th>Limit Override</th>
-									<td><InputNumber @bind-Value="PolicyDetails.LimitOverride" class="form-control" /></td>
-								</tr>
-								<tr>
-									<th>Deductible / Retention Override</th>
-									<td><InputNumber @bind-Value="PolicyDetails.DeductibleRetentionOverride" class="form-control" /></td>
-								</tr>
-								<tr>
-									<th>Policy Type Override</th>
-									<td><InputText @bind-Value="PolicyDetails.PolicyTypeOverride" class="form-control" /></td>
-								</tr>
-								<tr>
-									<th>Policy Sub-Type Override</th>
-									<td><InputText @bind-Value="PolicyDetails.PolicySubTypeOverride" class="form-control" /></td>
-								</tr>																
-							</tbody>
-						</table>
-					</div>
-				</div>
-				<div class="card shadow md-4">
-					<div class="card-header">Agg Deductibles</div>
-					<div class="card-body">
-						@if (PolicyDetails?.AggDeductibles.Any() == true)
-						{
-							<div class="mt-1">
-								<table class=" table table-sm table-striped text-nowrap">
-									<thead>
-										<tr>
-											<th>Peril</th>
-											<th>Peril Region</th>
-											<th>Note</th>
-											<th class="text-end">Application Priority</th>
-											<th class="text-end">Deductible</th>
-											<th>Actions</th>
-										</tr>
-									</thead>
-									<tbody>
-										@foreach (var aggDeductible in PolicyDetails.AggDeductibles)
-										{
-											<tr>
-												<td>
-													<InputText @bind-Value="@aggDeductible.Peril" class="form-control" readonly />
-												</td>
-												<td>
-													<InputText @bind-Value="@aggDeductible.PerilRegion" class="form-control" readonly />
-												</td>
-												<td>
-													<InputText @bind-Value="@aggDeductible.Note" class="form-control" readonly />
-												</td>
-												<td class="text-end">
-													<InputNumber @bind-Value="@aggDeductible.ApplicationPriority" class="form-control text-end" readonly />
-												</td>
-												<td class="text-end">
-													<InputNumber @bind-Value="@aggDeductible.Deductible" class="form-control text-end" readonly />
-												</td>
-												<td>
-													<button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveAggDeductible(aggDeductible)">
-														Remove
-													</button>
-												</td>
-											</tr>
-										}
-									</tbody>
-								</table>
-							</div>
-						}
-						else
-						{
-							<p class="text-muted">No Agg Deductibles.</p>
-						}
-						<div class="mt-3">
-							<h5>Add New Agg Deductible</h5>							
-							<table class=" table table-sm table-striped text-nowrap">
-								<thead>
-									<tr>
-										<th>Peril</th>
-										<th>Peril Region</th>
-										<th>Note</th>
-										<th class="text-end">Application Priority</th>
-										<th class="text-end">Deductible</th>
-										<th>Actions</th>
-									</tr>
-								</thead>
-								<tbody>
-									<tr>
-										<td>
-											<InputText @bind-Value="@newAggDeductible.Peril" class="form-control" />
-										</td>
-										<td>
-											<InputText @bind-Value="@newAggDeductible.PerilRegion" class="form-control" />
-										</td>
-										<td>
-											<InputText @bind-Value="@newAggDeductible.Note" class="form-control" />
-										</td>
-										<td class="text-end">
-											<InputNumber @bind-Value="@newAggDeductible.ApplicationPriority" class="form-control text-end" />
-										</td>
-										<td class="text-end">
-											<InputNumber @bind-Value="@newAggDeductible.Deductible" class="form-control text-end" />
-										</td>
-										<td>
-											<button type="button" class="btn btn-primary" @onclick="() => AddAggDeductible()">
-												Add
-											</button>
-										</td>
-									</tr>
-								</tbody>
-							</table>
-							@if (!string.IsNullOrEmpty(validationMessage))
-							{
-								<div class="text-danger">@validationMessage</div>
-							}
-						</div>
-					</div>
+                            </td>
+                            <td>
+                                @if (KnownDropdownTypes.Contains(newFilter.IncludedOrExcludedItem))
+                                {
+                                    if (IsLoadingDropdown)
+                                    {
+                                        @if (IsLoadingDropdown)
+                                        {
+                                            <select class="form-control" disabled>
+                                                <option>Fetching options...</option>
+                                            </select>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <InputSelect class="form-control"
+                                                     Value="@newFilter.IncludedOrExcludedValue"
+                                                     ValueChanged="v => newFilter.IncludedOrExcludedValue = v"
+                                                     ValueExpression="() => newFilter.IncludedOrExcludedValue"
+                                                     TValue="string">
+                                            <option value="">Select an option</option>
+                                            @foreach (var item in DropdownValues.GetValueOrDefault(newFilter.IncludedOrExcludedItem, new()))
+                                            {
+                                                <option value="@item.Code">@item.Name</option>
+                                            }
+                                        </InputSelect>
+                                    }
+                                }
+                                else
+                                {
+                                    <InputText class="form-control" @bind-Value="newFilter.IncludedOrExcludedValue" placeholder="Enter value" />
+                                }
+                            </td>
 
 
-				</div>
+                            <td>
+                                <InputText class="form-control" @bind-Value="newFilter.Note" placeholder="Note (optional)" />
+                            </td>
+                            <td colspan="2"></td>
+                            <td>
+                                <button type="button" class="btn btn-primary btn-sm" @onclick="AddFilter">Add</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                @if (PolicyDetails.PolicyType == "X")
+                {
+                    <div class="card shadow mb-4 border">
+                        <div class="card-header">
+                            Policy Premium
+                        </div>
+                        <div class="card-body">
+                            @if (policyPremiums is null || !policyPremiums.Any())
+                            {
+                                <p>No Policy Premiums added.</p>
+                            }
+                            else
+                            {
+                                <table class="table table-sm align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>Period</th>
+                                            <th>Final</th>
+
+                                            <th class="text-end">Gross Subject Premium</th>
+                                            <th class="text-end">Adjustable Rate</th>
+                                            <th class="text-end">Minimum Premium</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var premium in policyPremiums.Where(p => !p.IsDeleted))
+                                        {
+                                            <tr>
+                                                <td>@premium.Period</td>
+                                                <td>@(premium.IsFinalAdjusted ? "Yes" : "No")</td>
+                                                <td class="text-end">@premium.GrossSubjectPremium?.ToString("N2")</td>
+                                                <td class="text-end">@premium.AdjustableRate?.ToString("N4")</td>
+                                                <td class="text-end">@premium.MinimumPremium?.ToString("N2")</td>
+
+                                                <td>
+                                                    <button type="button" class="btn btn-danger btn-sm" @onclick="() => SoftDeletePremium(premium)">Remove</button>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            }
+
+                            <h6 class="mt-4">Add New Policy Premium</h6>
+                            <div class="row g-2 align-items-center">
+                                <div class="col-2">
+                                    <InputText class="form-control" @bind-Value="newPremium.Period" placeholder="YYYYMM" />
+                                </div>
+                                <div class="col-2">
+                                    <InputNumber class="form-control" @bind-Value="newPremium.GrossSubjectPremium" placeholder="Gross Subject Premium" />
+                                </div>
+                                <div class="col-2">
+                                    <InputNumber class="form-control" @bind-Value="newPremium.AdjustableRate" placeholder="Adjustable Rate" />
+                                </div>
+                                <div class="col-2">
+                                    <InputNumber class="form-control" @bind-Value="newPremium.MinimumPremium" placeholder="Minimum Premum" />
+                                </div>
+                                <div class="col-2">
+                                    <div class="form-check">
+                                        <InputCheckbox class="form-check-input" @bind-Value="newPremium.IsFinalAdjusted" />
+                                        <label class="form-check-label ms-1">Final</label>
+                                    </div>
+                                </div>
+                                <div class="col-2">
+                                    <button type="button" class="btn btn-primary w-100" @onclick="AddPremium">Add</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                <div class="card shadow mb-4 border">
+                    <div class="card-header">Policy Details</div>
+                    <div class="card-body">
+                        <table class="table table-bordered">
+                            <tbody>
+                                <tr>
+                                    <th>FX Rate Application Date</th>
+                                    <td>
+                                        <InputText @bind-Value="PolicyDetails.FXRateApplicationDate" class="form-control" readonly />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>FX Treatment</th>
+                                    <td>
+                                        <InputSelect class="form-control" @bind-Value="PolicyDetails.FXTreatment" TValue="string">
+                                            <option value="">Select an FX Treatment</option>
+                                            @if (FXTreatments != null)
+                                            {
+                                                @foreach (var item in FXTreatments)
+                                                {
+                                                    <option value="@item.FXTreatment">@item.FXTreatment</option>
+                                                }
+                                            }
+                                        </InputSelect>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Inuring Priority</th>
+                                    <td>
+                                        <InputNumber @bind-Value="PolicyDetails.InuringPriority" class="form-control" />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Ceded Premium Calculation</th>
+                                    <td>
+                                        <InputSelect class="form-control" @bind-Value="PolicyDetails.CededPremiumCalculation" TValue="string">
+                                            <option value="">Select a Ceded Premium Calculation...</option>
+                                            <option value="GrossGross">Gross Gross</option>
+                                            <option value="GrossNet">Gross Net</option>
+                                        </InputSelect>
+                                    </td>
+                                </tr>
+
+                                <!-- --- NEW OVERRIDE FIELDS --- -->
+                                <tr>
+                                    <th>Inception Override</th>
+                                    <td><InputDate @bind-Value="PolicyDetails.InceptionOverride" class="form-control" /></td>
+                                </tr>
+                                <tr>
+                                    <th>Expiry Override</th>
+                                    <td><InputDate @bind-Value="PolicyDetails.ExpiryOverride" class="form-control" /></td>
+                                </tr>
+                                <tr>
+                                    <th>Basis of Cover Override</th>
+                                    <td><InputText @bind-Value="PolicyDetails.BasisOfCoverCodeOverride" class="form-control" /></td>
+                                </tr>
+                                <tr>
+                                    <th>Cession Override</th>
+                                    <td><InputNumber @bind-Value="PolicyDetails.CessionOverride" class="form-control" /></td>
+                                </tr>
+                                <tr>
+                                    <th>Order Override</th>
+                                    <td><InputNumber @bind-Value="PolicyDetails.OrderOverride" class="form-control" /></td>
+                                </tr>
+                                <tr>
+                                    <th>Whole / Order Override</th>
+                                    <td>
+                                        <InputSelect class="form-control" @bind-Value="PolicyDetails.WholeOrOrderOverride" TValue="string">
+                                            <option value="">Select...</option>
+                                            <option value="W">Whole</option>
+                                            <option value="O">Order</option>
+                                        </InputSelect>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Limit Override</th>
+                                    <td><InputNumber @bind-Value="PolicyDetails.LimitOverride" class="form-control" /></td>
+                                </tr>
+                                <tr>
+                                    <th>Deductible / Retention Override</th>
+                                    <td><InputNumber @bind-Value="PolicyDetails.DeductibleRetentionOverride" class="form-control" /></td>
+                                </tr>
+                                <tr>
+                                    <th>Policy Type Override</th>
+                                    <td><InputText @bind-Value="PolicyDetails.PolicyTypeOverride" class="form-control" /></td>
+                                </tr>
+                                <tr>
+                                    <th>Policy Sub-Type Override</th>
+                                    <td><InputText @bind-Value="PolicyDetails.PolicySubTypeOverride" class="form-control" /></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card mb-4 border">
+                    <div class="card-header">PC / Overrider / Expenses</div>
+                    <div class="card-body">
+                        <table class="table table-bordered">
+                            <tbody>
+                                <tr>
+                                    <th>Overrider</th>
+                                    <td>
+                                        <InputNumber @bind-Value="PolicyDetails.Overrider"
+                                                     class="form-control" />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>PC</th>
+                                    <td>
+                                        <InputNumber @bind-Value="PolicyDetails.PC"
+                                                     class="form-control" />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>UW Expenses</th>
+                                    <td>
+                                        <InputNumber @bind-Value="PolicyDetails.UWExpenses"
+                                                     class="form-control" />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>QS Basis</th>
+                                    <td>
+                                        <InputSelect @bind-Value="PolicyDetails.QSBasis" class="form-control">
+                                            <option value="">Select...</option>
+                                            <option value="Gross">Gross</option>
+                                            <option value="Net">Net</option>
+                                        </InputSelect>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Overrider Basis</th>
+                                    <td>
+                                        <InputSelect @bind-Value="PolicyDetails.OverriderBasis" class="form-control">
+                                            <option value="">Select...</option>
+                                            <option value="Gross">Gross</option>
+                                            <option value="Net">Net</option>
+                                        </InputSelect>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>UW Expenses Basis</th>
+                                    <td>
+                                        <InputSelect @bind-Value="PolicyDetails.UWExpensesBasis" class="form-control">
+                                            <option value="">Select...</option>
+                                            <option value="Gross">Gross</option>
+                                            <option value="Net">Net</option>
+                                        </InputSelect>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>PC Profit Basis</th>
+                                    <td>
+                                        <InputSelect @bind-Value="PolicyDetails.PCProfitBasis" class="form-control">
+                                            <option value="">Select...</option>
+                                            <option value="Gross">Gross</option>
+                                            <option value="Net">Net</option>
+                                        </InputSelect>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Nil PC Override</th>
+                                    <td>
+                                        <InputSelect @bind-Value="PolicyDetails.NilPCOverride" class="form-control">
+                                            <option value="">Select...</option>
+                                            <option value="Y">Y</option>
+                                            <option value="N">N</option>
+                                        </InputSelect>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card shadow md-4">
+                    <div class="card-header">Agg Deductibles</div>
+                    <div class="card-body">
+                        @if (PolicyDetails?.AggDeductibles.Any() == true)
+                        {
+                            <div class="mt-1">
+                                <table class=" table table-sm table-striped text-nowrap">
+                                    <thead>
+                                        <tr>
+                                            <th>Peril</th>
+                                            <th>Peril Region</th>
+                                            <th>Note</th>
+                                            <th class="text-end">Application Priority</th>
+                                            <th class="text-end">Deductible</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var aggDeductible in PolicyDetails.AggDeductibles)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <InputText @bind-Value="@aggDeductible.Peril" class="form-control" readonly />
+                                                </td>
+                                                <td>
+                                                    <InputText @bind-Value="@aggDeductible.PerilRegion" class="form-control" readonly />
+                                                </td>
+                                                <td>
+                                                    <InputText @bind-Value="@aggDeductible.Note" class="form-control" readonly />
+                                                </td>
+                                                <td class="text-end">
+                                                    <InputNumber @bind-Value="@aggDeductible.ApplicationPriority" class="form-control text-end" readonly />
+                                                </td>
+                                                <td class="text-end">
+                                                    <InputNumber @bind-Value="@aggDeductible.Deductible" class="form-control text-end" readonly />
+                                                </td>
+                                                <td>
+                                                    <button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveAggDeductible(aggDeductible)">
+                                                        Remove
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="text-muted">No Agg Deductibles.</p>
+                        }
+                        <div class="mt-3">
+                            <h5>Add New Agg Deductible</h5>
+                            <table class=" table table-sm table-striped text-nowrap">
+                                <thead>
+                                    <tr>
+                                        <th>Peril</th>
+                                        <th>Peril Region</th>
+                                        <th>Note</th>
+                                        <th class="text-end">Application Priority</th>
+                                        <th class="text-end">Deductible</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <InputText @bind-Value="@newAggDeductible.Peril" class="form-control" />
+                                        </td>
+                                        <td>
+                                            <InputText @bind-Value="@newAggDeductible.PerilRegion" class="form-control" />
+                                        </td>
+                                        <td>
+                                            <InputText @bind-Value="@newAggDeductible.Note" class="form-control" />
+                                        </td>
+                                        <td class="text-end">
+                                            <InputNumber @bind-Value="@newAggDeductible.ApplicationPriority" class="form-control text-end" />
+                                        </td>
+                                        <td class="text-end">
+                                            <InputNumber @bind-Value="@newAggDeductible.Deductible" class="form-control text-end" />
+                                        </td>
+                                        <td>
+                                            <button type="button" class="btn btn-primary" @onclick="() => AddAggDeductible()">
+                                                Add
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            @if (!string.IsNullOrEmpty(validationMessage))
+                            {
+                                <div class="text-danger">@validationMessage</div>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="card shadow mb-4 border">
+                    <div class="card-header">Policy Allocations by Class</div>
+                    <div class="card-body">
+                        @if (PolicyDetails?.PolicyAllocationsClass != null && PolicyDetails.PolicyAllocationsClass.Any())
+                        {
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Class</th>
+                                        <th class="text-end">Allocation</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var allocation in PolicyDetails.PolicyAllocationsClass)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <InputText @bind-Value="allocation.Class" class="form-control" readonly />
+                                            </td>
+                                            <td>
+                                                <InputNumber @bind-Value="allocation.Allocation" class="form-control text-end" readonly />
+                                            </td>
+                                            <td>
+                                                <button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveClassAllocation(allocation)">
+                                                    Remove
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                        else
+                        {
+                            <p class="text-muted">No class allocations defined for this policy.</p>
+                        }
+                        <div class="mt-3">
+                            <h5>Add New Class Allocation</h5>
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Class</th>
+                                        <th class="text-end">Allocation</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <InputText @bind-Value="newClassAllocation.Class" class="form-control" />
+                                        </td>
+                                        <td>
+                                            <InputNumber @bind-Value="newClassAllocation.Allocation" class="form-control text-end" />
+                                        </td>
+                                        <td>
+                                            <button type="button" class="btn btn-primary" @onclick="() => AddClassAllocation()">
+                                                Add
+                                            </button>
+                                        </td>
+                                    </tr>
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="card shadow mb-4 border">
+                    <div class="card-header">Policy Allocations by Year of Account</div>
+                    <div class="card-body">
+                        @if (PolicyDetails?.PolicyAllocationsYOA != null && PolicyDetails.PolicyAllocationsYOA.Any())
+                        {
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Year of Account</th>
+                                        <th class="text-end">Allocation</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var allocation in PolicyDetails.PolicyAllocationsYOA)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <InputNumber @bind-Value="allocation.YearOfAccount" class="form-control" readonly />
+                                            </td>
+                                            <td>
+                                                <InputNumber @bind-Value="allocation.Allocation" class="form-control text-end" readonly />
+                                            </td>
+                                            <td>
+                                                <button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveYOAAllocation(allocation)">
+                                                    Remove
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                        else
+                        {
+                            <p class="text-muted">No year of account allocations defined for this policy.</p>
+                        }
+                        <div class="mt-3">
+                            <h5>Add New YOA Allocation</h5>
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Year of Account</th>
+                                        <th class="text-end">Allocation</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <InputNumber @bind-Value="newYOAAllocation.YearOfAccount" class="form-control" />
+                                        </td>
+                                        <td>
+                                            <InputNumber @bind-Value="newYOAAllocation.Allocation" class="form-control text-end" />
+                                        </td>
+                                        <td>
+                                            <button type="button" class="btn btn-primary" @onclick="() => AddYOAAllocation()">
+                                                Add
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="card shadow mb-4 border">
+                    <div class="card-header">Syndicate Splits</div>
+                    <div class="card-body">
+                        @if (PolicyDetails?.SyndicateSplits != null && PolicyDetails.SyndicateSplits.Any())
+                        {
+                            <table class="table table-sm table-striped text-nowrap">
+                                <thead>
+                                    <tr>
+                                        <th>Syndicate</th>
+                                        <th class="text-end">Percentage</th>
+                                        <th>Last Updated</th>
+                                        <th>Updated By</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var split in PolicyDetails.SyndicateSplits)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <InputText @bind-Value="split.Syndicate" class="form-control" readonly />
+                                            </td>
+                                            <td class="text-end">
+                                                <InputNumber @bind-Value="split.Percentage" class="form-control text-end" />
+                                            </td>
+                                            <td>@split.LastUpdated?.ToString("yyyy-MM-dd HH:mm")</td>
+                                            <td>@split.LastUpdatedBy</td>
+                                            <td>
+                                                <button type="button"
+                                                        class="btn btn-danger btn-sm"
+                                                        @onclick="() => RemoveSyndicateSplit(split)">
+                                                    Remove
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                        else
+                        {
+                            <p class="text-muted">No syndicate splits defined for this policy.</p>
+                        }
+
+                        <div class="mt-3">
+                            <h5>Add New Syndicate Split</h5>
+                            <table class="table table-sm table-striped text-nowrap">
+                                <thead>
+                                    <tr>
+                                        <th>Syndicate</th>
+                                        <th class="text-end">Percentage</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <InputText @bind-Value="newSyndicateSplit.Syndicate" class="form-control" />
+                                        </td>
+                                        <td>
+                                            <InputNumber @bind-Value="newSyndicateSplit.Percentage" class="form-control text-end" />
+                                        </td>
+                                        <td>
+                                            <button type="button" class="btn btn-primary" @onclick="AddSyndicateSplit">
+                                                Add
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
 
-
-				<div class="card mb-4 border">
-					<div class="card-header">PC / Overrider / Expenses</div>
-					<div class="card-body">
-						<table class="table table-bordered">
-							<tbody>
-								<tr>
-									<th>Overrider</th>
-									<td>
-										<InputNumber @bind-Value="PolicyDetails.Overrider"
-													 class="form-control" />
-									</td>
-								</tr>
-								<tr>
-									<th>PC</th>
-									<td>
-										<InputNumber @bind-Value="PolicyDetails.PC"
-													 class="form-control" />
-									</td>
-								</tr>
-								<tr>
-									<th>UW Expenses</th>
-									<td>
-										<InputNumber @bind-Value="PolicyDetails.UWExpenses"
-													 class="form-control" />
-									</td>
-								</tr>
-								<tr>
-									<th>QS Basis</th>
-									<td>
-										<InputSelect @bind-Value="PolicyDetails.QSBasis" class="form-control">
-											<option value="">Select...</option>
-											<option value="Gross">Gross</option>
-											<option value="Net">Net</option>
-										</InputSelect>
-									</td>
-								</tr>
-								<tr>
-									<th>Overrider Basis</th>
-									<td>
-										<InputSelect @bind-Value="PolicyDetails.OverriderBasis" class="form-control">
-											<option value="">Select...</option>
-											<option value="Gross">Gross</option>
-											<option value="Net">Net</option>
-										</InputSelect>
-									</td>
-								</tr>
-								<tr>
-									<th>UW Expenses Basis</th>
-									<td>
-										<InputSelect @bind-Value="PolicyDetails.UWExpensesBasis" class="form-control">
-											<option value="">Select...</option>
-											<option value="Gross">Gross</option>
-											<option value="Net">Net</option>
-										</InputSelect>
-									</td>
-								</tr>
-								<tr>
-									<th>PC Profit Basis</th>
-									<td>
-										<InputSelect @bind-Value="PolicyDetails.PCProfitBasis" class="form-control">
-											<option value="">Select...</option>
-											<option value="Gross">Gross</option>
-											<option value="Net">Net</option>
-										</InputSelect>
-									</td>
-								</tr>
-								<tr>
-									<th>Nil PC Override</th>
-									<td>
-										<InputSelect @bind-Value="PolicyDetails.NilPCOverride" class="form-control">
-											<option value="">Select...</option>
-											<option value="Y">Y</option>
-											<option value="N">N</option>
-										</InputSelect>
-									</td>
-								</tr>
-							</tbody>
-						</table>
-					</div>
-				</div>
-
-				<div class="card shadow mb-4 border">
-					<div class="card-header">Syndicate Splits</div>
-					<div class="card-body">
-						@if (PolicyDetails?.SyndicateSplits != null && PolicyDetails.SyndicateSplits.Any())
-						{
-							<table class="table table-sm table-striped text-nowrap">
-								<thead>
-									<tr>
-										<th>Syndicate</th>
-										<th class="text-end">Percentage</th>
-										<th>Last Updated</th>
-										<th>Updated By</th>
-										<th>Actions</th>
-									</tr>
-								</thead>
-								<tbody>
-									@foreach (var split in PolicyDetails.SyndicateSplits)
-									{
-										<tr>
-											<td>
-												<InputText @bind-Value="split.Syndicate" class="form-control" readonly />
-											</td>
-											<td class="text-end">
-												<InputNumber @bind-Value="split.Percentage" class="form-control text-end" />
-											</td>
-											<td>@split.LastUpdated?.ToString("yyyy-MM-dd HH:mm")</td>
-											<td>@split.LastUpdatedBy</td>
-											<td>
-												<button type="button"
-														class="btn btn-danger btn-sm"
-														@onclick="() => RemoveSyndicateSplit(split)">
-													Remove
-												</button>
-											</td>
-										</tr>
-									}
-								</tbody>
-							</table>
-						}
-						else
-						{
-							<p class="text-muted">No syndicate splits defined for this policy.</p>
-						}
-
-						<div class="mt-3">
-							<h5>Add New Syndicate Split</h5>
-							<table class="table table-sm table-striped text-nowrap">
-								<thead>
-									<tr>
-										<th>Syndicate</th>
-										<th class="text-end">Percentage</th>
-										<th>Actions</th>
-									</tr>
-								</thead>
-								<tbody>
-									<tr>
-										<td>
-											<InputText @bind-Value="newSyndicateSplit.Syndicate" class="form-control" />
-										</td>
-										<td>
-											<InputNumber @bind-Value="newSyndicateSplit.Percentage" class="form-control text-end" />
-										</td>
-										<td>
-											<button type="button" class="btn btn-primary" @onclick="AddSyndicateSplit">
-												Add
-											</button>
-										</td>
-									</tr>
-								</tbody>
-							</table>
-						</div>
-					</div>
-				</div>
-
-
-			</div>
-			<div class="col-md-6">
-				<div class="card shadow mb-4 border">
-					<div class="card-header">Policy Allocations by Class</div>
-					<div class="card-body">
-						@if (PolicyDetails?.PolicyAllocationsClass != null && PolicyDetails.PolicyAllocationsClass.Any())
-						{
-							<table class="table table-striped">
-								<thead>
-									<tr>
-										<th>Class</th>
-										<th class="text-end">Allocation</th>
-										<th>Actions</th>
-									</tr>
-								</thead>
-								<tbody>
-									@foreach (var allocation in PolicyDetails.PolicyAllocationsClass)
-									{
-										<tr>
-											<td>
-												<InputText @bind-Value="allocation.Class" class="form-control" readonly />
-											</td>
-											<td>
-												<InputNumber @bind-Value="allocation.Allocation" class="form-control text-end" readonly />
-											</td>
-											<td>
-												<button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveClassAllocation(allocation)">
-													Remove
-												</button>
-											</td>
-										</tr>
-									}
-								</tbody>
-							</table>
-						}
-						else
-						{
-							<p class="text-muted">No class allocations defined for this policy.</p>
-						}
-						<div class="mt-3">
-							<h5>Add New Class Allocation</h5>
-							<table class="table table-striped">
-								<thead>
-									<tr>
-										<th>Class</th>
-										<th class="text-end">Allocation</th>
-										<th>Actions</th>
-									</tr>
-								</thead>
-								<tbody>
-									<tr>
-										<td>
-											<InputText @bind-Value="newClassAllocation.Class" class="form-control" />
-										</td>
-										<td>
-											<InputNumber @bind-Value="newClassAllocation.Allocation" class="form-control text-end" />
-										</td>
-										<td>
-											<button type="button" class="btn btn-primary" @onclick="() => AddClassAllocation()">
-												Add
-											</button>
-										</td>
-									</tr>
-
-								</tbody>
-							</table>
-						</div>
-					</div>
-				</div>
-				<div class="card shadow mb-4 border">
-					<div class="card-header">Policy Allocations by Year of Account</div>
-					<div class="card-body">
-						@if (PolicyDetails?.PolicyAllocationsYOA != null && PolicyDetails.PolicyAllocationsYOA.Any())
-						{
-							<table class="table table-striped">
-								<thead>
-									<tr>
-										<th>Year of Account</th>
-										<th class="text-end">Allocation</th>
-										<th>Actions</th>
-									</tr>
-								</thead>
-								<tbody>
-									@foreach (var allocation in PolicyDetails.PolicyAllocationsYOA)
-									{
-										<tr>
-											<td>
-												<InputNumber @bind-Value="allocation.YearOfAccount" class="form-control" readonly />
-											</td>
-											<td>
-												<InputNumber @bind-Value="allocation.Allocation" class="form-control text-end" readonly />
-											</td>
-											<td>
-												<button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveYOAAllocation(allocation)">
-													Remove
-												</button>
-											</td>
-										</tr>
-									}
-								</tbody>
-							</table>
-						}
-						else
-						{
-							<p class="text-muted">No year of account allocations defined for this policy.</p>
-						}
-						<div class="mt-3">
-							<h5>Add New YOA Allocation</h5>
-							<table class="table table-striped">
-								<thead>
-									<tr>
-										<th>Year of Account</th>
-										<th class="text-end">Allocation</th>
-										<th>Actions</th>
-									</tr>
-								</thead>
-								<tbody>
-									<tr>
-										<td>
-											<InputNumber @bind-Value="newYOAAllocation.YearOfAccount" class="form-control" />
-										</td>
-										<td>
-											<InputNumber @bind-Value="newYOAAllocation.Allocation" class="form-control text-end" />
-										</td>
-										<td>
-											<button type="button" class="btn btn-primary" @onclick="() => AddYOAAllocation()">
-												Add
-											</button>
-										</td>
-									</tr>
-								</tbody>
-							</table>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-
-
-		<div class="text-right">
-			<button type="submit" class="btn btn-success">Save Changes</button>
-			<button type="button" class="btn btn-secondary" @onclick="NavigateBack">Cancel</button>
-		</div>
-	</EditForm>
+        <div class="text-right">
+            <button type="submit" class="btn btn-success">Save Changes</button>
+            <button type="button" class="btn btn-secondary" @onclick="NavigateBack">Cancel</button>
+        </div>
+    </EditForm>
 }
 
 @code {
-	[Inject] private NavigationManager Navigation { get; set; }
-	[Parameter] public required string ORIPolicyReference { get; set; }
-	private Dictionary<string, List<DropdownItem>> DropdownValues = new();
-	public Flatpickr? fxRateApplicationDatePickr;
+    [Inject] private NavigationManager Navigation { get; set; }
+    [Parameter] public required string ORIPolicyReference { get; set; }
+    private Dictionary<string, List<DropdownItem>> DropdownValues = new();
+    public Flatpickr? fxRateApplicationDatePickr;
 
-	private List<ORIPolicyListModel> AllPolicies = new();
-	private List<ORIPolicyListModel> FilteredPolicies = new();
-	private ORIPolicyModel PolicyDetails { get; set; }
-	private List<FXTreatmentModel> FXTreatments { get; set; } = new();
-	private List<ORIFilterItemDefinition> FilterItemsList = new();
+    private List<ORIPolicyListModel> AllPolicies = new();
+    private List<ORIPolicyListModel> FilteredPolicies = new();
+    private ORIPolicyModel PolicyDetails { get; set; }
+    private List<FXTreatmentModel> FXTreatments { get; set; } = new();
+    private List<ORIFilterItemDefinition> FilterItemsList = new();
 
-	private bool IsLoading = true;
-	private bool IsLoadingDropdown = false;
-	private string? ErrorMessage;
-	private string? validationMessage;
-	private string? SelectedPolicyToCopyFrom;
-	private string? PolicySearchTerm;
+    private bool IsLoading = true;
+    private bool IsLoadingDropdown = false;
+    private string? ErrorMessage;
+    private string? validationMessage;
+    private string? SelectedPolicyToCopyFrom;
+    private string? PolicySearchTerm;
 
-	private HashSet<string> KnownDropdownTypes = new()
-	{
-		"Class",
-		"DomicileCountry",
-		"Peril",
-		"PerilRegion",
-		"RiskCode",
-		"ReservingClass",
-		"StatCode1",
-		"StatCode2"
-	};
+    private HashSet<string> KnownDropdownTypes = new()
+    {
+        "Class",
+        "DomicileCountry",
+        "Peril",
+        "PerilRegion",
+        "RiskCode",
+        "ReservingClass",
+        "StatCode1",
+        "StatCode2"
+    };
 
-	private DateTime selectedFXRateApplicationDate
-	{
-		get
-		{
-			if (DateTime.TryParseExact(PolicyDetails.FXRateApplicationDate, "yyyy-MM-dd", null, System.Globalization.DateTimeStyles.None, out var dt))
-			{
-				return dt.Date;
-			}
-			else
-			{
-				var defaultDate = PolicyDetails.Inception;
-				return defaultDate.Date;
-			}
-		}
-		set
-		{
-			PolicyDetails.FXRateApplicationDate = value.ToString("yyyy-MM-dd");
-		}
-	}
+    private DateTime selectedFXRateApplicationDate
+    {
+        get
+        {
+            if (DateTime.TryParseExact(PolicyDetails.FXRateApplicationDate, "yyyy-MM-dd", null, System.Globalization.DateTimeStyles.None, out var dt))
+            {
+                return dt.Date;
+            }
+            else
+            {
+                var defaultDate = PolicyDetails.Inception;
+                return defaultDate.Date;
+            }
+        }
+        set
+        {
+            PolicyDetails.FXRateApplicationDate = value.ToString("yyyy-MM-dd");
+        }
+    }
 
-	private ORIFilterItem newFilter = new ORIFilterItem
-		{
-			InclusionExclusion = "Inclusion", // Default value
-			IncludedOrExcludedItem = null,         // Use object, not a string
-			IncludedOrExcludedValue = "",
-			Note = ""
-		};
+    private ORIFilterItem newFilter = new ORIFilterItem
+    {
+        InclusionExclusion = "Inclusion", // Default value
+        IncludedOrExcludedItem = null,         // Use object, not a string
+        IncludedOrExcludedValue = "",
+        Note = ""
+    };
 
-	// New allocation properties
-	private ORIPolicyAllocationClass newClassAllocation = new ORIPolicyAllocationClass();
-	private ORIPolicyAllocationYOA newYOAAllocation = new ORIPolicyAllocationYOA();
+    // New allocation properties
+    private ORIPolicyAllocationClass newClassAllocation = new ORIPolicyAllocationClass();
+    private ORIPolicyAllocationYOA newYOAAllocation = new ORIPolicyAllocationYOA();
 
-	// New agg deductible property
-	private AggDeductible newAggDeductible = new AggDeductible();
+    // New agg deductible property
+    private AggDeductible newAggDeductible = new AggDeductible();
 
-	protected override async Task OnInitializedAsync()
-	{
-		if (string.IsNullOrWhiteSpace(ORIPolicyReference))
-		{
-			ErrorMessage = "Policy reference is required.";
-			IsLoading = false;
-			return;
-		}
+    // Temporary in-memory list of premiums for this policy
+    private List<ORIPolicyPremiumModel> policyPremiums = new();
 
-		try
-		{
-			// Get All Policies for filtering
-			FilterItemsList = await ORIService.GetIncludedOrExcludedItems();
-			await LoadAllPolicies();
-			FilteredPolicies = AllPolicies;
+    // New premium form row
+    private ORIPolicyPremiumModel newPremium = new();
 
+    protected override async Task OnInitializedAsync()
+    {
+        if (string.IsNullOrWhiteSpace(ORIPolicyReference))
+        {
+            ErrorMessage = "Policy reference is required.";
+            IsLoading = false;
+            return;
+        }
 
-			// Get Policy Details
-			PolicyDetails = await ORIService.GetORIPolicyDetails(ORIPolicyReference);
-			if (PolicyDetails != null)
-			{
-				FilterItemsList = await ORIService.GetIncludedOrExcludedItems();
-				FXTreatments = await ORIService.GetFXTreatments();
-				SetNextAvailableAggDeductiblePriority();
-			}
-			else
-			{
-				ErrorMessage = $"No policy details found for reference: {ORIPolicyReference}";
-			}
-		}
-		catch (Exception)
-		{
-			ErrorMessage = "An error occurred while fetching policy details.";
-		}
-		finally
-		{
-			IsLoading = false;
-		}
-		Console.WriteLine("pageloaded");
-	}
-
-	private void OnFXRateDateChanged(DateTime date)
-	{
-		selectedFXRateApplicationDate = date;
-	}
-
-	private async Task HandleValidSubmit()
-	{
-		IsLoading = true;
-		try
-		{
-			await ORIService.SaveORIPolicyMetadata(PolicyDetails);
-			Navigation.NavigateTo($"ViewORIPolicy/{PolicyDetails.ORIPolicyReference}", forceLoad: true);
-		}
-		catch (Exception ex)
-		{
-			ErrorMessage = ex.Message;
-		}
-		finally
-		{
-			IsLoading = false;
-		}
-	}
-
-	private async Task NavigateBack()
-	{
-		Navigation.NavigateTo($"ViewORIPolicy/{PolicyDetails.ORIPolicyReference}", forceLoad: true);
-	}
-
-	private void AddFilter()
-	{
-		if (newFilter.IncludedOrExcludedItem == null ||
-			string.IsNullOrWhiteSpace(newFilter.IncludedOrExcludedValue))
-		{
-			Console.WriteLine("Cannot add a filter without a valid type and value.");
-			return;
-		}
-
-		// Ensure PolicyDetails.Filters is not null
-		if (PolicyDetails.Filters == null)
-		{
-			PolicyDetails.Filters = new List<ORIFilterItem>();
-		}
-
-		// Add the filter to the policy
-		PolicyDetails.Filters.Add(new ORIFilterItem
-			{
-				InclusionExclusion = newFilter.InclusionExclusion,
-				IncludedOrExcludedItem = newFilter.IncludedOrExcludedItem, // Object reference
-				IncludedOrExcludedValue = newFilter.IncludedOrExcludedValue,
-				Note = newFilter.Note
-			});
-
-		Console.WriteLine($"Added Filter: {newFilter.InclusionExclusion} - {newFilter.IncludedOrExcludedItem} - {newFilter.IncludedOrExcludedValue}");
-
-		// Reset the input fields
-		newFilter = new ORIFilterItem
-			{
-				InclusionExclusion = "Inclusion",
-				IncludedOrExcludedItem = null,         // Use object, not a string
-				IncludedOrExcludedValue = "",
-				Note = ""
-			};
-
-		// Force UI update
-		StateHasChanged();
-	}
-
-	private void RemoveFilter(ORIFilterItem filter)
-	{
-		if (PolicyDetails.Filters.Contains(filter))
-		{
-			PolicyDetails.Filters.Remove(filter);
-			if (PolicyDetails.RemovedFilters == null)
-			{
-				PolicyDetails.RemovedFilters = new List<ORIFilterItem>();
-			}
-			PolicyDetails.RemovedFilters.Add(filter); // Track deleted filters
-		}
-	}
-
-	private string GetGhostButtonClass(string item)
-	{
-		return item switch
-		{
-			"DomicileCountry" => "primary-ghost",
-			"InwardPolicyReference" => "secondary-ghost",
-			"Peril" => "success-ghost",
-			"PlacementUMR" => "danger-ghost",
-			"RiskCode" => "warning-ghost",
-			"ReservingClass" => "info-ghost",
-			"StatCode1" => "purple-ghost",
-			"StatCode2" => "teal-ghost",
-			_ => "orange-ghost"
-		};
-	}
-
-	private async Task HandleItemChanged(string selected)
-	{
-		Console.WriteLine("triggered HIC");
-		newFilter.IncludedOrExcludedItem = selected;
-		newFilter.IncludedOrExcludedValue = "";
-
-		if (!string.IsNullOrWhiteSpace(selected) && KnownDropdownTypes.Contains(selected))
-		{
-			Console.WriteLine("into if on line 325");
-
-			IsLoadingDropdown = true;
-			StateHasChanged();
-
-			await Task.Delay(2000); // Simulate DB latency
-
-			if (!DropdownValues.ContainsKey(selected))
-			{
-				Console.WriteLine("going to db");
-				DropdownValues[selected] = await ORIService.GetDropdownValues(selected);
-				Console.WriteLine("coming from db");
-			}
-
-			IsLoadingDropdown = false;
-			StateHasChanged();
-		}
-	}
-
-	private async Task LoadAllPolicies()
-	{
-		AllPolicies = (await ORIService.GetORIPolicies()).ToList();
-	}
-
-	private async Task CopyFromAnotherPolicy()
-	{
-		if (string.IsNullOrWhiteSpace(SelectedPolicyToCopyFrom)) return;
-
-		var sourcePolicy = await ORIService.GetORIPolicyDetails(SelectedPolicyToCopyFrom);
-		if (sourcePolicy != null)
-		{
-			PolicyDetails.Filters = sourcePolicy.Filters
-				.Select(f => new ORIFilterItem
-					{
-						InclusionExclusion = f.InclusionExclusion,
-						IncludedOrExcludedItem = f.IncludedOrExcludedItem,
-						IncludedOrExcludedValue = f.IncludedOrExcludedValue,
-						Note = $"Copied from reference {SelectedPolicyToCopyFrom}"
-					})
-				.ToList();
-
-			StateHasChanged();
-		}
-	}
-
-	private void FilterPolicies()
-	{
-		FilteredPolicies = string.IsNullOrWhiteSpace(PolicySearchTerm)
-			? AllPolicies
-			: AllPolicies
-				.Where(p =>
-					p.ORIPolicyReference.Contains(PolicySearchTerm, StringComparison.OrdinalIgnoreCase) ||
-					(p.PolicyDescription?.Contains(PolicySearchTerm, StringComparison.OrdinalIgnoreCase) ?? false))
-				.ToList();
-	}
-
-	private void SelectPolicy(string policyRef)
-	{
-		SelectedPolicyToCopyFrom = policyRef;
-		PolicySearchTerm = policyRef;
-	}
-
-	// Methods for adding and removing allocations
-	private void AddClassAllocation()
-	{
-		if (newClassAllocation.Class != null && newClassAllocation.Allocation != 0)
-		{
-			if (PolicyDetails.PolicyAllocationsClass == null)
-			{
-				PolicyDetails.PolicyAllocationsClass = new List<ORIPolicyAllocationClass>();
-			}
-			newClassAllocation.LastUpdated = DateTime.Now;
-			newClassAllocation.LastUpdatedBy = "CurrentUser"; // Replace with actual user
-			PolicyDetails.PolicyAllocationsClass.Add(newClassAllocation);
-			newClassAllocation = new ORIPolicyAllocationClass(); // Reset
-			StateHasChanged();
-		}
-	}
-
-	private void RemoveClassAllocation(ORIPolicyAllocationClass allocation)
-	{
-		if (PolicyDetails.PolicyAllocationsClass.Contains(allocation))
-		{
-			PolicyDetails.PolicyAllocationsClass.Remove(allocation);
-			if (PolicyDetails.RemovedPolicyAllocationsClass == null)
-			{
-				PolicyDetails.RemovedPolicyAllocationsClass = new List<ORIPolicyAllocationClass>();
-			}
-			PolicyDetails.RemovedPolicyAllocationsClass.Add(allocation);
-			StateHasChanged();
-		}
-	}
-
-	private void AddYOAAllocation()
-	{
-		if (newYOAAllocation.YearOfAccount != 0 && newYOAAllocation.Allocation != 0)
-		{
-			if (PolicyDetails.PolicyAllocationsYOA == null)
-			{
-				PolicyDetails.PolicyAllocationsYOA = new List<ORIPolicyAllocationYOA>();
-			}
-			newYOAAllocation.LastUpdated = DateTime.Now;
-			newYOAAllocation.LastUpdatedBy = "CurrentUser"; // Replace with actual user
-			PolicyDetails.PolicyAllocationsYOA.Add(newYOAAllocation);
-			newYOAAllocation = new ORIPolicyAllocationYOA(); // Reset
-			StateHasChanged();
-		}
-	}
-
-	private void RemoveYOAAllocation(ORIPolicyAllocationYOA allocation)
-	{
-		if (PolicyDetails.PolicyAllocationsYOA.Contains(allocation))
-		{
-			PolicyDetails.PolicyAllocationsYOA.Remove(allocation);
-			if (PolicyDetails.RemovedPolicyAllocationsYOA == null)
-			{
-				PolicyDetails.RemovedPolicyAllocationsYOA = new List<ORIPolicyAllocationYOA>();
-			}
-			PolicyDetails.RemovedPolicyAllocationsYOA.Add(allocation);
-			StateHasChanged();
-		}
-	}
-
-	// Methods for adding and reming agg deductibles
-	private void SetNextAvailableAggDeductiblePriority()
-	{
-		int nextPriority = 1;
-		var usedPriorities = PolicyDetails.AggDeductibles.Select(d => d.ApplicationPriority).ToHashSet();
-
-		while (usedPriorities.Contains(nextPriority))
-		{
-			nextPriority++;
-		}
-
-		newAggDeductible.ApplicationPriority = nextPriority;
-	}
+        try
+        {
+            // Get All Policies for filtering
+            FilterItemsList = await ORIService.GetIncludedOrExcludedItems();
+            await LoadAllPolicies();
+            FilteredPolicies = AllPolicies;
 
 
-	private void AddAggDeductible()
-	{
-		if (newAggDeductible.Deductible != 0)
-		{
-			if (PolicyDetails.AggDeductibles == null)
-			{
-				PolicyDetails.AggDeductibles = new List<AggDeductible>();
-			}
+            // Get Policy Details
+            PolicyDetails = await ORIService.GetORIPolicyDetails(ORIPolicyReference);
+            if (PolicyDetails != null)
+            {
+                FilterItemsList = await ORIService.GetIncludedOrExcludedItems();
+                FXTreatments = await ORIService.GetFXTreatments();
+                policyPremiums = await ORIService.GetORIPolicyPremiumsAsync(ORIPolicyReference, null, includeDeleted: false);
+                SetNextAvailableAggDeductiblePriority();
+            }
+            else
+            {
+                ErrorMessage = $"No policy details found for reference: {ORIPolicyReference}";
+            }
+        }
+        catch (Exception)
+        {
+            ErrorMessage = "An error occurred while fetching policy details.";
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+        Console.WriteLine("pageloaded");
+    }
 
-			if (PolicyDetails.AggDeductibles.Any(d => d.ApplicationPriority == newAggDeductible.ApplicationPriority))
-			{
-				// Optionally show validation message (you could wire this to UI)
-				validationMessage = $"Application Priority {newAggDeductible.ApplicationPriority} already exists.";
-				return;
-			}
+    private void OnFXRateDateChanged(DateTime date)
+    {
+        selectedFXRateApplicationDate = date;
+    }
 
-			newAggDeductible.LastUpdated = DateTime.Now;
-			newAggDeductible.LastUpdatedBy = "CurrentUser"; // Replace with actual user
-			PolicyDetails.AggDeductibles.Add(newAggDeductible);
-			SetNextAvailableAggDeductiblePriority();
+    private async Task HandleValidSubmit()
+    {
+        IsLoading = true;
+        try
+        {
+            await ORIService.SaveORIPolicyMetadata(PolicyDetails);
 
-			newAggDeductible = new AggDeductible(); // Reset
-			StateHasChanged();
-		}
-	}
+            foreach (var premium in policyPremiums.Where(p => p.IsModified))
+            {
+                await ORIService.UpsertORIPolicyPremiumAsync(
+                    premium.ORIPolicyReference,
+                    premium.Period,
+                    premium.IsFinalAdjusted,
+                    premium.GrossSubjectPremium,
+                    premium.AdjustableRate,
+                    premium.MinimumPremium,
+                    premium.IsDeleted
+                );
+            }
 
-	private void RemoveAggDeductible(AggDeductible aggDeductible)
-	{
-		if (PolicyDetails.AggDeductibles.Contains(aggDeductible))
-		{
-			PolicyDetails.AggDeductibles.Remove(aggDeductible);
-			SetNextAvailableAggDeductiblePriority();
+            Navigation.NavigateTo($"ViewORIPolicy/{PolicyDetails.ORIPolicyReference}", forceLoad: true);
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
 
-			if (PolicyDetails.RemovedAggDeductibles == null)
-			{
-				PolicyDetails.RemovedAggDeductibles = new List<AggDeductible>();
-			}
-			PolicyDetails.RemovedAggDeductibles.Add(aggDeductible);
-			StateHasChanged();
-		}
-	}
+    private async Task NavigateBack()
+    {
+        Navigation.NavigateTo($"ViewORIPolicy/{PolicyDetails.ORIPolicyReference}", forceLoad: true);
+    }
 
-	// new property for binding
-	private SyndicateSplit newSyndicateSplit = new SyndicateSplit();
+    private void AddFilter()
+    {
+        if (newFilter.IncludedOrExcludedItem == null ||
+            string.IsNullOrWhiteSpace(newFilter.IncludedOrExcludedValue))
+        {
+            Console.WriteLine("Cannot add a filter without a valid type and value.");
+            return;
+        }
 
-	private void AddSyndicateSplit()
-	{
-		if (!string.IsNullOrWhiteSpace(newSyndicateSplit.Syndicate) && newSyndicateSplit.Percentage > 0)
-		{
-			if (PolicyDetails.SyndicateSplits == null)
-			{
-				PolicyDetails.SyndicateSplits = new List<SyndicateSplit>();
-			}
+        // Ensure PolicyDetails.Filters is not null
+        if (PolicyDetails.Filters == null)
+        {
+            PolicyDetails.Filters = new List<ORIFilterItem>();
+        }
 
-			newSyndicateSplit.LastUpdated = DateTime.Now;
-			newSyndicateSplit.LastUpdatedBy = "CurrentUser"; // replace with actual user context
+        // Add the filter to the policy
+        PolicyDetails.Filters.Add(new ORIFilterItem
+        {
+            InclusionExclusion = newFilter.InclusionExclusion,
+            IncludedOrExcludedItem = newFilter.IncludedOrExcludedItem, // Object reference
+            IncludedOrExcludedValue = newFilter.IncludedOrExcludedValue,
+            Note = newFilter.Note
+        });
 
-			PolicyDetails.SyndicateSplits.Add(newSyndicateSplit);
+        Console.WriteLine($"Added Filter: {newFilter.InclusionExclusion} - {newFilter.IncludedOrExcludedItem} - {newFilter.IncludedOrExcludedValue}");
 
-			newSyndicateSplit = new SyndicateSplit(); // reset
-			StateHasChanged();
-		}
-	}
+        // Reset the input fields
+        newFilter = new ORIFilterItem
+        {
+            InclusionExclusion = "Inclusion",
+            IncludedOrExcludedItem = null,         // Use object, not a string
+            IncludedOrExcludedValue = "",
+            Note = ""
+        };
 
-	private void RemoveSyndicateSplit(SyndicateSplit split)
-	{
-		if (PolicyDetails.SyndicateSplits.Contains(split))
-		{
-			PolicyDetails.SyndicateSplits.Remove(split);
+        // Force UI update
+        StateHasChanged();
+    }
 
-			if (PolicyDetails.RemovedSyndicateSplits == null)
-			{
-				PolicyDetails.RemovedSyndicateSplits = new List<SyndicateSplit>();
-			}
-			PolicyDetails.RemovedSyndicateSplits.Add(split); // track deletions
+    private void RemoveFilter(ORIFilterItem filter)
+    {
+        if (PolicyDetails.Filters.Contains(filter))
+        {
+            PolicyDetails.Filters.Remove(filter);
+            if (PolicyDetails.RemovedFilters == null)
+            {
+                PolicyDetails.RemovedFilters = new List<ORIFilterItem>();
+            }
+            PolicyDetails.RemovedFilters.Add(filter); // Track deleted filters
+        }
+    }
 
-			StateHasChanged();
-		}
-	}
+    private string GetGhostButtonClass(string item)
+    {
+        return item switch
+        {
+            "DomicileCountry" => "primary-ghost",
+            "InwardPolicyReference" => "secondary-ghost",
+            "Peril" => "success-ghost",
+            "PlacementUMR" => "danger-ghost",
+            "RiskCode" => "warning-ghost",
+            "ReservingClass" => "info-ghost",
+            "StatCode1" => "purple-ghost",
+            "StatCode2" => "teal-ghost",
+            _ => "orange-ghost"
+        };
+    }
 
+    private async Task HandleItemChanged(string selected)
+    {
+        Console.WriteLine("triggered HIC");
+        newFilter.IncludedOrExcludedItem = selected;
+        newFilter.IncludedOrExcludedValue = "";
+
+        if (!string.IsNullOrWhiteSpace(selected) && KnownDropdownTypes.Contains(selected))
+        {
+            Console.WriteLine("into if on line 325");
+
+            IsLoadingDropdown = true;
+            StateHasChanged();
+
+            await Task.Delay(2000); // Simulate DB latency
+
+            if (!DropdownValues.ContainsKey(selected))
+            {
+                Console.WriteLine("going to db");
+                DropdownValues[selected] = await ORIService.GetDropdownValues(selected);
+                Console.WriteLine("coming from db");
+            }
+
+            IsLoadingDropdown = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadAllPolicies()
+    {
+        AllPolicies = (await ORIService.GetORIPolicies()).ToList();
+    }
+
+    private async Task CopyFromAnotherPolicy()
+    {
+        if (string.IsNullOrWhiteSpace(SelectedPolicyToCopyFrom)) return;
+
+        var sourcePolicy = await ORIService.GetORIPolicyDetails(SelectedPolicyToCopyFrom);
+        if (sourcePolicy != null)
+        {
+            PolicyDetails.Filters = sourcePolicy.Filters
+                .Select(f => new ORIFilterItem
+                {
+                    InclusionExclusion = f.InclusionExclusion,
+                    IncludedOrExcludedItem = f.IncludedOrExcludedItem,
+                    IncludedOrExcludedValue = f.IncludedOrExcludedValue,
+                    Note = $"Copied from reference {SelectedPolicyToCopyFrom}"
+                })
+                .ToList();
+
+            StateHasChanged();
+        }
+    }
+
+    private void FilterPolicies()
+    {
+        FilteredPolicies = string.IsNullOrWhiteSpace(PolicySearchTerm)
+            ? AllPolicies
+            : AllPolicies
+                .Where(p =>
+                    p.ORIPolicyReference.Contains(PolicySearchTerm, StringComparison.OrdinalIgnoreCase) ||
+                    (p.PolicyDescription?.Contains(PolicySearchTerm, StringComparison.OrdinalIgnoreCase) ?? false))
+                .ToList();
+    }
+
+    private void SelectPolicy(string policyRef)
+    {
+        SelectedPolicyToCopyFrom = policyRef;
+        PolicySearchTerm = policyRef;
+    }
+
+    // Methods for adding and removing allocations
+    private void AddClassAllocation()
+    {
+        if (newClassAllocation.Class != null && newClassAllocation.Allocation != 0)
+        {
+            if (PolicyDetails.PolicyAllocationsClass == null)
+            {
+                PolicyDetails.PolicyAllocationsClass = new List<ORIPolicyAllocationClass>();
+            }
+            newClassAllocation.LastUpdated = DateTime.Now;
+            newClassAllocation.LastUpdatedBy = "CurrentUser"; // Replace with actual user
+            PolicyDetails.PolicyAllocationsClass.Add(newClassAllocation);
+            newClassAllocation = new ORIPolicyAllocationClass(); // Reset
+            StateHasChanged();
+        }
+    }
+
+    private void RemoveClassAllocation(ORIPolicyAllocationClass allocation)
+    {
+        if (PolicyDetails.PolicyAllocationsClass.Contains(allocation))
+        {
+            PolicyDetails.PolicyAllocationsClass.Remove(allocation);
+            if (PolicyDetails.RemovedPolicyAllocationsClass == null)
+            {
+                PolicyDetails.RemovedPolicyAllocationsClass = new List<ORIPolicyAllocationClass>();
+            }
+            PolicyDetails.RemovedPolicyAllocationsClass.Add(allocation);
+            StateHasChanged();
+        }
+    }
+
+    private void AddYOAAllocation()
+    {
+        if (newYOAAllocation.YearOfAccount != 0 && newYOAAllocation.Allocation != 0)
+        {
+            if (PolicyDetails.PolicyAllocationsYOA == null)
+            {
+                PolicyDetails.PolicyAllocationsYOA = new List<ORIPolicyAllocationYOA>();
+            }
+            newYOAAllocation.LastUpdated = DateTime.Now;
+            newYOAAllocation.LastUpdatedBy = "CurrentUser"; // Replace with actual user
+            PolicyDetails.PolicyAllocationsYOA.Add(newYOAAllocation);
+            newYOAAllocation = new ORIPolicyAllocationYOA(); // Reset
+            StateHasChanged();
+        }
+    }
+
+    private void RemoveYOAAllocation(ORIPolicyAllocationYOA allocation)
+    {
+        if (PolicyDetails.PolicyAllocationsYOA.Contains(allocation))
+        {
+            PolicyDetails.PolicyAllocationsYOA.Remove(allocation);
+            if (PolicyDetails.RemovedPolicyAllocationsYOA == null)
+            {
+                PolicyDetails.RemovedPolicyAllocationsYOA = new List<ORIPolicyAllocationYOA>();
+            }
+            PolicyDetails.RemovedPolicyAllocationsYOA.Add(allocation);
+            StateHasChanged();
+        }
+    }
+
+    // Methods for adding and reming agg deductibles
+    private void SetNextAvailableAggDeductiblePriority()
+    {
+        int nextPriority = 1;
+        var usedPriorities = PolicyDetails.AggDeductibles.Select(d => d.ApplicationPriority).ToHashSet();
+
+        while (usedPriorities.Contains(nextPriority))
+        {
+            nextPriority++;
+        }
+
+        newAggDeductible.ApplicationPriority = nextPriority;
+    }
+
+
+    private void AddAggDeductible()
+    {
+        if (newAggDeductible.Deductible != 0)
+        {
+            if (PolicyDetails.AggDeductibles == null)
+            {
+                PolicyDetails.AggDeductibles = new List<AggDeductible>();
+            }
+
+            if (PolicyDetails.AggDeductibles.Any(d => d.ApplicationPriority == newAggDeductible.ApplicationPriority))
+            {
+                // Optionally show validation message (you could wire this to UI)
+                validationMessage = $"Application Priority {newAggDeductible.ApplicationPriority} already exists.";
+                return;
+            }
+
+            newAggDeductible.LastUpdated = DateTime.Now;
+            newAggDeductible.LastUpdatedBy = "CurrentUser"; // Replace with actual user
+            PolicyDetails.AggDeductibles.Add(newAggDeductible);
+            SetNextAvailableAggDeductiblePriority();
+
+            newAggDeductible = new AggDeductible(); // Reset
+            StateHasChanged();
+        }
+    }
+
+    private void RemoveAggDeductible(AggDeductible aggDeductible)
+    {
+        if (PolicyDetails.AggDeductibles.Contains(aggDeductible))
+        {
+            PolicyDetails.AggDeductibles.Remove(aggDeductible);
+            SetNextAvailableAggDeductiblePriority();
+
+            if (PolicyDetails.RemovedAggDeductibles == null)
+            {
+                PolicyDetails.RemovedAggDeductibles = new List<AggDeductible>();
+            }
+            PolicyDetails.RemovedAggDeductibles.Add(aggDeductible);
+            StateHasChanged();
+        }
+    }
+
+    // new property for binding
+    private SyndicateSplit newSyndicateSplit = new SyndicateSplit();
+
+    private void AddSyndicateSplit()
+    {
+        if (!string.IsNullOrWhiteSpace(newSyndicateSplit.Syndicate) && newSyndicateSplit.Percentage > 0)
+        {
+            if (PolicyDetails.SyndicateSplits == null)
+            {
+                PolicyDetails.SyndicateSplits = new List<SyndicateSplit>();
+            }
+
+            newSyndicateSplit.LastUpdated = DateTime.Now;
+            newSyndicateSplit.LastUpdatedBy = "CurrentUser"; // replace with actual user context
+
+            PolicyDetails.SyndicateSplits.Add(newSyndicateSplit);
+
+            newSyndicateSplit = new SyndicateSplit(); // reset
+            StateHasChanged();
+        }
+    }
+
+    private void RemoveSyndicateSplit(SyndicateSplit split)
+    {
+        if (PolicyDetails.SyndicateSplits.Contains(split))
+        {
+            PolicyDetails.SyndicateSplits.Remove(split);
+
+            if (PolicyDetails.RemovedSyndicateSplits == null)
+            {
+                PolicyDetails.RemovedSyndicateSplits = new List<SyndicateSplit>();
+            }
+            PolicyDetails.RemovedSyndicateSplits.Add(split); // track deletions
+
+            StateHasChanged();
+        }
+    }
+
+    private void AddPremium()
+    {
+        if (string.IsNullOrWhiteSpace(newPremium.Period))
+            return;
+
+        // Prevent duplicate period entries in local list
+        var existing = policyPremiums.FirstOrDefault(p => p.Period == newPremium.Period);
+        if (existing != null)
+            policyPremiums.Remove(existing);
+
+        // Clone and add
+        policyPremiums.Add(new ORIPolicyPremiumModel
+        {
+            ORIPolicyReference = ORIPolicyReference,
+            Period = newPremium.Period,
+            IsFinalAdjusted = newPremium.IsFinalAdjusted,
+            GrossSubjectPremium = newPremium.GrossSubjectPremium,
+            AdjustableRate = newPremium.AdjustableRate,
+            MinimumPremium = newPremium.MinimumPremium,
+            LastUpdatedBy = "PendingSave",
+            LastUpdatedDate = DateTime.Now,
+            IsDeleted = false,
+            IsModified = true
+        });
+
+        // Reset form
+        newPremium = new();
+    }
+
+    private void SoftDeletePremium(ORIPolicyPremiumModel premium)
+    {
+        premium.IsDeleted = true;
+        premium.IsModified = true;
+        StateHasChanged(); // Forces immediate refresh
+    }
+
+    private void RemovePremium(ORIPolicyPremiumModel premium)
+    {
+        policyPremiums.Remove(premium);
+    }
 }
 
