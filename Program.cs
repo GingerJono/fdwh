@@ -135,6 +135,7 @@ builder.Services.AddScoped<ReservingService>();
 builder.Services.AddScoped<ReportingService>();
 builder.Services.AddScoped<ORIService>();
 builder.Services.AddScoped<PrismService>();
+builder.Services.AddScoped<ExceptionService>();
 builder.Services.AddScoped<CookieManager>();
 builder.Services.AddScoped<CytoraCheckingFilterState>();
 

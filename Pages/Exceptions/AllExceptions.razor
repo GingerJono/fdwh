@@ -1,0 +1,185 @@
+@page "/AllExceptions"
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager
+@using Sandbox.Models.Exceptions
+@using Sandbox.Services
+@inject ExceptionService ExceptionService
+
+<div class="row mt-4 mb-4">
+    <h3>Exceptions</h3>
+</div>
+
+@if (AllExceptions_ == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card shadow mb-4 border">
+                <div class="card-body">
+                    <h5 class="card-title mb-1">Total Exceptions</h5>
+                    <p class="fs-4 fw-bold mb-0">@AllExceptions_.Count()</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow mb-4 border">
+                <div class="card-body">
+                    <h5 class="card-title mb-1">Open Exceptions</h5>
+                    <p class="fs-4 fw-bold text-danger mb-0">@AllExceptions_.Count(e => e.Status == "Open")</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow mb-4 border">
+                <div class="card-body">
+                    <h5 class="card-title mb-1">Recently Updated</h5>
+                    <p class="fs-4 fw-bold text-warning mb-0">@AllExceptions_.Count(e => e.LastUpdated >= DateTime.Now.AddDays(-7))</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4 border">
+        <div class="table-responsive">
+            <table class="table table-striped table-fixed text-nowrap">
+                <colgroup>
+                    <col style="width: 6%" />
+                    <col style="width: 6%" />
+                    <col style="width: 10%" />
+                    <col style="width: 10%" />
+                    <col style="width: 15%" />
+                    <col style="width: 15%" />
+                    <col style="width: 10%" />
+                    <col style="width: 10%" />
+                    <col style="width: 10%" />
+                    <col style="width: 8%" />
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th>Exception ID</th>
+                        <th>Rule ID</th>
+                        <th>Business ID</th>
+                        <th>Status</th>
+                        <th>Prior Status</th>
+                        <th>Current Value</th>
+                        <th>Reason</th>
+                        <th>Created</th>
+                        <th>Last Updated</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var ex in PagedExceptions)
+                    {
+                        <tr>
+                            <td>@ex.ExceptionID</td>
+                            <td>@ex.RuleID</td>
+                            <td>@ex.BusinessID</td>
+                            <td>
+                                <span class="@($"badge {(ex.Status == "Open" ? "bg-danger" : "bg-success")}")">
+                                    @ex.Status
+                                </span>
+                            </td>
+                            <td>@ex.PriorStatus</td>
+                            <td>@ex.CurrentValue</td>
+                            <td>@ex.Reason</td>
+                            <td>@ex.CreatedDate?.ToString("yyyy-MM-dd")</td>
+                            <td>@ex.LastUpdated?.ToString("yyyy-MM-dd")</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary"
+                                        @onclick='() => NavigationManager.NavigateTo($"ViewException/{ex.ExceptionID}")'>
+                                    View
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="px-3 pb-3">
+        <div class="d-flex justify-content-between align-items-center mt-3">
+            <select class="form-select form-select-sm w-auto" @onchange="OnPageSizeChanged">
+                @foreach (var size in PageSizeOptions)
+                {
+                    <option value="@size" selected="@(PageSize == size)">
+                        @size per page
+                    </option>
+                }
+            </select>
+
+            <nav>
+                <ul class="pagination mb-0">
+                    <li class="page-item @(CurrentPage == 1 ? "disabled" : "")">
+                        <button class="page-link" @onclick="() => GoToPage(CurrentPage - 1)">Previous</button>
+                    </li>
+
+                    @for (int i = StartPage; i <= EndPage && i <= TotalPages; i++)
+                    {
+                        var pageNumber = i;
+                        <li class="page-item @(CurrentPage == pageNumber ? "active" : "")">
+                            <button class="page-link" @onclick="() => GoToPage(pageNumber)">@pageNumber</button>
+                        </li>
+                    }
+
+                    <li class="page-item @(CurrentPage == TotalPages ? "disabled" : "")">
+                        <button class="page-link" @onclick="() => GoToPage(CurrentPage + 1)">Next</button>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+}
+
+@code {
+    private List<ExceptionRecord> AllExceptions_ = new();
+    private List<ExceptionRecord> PagedExceptions = new();
+    private int CurrentPage = 1;
+    private int PageSize = 20;
+    private int TotalRecords = 0;
+    private List<int> PageSizeOptions = new() { 10, 20, 50, 100 };
+
+    private const int MaxVisiblePages = 10;
+    private int TotalPages => Math.Max(1, (int)Math.Ceiling((double)TotalRecords / PageSize));
+    private int StartPage => Math.Max(1, ((CurrentPage - 1) / MaxVisiblePages) * MaxVisiblePages + 1);
+    private int EndPage => Math.Min(StartPage + MaxVisiblePages - 1, TotalPages);
+
+    protected override async Task OnInitializedAsync()
+    {
+        AllExceptions_ = (await ExceptionService.GetExceptions()).ToList();
+        ApplyPagination();
+    }
+
+    private void ApplyPagination()
+    {
+        TotalRecords = AllExceptions_.Count;
+        PagedExceptions = AllExceptions_
+            .Skip((CurrentPage - 1) * PageSize)
+            .Take(PageSize)
+            .ToList();
+    }
+
+    private async Task GoToPage(int page)
+    {
+        if (page >= 1 && page <= TotalPages)
+        {
+            CurrentPage = page;
+            ApplyPagination();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task OnPageSizeChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int newSize))
+        {
+            PageSize = newSize;
+            CurrentPage = 1;
+            ApplyPagination();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+}
