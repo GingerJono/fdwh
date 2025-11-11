@@ -1,0 +1,53 @@
+﻿@page "/FDWH/ReportRuns"
+@inject Sandbox.Services.FDWHReportingService ReportingService
+@using Sandbox.Models.FDWH
+
+<h3>Report Runs</h3>
+
+@if (runs == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table table-bordered table-sm">
+        <thead>
+            <tr>
+                <th>Run ID</th>
+                <th>Report ID</th>
+                <th>Run By</th>
+                <th>Run Date (UTC)</th>
+                <th>Version</th>
+                <th>Rows</th>
+                <th>Download</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var r in runs)
+        {
+            <tr>
+                <td>@r.RunID</td>
+                <td>@r.ReportID</td>
+                <td>@r.RunBy</td>
+                <td>@r.RunDate.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                <td>@r.ReportVersion</td>
+                <td>@r.RowCount</td>
+                <td>
+                    @if (!string.IsNullOrEmpty(r.FilePath))
+                    {
+                        <a href="@($"/exports/{Path.GetFileName(r.FilePath)}")" target="_blank">Download</a>
+                    }
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<FDWHReportRun>? runs;
+    protected override async Task OnInitializedAsync()
+    {
+        runs = await ReportingService.GetReportRunsAsync();
+    }
+}

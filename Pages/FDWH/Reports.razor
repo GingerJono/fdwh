@@ -1,0 +1,33 @@
+﻿@page "/FDWH/Reports"
+@inject Sandbox.Services.FDWHReportingService ReportingService
+@using Sandbox.Models.FDWH
+
+<h3>FDWH Reports</h3>
+
+@if (reports == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table table-bordered table-sm">
+        <thead><tr><th>Name</th><th>Description</th><th>Version</th><th></th></tr></thead>
+        <tbody>
+            @foreach (var r in reports)
+            {
+                <tr>
+                    <td>@r.ReportName</td>
+                    <td>@r.Description</td>
+                    <td>@r.VersionNumber</td>
+                    <td><a href="/FDWH/Report/@r.ReportID">View</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<FDWHReport>? reports;
+    protected override async Task OnInitializedAsync() =>
+        reports = await ReportingService.GetReportListAsync();
+}

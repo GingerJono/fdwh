@@ -1,0 +1,54 @@
+﻿@page "/FDWH/Report/{ReportID:int}"
+@inject Sandbox.Services.FDWHReportingService ReportingService
+@using System.Data
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JS
+
+<h3>Run Report</h3>
+
+@if (true)
+{
+    <EditForm Model="@paramModel" OnValidSubmit="RunReport">
+        <div class="mb-2">
+            <label>Processing Month From</label>
+            <InputNumber @bind-Value="paramModel.ProcessingMonthFrom" class="form-control" />
+        </div>
+        <div class="mb-2">
+            <label>Processing Month To</label>
+            <InputNumber @bind-Value="paramModel.ProcessingMonthTo" class="form-control" />
+        </div>
+        <button class="btn btn-primary">Run</button>
+    </EditForm>
+}
+
+
+@code {
+    [Parameter] public int ReportID { get; set; }
+
+    private ReportParams paramModel = new() { ProcessingMonthFrom = 202401, ProcessingMonthTo = 202406 };
+
+    private async Task RunReport()
+    {
+        var parameters = new Dictionary<string, object> {
+            { "@ProcessingMonthFrom", paramModel.ProcessingMonthFrom },
+            { "@ProcessingMonthTo", paramModel.ProcessingMonthTo }
+        };
+
+        var bytes = await ReportingService.RunReportAndExportAsync(
+            ReportID,
+            "reporting.spPremiumBetweenProcessingMonths",
+            parameters,
+            "jononeill",
+            1);
+
+        var fileName = $"Report_{ReportID}_{DateTime.UtcNow:yyyyMMddHHmmss}.xlsx";
+        using var streamRef = new DotNetStreamReference(new MemoryStream(bytes));
+        await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
+    }
+
+    public class ReportParams
+    {
+        public int ProcessingMonthFrom { get; set; }
+        public int ProcessingMonthTo { get; set; }
+    }
+}
