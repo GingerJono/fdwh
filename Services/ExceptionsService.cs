@@ -60,5 +60,24 @@ namespace Sandbox.Services
 				);
 			}
 		}
+
+		public async Task<IEnumerable<ExceptionRecord>> GetExceptionHistoryAsync(int ruleId, string businessId)
+		{
+			using (var connection = new SqlConnection(_configuration.GetConnectionString("ExceptionsConnection")))
+			{
+				await connection.OpenAsync();
+
+				var parameters = new DynamicParameters();
+				parameters.Add("@RuleID", ruleId);
+				parameters.Add("@BusinessID", businessId);
+
+				var sql = @"SELECT *
+                    FROM [Exceptions].[dbo].[vwExceptionHistory]
+                    WHERE RuleID = @RuleID AND BusinessID = @BusinessID
+                    ORDER BY CreatedDate DESC";
+
+				return await connection.QueryAsync<ExceptionRecord>(sql, parameters);
+			}
+		}
 	}
 }

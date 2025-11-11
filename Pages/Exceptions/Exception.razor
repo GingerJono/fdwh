@@ -1,31 +1,47 @@
-@page "/Exception/{ExceptionID:int}"
+@page "/Exception/{RuleID:int}/{BusinessID}"
 @using Sandbox.Models.Exceptions
 @using Sandbox.Services
 @inject ExceptionService ExceptionService
 @inject NavigationManager NavigationManager
 
-<h3 class="mt-3 mb-4">Edit Exception</h3>
+<h3 class="mt-3 mb-4">Exception Details</h3>
 
-@if (CurrentException == null)
+@if (CurrentStatic == null)
 {
     <p><em>Loading...</em></p>
 }
 else
 {
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card text-white bg-primary shadow">
+                <div class="card-body">
+                    <h5 class="card-title">Current Status</h5>
+                    <p class="fs-3 fw-bold">@CurrentStatic.Status</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card text-white bg-dark shadow">
+                <div class="card-body">
+                    <h5 class="card-title">Current Value</h5>
+                    <p class="fs-3 fw-bold">@CurrentStatic.CurrentValue</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="card shadow mb-4 border">
         <div class="card-body">
             <table class="table table-bordered table-sm mb-0">
                 <tbody>
-                    <tr><th>Exception ID</th><td>@CurrentException.ExceptionID</td></tr>
-                    <tr><th>Rule ID</th><td>@CurrentException.RuleID</td></tr>
-                    <tr><th>Business ID</th><td>@CurrentException.BusinessID</td></tr>
-                    <tr><th>Status</th><td>@CurrentException.Status</td></tr>
-                    <tr><th>Prior Status</th><td>@CurrentException.PriorStatus</td></tr>
-                    <tr><th>Current Value</th><td>@CurrentException.CurrentValue</td></tr>
-                    <tr><th>Reason</th><td>@CurrentException.Reason</td></tr>
-                    <tr><th>Created</th><td>@CurrentException.CreatedDate?.ToString("yyyy-MM-dd HH:mm")</td></tr>
-                    <tr><th>Last Updated</th><td>@CurrentException.LastUpdated?.ToString("yyyy-MM-dd HH:mm")</td></tr>
-                    <tr><th>User</th><td>@CurrentException.User</td></tr>
+                    <tr><th>Rule ID</th><td>@CurrentStatic.RuleID</td></tr>
+                    <tr><th>Business ID</th><td>@CurrentStatic.BusinessID</td></tr>
+                    <tr><th>Status</th><td>@CurrentStatic.Status</td></tr>
+                    <tr><th>Prior Status</th><td>@CurrentStatic.PriorStatus</td></tr>
+                    <tr><th>Reason</th><td>@CurrentStatic.Reason</td></tr>
+                    <tr><th>User</th><td>@CurrentStatic.User</td></tr>
+                    <tr><th>Last Updated</th><td>@CurrentStatic.LastUpdated?.ToString("yyyy-MM-dd HH:mm")</td></tr>
                 </tbody>
             </table>
         </div>
@@ -44,12 +60,45 @@ else
             <button type="button" class="btn btn-outline-secondary" disabled="@IsDisabled" @onclick='() => SubmitAction("Deferred")'>Defer</button>
         </div>
     </EditForm>
+
+    <h5 class="mt-5">History</h5>
+    <div class="card shadow border">
+        <div class="card-body">
+            <table class="table table-striped table-bordered table-sm text-nowrap">
+                <thead class="table-light">
+                    <tr>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Prior Status</th>
+                        <th>Reason</th>
+                        <th>Notes</th>
+                        <th>User</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in History)
+                    {
+                        <tr>
+                            <td>@row.LastUpdated?.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td>@row.Status</td>
+                            <td>@row.PriorStatus</td>
+                            <td>@row.Reason</td>
+                            <td>@row.Comment</td>
+                            <td>@row.User</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
 }
 
 @code {
-    [Parameter] public int ExceptionID { get; set; }
+    [Parameter] public int RuleID { get; set; }
+    [Parameter] public string BusinessID { get; set; }
 
-    private ExceptionRecord CurrentException;
+    private ExceptionRecord CurrentStatic;
+    private IEnumerable<ExceptionRecord> History = Enumerable.Empty<ExceptionRecord>();
     private string Notes = string.Empty;
     private bool IsDisabled = false;
     private string SelectedAction;
@@ -57,16 +106,18 @@ else
     protected override async Task OnInitializedAsync()
     {
         var all = await ExceptionService.GetExceptions();
-        CurrentException = all.FirstOrDefault(e => e.ExceptionID == ExceptionID);
+        CurrentStatic = all.FirstOrDefault(e => e.RuleID == RuleID && e.BusinessID == BusinessID);
+
+        History = await ExceptionService.GetExceptionHistoryAsync(RuleID, BusinessID);
     }
 
     private async Task SubmitAction(string action)
     {
         if (IsDisabled) return;
-
         SelectedAction = action;
-        await ExceptionService.UpdateExceptionStatusAsync(ExceptionID, Environment.UserName, Notes, action);
+        await ExceptionService.UpdateExceptionStatusAsync(RuleID, BusinessID, Environment.UserName, Notes, action);
         IsDisabled = true;
+        History = await ExceptionService.GetExceptionHistoryAsync(RuleID, BusinessID);
         StateHasChanged();
     }
 }
