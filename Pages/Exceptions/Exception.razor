@@ -1,0 +1,72 @@
+@page "/Exception/{ExceptionID:int}"
+@using Sandbox.Models.Exceptions
+@using Sandbox.Services
+@inject ExceptionService ExceptionService
+@inject NavigationManager NavigationManager
+
+<h3 class="mt-3 mb-4">Edit Exception</h3>
+
+@if (CurrentException == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="card shadow mb-4 border">
+        <div class="card-body">
+            <table class="table table-bordered table-sm mb-0">
+                <tbody>
+                    <tr><th>Exception ID</th><td>@CurrentException.ExceptionID</td></tr>
+                    <tr><th>Rule ID</th><td>@CurrentException.RuleID</td></tr>
+                    <tr><th>Business ID</th><td>@CurrentException.BusinessID</td></tr>
+                    <tr><th>Status</th><td>@CurrentException.Status</td></tr>
+                    <tr><th>Prior Status</th><td>@CurrentException.PriorStatus</td></tr>
+                    <tr><th>Current Value</th><td>@CurrentException.CurrentValue</td></tr>
+                    <tr><th>Reason</th><td>@CurrentException.Reason</td></tr>
+                    <tr><th>Created</th><td>@CurrentException.CreatedDate?.ToString("yyyy-MM-dd HH:mm")</td></tr>
+                    <tr><th>Last Updated</th><td>@CurrentException.LastUpdated?.ToString("yyyy-MM-dd HH:mm")</td></tr>
+                    <tr><th>User</th><td>@CurrentException.User</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <EditForm Model="@this" OnValidSubmit="() => SubmitAction(SelectedAction)">
+        <div class="mb-3">
+            <label for="notes" class="form-label">Notes</label>
+            <textarea id="notes" class="form-control" rows="6" @bind="@Notes" disabled="@IsDisabled"></textarea>
+        </div>
+
+        <div class="mb-3 d-flex gap-2">
+            <button type="button" class="btn btn-outline-success" disabled="@IsDisabled" @onclick='() => SubmitAction("Checked")'>Mark as Checked</button>
+            <button type="button" class="btn btn-outline-warning" disabled="@IsDisabled" @onclick='() => SubmitAction("Changed")'>Mark as Changed</button>
+            <button type="button" class="btn btn-outline-primary" disabled="@IsDisabled" @onclick='() => SubmitAction("Assigned")'>Assign</button>
+            <button type="button" class="btn btn-outline-secondary" disabled="@IsDisabled" @onclick='() => SubmitAction("Deferred")'>Defer</button>
+        </div>
+    </EditForm>
+}
+
+@code {
+    [Parameter] public int ExceptionID { get; set; }
+
+    private ExceptionRecord CurrentException;
+    private string Notes = string.Empty;
+    private bool IsDisabled = false;
+    private string SelectedAction;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var all = await ExceptionService.GetExceptions();
+        CurrentException = all.FirstOrDefault(e => e.ExceptionID == ExceptionID);
+    }
+
+    private async Task SubmitAction(string action)
+    {
+        if (IsDisabled) return;
+
+        SelectedAction = action;
+        await ExceptionService.UpdateExceptionStatusAsync(ExceptionID, Environment.UserName, Notes, action);
+        IsDisabled = true;
+        StateHasChanged();
+    }
+}
