@@ -43,7 +43,7 @@ namespace Sandbox.Services
 
 		public async Task UpdateExceptionStatusAsync(int exceptionId, string user, string notes, string newTargetStatus)
 		{
-			using (var connection = new SqlConnection(_configuration.GetConnectionString("ExceptionsConnection")))
+			using (var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection")))
 			{
 				await connection.OpenAsync();
 
@@ -61,9 +61,29 @@ namespace Sandbox.Services
 			}
 		}
 
+		public async Task UpdateExceptionStatusAsync(int ruleId, string businessId, string user, string notes, string newTargetStatus)
+		{
+			using (var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection")))
+			{
+				await connection.OpenAsync();
+
+				var parameters = new DynamicParameters();
+				parameters.Add("@RuleID", ruleId);
+				parameters.Add("@BusinessID", businessId);
+				parameters.Add("@User", user);
+				parameters.Add("@Notes", notes);
+				parameters.Add("@NewTargetStatus", newTargetStatus);
+
+				await connection.ExecuteAsync(
+					"Exceptions.spUpdateExceptionStatus",
+					parameters,
+					commandType: CommandType.StoredProcedure
+				);
+			}
+		}
 		public async Task<IEnumerable<ExceptionRecord>> GetExceptionHistoryAsync(int ruleId, string businessId)
 		{
-			using (var connection = new SqlConnection(_configuration.GetConnectionString("ExceptionsConnection")))
+			using (var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection")))
 			{
 				await connection.OpenAsync();
 
@@ -71,13 +91,15 @@ namespace Sandbox.Services
 				parameters.Add("@RuleID", ruleId);
 				parameters.Add("@BusinessID", businessId);
 
-				var sql = @"SELECT *
-                    FROM [Exceptions].[dbo].[vwExceptionHistory]
-                    WHERE RuleID = @RuleID AND BusinessID = @BusinessID
-                    ORDER BY CreatedDate DESC";
+				var result = await connection.QueryAsync<ExceptionRecord>(
+					"Exceptions.spGetExceptionHistory",
+					parameters,
+					commandType: CommandType.StoredProcedure
+				);
 
-				return await connection.QueryAsync<ExceptionRecord>(sql, parameters);
+				return result;
 			}
 		}
+
 	}
 }

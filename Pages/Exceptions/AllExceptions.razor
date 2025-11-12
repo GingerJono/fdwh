@@ -47,14 +47,14 @@ else
                 <colgroup>
                     <col style="width: 6%" />
                     <col style="width: 6%" />
-                    <col style="width: 10%" />
-                    <col style="width: 10%" />
-                    <col style="width: 15%" />
-                    <col style="width: 15%" />
-                    <col style="width: 10%" />
-                    <col style="width: 10%" />
-                    <col style="width: 10%" />
+                    <col style="width: 12%" />
                     <col style="width: 8%" />
+                    <col style="width: 10%" />
+                    <col style="width: 15%" />
+                    <col style="width: 15%" />
+                    <col style="width: 8%" />
+                    <col style="width: 8%" />
+                    <col style="width: 6%" />
                 </colgroup>
                 <thead>
                     <tr>
@@ -63,7 +63,7 @@ else
                         <th>Business ID</th>
                         <th>Status</th>
                         <th>Prior Status</th>
-                        <th>Current Value</th>
+                        <th>Value</th>
                         <th>Reason</th>
                         <th>Created</th>
                         <th>Last Updated</th>
@@ -78,23 +78,31 @@ else
                             <td>@ex.RuleID</td>
                             <td>@ex.BusinessID</td>
                             <td>
-                                <span class="@($"badge {(ex.Status == "Open" ? "bg-danger" : "bg-success")}")">
+                                <span class="@($"badge {(ex.Status?.Equals("Open", StringComparison.OrdinalIgnoreCase) == true ? "bg-danger" : "bg-success")}")">
                                     @ex.Status
                                 </span>
                             </td>
                             <td>@ex.PriorStatus</td>
-                            <td>@ex.CurrentValue</td>
-                            <td>@ex.Reason</td>
-                            <td>@ex.CreatedDate?.ToString("yyyy-MM-dd")</td>
-                            <td>@ex.LastUpdated?.ToString("yyyy-MM-dd")</td>
                             <td>
-                                <button class="btn btn-sm btn-outline-primary"
-                                        @onclick='() => NavigationManager.NavigateTo($"Exception/{ex.ExceptionID}")'>
-                                    View
-                                </button>
-                            </td>
-                        </tr>
-                    }
+                                @(
+                                                        !string.IsNullOrEmpty(ex.ValueDescriptive) ? ex.ValueDescriptive :
+                                                        ex.ValueText ??
+                                                        ex.ValueInt?.ToString() ??
+                                                        ex.ValueDecimal?.ToString("0.###") ??
+                                                        (ex.ValueDate?.ToString("yyyy-MM-dd") ?? "")
+                                                        )
+                        </td>
+                        <td>@ex.Reason</td>
+                        <td>@ex.CreatedDate.ToString("yyyy-MM-dd")</td>
+                        <td>@ex.LastUpdated?.ToString("yyyy-MM-dd")</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary"
+                                    @onclick='() => NavigationManager.NavigateTo($"Exception/{ex.RuleID}/{ex.BusinessID}")'>
+                                View
+                            </button>
+                        </td>
+                    </tr>
+                                }
                 </tbody>
             </table>
         </div>

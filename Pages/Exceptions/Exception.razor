@@ -25,11 +25,19 @@ else
             <div class="card text-white bg-dark shadow">
                 <div class="card-body">
                     <h5 class="card-title">Current Value</h5>
-                    <p class="fs-3 fw-bold">@CurrentStatic.CurrentValue</p>
-                </div>
+                    <p class="fs-3 fw-bold">
+                        @(
+                                            !string.IsNullOrEmpty(CurrentStatic.ValueDescriptive) ? CurrentStatic.ValueDescriptive :
+                                            CurrentStatic.ValueText ??
+                                            CurrentStatic.ValueInt?.ToString() ??
+                                            CurrentStatic.ValueDecimal?.ToString("0.###") ??
+                                            (CurrentStatic.ValueDate?.ToString("yyyy-MM-dd") ?? "")
+                                            )
+                </p>
             </div>
         </div>
     </div>
+</div>
 
     <div class="card shadow mb-4 border">
         <div class="card-body">
@@ -76,7 +84,7 @@ else
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var row in History)
+                @foreach (var row in History)
                     {
                         <tr>
                             <td>@row.LastUpdated?.ToString("yyyy-MM-dd HH:mm")</td>
@@ -105,17 +113,17 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var all = await ExceptionService.GetExceptions();
-        CurrentStatic = all.FirstOrDefault(e => e.RuleID == RuleID && e.BusinessID == BusinessID);
-
         History = await ExceptionService.GetExceptionHistoryAsync(RuleID, BusinessID);
+        CurrentStatic = History.OrderByDescending(h => h.CreatedDate).FirstOrDefault();
     }
 
     private async Task SubmitAction(string action)
     {
         if (IsDisabled) return;
+
         SelectedAction = action;
         await ExceptionService.UpdateExceptionStatusAsync(RuleID, BusinessID, Environment.UserName, Notes, action);
+
         IsDisabled = true;
         History = await ExceptionService.GetExceptionHistoryAsync(RuleID, BusinessID);
         StateHasChanged();
