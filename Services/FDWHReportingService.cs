@@ -42,8 +42,11 @@ namespace Sandbox.Services
 		}
 
 		public async Task<byte[]> RunReportAndExportAsync(
-			int reportId, string storedProc, Dictionary<string, object> parameters,
-			string runBy, int version)
+			int reportId,
+			string storedProc,
+			Dictionary<string, object> parameters,
+			string runBy,
+			int version)
 		{
 			var dt = new DataTable();
 			using var conn = new SqlConnection(GetFDWHConnection());
@@ -70,14 +73,13 @@ namespace Sandbox.Services
 			controlSheet.Cells["B5"].Value = System.Text.Json.JsonSerializer.Serialize(parameters);
 			controlSheet.Cells.AutoFitColumns();
 
-			var bytes = await package.GetAsByteArrayAsync();
-
 			await LogRunAsync(reportId, runBy,
 				System.Text.Json.JsonSerializer.Serialize(parameters),
 				version, null, dt.Rows.Count);
 
-			return bytes;
+			return await package.GetAsByteArrayAsync();
 		}
+
 
 
 		public async Task<List<FDWHReportRun>> GetReportRunsAsync()

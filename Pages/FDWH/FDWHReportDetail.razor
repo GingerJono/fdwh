@@ -1,31 +1,131 @@
 ﻿@page "/FDWH/Report/{ReportID:int}"
 @inject Sandbox.Services.FDWHReportingService ReportingService
-@using System.Data
-@inject NavigationManager NavigationManager
 @inject IJSRuntime JS
+@inject Helpers.SandboxContext SandboxContext
+@using System.Text.Json
+@using Sandbox.Models.FDWH
 
-<h3>Run Report</h3>
+<h3 class="mb-3">@reportTitle</h3>
 
-@if (true)
+<div class="card mb-4 shadow-sm border-0">
+    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+        <span class="fw-semibold">Report Information</span>
+        <button class="btn btn-sm btn-outline-secondary" @onclick="ToggleInfo">
+            @(showInfo ? "Hide" : "Show")
+        </button>
+    </div>
+    @if (showInfo)
+    {
+        <div class="card-body markdown-body">
+            @((MarkupString)reportDescription)
+        </div>
+    }
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-primary text-white">Run Report</div>
+    <div class="card-body">
+        <EditForm Model="@paramModel" OnValidSubmit="RunReport">
+            <div class="row">
+                <div class="col-md-4">
+                    <label class="form-label">Processing Month From</label>
+                    <InputNumber @bind-Value="paramModel.ProcessingMonthFrom" class="form-control" />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Processing Month To</label>
+                    <InputNumber @bind-Value="paramModel.ProcessingMonthTo" class="form-control" />
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <button class="btn btn-success w-100">Run and Download</button>
+                </div>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@if (runs?.Count > 0)
 {
-    <EditForm Model="@paramModel" OnValidSubmit="RunReport">
-        <div class="mb-2">
-            <label>Processing Month From</label>
-            <InputNumber @bind-Value="paramModel.ProcessingMonthFrom" class="form-control" />
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-light fw-semibold">Previous Runs</div>
+        <div class="card-body p-0">
+            <table class="table table-sm table-hover mb-0 align-middle">
+                <thead class="table-secondary">
+                    <tr>
+                        <th>Date (UTC)</th>
+                        <th>Run By</th>
+                        <th>Version</th>
+                        <th>Rows</th>
+                        <th>Parameters</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var r in runs)
+                    {
+                        <tr>
+                            <td>@r.RunDate.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td>@r.RunBy</td>
+                            <td>@r.ReportVersion</td>
+                            <td>@r.RowCount</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-dark"
+                                        @onclick="() => ToggleParams(r.RunID)">
+                                    @(expandedParams.Contains(r.RunID) ? "Hide" : "Show")
+                                </button>
+                            </td>
+                        </tr>
+                        @if (expandedParams.Contains(r.RunID))
+                        {
+                            <tr class="bg-light">
+                                <td colspan="5" style="white-space: pre-wrap;">
+                                    <code>@FormatParams(r.ParametersJSON)</code>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
         </div>
-        <div class="mb-2">
-            <label>Processing Month To</label>
-            <InputNumber @bind-Value="paramModel.ProcessingMonthTo" class="form-control" />
-        </div>
-        <button class="btn btn-primary">Run</button>
-    </EditForm>
+    </div>
 }
-
+else
+{
+    <p class="text-muted mt-3 fst-italic">No previous runs logged for this report.</p>
+}
 
 @code {
     [Parameter] public int ReportID { get; set; }
 
+    private bool showInfo = true;
+    private HashSet<int> expandedParams = new();
+    private string reportTitle = "Premium Between Processing Months";
+
+    private string reportDescription = @"
+### Parameters
+- **ProcessingMonthFrom** – start month (YYYYMM)
+- **ProcessingMonthTo** – end month (YYYYMM)
+
+### Output
+Produces an Excel workbook with:
+1. **Output** tab – the data
+2. **Control** tab – run metadata (user, parameters, version)
+
+### Version History
+| Version | Date | Notes |
+|:--:|:--:|:--|
+| 1.0 | 2025-11-11 | Initial release |
+| 1.1 | 2025-11-12 | Added Excel control sheet + run logging |
+| 1.2 | 2025-11-13 | UI enhancements and param tracking |";
+
     private ReportParams paramModel = new() { ProcessingMonthFrom = 202401, ProcessingMonthTo = 202406 };
+    private List<FDWHReportRun> runs = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        runs = (await ReportingService.GetReportRunsAsync())
+            .Where(r => r.ReportID == ReportID)
+            .OrderByDescending(r => r.RunDate)
+            .ToList();
+    }
 
     private async Task RunReport()
     {
@@ -38,12 +138,35 @@
             ReportID,
             "reporting.spPremiumBetweenProcessingMonths",
             parameters,
-            "jononeill",
+            SandboxContext.EffectiveUserName ?? "unknown",
             1);
 
         var fileName = $"Report_{ReportID}_{DateTime.UtcNow:yyyyMMddHHmmss}.xlsx";
         using var streamRef = new DotNetStreamReference(new MemoryStream(bytes));
         await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
+
+        runs = (await ReportingService.GetReportRunsAsync())
+            .Where(r => r.ReportID == ReportID)
+            .OrderByDescending(r => r.RunDate)
+            .ToList();
+    }
+
+    private void ToggleInfo() => showInfo = !showInfo;
+
+    private void ToggleParams(int runId)
+    {
+        if (!expandedParams.Add(runId))
+            expandedParams.Remove(runId);
+    }
+
+    private static string FormatParams(string json)
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(json);
+            return JsonSerializer.Serialize(doc, new JsonSerializerOptions { WriteIndented = true });
+        }
+        catch { return json; }
     }
 
     public class ReportParams
