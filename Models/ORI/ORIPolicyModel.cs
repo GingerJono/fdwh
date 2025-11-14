@@ -58,25 +58,15 @@ namespace Sandbox.Models.ORI
         public List<ORIFilterItem> RemovedFilters { get; set; } = new(); // Track deleted filters
 
         // New Lists for Policy Allocations
-        public List<ORIPolicyAllocationClass> PolicyAllocationsClass { get; set; } = new();
-        public List<ORIPolicyAllocationYOA> PolicyAllocationsYOA { get; set; } = new();
-        public List<ORIPolicyAllocationClass> RemovedPolicyAllocationsClass { get; set; } = new();
-        public List<ORIPolicyAllocationYOA> RemovedPolicyAllocationsYOA { get; set; } = new();
+        public List<ORIPolicyAllocation> PolicyAllocations { get; set; } = new();       
         public List<AggDeductible> RemovedAggDeductibles { get; set; } = new();
         public List<Narrative> Narratives { get; set; } = new();
         public List<ORIPolicyReinstatementModel> Reinstatements { get; set; } = new();
         public List<PolicySecurity> PolicySecurities { get; set; } = new();
-
-        // Class/Year of Account Allocation Splits
-        public List<ClassYearOfAccountSplits> ClassYearOfAccountSplits { get; set; } = new();
-
-        // Agg Deductibles
         public List<AggDeductible> AggDeductibles { get; set; } = new();
-		public List<SyndicateSplit> SyndicateSplits { get; set; } = new();
-		public List<SyndicateSplit> RemovedSyndicateSplits { get; set; } = new();
+        public List<ORIPolicyAllocation> RemovedPolicyAllocations { get; set; } = new();
 
-
-	}
+    }
 	public class ORIFilterItemDefinition
     {
         public string? Code { get; set; }  // "DomicileCountry", "InwardPolicyReference", etc.
@@ -145,26 +135,19 @@ namespace Sandbox.Models.ORI
     }
 
     // New classes to represent the allocation tables
-    public class ORIPolicyAllocationClass
+    public class ORIPolicyAllocation
     {
+        public string ORIPolicyReference { get; set; }
+        public string? YOA { get; set; }
         public string? Class { get; set; }
+        public string? Syndicate { get; set; }
+        public decimal YOAAllocation { get; set; }
+        public decimal ClassAllocation { get; set; }
+        public decimal SyndicateAllocation { get; set; }        
         public decimal Allocation { get; set; }
+        public string? AllocationKey { get; set; }
         public DateTime? LastUpdated { get; set; }
-        public string? LastUpdatedBy { get; set; }
-    }
-
-    public class ORIPolicyAllocationYOA
-    {
-        public int YearOfAccount { get; set; }
-        public decimal Allocation { get; set; }
-        public DateTime? LastUpdated { get; set; }
-        public string? LastUpdatedBy { get; set; }
-    }
-
-    public class ClassYearOfAccountSplits
-    {
-        public string? Class { get; set; }
-        public Dictionary<int, decimal> YearOfAccountSplits { get; set; } = new();
+        public string? LastUpdatedBy { get; set; }   
     }
 
     public class AggDeductible
@@ -179,17 +162,5 @@ namespace Sandbox.Models.ORI
         public string? Note { get; set; } // Optional, can be null if not applicable
         public int IsDeleted { get; set; }
     }
-
-	public class SyndicateSplit
-	{
-		public string? ORIPolicyReference { get; set; }
-		public string? Syndicate { get; set; }
-		public decimal Percentage { get; set; }
-		public DateTime? LastUpdated { get; set; }
-		public string? LastUpdatedBy { get; set; }
-		public bool IsDeleted { get; set; }
-	}
-
-
 }
 

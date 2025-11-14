@@ -364,6 +364,9 @@ else if (PolicyDetails != null)
                     </div>
                 </div>
 
+                
+            </div>
+            <div class="col-md-6">
                 <div class="card mb-4 border">
                     <div class="card-header">PC / Overrider / Expenses</div>
                     <div class="card-body">
@@ -444,8 +447,6 @@ else if (PolicyDetails != null)
                         </table>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-6">
                 <div class="card shadow md-4">
                     <div class="card-header">Agg Deductibles</div>
                     <div class="card-body">
@@ -542,31 +543,56 @@ else if (PolicyDetails != null)
                         </div>
                     </div>
                 </div>
+                
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
                 <div class="card shadow mb-4 border">
-                    <div class="card-header">Policy Allocations by Class</div>
+                    <div class="card-header">Policy Allocations</div>
                     <div class="card-body">
-                        @if (PolicyDetails?.PolicyAllocationsClass != null && PolicyDetails.PolicyAllocationsClass.Any())
+                        @if (PolicyDetails?.PolicyAllocations != null && PolicyDetails.PolicyAllocations.Any())
                         {
                             <table class="table table-striped">
                                 <thead>
                                     <tr>
+                                        <th>YOA</th>
                                         <th>Class</th>
+                                        <th>Syndicate</th>
+                                        <th class="text-end">YOA Allocation</th>
+                                        <th class="text-end">Class Allocation</th>
+                                        <th class="text-end">Syndicate Allocation</th>
                                         <th class="text-end">Allocation</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach (var allocation in PolicyDetails.PolicyAllocationsClass)
+                                    @foreach (var allocation in PolicyDetails.PolicyAllocations)
                                     {
                                         <tr>
                                             <td>
+                                                <InputText @bind-Value="allocation.YOA" class="form-control" readonly />
+                                            </td>
+                                            <td>
                                                 <InputText @bind-Value="allocation.Class" class="form-control" readonly />
+                                            </td>
+                                            <td>
+                                                <InputText @bind-Value="allocation.Syndicate" class="form-control" readonly />
+                                            </td>
+                                            <td>
+                                                <InputNumber @bind-Value="allocation.YOAAllocation" class="form-control text-end" readonly />
+                                            </td>
+                                            <td>
+                                                <InputNumber @bind-Value="allocation.ClassAllocation" class="form-control text-end" readonly />
+                                            </td>
+                                            <td>
+                                                <InputNumber @bind-Value="allocation.SyndicateAllocation" class="form-control text-end" readonly />
                                             </td>
                                             <td>
                                                 <InputNumber @bind-Value="allocation.Allocation" class="form-control text-end" readonly />
                                             </td>
                                             <td>
-                                                <button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveClassAllocation(allocation)">
+                                                <button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveAllocation(allocation)">
                                                     Remove
                                                 </button>
                                             </td>
@@ -584,161 +610,41 @@ else if (PolicyDetails != null)
                             <table class="table table-striped">
                                 <thead>
                                     <tr>
+                                        <th>YOA</th>
                                         <th>Class</th>
-                                        <th class="text-end">Allocation</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>
-                                            <InputText @bind-Value="newClassAllocation.Class" class="form-control" />
-                                        </td>
-                                        <td>
-                                            <InputNumber @bind-Value="newClassAllocation.Allocation" class="form-control text-end" />
-                                        </td>
-                                        <td>
-                                            <button type="button" class="btn btn-primary" @onclick="() => AddClassAllocation()">
-                                                Add
-                                            </button>
-                                        </td>
-                                    </tr>
-
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                <div class="card shadow mb-4 border">
-                    <div class="card-header">Policy Allocations by Year of Account</div>
-                    <div class="card-body">
-                        @if (PolicyDetails?.PolicyAllocationsYOA != null && PolicyDetails.PolicyAllocationsYOA.Any())
-                        {
-                            <table class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>Year of Account</th>
-                                        <th class="text-end">Allocation</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var allocation in PolicyDetails.PolicyAllocationsYOA)
-                                    {
-                                        <tr>
-                                            <td>
-                                                <InputNumber @bind-Value="allocation.YearOfAccount" class="form-control" readonly />
-                                            </td>
-                                            <td>
-                                                <InputNumber @bind-Value="allocation.Allocation" class="form-control text-end" readonly />
-                                            </td>
-                                            <td>
-                                                <button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveYOAAllocation(allocation)">
-                                                    Remove
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        }
-                        else
-                        {
-                            <p class="text-muted">No year of account allocations defined for this policy.</p>
-                        }
-                        <div class="mt-3">
-                            <h5>Add New YOA Allocation</h5>
-                            <table class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>Year of Account</th>
-                                        <th class="text-end">Allocation</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>
-                                            <InputNumber @bind-Value="newYOAAllocation.YearOfAccount" class="form-control" />
-                                        </td>
-                                        <td>
-                                            <InputNumber @bind-Value="newYOAAllocation.Allocation" class="form-control text-end" />
-                                        </td>
-                                        <td>
-                                            <button type="button" class="btn btn-primary" @onclick="() => AddYOAAllocation()">
-                                                Add
-                                            </button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                <div class="card shadow mb-4 border">
-                    <div class="card-header">Syndicate Splits</div>
-                    <div class="card-body">
-                        @if (PolicyDetails?.SyndicateSplits != null && PolicyDetails.SyndicateSplits.Any())
-                        {
-                            <table class="table table-sm table-striped text-nowrap">
-                                <thead>
-                                    <tr>
                                         <th>Syndicate</th>
-                                        <th class="text-end">Percentage</th>
-                                        <th>Last Updated</th>
-                                        <th>Updated By</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var split in PolicyDetails.SyndicateSplits)
-                                    {
-                                        <tr>
-                                            <td>
-                                                <InputText @bind-Value="split.Syndicate" class="form-control" readonly />
-                                            </td>
-                                            <td class="text-end">
-                                                <InputNumber @bind-Value="split.Percentage" class="form-control text-end" />
-                                            </td>
-                                            <td>@split.LastUpdated?.ToString("yyyy-MM-dd HH:mm")</td>
-                                            <td>@split.LastUpdatedBy</td>
-                                            <td>
-                                                <button type="button"
-                                                        class="btn btn-danger btn-sm"
-                                                        @onclick="() => RemoveSyndicateSplit(split)">
-                                                    Remove
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        }
-                        else
-                        {
-                            <p class="text-muted">No syndicate splits defined for this policy.</p>
-                        }
-
-                        <div class="mt-3">
-                            <h5>Add New Syndicate Split</h5>
-                            <table class="table table-sm table-striped text-nowrap">
-                                <thead>
-                                    <tr>
-                                        <th>Syndicate</th>
-                                        <th class="text-end">Percentage</th>
+                                        <th class="text-end">YOA Allocation</th>
+                                        <th class="text-end">Class Allocation</th>
+                                        <th class="text-end">Syndicate Allocation</th>
+                                        <th class="text-end">Allocation</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
                                         <td>
-                                            <InputText @bind-Value="newSyndicateSplit.Syndicate" class="form-control" />
+                                            <InputText @bind-Value="newAllocation.YOA" class="form-control" readonly />
                                         </td>
                                         <td>
-                                            <InputNumber @bind-Value="newSyndicateSplit.Percentage" class="form-control text-end" />
+                                            <InputText @bind-Value="newAllocation.Class" class="form-control" readonly />
                                         </td>
                                         <td>
-                                            <button type="button" class="btn btn-primary" @onclick="AddSyndicateSplit">
+                                            <InputText @bind-Value="newAllocation.Syndicate" class="form-control" readonly />
+                                        </td>
+                                        <td>
+                                            <InputNumber @bind-Value="newAllocation.YOAAllocation" class="form-control text-end" readonly />
+                                        </td>
+                                        <td>
+                                            <InputNumber @bind-Value="newAllocation.ClassAllocation" class="form-control text-end" readonly />
+                                        </td>
+                                        <td>
+                                            <InputNumber @bind-Value="newAllocation.SyndicateAllocation" class="form-control text-end" readonly />
+                                        </td>
+                                        <td>
+                                            <InputNumber @bind-Value="newAllocation.Allocation" class="form-control text-end" readonly />
+                                        </td>
+                                        <td>
+                                            <button type="button" class="btn btn-primary" @onclick="() => AddAllocation()">
                                                 Add
                                             </button>
                                         </td>
@@ -819,8 +725,7 @@ else if (PolicyDetails != null)
     };
 
     // New allocation properties
-    private ORIPolicyAllocationClass newClassAllocation = new ORIPolicyAllocationClass();
-    private ORIPolicyAllocationYOA newYOAAllocation = new ORIPolicyAllocationYOA();
+    private ORIPolicyAllocation newAllocation = new ORIPolicyAllocation();
 
     // New agg deductible property
     private AggDeductible newAggDeductible = new AggDeductible();
@@ -1054,65 +959,35 @@ else if (PolicyDetails != null)
     }
 
     // Methods for adding and removing allocations
-    private void AddClassAllocation()
+    private void AddAllocation()
     {
-        if (newClassAllocation.Class != null && newClassAllocation.Allocation != 0)
+        if (newAllocation.Class != null && newAllocation.Allocation != 0)
         {
-            if (PolicyDetails.PolicyAllocationsClass == null)
+            if (PolicyDetails.PolicyAllocations == null)
             {
-                PolicyDetails.PolicyAllocationsClass = new List<ORIPolicyAllocationClass>();
+                PolicyDetails.PolicyAllocations = new List<ORIPolicyAllocation>();
             }
-            newClassAllocation.LastUpdated = DateTime.Now;
-            newClassAllocation.LastUpdatedBy = "CurrentUser"; // Replace with actual user
-            PolicyDetails.PolicyAllocationsClass.Add(newClassAllocation);
-            newClassAllocation = new ORIPolicyAllocationClass(); // Reset
+            newAllocation.LastUpdated = DateTime.Now;
+            newAllocation.LastUpdatedBy = "CurrentUser"; // Replace with actual user
+            PolicyDetails.PolicyAllocations.Add(newAllocation);
+            newAllocation = new ORIPolicyAllocation(); // Reset
             StateHasChanged();
         }
     }
 
-    private void RemoveClassAllocation(ORIPolicyAllocationClass allocation)
+    private void RemoveAllocation(ORIPolicyAllocation allocation)
     {
-        if (PolicyDetails.PolicyAllocationsClass.Contains(allocation))
+        if (PolicyDetails.PolicyAllocations.Contains(allocation))
         {
-            PolicyDetails.PolicyAllocationsClass.Remove(allocation);
-            if (PolicyDetails.RemovedPolicyAllocationsClass == null)
+            PolicyDetails.PolicyAllocations.Remove(allocation);
+            if (PolicyDetails.RemovedPolicyAllocations == null)
             {
-                PolicyDetails.RemovedPolicyAllocationsClass = new List<ORIPolicyAllocationClass>();
+                PolicyDetails.RemovedPolicyAllocations = new List<ORIPolicyAllocation>();
             }
-            PolicyDetails.RemovedPolicyAllocationsClass.Add(allocation);
+            PolicyDetails.RemovedPolicyAllocations.Add(allocation);
             StateHasChanged();
         }
-    }
-
-    private void AddYOAAllocation()
-    {
-        if (newYOAAllocation.YearOfAccount != 0 && newYOAAllocation.Allocation != 0)
-        {
-            if (PolicyDetails.PolicyAllocationsYOA == null)
-            {
-                PolicyDetails.PolicyAllocationsYOA = new List<ORIPolicyAllocationYOA>();
-            }
-            newYOAAllocation.LastUpdated = DateTime.Now;
-            newYOAAllocation.LastUpdatedBy = "CurrentUser"; // Replace with actual user
-            PolicyDetails.PolicyAllocationsYOA.Add(newYOAAllocation);
-            newYOAAllocation = new ORIPolicyAllocationYOA(); // Reset
-            StateHasChanged();
-        }
-    }
-
-    private void RemoveYOAAllocation(ORIPolicyAllocationYOA allocation)
-    {
-        if (PolicyDetails.PolicyAllocationsYOA.Contains(allocation))
-        {
-            PolicyDetails.PolicyAllocationsYOA.Remove(allocation);
-            if (PolicyDetails.RemovedPolicyAllocationsYOA == null)
-            {
-                PolicyDetails.RemovedPolicyAllocationsYOA = new List<ORIPolicyAllocationYOA>();
-            }
-            PolicyDetails.RemovedPolicyAllocationsYOA.Add(allocation);
-            StateHasChanged();
-        }
-    }
+    } 
 
     // Methods for adding and reming agg deductibles
     private void SetNextAvailableAggDeductiblePriority()
@@ -1169,45 +1044,7 @@ else if (PolicyDetails != null)
             PolicyDetails.RemovedAggDeductibles.Add(aggDeductible);
             StateHasChanged();
         }
-    }
-
-    // new property for binding
-    private SyndicateSplit newSyndicateSplit = new SyndicateSplit();
-
-    private void AddSyndicateSplit()
-    {
-        if (!string.IsNullOrWhiteSpace(newSyndicateSplit.Syndicate) && newSyndicateSplit.Percentage > 0)
-        {
-            if (PolicyDetails.SyndicateSplits == null)
-            {
-                PolicyDetails.SyndicateSplits = new List<SyndicateSplit>();
-            }
-
-            newSyndicateSplit.LastUpdated = DateTime.Now;
-            newSyndicateSplit.LastUpdatedBy = "CurrentUser"; // replace with actual user context
-
-            PolicyDetails.SyndicateSplits.Add(newSyndicateSplit);
-
-            newSyndicateSplit = new SyndicateSplit(); // reset
-            StateHasChanged();
-        }
-    }
-
-    private void RemoveSyndicateSplit(SyndicateSplit split)
-    {
-        if (PolicyDetails.SyndicateSplits.Contains(split))
-        {
-            PolicyDetails.SyndicateSplits.Remove(split);
-
-            if (PolicyDetails.RemovedSyndicateSplits == null)
-            {
-                PolicyDetails.RemovedSyndicateSplits = new List<SyndicateSplit>();
-            }
-            PolicyDetails.RemovedSyndicateSplits.Add(split); // track deletions
-
-            StateHasChanged();
-        }
-    }
+    }   
 
     private void AddPremium()
     {

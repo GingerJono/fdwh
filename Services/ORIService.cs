@@ -260,16 +260,15 @@ namespace Sandbox.Services
                         "ORI.spGetORIPolicySecurity", parameters, commandType: CommandType.StoredProcedure)).ToList();
 
                     // Fetch Allocations Class and YOA
-                    policyDetails.PolicyAllocationsClass = (await GetPolicyAllocationsClass(connection, policyDetails.ORIPolicyReference)).ToList();
-                    policyDetails.PolicyAllocationsYOA = (await GetPolicyAllocationsYOA(connection, policyDetails.ORIPolicyReference)).ToList();
+                    policyDetails.PolicyAllocations = (await GetPolicyAllocations(connection, policyDetails.ORIPolicyReference)).ToList();
+                    //policyDetails.PolicyAllocationsClass = (await GetPolicyAllocationsClass(connection, policyDetails.ORIPolicyReference)).ToList();
+                    //policyDetails.PolicyAllocationsYOA = (await GetPolicyAllocationsYOA(connection, policyDetails.ORIPolicyReference)).ToList();
 
                     // Get Reinstatements
                     policyDetails.Reinstatements = (await GetPolicyReinstatements(connection, policyDetails.ORIPolicyReference)).ToList();
 
                     // Get Agg Deductibles
                     policyDetails.AggDeductibles = (await GetAggDeductibles(connection, policyDetails.ORIPolicyReference)).ToList();
-
-                    policyDetails.SyndicateSplits = (await GetSyndicateSplits(connection, policyDetails.ORIPolicyReference)).ToList();
 
                     return policyDetails;
                 }
@@ -279,13 +278,14 @@ namespace Sandbox.Services
                 }
             }
         }
-        private async Task<IEnumerable<ORIPolicyAllocationClass>> GetPolicyAllocationsClass(SqlConnection connection, string ORIPolicyReference)
+
+        private async Task<IEnumerable<ORIPolicyAllocation>> GetPolicyAllocations(SqlConnection connection, string ORIPolicyReference)
         {
             var parameters = new DynamicParameters();
             parameters.Add("@ORIPolicyReference", ORIPolicyReference, DbType.String);
 
-            var result = await connection.QueryAsync<ORIPolicyAllocationClass>(
-                "ORI.spGetPolicyAllocationsClass",
+            var result = await connection.QueryAsync<ORIPolicyAllocation>(
+                "ORI.spGetPolicyAllocations",
                 parameters,
                 commandType: CommandType.StoredProcedure);
 
@@ -297,7 +297,7 @@ namespace Sandbox.Services
             {
                 throw new Exception($"No policy allocations found for policy reference: {ORIPolicyReference}.");
             }
-        }
+        }       
 
         private async Task<IEnumerable<AggDeductible>> GetAggDeductibles(SqlConnection connection, string ORIPolicyReference)
         {
@@ -317,27 +317,7 @@ namespace Sandbox.Services
             {
                 throw new Exception($"No aggregate deductibles found for policy reference: {ORIPolicyReference}.");
             }
-        }
-
-        private async Task<IEnumerable<ORIPolicyAllocationYOA>> GetPolicyAllocationsYOA(SqlConnection connection, string ORIPolicyReference)
-        {
-            var parameters = new DynamicParameters();
-            parameters.Add("@ORIPolicyReference", ORIPolicyReference, DbType.String);
-
-            var result = await connection.QueryAsync<ORIPolicyAllocationYOA>(
-                "ORI.spGetPolicyAllocationsYOA",
-                parameters,
-                commandType: CommandType.StoredProcedure);
-
-            if (result != null)
-            {
-                return result.ToList();
-            }
-            else
-            {
-                throw new Exception($"No policy allocations found for policy reference: {ORIPolicyReference}.");
-            }
-        }
+        }        
 
         private async Task<IEnumerable<ORIPolicyReinstatementModel>> GetPolicyReinstatements(SqlConnection connection, string ORIPolicyReference)
         {
@@ -498,33 +478,21 @@ namespace Sandbox.Services
                     }
                 }
 
-                // Step 3: Remove Class Allocations
-                if (model.RemovedPolicyAllocationsClass != null && model.RemovedPolicyAllocationsClass.Any())
+                // Step 3: Remove  Allocations
+                if (model.RemovedPolicyAllocations != null && model.RemovedPolicyAllocations.Any())
                 {
-                    foreach (var allocation in model.RemovedPolicyAllocationsClass)
+                    foreach (var allocation in model.RemovedPolicyAllocations)
                     {
                         var parameters = new DynamicParameters();
-                        parameters.Add("@ORIPolicyReference", model.ORIPolicyReference);
-                        parameters.Add("@Class", allocation.Class); // Add the key fields for deletion
-                                                                    //  You might need YearOfAccount too, depending on your table structure
+                        parameters.Add("@ORIPolicyReference", allocation.ORIPolicyReference);
+                        parameters.Add("@YOA", allocation.YOA);
+                        parameters.Add("@Class", allocation.Class);
+                        parameters.Add("@Syndicate", allocation.Syndicate);
                         parameters.Add("@LastUpdatedBy", userNameFinal);
-                        await db.ExecuteAsync("ORI.spDeletePolicyAllocationsClass", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
-                    }
-                }
 
-
-                // Step 4: Remove YOA Allocations
-                if (model.RemovedPolicyAllocationsYOA != null && model.RemovedPolicyAllocationsYOA.Any())
-                {
-                    foreach (var allocation in model.RemovedPolicyAllocationsYOA)
-                    {
-                        var parameters = new DynamicParameters();
-                        parameters.Add("@ORIPolicyReference", model.ORIPolicyReference);
-                        parameters.Add("@YearOfAccount", allocation.YearOfAccount); // Add the key fields for deletion
-                        parameters.Add("@LastUpdatedBy", userNameFinal);
-                        await db.ExecuteAsync("ORI.spDeletePolicyAllocationsYOA", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
+                        await db.ExecuteAsync("ORI.spDeletePolicyAllocationsClass", parameters, transaction: transaction, commandType: CommandType.StoredProcedure);
                     }
-                }
+                }                
 
                 // Step 5: Remove Agg Deductibles
                 if (model.RemovedAggDeductibles != null && model.RemovedAggDeductibles.Any())
@@ -541,24 +509,14 @@ namespace Sandbox.Services
                     }
                 }
 
-
-                // Step 6: Process Class Allocations
-                if (model.PolicyAllocationsClass != null && model.PolicyAllocationsClass.Any())
+                // Step 6: Process  Allocations
+                if (model.PolicyAllocations != null && model.PolicyAllocations.Any())
                 {
-                    foreach (var allocation in model.PolicyAllocationsClass)
+                    foreach (var allocation in model.PolicyAllocations)
                     {
-                        await UpsertPolicyAllocationsClass(db, allocation, userNameFinal, transaction, model.ORIPolicyReference);
+                        await UpsertPolicyAllocations(db, allocation, userNameFinal, transaction, model.ORIPolicyReference);
                     }
-                }
-
-                // Step 7: Process YOA Allocations
-                if (model.PolicyAllocationsYOA != null && model.PolicyAllocationsYOA.Any())
-                {
-                    foreach (var allocation in model.PolicyAllocationsYOA)
-                    {
-                        await UpsertPolicyAllocationsYOA(db, allocation, userNameFinal, transaction, model.ORIPolicyReference);
-                    }
-                }
+                }               
 
                 // Step 8: Process Agg Deductibles
                 if (model.AggDeductibles != null && model.AggDeductibles.Any())
@@ -575,42 +533,7 @@ namespace Sandbox.Services
                         parameters.Add("@LastUpdatedBy", userNameFinal);
                         await db.ExecuteAsync("ORI.spUpsertAggDeductibles", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
                     }
-                }
-
-
-                // Step 9: Process Syndicate Splits (removes first, then upserts)
-                if (model.RemovedSyndicateSplits != null && model.RemovedSyndicateSplits.Any())
-                {
-                    foreach (var split in model.RemovedSyndicateSplits)
-                    {
-                        var parameters = new DynamicParameters();
-                        parameters.Add("@ORIPolicyReference", model.ORIPolicyReference);
-                        parameters.Add("@Syndicate", split.Syndicate);
-                        parameters.Add("@LastUpdatedBy", userNameFinal);
-
-                        await db.ExecuteAsync("ORI.spDeleteSyndicateSplit",
-                            parameters,
-                            commandType: CommandType.StoredProcedure,
-                            transaction: transaction);
-                    }
-                }
-
-                if (model.SyndicateSplits != null && model.SyndicateSplits.Any())
-                {
-                    foreach (var split in model.SyndicateSplits)
-                    {
-                        var parameters = new DynamicParameters();
-                        parameters.Add("@ORIPolicyReference", model.ORIPolicyReference);
-                        parameters.Add("@Syndicate", split.Syndicate);
-                        parameters.Add("@Percentage", split.Percentage);
-                        parameters.Add("@LastUpdatedBy", userNameFinal);
-
-                        await db.ExecuteAsync("ORI.spUpsertSyndicateSplit",
-                            parameters,
-                            commandType: CommandType.StoredProcedure,
-                            transaction: transaction);
-                    }
-                }
+                } 
 
                 // Step 9: Update Policy Metadata
                 var metaDataParameters = new DynamicParameters();
@@ -654,47 +577,22 @@ namespace Sandbox.Services
                 db.Close();
             }
         }
-        private async Task UpsertPolicyAllocationsClass(SqlConnection connection, ORIPolicyAllocationClass allocation, string userName, SqlTransaction transaction, string ORIPolicyReference)
+        private async Task UpsertPolicyAllocations(SqlConnection connection, ORIPolicyAllocation allocation, string userName, SqlTransaction transaction, string ORIPolicyReference)
         {
             var parameters = new DynamicParameters();
             parameters.Add("@ORIPolicyReference", ORIPolicyReference);
+            parameters.Add("@YOA", allocation.YOA);
             parameters.Add("@Class", allocation.Class);
+            parameters.Add("@Syndicate", allocation.Syndicate);
+            parameters.Add("@YOAAllocation", allocation.YOAAllocation);
+            parameters.Add("@ClassAllocation", allocation.ClassAllocation);
+            parameters.Add("@SyndicateAllocation", allocation.SyndicateAllocation);
             parameters.Add("@Allocation", allocation.Allocation);
             parameters.Add("@LastUpdatedBy", userName);
 
-            await connection.ExecuteAsync("ORI.spUpsertPolicyAllocationsClass", parameters, transaction: transaction, commandType: CommandType.StoredProcedure);
-        }
-
-        private async Task UpsertPolicyAllocationsYOA(SqlConnection connection, ORIPolicyAllocationYOA allocation, string userName, SqlTransaction transaction, string ORIPolicyReference)
-        {
-            var parameters = new DynamicParameters();
-            parameters.Add("@ORIPolicyReference", ORIPolicyReference);
-            parameters.Add("@YearOfAccount", allocation.YearOfAccount);
-            parameters.Add("@Allocation", allocation.Allocation);
-            parameters.Add("@LastUpdatedBy", userName);
-
-            await connection.ExecuteAsync("ORI.spUpsertPolicyAllocationsYOA", parameters, transaction: transaction, commandType: CommandType.StoredProcedure);
-        }
-
-        private async Task DeletePolicyAllocationsClass(SqlConnection connection, string ORIPolicyReference, string className, string userName, SqlTransaction transaction)
-        {
-            var parameters = new DynamicParameters();
-            parameters.Add("@ORIPolicyReference", ORIPolicyReference);
-            parameters.Add("@Class", className);
-            parameters.Add("@LastUpdatedBy", userName);
-
-            await connection.ExecuteAsync("ORI.spDeletePolicyAllocationsClass", parameters, transaction: transaction, commandType: CommandType.StoredProcedure);
-        }
-
-        private async Task DeletePolicyAllocationsYOA(SqlConnection connection, string ORIPolicyReference, int yearOfAccount, string userName, SqlTransaction transaction)
-        {
-            var parameters = new DynamicParameters();
-            parameters.Add("@ORIPolicyReference", ORIPolicyReference);
-            parameters.Add("@YearOfAccount", yearOfAccount);
-            parameters.Add("@LastUpdatedBy", userName);
-
-            await connection.ExecuteAsync("ORI.spDeletePolicyAllocationsYOA", parameters, transaction: transaction, commandType: CommandType.StoredProcedure);
-        }
+            await connection.ExecuteAsync("ORI.spUpsertPolicyAllocations", parameters, transaction: transaction, commandType: CommandType.StoredProcedure);
+        }        
+                        
         public async Task<List<ORIFilterItemDefinition>> GetIncludedOrExcludedItems()
         {
             using var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
@@ -1058,46 +956,7 @@ namespace Sandbox.Services
                 throw new Exception($"No policy securities found for policy reference: {ORIPolicyReference}.");
             }
         }
-
-        public async Task UpsertSyndicateSplit(string ORIPolicyReference, string Syndicate, decimal Percentage, string lastUpdatedBy)
-        {
-            using var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
-            await connection.OpenAsync();
-
-            var parameters = new DynamicParameters();
-            parameters.Add("@ORIPolicyReference", ORIPolicyReference);
-            parameters.Add("@Syndicate", Syndicate);
-            parameters.Add("@Percentage", Percentage);
-            parameters.Add("@LastUpdatedBy", lastUpdatedBy);
-
-            await connection.ExecuteAsync("ORI.spUpsertSyndicateSplit", parameters, commandType: CommandType.StoredProcedure);
-        }
-
-        public async Task DeleteSyndicateSplit(string ORIPolicyReference, string Syndicate, string lastUpdatedBy)
-        {
-            using var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
-            await connection.OpenAsync();
-
-            var parameters = new DynamicParameters();
-            parameters.Add("@ORIPolicyReference", ORIPolicyReference);
-            parameters.Add("@Syndicate", Syndicate);
-            parameters.Add("@LastUpdatedBy", lastUpdatedBy);
-
-            await connection.ExecuteAsync("ORI.spDeleteSyndicateSplit", parameters, commandType: CommandType.StoredProcedure);
-        }
-
-        private async Task<IEnumerable<SyndicateSplit>> GetSyndicateSplits(SqlConnection connection, string ORIPolicyReference)
-        {
-            var parameters = new DynamicParameters();
-            parameters.Add("@ORIPolicyReference", ORIPolicyReference, DbType.String);
-
-            var result = await connection.QueryAsync<SyndicateSplit>(
-                "ORI.spGetSyndicateSplits",
-                parameters,
-                commandType: CommandType.StoredProcedure);
-
-            return result ?? Enumerable.Empty<SyndicateSplit>();
-        }
+                      
 
         // Difference Notes
         public async Task AddDifferenceNoteAsync(DifferenceNoteModel note)
