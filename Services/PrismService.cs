@@ -667,11 +667,9 @@ namespace Sandbox.Services
                     transaction);
 
                 // Insert sheets
-                await InsertSheetAsync(workbook.Worksheet("Incurred Claims"), "ORI.AdjustmentsInputIncurredClaims", adjustmentID, uploadedBy, connection, transaction);
-                await InsertSheetAsync(workbook.Worksheet("ORI Policies"), "ORI.AdjustmentsInputORIPolicies", adjustmentID, uploadedBy, connection, transaction);
-                await InsertSheetAsync(workbook.Worksheet("Ultimate Claims"), "ORI.AdjustmentsInputUltimateClaims", adjustmentID, uploadedBy, connection, transaction);
-                await InsertSheetAsync(workbook.Worksheet("Allocated Recoveries and RIPs"), "ORI.AdjustmentsOutputAllocatedRecoveriesAndRIPs", adjustmentID, uploadedBy, connection, transaction);
-                await InsertSheetAsync(workbook.Worksheet("Claims By Event"), "ORI.AdjustmentsPreAllocationORIPolicyClaimsByEvent", adjustmentID, uploadedBy, connection, transaction);
+                await InsertSheetAsync(workbook.Worksheet("Premium"), "ORI.AdjustmentsAllocatedWrittenAndEarnedPremium", adjustmentID, uploadedBy, connection, transaction);
+                await InsertSheetAsync(workbook.Worksheet("Recoveries"), "ORI.AdjustmentsAllocatedRecoveriesAndRIPs", adjustmentID, uploadedBy, connection, transaction);
+               
 
                 // Save file to wwwroot/uploads/prismadjustments with AdjustmentID prepended
                 var safeFileName = Path.GetFileName(adjustmentFileName);
@@ -704,16 +702,16 @@ namespace Sandbox.Services
                 dataTable.Columns.Add(headerCell.GetValue<string>());
 
             if (!dataTable.Columns.Contains("AdjustmentID"))
-                dataTable.Columns.Add("AdjustmentID", typeof(long)).SetOrdinal(0);
+                dataTable.Columns.Add("AdjustmentID", typeof(long));
 
             foreach (var row in sheet.RowsUsed().Skip(1))
             {
                 var dataRow = dataTable.NewRow();
 
                 // Start from column 1 because AdjustmentID is not in the Excel file
-                for (int colIndex = 1; colIndex < dataTable.Columns.Count; colIndex++)
+                for (int colIndex = 1; colIndex <= dataTable.Columns.Count; colIndex++)
                 {
-                    var colName = dataTable.Columns[colIndex].ColumnName;
+                    var colName = dataTable.Columns[colIndex-1].ColumnName;
                     var cellValue = row.Cell(colIndex).Value;
 
                     var cell = row.Cell(colIndex);
