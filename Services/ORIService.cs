@@ -261,14 +261,16 @@ namespace Sandbox.Services
 
                     // Fetch Allocations Class and YOA
                     policyDetails.PolicyAllocations = (await GetPolicyAllocations(connection, policyDetails.ORIPolicyReference)).ToList();
-                    //policyDetails.PolicyAllocationsClass = (await GetPolicyAllocationsClass(connection, policyDetails.ORIPolicyReference)).ToList();
-                    //policyDetails.PolicyAllocationsYOA = (await GetPolicyAllocationsYOA(connection, policyDetails.ORIPolicyReference)).ToList();
+                  
 
                     // Get Reinstatements
                     policyDetails.Reinstatements = (await GetPolicyReinstatements(connection, policyDetails.ORIPolicyReference)).ToList();
 
                     // Get Agg Deductibles
                     policyDetails.AggDeductibles = (await GetAggDeductibles(connection, policyDetails.ORIPolicyReference)).ToList();
+
+                    // Get FX Rates
+                    policyDetails.PolicyFXRates = (await GetPolicyFXRates(connection, policyDetails.ORIPolicyReference)).ToList();
 
                     return policyDetails;
                 }
@@ -285,19 +287,25 @@ namespace Sandbox.Services
             parameters.Add("@ORIPolicyReference", ORIPolicyReference, DbType.String);
 
             var result = await connection.QueryAsync<ORIPolicyAllocation>(
-                "ORI.spGetPolicyAllocations",
+                "ORI.spGetORIPolicyAllocations",
                 parameters,
                 commandType: CommandType.StoredProcedure);
+            
+                return result.ToList();     
+        }
 
-            if (result != null)
-            {
-                return result.ToList();
-            }
-            else
-            {
-                throw new Exception($"No policy allocations found for policy reference: {ORIPolicyReference}.");
-            }
-        }       
+        private async Task<IEnumerable<ORIPolicyFXRate>> GetPolicyFXRates(SqlConnection connection, string ORIPolicyReference)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("@ORIPolicyReference", ORIPolicyReference, DbType.String);
+
+            var result = await connection.QueryAsync<ORIPolicyFXRate>(
+                "ORI.spGetORIPolicyFXRates",
+                parameters,
+                commandType: CommandType.StoredProcedure);
+            
+                return result.ToList();                       
+        }
 
         private async Task<IEnumerable<AggDeductible>> GetAggDeductibles(SqlConnection connection, string ORIPolicyReference)
         {
@@ -445,7 +453,7 @@ namespace Sandbox.Services
             {
                 Console.WriteLine($"[INFO] Saving ORI Policy Metadata for {model.ORIPolicyReference}");
 
-                // Step 1: Process Removed Filters
+                // Process Removed Filters
                 if (model.RemovedFilters != null && model.RemovedFilters.Any()) // Null and empty check
                 {
                     foreach (var filter in model.RemovedFilters)
@@ -461,7 +469,7 @@ namespace Sandbox.Services
                     }
                 }
 
-                // Step 2: Process Added/Updated Filters
+                // Process Added/Updated Filters
                 if (model.Filters != null && model.Filters.Any())
                 {
                     foreach (var filter in model.Filters)
@@ -478,7 +486,7 @@ namespace Sandbox.Services
                     }
                 }
 
-                // Step 3: Remove  Allocations
+                // Remove  Allocations
                 if (model.RemovedPolicyAllocations != null && model.RemovedPolicyAllocations.Any())
                 {
                     foreach (var allocation in model.RemovedPolicyAllocations)
@@ -490,11 +498,11 @@ namespace Sandbox.Services
                         parameters.Add("@Syndicate", allocation.Syndicate);
                         parameters.Add("@LastUpdatedBy", userNameFinal);
 
-                        await db.ExecuteAsync("ORI.spDeletePolicyAllocationsClass", parameters, transaction: transaction, commandType: CommandType.StoredProcedure);
+                        await db.ExecuteAsync("ORI.spDeletePolicyAllocations", parameters, transaction: transaction, commandType: CommandType.StoredProcedure);
                     }
                 }                
 
-                // Step 5: Remove Agg Deductibles
+                // Remove Agg Deductibles
                 if (model.RemovedAggDeductibles != null && model.RemovedAggDeductibles.Any())
                 {
                     foreach (var aggDeductible in model.RemovedAggDeductibles)
@@ -509,7 +517,21 @@ namespace Sandbox.Services
                     }
                 }
 
-                // Step 6: Process  Allocations
+                // Remove FX Rates
+                if (model.RemovedPolicyFXRates != null && model.RemovedPolicyFXRates.Any())
+                {
+                    foreach (var rate in model.RemovedPolicyFXRates)
+                    {
+                        var parameters = new DynamicParameters();
+                        parameters.Add("@ORIPolicyReference", model.ORIPolicyReference);
+                        parameters.Add("@FromCurrency", rate.FromCurrency);
+                        parameters.Add("@ToCurrency", rate.ToCurrency);                        
+                        parameters.Add("@LastUpdatedBy", userNameFinal);
+                        await db.ExecuteAsync("ORI.spDeletePolicyFXRates", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
+                    }
+                }
+
+                // Process Allocations
                 if (model.PolicyAllocations != null && model.PolicyAllocations.Any())
                 {
                     foreach (var allocation in model.PolicyAllocations)
@@ -518,7 +540,7 @@ namespace Sandbox.Services
                     }
                 }               
 
-                // Step 8: Process Agg Deductibles
+                // Process Agg Deductibles
                 if (model.AggDeductibles != null && model.AggDeductibles.Any())
                 {
                     foreach (var aggDeductible in model.AggDeductibles)
@@ -533,11 +555,27 @@ namespace Sandbox.Services
                         parameters.Add("@LastUpdatedBy", userNameFinal);
                         await db.ExecuteAsync("ORI.spUpsertAggDeductibles", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
                     }
-                } 
+                }
+
+                // Process FX Rates
+                if (model.PolicyFXRates != null && model.PolicyFXRates.Any())
+                {
+                    foreach (var rate in model.PolicyFXRates)
+                    {
+                        var parameters = new DynamicParameters();
+                        parameters.Add("@ORIPolicyReference", model.ORIPolicyReference);
+                        parameters.Add("@FromCurrency", rate.FromCurrency);
+                        parameters.Add("@ToCurrency", rate.ToCurrency);
+                        parameters.Add("@Rate", rate.Rate);                        
+                        parameters.Add("@LastUpdatedBy", userNameFinal);
+                        await db.ExecuteAsync("ORI.spUpsertORIPolicyFXRates", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
+                    }
+                }
 
                 // Step 9: Update Policy Metadata
                 var metaDataParameters = new DynamicParameters();
                 metaDataParameters.Add("@ORIPolicyReference", model.ORIPolicyReference);
+                metaDataParameters.Add("@UseContractCurrency", model.UseContractCurrency);
                 metaDataParameters.Add("@FXRateApplicationDate", model.FXRateApplicationDate);
                 metaDataParameters.Add("@FXTreatment", model.FXTreatment);
                 metaDataParameters.Add("@InuringPriority", model.InuringPriority);
@@ -590,9 +628,21 @@ namespace Sandbox.Services
             parameters.Add("@Allocation", allocation.Allocation);
             parameters.Add("@LastUpdatedBy", userName);
 
-            await connection.ExecuteAsync("ORI.spUpsertPolicyAllocations", parameters, transaction: transaction, commandType: CommandType.StoredProcedure);
-        }        
-                        
+            await connection.ExecuteAsync("ORI.spUpsertORIPolicyAllocations", parameters, transaction: transaction, commandType: CommandType.StoredProcedure);
+        }
+
+        private async Task UpsertPolicyFXRates(SqlConnection connection, ORIPolicyFXRate fxRate, string userName, SqlTransaction transaction, string ORIPolicyReference)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("@ORIPolicyReference", ORIPolicyReference);
+            parameters.Add("@FromCurrency", fxRate.FromCurrency);
+            parameters.Add("@Class", fxRate.ToCurrency);
+            parameters.Add("@Rate", fxRate.Rate);            
+            parameters.Add("@LastUpdatedBy", userName);
+
+            await connection.ExecuteAsync("ORI.spUpsertORIPolicyAllocations", parameters, transaction: transaction, commandType: CommandType.StoredProcedure);
+        }
+
         public async Task<List<ORIFilterItemDefinition>> GetIncludedOrExcludedItems()
         {
             using var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
@@ -1101,7 +1151,7 @@ namespace Sandbox.Services
 
         }
 
-        public async Task<List<ORIPolicyPremiumModel>> GetORIPolicyPremiumsAsync(string oriPolicyReference, string? period = null, bool includeDeleted = false)
+        public async Task<List<ORIPolicyPremiumModel>> GetORIPolicyPremiums(string oriPolicyReference, string? period = null, bool includeDeleted = false)
         {
             const string baseSql = @"
         SELECT ORIPolicyReference, Period, IsFinalAdjusted, GrossSubjectPremium, AdjustableRate, MinimumPremium,
@@ -1131,7 +1181,7 @@ namespace Sandbox.Services
         // Returns the active (non-deleted) row for a given period if it exists
         public async Task<ORIPolicyPremiumModel?> GetCurrentORIPolicyPremiumAsync(string oriPolicyReference, string period)
         {
-            var list = await GetORIPolicyPremiumsAsync(oriPolicyReference, period, includeDeleted: false);
+            var list = await GetORIPolicyPremiums(oriPolicyReference, period, includeDeleted: false);
             return list.FirstOrDefault();
         }
 

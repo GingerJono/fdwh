@@ -249,7 +249,7 @@ else
         {
             <div class="card shadow mb-4 border">
                 <div class="card-header">
-                    Policy Premium
+                    Premium
                 </div>
                 <div class="card-body">
                     @if (policyPremiums is null || !policyPremiums.Any())
@@ -287,7 +287,7 @@ else
             </div>
         }
         <div class="card shadow mb-4 border">
-            <div class="card-header">Policy Allocations</div>
+            <div class="card-header">Allocations</div>
             <div class="card-body">
                 @if (PolicyDetails?.PolicyAllocations?.Any() == true)
                 {
@@ -355,6 +355,37 @@ else
                 else
                 {
                     <p class="text-muted">No security info available.</p>
+                }
+            </div>
+        </div>
+        <div class="card shadow mb-4 border">
+            <div class="card-header">FX Rates</div>
+            <div class="card-body">
+                @if (PolicyDetails?.PolicyFXRates?.Any() == true)
+                {
+                    <table class="table table-sm table-striped text-nowrap">
+                        <thead>
+                            <tr>
+                                <th>From Currency</th>
+                                <th>To Currency</th>                                
+                                <th class="text-end">Rate</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var rate in PolicyDetails.PolicyFXRates)
+                            {
+                                <tr>
+                                    <td>@rate.FromCurrency</td>
+                                    <td>@rate.ToCurrency</td>                                    
+                                    <td class="text-end">@rate.Rate.ToString("N2")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p class="text-muted">No policy FX Rates available.</p>
                 }
             </div>
         </div>
@@ -1010,8 +1041,7 @@ else
     private bool IsLoading { get; set; } = true;
     private string ErrorMessage { get; set; } = string.Empty;
     private List<ORIUSMListModel> USMs { get; set; } = new();
-    private List<LORSListModel> LORS { get; set; } = new();
-   
+    private List<LORSListModel> LORS { get; set; } = new();   
 
     [Parameter] public int PrismRunID { get; set; }
     private List<SubjectClaimsModel> SubjectClaims { get; set; } = new();
@@ -1021,6 +1051,27 @@ else
     private List<UnAdjustedAdjustedModel> UnAdjustedAdjustedMetrics { get; set; } = new();
     private List<RunLogModel> RunLogsForPolicy { get; set; } = new();
     private List<ORIPolicyPremiumModel> policyPremiums = new();
+
+    // page-provided context
+
+    [Parameter] public double UnadjustedValue { get; set; }
+
+    private string _username = "";
+    private List<DifferenceNoteModel> _existingNotes = new();
+
+    // add form fields
+    private string? _selectedMetric;
+    private bool _expectedSolve;
+    private bool _prismCorrect;
+    private string? _notes;
+    private string _runIdInput = "";
+    private string _unadjustedInput = "";
+
+    // inline edit state
+    private string? _editingKey;
+    private bool _editExpectedSolve;
+    private bool _editPrismCorrect;
+    private string? _editNotes;
 
     protected override async Task OnInitializedAsync()
     {
@@ -1051,7 +1102,7 @@ else
                 UnAdjustedAdjustedMetrics = await PrismService.GetUnadjustedAdjusted(PrismRunID, ORIPolicyReference);
                 RunLogsForPolicy = await PrismService.GetRunLogsForORIPolicy(PrismRunID, ORIPolicyReference);
 
-                policyPremiums = await ORIService.GetORIPolicyPremiumsAsync(ORIPolicyReference, null, includeDeleted: false);
+                policyPremiums = await ORIService.GetORIPolicyPremiums(ORIPolicyReference, null, includeDeleted: false);
 
                 await LoadNotesAsync();
             }
@@ -1087,28 +1138,7 @@ else
             "StatCode2" => "teal-ghost",
             _ => "orange-ghost" // Default fallback
         };
-    }
-
-    // page-provided context
-
-    [Parameter] public double UnadjustedValue { get; set; }
-
-    private string _username = "";
-    private List<DifferenceNoteModel> _existingNotes = new();
-
-    // add form fields
-    private string? _selectedMetric;
-    private bool _expectedSolve;
-    private bool _prismCorrect;
-    private string? _notes;
-    private string _runIdInput = "";
-    private string _unadjustedInput = "";
-
-    // inline edit state
-    private string? _editingKey;
-    private bool _editExpectedSolve;
-    private bool _editPrismCorrect;
-    private string? _editNotes;
+    }    
 
     private async Task LoadNotesAsync()
     {

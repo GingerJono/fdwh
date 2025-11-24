@@ -1,5 +1,6 @@
 @page "/EditORIPolicy/{ORIPolicyReference}"
 @inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthStateProvider
 @using Sandbox._Spk
 @using CardModel
 @using FlatpickrBlazor
@@ -275,6 +276,12 @@ else if (PolicyDetails != null)
                         <table class="table table-bordered">
                             <tbody>
                                 <tr>
+                                    <th>Use Contract Currency</th>
+                                    <td>
+                                        <InputCheckbox @bind-Value="PolicyDetails.UseContractCurrency" class="form-check-input" />
+                                    </td>
+                                </tr>
+                                <tr>
                                     <th>FX Rate Application Date</th>
                                     <td>
                                         <InputText @bind-Value="PolicyDetails.FXRateApplicationDate" class="form-control" readonly />
@@ -362,9 +369,7 @@ else if (PolicyDetails != null)
                             </tbody>
                         </table>
                     </div>
-                </div>
-
-                
+                </div>                
             </div>
             <div class="col-md-6">
                 <div class="card mb-4 border">
@@ -543,7 +548,86 @@ else if (PolicyDetails != null)
                         </div>
                     </div>
                 </div>
-                
+                <div class="card shadow md-4">
+                    <div class="card-header">FX Rates</div>
+                    <div class="card-body">
+                        @if (PolicyDetails?.PolicyFXRates.Any() == true)
+                        {
+                            <div class="mt-1">
+                                <table class=" table table-sm table-striped text-nowrap">
+                                    <thead>
+                                        <tr>
+                                            <th>From Currency</th>
+                                            <th>To Currency</th>                                           
+                                            <th class="text-end">Rate</th>                                           
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var rate in PolicyDetails.PolicyFXRates)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <InputText @bind-Value="@rate.FromCurrency" class="form-control" readonly />
+                                                </td>
+                                                <td>
+                                                    <InputText @bind-Value="@rate.ToCurrency" class="form-control" readonly />
+                                                </td>                                              
+                                                <td class="text-end">
+                                                    <InputNumber @bind-Value="@rate.Rate" class="form-control text-end" readonly />
+                                                </td>                                                
+                                                <td>
+                                                    <button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveFXRate(rate)">
+                                                        Remove
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="text-muted">No FX Rates.</p>
+                        }
+                        <div class="mt-3">
+                            <h5>Add New FX Rate</h5>
+                            <table class=" table table-sm table-striped text-nowrap">
+                                <thead>
+                                    <tr>
+                                        <th>From Currency</th>
+                                        <th>To Currency</th>
+                                        <th class="text-end">Rate</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <InputText @bind-Value="@newFXRate.FromCurrency" class="form-control" />
+                                        </td>
+                                        <td>
+                                            <InputText @bind-Value="@newFXRate.ToCurrency" class="form-control" />
+                                        </td>                                       
+                                        <td class="text-end">
+                                            <InputNumber @bind-Value="@newFXRate.Rate" class="form-control text-end" />
+                                        </td>                                        
+                                        <td>
+                                            <button type="button" class="btn btn-primary" @onclick="() => AddFXRate()">
+                                                Add
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            @if (!string.IsNullOrEmpty(validationMessage))
+                            {
+                                <div class="text-danger">@validationMessage</div>
+                            }
+                        </div>
+                    </div>
+                </div>                
             </div>
         </div>
         <div class="row">
@@ -603,10 +687,10 @@ else if (PolicyDetails != null)
                         }
                         else
                         {
-                            <p class="text-muted">No class allocations defined for this policy.</p>
+                            <p class="text-muted">No allocations defined for this policy.</p>
                         }
                         <div class="mt-3">
-                            <h5>Add New Class Allocation</h5>
+                            <h5>Add New Allocation</h5>
                             <table class="table table-striped">
                                 <thead>
                                     <tr>
@@ -657,7 +741,6 @@ else if (PolicyDetails != null)
             </div>
         </div>
 
-
         <div class="text-right">
             <button type="submit" class="btn btn-success">Save Changes</button>
             <button type="button" class="btn btn-secondary" @onclick="NavigateBack">Cancel</button>
@@ -677,6 +760,7 @@ else if (PolicyDetails != null)
     private List<FXTreatmentModel> FXTreatments { get; set; } = new();
     private List<ORIFilterItemDefinition> FilterItemsList = new();
 
+    private string _username = "";
     private bool IsLoading = true;
     private bool IsLoadingDropdown = false;
     private string? ErrorMessage;
@@ -730,6 +814,9 @@ else if (PolicyDetails != null)
     // New agg deductible property
     private AggDeductible newAggDeductible = new AggDeductible();
 
+    // New FX Rate
+    private ORIPolicyFXRate newFXRate = new ORIPolicyFXRate();
+
     // Temporary in-memory list of premiums for this policy
     private List<ORIPolicyPremiumModel> policyPremiums = new();
 
@@ -747,6 +834,9 @@ else if (PolicyDetails != null)
 
         try
         {
+            var auth = await AuthStateProvider.GetAuthenticationStateAsync();
+            _username = auth.User?.Identity?.Name ?? "Unknown";
+
             // Get All Policies for filtering
             FilterItemsList = await ORIService.GetIncludedOrExcludedItems();
             await LoadAllPolicies();
@@ -759,7 +849,7 @@ else if (PolicyDetails != null)
             {
                 FilterItemsList = await ORIService.GetIncludedOrExcludedItems();
                 FXTreatments = await ORIService.GetFXTreatments();
-                policyPremiums = await ORIService.GetORIPolicyPremiumsAsync(ORIPolicyReference, null, includeDeleted: false);
+                policyPremiums = await ORIService.GetORIPolicyPremiums(ORIPolicyReference, null, includeDeleted: false);
                 SetNextAvailableAggDeductiblePriority();
             }
             else
@@ -968,7 +1058,7 @@ else if (PolicyDetails != null)
                 PolicyDetails.PolicyAllocations = new List<ORIPolicyAllocation>();
             }
             newAllocation.LastUpdated = DateTime.Now;
-            newAllocation.LastUpdatedBy = "CurrentUser"; // Replace with actual user
+            newAllocation.LastUpdatedBy = _username;
             PolicyDetails.PolicyAllocations.Add(newAllocation);
             newAllocation = new ORIPolicyAllocation(); // Reset
             StateHasChanged();
@@ -1003,7 +1093,6 @@ else if (PolicyDetails != null)
         newAggDeductible.ApplicationPriority = nextPriority;
     }
 
-
     private void AddAggDeductible()
     {
         if (newAggDeductible.Deductible != 0)
@@ -1021,7 +1110,7 @@ else if (PolicyDetails != null)
             }
 
             newAggDeductible.LastUpdated = DateTime.Now;
-            newAggDeductible.LastUpdatedBy = "CurrentUser"; // Replace with actual user
+            newAggDeductible.LastUpdatedBy = _username;
             PolicyDetails.AggDeductibles.Add(newAggDeductible);
             SetNextAvailableAggDeductiblePriority();
 
@@ -1044,7 +1133,40 @@ else if (PolicyDetails != null)
             PolicyDetails.RemovedAggDeductibles.Add(aggDeductible);
             StateHasChanged();
         }
-    }   
+    }
+
+    private void AddFXRate()
+    {
+        if (newFXRate.Rate != 0)
+        {
+            if (PolicyDetails.PolicyFXRates == null)
+            {
+                PolicyDetails.PolicyFXRates = new List<ORIPolicyFXRate>();
+            }            
+
+            newFXRate.LastUpdated = DateTime.Now;
+            newFXRate.LastUpdatedBy = _username;
+            PolicyDetails.PolicyFXRates.Add(newFXRate);
+
+            newAggDeductible = new AggDeductible(); // Reset
+            StateHasChanged();
+        }
+    }
+
+    private void RemoveFXRate(ORIPolicyFXRate policyFXRate)
+    {
+        if (PolicyDetails.PolicyFXRates.Contains(policyFXRate))
+        {
+            PolicyDetails.PolicyFXRates.Remove(policyFXRate);
+
+            if (PolicyDetails.RemovedPolicyFXRates == null)
+            {
+                PolicyDetails.RemovedPolicyFXRates = new List<ORIPolicyFXRate>();
+            }
+            PolicyDetails.RemovedPolicyFXRates.Add(policyFXRate);
+            StateHasChanged();
+        }
+    }
 
     private void AddPremium()
     {

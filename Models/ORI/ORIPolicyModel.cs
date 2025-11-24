@@ -10,6 +10,8 @@ namespace Sandbox.Models.ORI
     public class ORIPolicyModel
     {
         public required string ORIPolicyReference { get; set; }
+
+        public bool UseContractCurrency { get; set; }
         public string? FXRateApplicationDate { get; set; }
         public string? FXTreatment { get; set; }        
         public string? PolicyDescription { get; set; }
@@ -58,15 +60,17 @@ namespace Sandbox.Models.ORI
         public List<ORIFilterItem> RemovedFilters { get; set; } = new(); // Track deleted filters
 
         // New Lists for Policy Allocations
-        public List<ORIPolicyAllocation> PolicyAllocations { get; set; } = new();       
+        public List<ORIPolicyAllocation> PolicyAllocations { get; set; } = new();
+        public List<ORIPolicyAllocation> RemovedPolicyAllocations { get; set; } = new();
+        public List<ORIPolicyFXRate> PolicyFXRates { get; set; } = new();
+        public List<ORIPolicyFXRate> RemovedPolicyFXRates { get; set; } = new();
         public List<AggDeductible> RemovedAggDeductibles { get; set; } = new();
         public List<Narrative> Narratives { get; set; } = new();
         public List<ORIPolicyReinstatementModel> Reinstatements { get; set; } = new();
         public List<PolicySecurity> PolicySecurities { get; set; } = new();
-        public List<AggDeductible> AggDeductibles { get; set; } = new();
-        public List<ORIPolicyAllocation> RemovedPolicyAllocations { get; set; } = new();
-
+        public List<AggDeductible> AggDeductibles { get; set; } = new(); 
     }
+
 	public class ORIFilterItemDefinition
     {
         public string? Code { get; set; }  // "DomicileCountry", "InwardPolicyReference", etc.
@@ -137,7 +141,7 @@ namespace Sandbox.Models.ORI
     // New classes to represent the allocation tables
     public class ORIPolicyAllocation
     {
-        public string ORIPolicyReference { get; set; }
+        public string? ORIPolicyReference { get; set; }
         public string? YOA { get; set; }
         public string? Class { get; set; }
         public string? Syndicate { get; set; }
@@ -148,6 +152,16 @@ namespace Sandbox.Models.ORI
         public string? AllocationKey { get; set; }
         public DateTime? LastUpdated { get; set; }
         public string? LastUpdatedBy { get; set; }   
+    }
+
+    public class ORIPolicyFXRate
+    {
+        public string? ORIPolicyReference { get; set; }
+        public string? FromCurrency { get; set; }
+        public string? ToCurrency { get; set; }
+        public decimal Rate { get; set; }
+        public DateTime? LastUpdated { get; set; }
+        public string? LastUpdatedBy { get; set; }
     }
 
     public class AggDeductible
