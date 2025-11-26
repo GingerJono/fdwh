@@ -199,7 +199,7 @@ else if (PolicyDetails != null)
         </div>
         <div class="row">
             <div class="col-md-6">
-                @if (PolicyDetails.PolicyType == "X")
+                @if (new[] { "F", "X", "T" }.Contains(PolicyDetails.PolicyType))
                 {
                     <div class="card shadow mb-4 border">
                         <div class="card-header">

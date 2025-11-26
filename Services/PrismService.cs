@@ -98,13 +98,14 @@ namespace Sandbox.Services
                     // Kick off child calls
                     var logsTask = GetRunLogs(runID);
                     var allocatedPremiumSignedTask = GetAllocatedPremiumSigned(runID);
-                    var allocatedPremiumWrittenTask = GetAllocatedPremiumWritten(runID);
+                    var allocatedPremiumWrittenTask = GetAllocatedWrittenAndEarnedPremium(runID);
                     var allocatedOverridersAndProfitCommissionTask = GetAllocatedOverridersAndProfitCommission(runID);
                     var allocatedRecoveriesAndRIPsTask = GetAllocatedRecoveriesAndRIPs(runID);
                     var allocatedActualRecoveriesTask = GetAllocatedActualRecoveries(runID);
                     var allocatedActualRIPsTask = GetAllocatedActualRIPs(runID);
-                    var subjectClaimsTask = GetSubjectClaims(runID, null);
-                    var subjectPoliciesTask = GetSubjectPolicies(runID, null);
+                    var subjectIncurredClaimsTask = GetSubjectIncurredClaims(runID, null);
+                    var subjectUltimateClaimsTask = GetSubjectUltimateClaims(runID, null);
+                    var subjectPoliciesTask = GetSubjectInwardPolicies(runID, null);
                     var oriActualRecoveriesTask = GetORIActualRecoveries(runID);
                     var oriActualRIPsTask = GetORIActualRIPs(runID);
                     var oriPoliciesTask = GetORIPolicies(runID);
@@ -120,7 +121,8 @@ namespace Sandbox.Services
                             allocatedRecoveriesAndRIPsTask,
                             allocatedActualRecoveriesTask,
                             allocatedActualRIPsTask,
-                            subjectClaimsTask,
+                            subjectIncurredClaimsTask,
+                            subjectUltimateClaimsTask,
                             subjectPoliciesTask,
                             oriActualRecoveriesTask,
                             oriActualRIPsTask,
@@ -137,14 +139,15 @@ namespace Sandbox.Services
 
                     // Populate the run object
                     run.Logs = logsTask.Result;
-                    run.AllocatedPremiumSigned = allocatedPremiumSignedTask.Result;
-                    run.AllocatedPremiumWritten = allocatedPremiumWrittenTask.Result;
+                    run.AllocatedSignedPremium = allocatedPremiumSignedTask.Result;
+                    run.AllocatedWrittenAndEarnedPremium = allocatedPremiumWrittenTask.Result;
                     run.AllocatedOverridersAndProfitCommission = allocatedOverridersAndProfitCommissionTask.Result;
                     run.AllocatedRecoveriesAndRIPs = allocatedRecoveriesAndRIPsTask.Result;
                     run.AllocatedActualRecoveries = allocatedActualRecoveriesTask.Result;
                     run.AllocatedActualRIPs = allocatedActualRIPsTask.Result;
-                    run.SubjectClaims = subjectClaimsTask.Result;
-                    run.SubjectPolicies = subjectPoliciesTask.Result;
+                    run.SubjectIncurredClaims = subjectIncurredClaimsTask.Result;
+                    run.SubjectUltimateClaims = subjectUltimateClaimsTask.Result;
+                    run.SubjectInwardPolicies = subjectPoliciesTask.Result;
                     run.ORIActualRecoveries = oriActualRecoveriesTask.Result;
                     run.ORIActualRIPs = oriActualRIPsTask.Result;
                     run.ORIPolicies = oriPoliciesTask.Result;
@@ -279,7 +282,7 @@ namespace Sandbox.Services
                 }
             }
         }
-        public async Task<List<AllocatedPremiumWrittenModel>> GetAllocatedPremiumWritten(int runID)
+        public async Task<List<AllocatedWrittenAndEarnedPremiumModel>> GetAllocatedWrittenAndEarnedPremium(int runID)
         {
             using (var connection = new SqlConnection(_configuration.GetConnectionString("PrismConnection")))
             {
@@ -290,8 +293,8 @@ namespace Sandbox.Services
 
                 try
                 {
-                    var results = await connection.QueryAsync<AllocatedPremiumWrittenModel>(
-                        "outputs.spGetreporting_AllocatedPremiumWritten",
+                    var results = await connection.QueryAsync<AllocatedWrittenAndEarnedPremiumModel>(
+                        "outputs.spGetreporting_AllocatedWrittenAndEarnedPremium",
                         parameters,
                         commandType: CommandType.StoredProcedure);
 
@@ -358,7 +361,7 @@ namespace Sandbox.Services
             }
         }
 
-        public async Task<List<SubjectClaimsModel>> GetSubjectClaims(int runID, string oriPolicyReference)
+        public async Task<List<SubjectIncurredClaimsModel>> GetSubjectIncurredClaims(int runID, string oriPolicyReference)
         {
             using (var connection = new SqlConnection(_configuration.GetConnectionString("PrismConnection")))
             {
@@ -370,8 +373,8 @@ namespace Sandbox.Services
 
                 try
                 {
-                    var results = await connection.QueryAsync<SubjectClaimsModel>(
-                        "outputs.spGetanalytics_ORIPolicyToIncurredAndUltimateClaimsMapping",
+                    var results = await connection.QueryAsync<SubjectIncurredClaimsModel>(
+                        "outputs.spGetanalytics_SubjectIncurredClaims",
                         parameters,
                         commandType: CommandType.StoredProcedure);
 
@@ -379,13 +382,13 @@ namespace Sandbox.Services
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Error in GetAllocatedRecoveriesAndRIPs: " + ex.Message);
+                    Console.WriteLine("Error in GetSubjectIncurredClaims: " + ex.Message);
                     throw;
                 }
             }
         }
 
-        public async Task<List<SubjectPoliciesModel>> GetSubjectPolicies(int runID, string oriPolicyReference)
+        public async Task<List<SubjectUltimateClaimsModel>> GetSubjectUltimateClaims(int runID, string oriPolicyReference)
         {
             using (var connection = new SqlConnection(_configuration.GetConnectionString("PrismConnection")))
             {
@@ -397,8 +400,8 @@ namespace Sandbox.Services
 
                 try
                 {
-                    var results = await connection.QueryAsync<SubjectPoliciesModel>(
-                        "outputs.spGetanalytics_ORIPolicyToInwardPolicyMapping",
+                    var results = await connection.QueryAsync<SubjectUltimateClaimsModel>(
+                        "outputs.spGetanalytics_SubjectUltimateClaims",
                         parameters,
                         commandType: CommandType.StoredProcedure);
 
@@ -406,13 +409,13 @@ namespace Sandbox.Services
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Error in GetAllocatedRecoveriesAndRIPs: " + ex.Message);
+                    Console.WriteLine("Error in GetSubjectUltimateClaims: " + ex.Message);
                     throw;
                 }
             }
         }
 
-        public async Task<List<ClaimsByEventModel>> GetClaimsByEvent(int runID, string oriPolicyReference)
+        public async Task<List<SubjectInwardPoliciesModel>> GetSubjectInwardPolicies(int runID, string oriPolicyReference)
         {
             using (var connection = new SqlConnection(_configuration.GetConnectionString("PrismConnection")))
             {
@@ -424,8 +427,35 @@ namespace Sandbox.Services
 
                 try
                 {
-                    var results = await connection.QueryAsync<ClaimsByEventModel>(
-                        "outputs.spGetanalytics_ORIPolicyClaimsByEvent",
+                    var results = await connection.QueryAsync<SubjectInwardPoliciesModel>(
+                        "outputs.spGetanalytics_SubjectInwardsPolicies",
+                        parameters,
+                        commandType: CommandType.StoredProcedure);
+
+                    return results.ToList();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error in GetSubjectInwardPolicies: " + ex.Message);
+                    throw;
+                }
+            }
+        }
+
+        public async Task<List<RecoveriesAndRIPsModel>> GetRecoveriesAndRIPs(int runID, string oriPolicyReference)
+        {
+            using (var connection = new SqlConnection(_configuration.GetConnectionString("PrismConnection")))
+            {
+                await connection.OpenAsync();
+
+                var parameters = new DynamicParameters();
+                parameters.Add("RunID", runID, DbType.Int64);
+                parameters.Add("ORIPolicyReference", oriPolicyReference, DbType.String);
+
+                try
+                {
+                    var results = await connection.QueryAsync<RecoveriesAndRIPsModel>(
+                        "outputs.spGetreporting_RecoveriesAndRIPs",
                         parameters,
                         commandType: CommandType.StoredProcedure);
 

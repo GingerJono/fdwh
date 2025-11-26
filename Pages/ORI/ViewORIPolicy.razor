@@ -245,7 +245,7 @@ else
 </div>
 <div class="row">
     <div class="col-md-6">
-        @if (PolicyDetails.PolicyType == "X")
+        @if (new[] { "F", "X", "T" }.Contains(PolicyDetails.PolicyType))
         {
             <div class="card shadow mb-4 border">
                 <div class="card-header">
@@ -718,48 +718,64 @@ else
 </div>
 
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-3">
         <div class="card shadow mb-4 border">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span>Subject Policies (@SubjectPolicies?.Count())</span>
-                <button class="btn btn-primary" @onclick="@(() => FileExportHelper.ExportToCsvAsync(SubjectPolicies, $"SubjectPolicies_{PolicyDetails.ORIPolicyReference}_{PrismRunID}.csv", JS))">
+                <span>Subject Policies (@SubjectInwardPolicies?.Count())</span>
+                <button class="btn btn-primary" @onclick="@(() => FileExportHelper.ExportToCsvAsync(SubjectInwardPolicies, $"SubjectPolicies_{PolicyDetails.ORIPolicyReference}_{PrismRunID}.csv", JS))">
                     <i class="bi bi-download me-1"></i>
                 </button>
             </div>
             <div class="card-body">
-                @if (SubjectPolicies == null)
+                @if (SubjectInwardPolicies == null)
                 {
                     <p><em>No data found</em></p>
                 }
             </div>
         </div>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-3">
         <div class="card shadow mb-4 border">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span>Subject Claims (@SubjectClaims?.Count())</span>
-                <button class="btn btn-primary" @onclick="@(() => FileExportHelper.ExportToCsvAsync(SubjectClaims, $"SubjectClaims_{PolicyDetails.ORIPolicyReference}_{PrismRunID}.csv", JS))">
+                <span>Subject Incurred Claims (@SubjectIncurredClaims?.Count())</span>
+                <button class="btn btn-primary" @onclick="@(() => FileExportHelper.ExportToCsvAsync(SubjectIncurredClaims, $"SubjectIncurredClaims_{PolicyDetails.ORIPolicyReference}_{PrismRunID}.csv", JS))">
                     <i class="bi bi-download me-1"></i>
                 </button>
             </div>
             <div class="card-body">
-                @if (SubjectClaims == null)
+                @if (SubjectIncurredClaims == null)
                 {
                     <p><em>No data found</em></p>
                 }
             </div>
         </div>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-3">
         <div class="card shadow mb-4 border">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span>Claims by Event (@ClaimsByEvent?.Count())</span>
-                <button class="btn btn-primary" @onclick="@(() => FileExportHelper.ExportToCsvAsync(ClaimsByEvent, $"ClaimsByEvent_{PolicyDetails.ORIPolicyReference}_{PrismRunID}.csv", JS))">
+                <span>Subject Ultimate Claims (@SubjectIncurredClaims?.Count())</span>
+                <button class="btn btn-primary" @onclick="@(() => FileExportHelper.ExportToCsvAsync(SubjectUltimateClaims, $"SubjectUltimateClaims_{PolicyDetails.ORIPolicyReference}_{PrismRunID}.csv", JS))">
                     <i class="bi bi-download me-1"></i>
                 </button>
             </div>
             <div class="card-body">
-                @if (ClaimsByEvent == null)
+                @if (SubjectUltimateClaims == null)
+                {
+                    <p><em>No data found</em></p>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow mb-4 border">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Recoveries (@RecoveriesAndRIPs?.Count())</span>
+                <button class="btn btn-primary" @onclick="@(() => FileExportHelper.ExportToCsvAsync(RecoveriesAndRIPs, $"RecoveriesAndRIPs_{PolicyDetails.ORIPolicyReference}_{PrismRunID}.csv", JS))">
+                    <i class="bi bi-download me-1"></i>
+                </button>
+            </div>
+            <div class="card-body">
+                @if (RecoveriesAndRIPs == null)
                 {
                     <p><em>No data found</em></p>
                 }
@@ -1044,9 +1060,10 @@ else
     private List<LORSListModel> LORS { get; set; } = new();   
 
     [Parameter] public int PrismRunID { get; set; }
-    private List<SubjectClaimsModel> SubjectClaims { get; set; } = new();
-    private List<SubjectPoliciesModel> SubjectPolicies { get; set; } = new();
-    private List<ClaimsByEventModel> ClaimsByEvent { get; set; } = new();
+    private List<SubjectIncurredClaimsModel> SubjectIncurredClaims { get; set; } = new();
+    private List<SubjectUltimateClaimsModel> SubjectUltimateClaims { get; set; } = new();
+    private List<SubjectInwardPoliciesModel> SubjectInwardPolicies { get; set; } = new();
+    private List<RecoveriesAndRIPsModel> RecoveriesAndRIPs { get; set; } = new();
     private List<WrittenPremiumDimensionAllocationsModel> WrittenPremiumDimensionAllocations { get; set; } = new();
     private List<UnAdjustedAdjustedModel> UnAdjustedAdjustedMetrics { get; set; } = new();
     private List<RunLogModel> RunLogsForPolicy { get; set; } = new();
@@ -1095,9 +1112,10 @@ else
                 LORS = (await ORIService.GetLORSByPolicy(ORIPolicyReference)).ToList();
                 PolicyDetails.Reinstatements = (await ORIService.GetReinstatementsByPolicy(ORIPolicyReference)).ToList();                
 
-                SubjectPolicies = await PrismService.GetSubjectPolicies(PrismRunID, ORIPolicyReference);
-                SubjectClaims = await PrismService.GetSubjectClaims(PrismRunID, ORIPolicyReference);
-                ClaimsByEvent = await PrismService.GetClaimsByEvent(PrismRunID, ORIPolicyReference);
+                SubjectInwardPolicies = await PrismService.GetSubjectInwardPolicies(PrismRunID, ORIPolicyReference);
+                SubjectIncurredClaims = await PrismService.GetSubjectIncurredClaims(PrismRunID, ORIPolicyReference);
+                SubjectUltimateClaims = await PrismService.GetSubjectUltimateClaims(PrismRunID, ORIPolicyReference);
+                RecoveriesAndRIPs = await PrismService.GetRecoveriesAndRIPs(PrismRunID, ORIPolicyReference);
                 WrittenPremiumDimensionAllocations = await PrismService.GetWrittenPremiumDimensionAllocations(PrismRunID, ORIPolicyReference);
                 UnAdjustedAdjustedMetrics = await PrismService.GetUnadjustedAdjusted(PrismRunID, ORIPolicyReference);
                 RunLogsForPolicy = await PrismService.GetRunLogsForORIPolicy(PrismRunID, ORIPolicyReference);
@@ -1119,7 +1137,7 @@ else
         finally
         {
             IsLoading = false;
-            Console.WriteLine($"[INFO] Data loading complete for {ORIPolicyReference}");
+            Console.WriteLine($"[INFO] RecoveriesAndRIPscomplete for {ORIPolicyReference}");
         }
     }
 

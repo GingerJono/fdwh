@@ -85,13 +85,13 @@ else
         <div class="col-md-6">
             <div class="card shadow mb-4 border">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <span>Allocated Premium Signed (@Run?.AllocatedPremiumSigned?.Count())</span>
-                    <button class="btn btn-primary" @onclick="@(() => FileExportHelper.ExportToCsvAsync(Run.AllocatedPremiumSigned, $"AllocatedPremiumSigned_{Run.RunID}.csv", JS))">
+                    <span>Allocated Premium Signed (@Run?.AllocatedSignedPremium?.Count())</span>
+                    <button class="btn btn-primary" @onclick="@(() => FileExportHelper.ExportToCsvAsync(Run.AllocatedSignedPremium, $"AllocatedPremiumSigned_{Run.RunID}.csv", JS))">
                         <i class="bi bi-download me-1"></i>
                     </button>
                 </div>
                 <div class="card-body">
-                    @if (Run?.AllocatedPremiumSigned == null)
+                    @if (Run?.AllocatedSignedPremium == null)
                     {
                         <p><em>No data found</em></p>
                     }
@@ -101,13 +101,13 @@ else
         <div class="col-md-6">
             <div class="card shadow mb-4 border">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <span>Allocated Premium Written (@Run?.AllocatedPremiumWritten?.Count())</span>
-                    <button class="btn btn-primary" @onclick="@(() => FileExportHelper.ExportToCsvAsync(Run.AllocatedPremiumWritten, $"AllocatedPremiumWritten_{Run.RunID}.csv", JS))">
+                    <span>Allocated Premium Written (@Run?.AllocatedWrittenAndEarnedPremium?.Count())</span>
+                    <button class="btn btn-primary" @onclick="@(() => FileExportHelper.ExportToCsvAsync(Run.AllocatedWrittenAndEarnedPremium, $"AllocatedPremiumWritten_{Run.RunID}.csv", JS))">
                         <i class="bi bi-download me-1"></i>
                     </button>
                 </div>
                 <div class="card-body">
-                    @if (Run?.AllocatedPremiumWritten == null)
+                    @if (Run?.AllocatedWrittenAndEarnedPremium == null)
                     {
                         <p><em>No data found</em></p>
                     }
@@ -192,13 +192,13 @@ else
         <div class="col-md-6">
             <div class="card shadow mb-4 border">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <span>Subject Policies (@Run?.SubjectPolicies?.Count())</span>
-                    <button class="btn btn-primary" @onclick="@(() => FileExportHelper.ExportToCsvAsync(Run.SubjectPolicies, $"SubjectPolicies_{Run.RunID}.csv", JS))">
+                    <span>ORI Policies (@Run?.ORIPolicies?.Count())</span>
+                    <button class="btn btn-primary" @onclick="@(() => FileExportHelper.ExportToCsvAsync(Run.ORIPolicies, $"ORIPolicies_{Run.RunID}.csv", JS))">
                         <i class="bi bi-download me-1"></i>
                     </button>
                 </div>
                 <div class="card-body">
-                    @if (Run?.SubjectPolicies == null)
+                    @if (Run?.ORIPolicies == null)
                     {
                         <p><em>No data found</em></p>
                     }
@@ -208,13 +208,48 @@ else
         <div class="col-md-6">
             <div class="card shadow mb-4 border">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <span>Subject Claims (@Run?.SubjectClaims?.Count())</span>
-                    <button class="btn btn-primary" @onclick="@(() => FileExportHelper.ExportToCsvAsync(Run.SubjectClaims, $"SubjectClaims_{Run.RunID}.csv", JS))">
+                    <span>Subject Inward Policies (@Run?.SubjectInwardPolicies?.Count())</span>
+                    <button class="btn btn-primary" @onclick="@(() => FileExportHelper.ExportToCsvAsync(Run.SubjectInwardPolicies, $"SubjectPolicies_{Run.RunID}.csv", JS))">
                         <i class="bi bi-download me-1"></i>
                     </button>
                 </div>
                 <div class="card-body">
-                    @if (Run?.SubjectPolicies == null)
+                    @if (Run?.SubjectInwardPolicies == null)
+                    {
+                        <p><em>No data found</em></p>
+                    }
+                </div>
+            </div>
+        </div>
+       
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card shadow mb-4 border">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Subject Incurred Claims (@Run?.SubjectIncurredClaims?.Count())</span>
+                    <button class="btn btn-primary" @onclick="@(() => FileExportHelper.ExportToCsvAsync(Run.SubjectIncurredClaims, $"SubjectIncurredClaims_{Run.RunID}.csv", JS))">
+                        <i class="bi bi-download me-1"></i>
+                    </button>
+                </div>
+                <div class="card-body">
+                    @if (Run?.SubjectIncurredClaims == null)
+                    {
+                        <p><em>No data found</em></p>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow mb-4 border">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Subject Ultimate Claims (@Run?.SubjectUltimateClaims?.Count())</span>
+                    <button class="btn btn-primary" @onclick="@(() => FileExportHelper.ExportToCsvAsync(Run.SubjectUltimateClaims, $"SubjectUltimateClaims_{Run.RunID}.csv", JS))">
+                        <i class="bi bi-download me-1"></i>
+                    </button>
+                </div>
+                <div class="card-body">
+                    @if (Run?.SubjectUltimateClaims == null)
                     {
                         <p><em>No data found</em></p>
                     }
@@ -239,7 +274,6 @@ else
                 </div>
             </div>
         </div>
-
         <div class="col-md-6">
             <div class="card shadow mb-4 border">
                 <div class="card-header d-flex justify-content-between align-items-center">
@@ -250,25 +284,6 @@ else
                 </div>
                 <div class="card-body">
                     @if (Run?.ORIActualRIPs == null)
-                    {
-                        <p><em>No data found</em></p>
-                    }
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-6">
-            <div class="card shadow mb-4 border">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <span>ORI Policies (@Run?.ORIPolicies?.Count())</span>
-                    <button class="btn btn-primary" @onclick="@(() => FileExportHelper.ExportToCsvAsync(Run.ORIPolicies, $"ORIPolicies_{Run.RunID}.csv", JS))">
-                        <i class="bi bi-download me-1"></i>
-                    </button>
-                </div>
-                <div class="card-body">
-                    @if (Run?.ORIPolicies == null)
                     {
                         <p><em>No data found</em></p>
                     }
@@ -403,16 +418,17 @@ else
     {
         var datasets = new Dictionary<string, IEnumerable<object>>
         {
-            { "AllocatedPremiumSigned", run.AllocatedPremiumSigned },
-            { "AllocatedPremiumWritten", run.AllocatedPremiumWritten },
+            { "AllocatedPremiumSigned", run.AllocatedSignedPremium },
+            { "AllocatedPremiumWritten", run.AllocatedWrittenAndEarnedPremium },
             { "AllocatedRecoveriesAndRIPs", run.AllocatedRecoveriesAndRIPs },
             { "AllocatedActualRecoveries", run.AllocatedActualRecoveries },
             { "AllocatedActualRIPs", run.AllocatedActualRIPs },
             { "ORIActualRecoveries", run.ORIActualRecoveries },
             { "ORIActualRIPs", run.ORIActualRIPs },
             { "ORIPolicies", run.ORIPolicies },
-            { "SubjectPolicies", run.SubjectPolicies },
-            { "SubjectClaims", run.SubjectClaims }
+            { "SubjectPolicies", run.SubjectInwardPolicies },
+            { "SubjectIncurredClaims", run.SubjectIncurredClaims },
+            { "SubjectUltimateClaims", run.SubjectUltimateClaims }
         };
 
         await FileExportHelper.ExportAllCsvsAsZipAsync(run.RunID, datasets, JS);
@@ -436,7 +452,7 @@ else
                 .Take(PageSize);
 
                 // Paging window start and end
-                private int StartPage => Math.Max(1, ((CurrentPage - 1) / MaxVisiblePages) * MaxVisiblePages + 1);
+                private int StartPage => Math.Min(1, ((CurrentPage - 1) / MaxVisiblePages) * MaxVisiblePages + 1);
                 private int EndPage => Math.Min(StartPage + MaxVisiblePages - 1, TotalPages);
 
                 private void GoToPage(int page)
