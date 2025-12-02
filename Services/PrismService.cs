@@ -697,7 +697,7 @@ namespace Sandbox.Services
                     transaction);
 
                 // Insert sheets
-                await InsertSheetAsync(workbook.Worksheet("Premium"), "ORI.AdjustmentsAllocatedWrittenAndEarnedPremium", adjustmentID, uploadedBy, connection, transaction);
+                await InsertSheetAsync(workbook.Worksheet("Premium"), "ORI.AdjustmentsAllocatedPremium", adjustmentID, uploadedBy, connection, transaction);
                 await InsertSheetAsync(workbook.Worksheet("Recoveries"), "ORI.AdjustmentsAllocatedRecoveriesAndRIPs", adjustmentID, uploadedBy, connection, transaction);
                
 

@@ -37,7 +37,8 @@
         public double? Incurred { get; set; }
         public string? Peril { get; set; }
         public string? PerilRegion { get; set; }
-        public double? WrittenLine { get; set; }
+        public decimal? WrittenLine { get; set; }
+        public decimal? SignedLine { get; set; }
         public string? DistributionChannel { get; set; }
         public string? EffectiveDate { get; set; }
         public double? FXRate { get; set; }

@@ -198,78 +198,75 @@ else if (PolicyDetails != null)
             </div>
         </div>
         <div class="row">
-            <div class="col-md-6">
-                @if (new[] { "F", "X", "T" }.Contains(PolicyDetails.PolicyType))
-                {
-                    <div class="card shadow mb-4 border">
-                        <div class="card-header">
-                            Policy Premium
-                        </div>
-                        <div class="card-body">
-                            @if (policyPremiums is null || !policyPremiums.Any())
-                            {
-                                <p>No Policy Premiums added.</p>
-                            }
-                            else
-                            {
-                                <table class="table table-sm align-middle">
-                                    <thead>
+            <div class="col-md-6">               
+                <div class="card shadow mb-4 border">
+                    <div class="card-header">
+                        Policy Premium
+                    </div>
+                    <div class="card-body">
+                        @if (policyPremiums is null || !policyPremiums.Any())
+                        {
+                            <p>No Policy Premiums added.</p>
+                        }
+                        else
+                        {
+                            <table class="table table-sm align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Period</th>
+                                        <th>Final</th>
+
+                                        <th class="text-end">Gross Subject Premium</th>
+                                        <th class="text-end">Adjustable Rate</th>
+                                        <th class="text-end">Minimum Premium</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var premium in policyPremiums.Where(p => !p.IsDeleted))
+                                    {
                                         <tr>
-                                            <th>Period</th>
-                                            <th>Final</th>
+                                            <td>@premium.Period</td>
+                                            <td>@(premium.IsFinalAdjusted ? "Yes" : "No")</td>
+                                            <td class="text-end">@premium.GrossSubjectPremium?.ToString("N2")</td>
+                                            <td class="text-end">@premium.AdjustableRate?.ToString("N4")</td>
+                                            <td class="text-end">@premium.MinimumPremium?.ToString("N2")</td>
 
-                                            <th class="text-end">Gross Subject Premium</th>
-                                            <th class="text-end">Adjustable Rate</th>
-                                            <th class="text-end">Minimum Premium</th>
-                                            <th>Actions</th>
+                                            <td>
+                                                <button type="button" class="btn btn-danger btn-sm" @onclick="() => SoftDeletePremium(premium)">Remove</button>
+                                            </td>
                                         </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach (var premium in policyPremiums.Where(p => !p.IsDeleted))
-                                        {
-                                            <tr>
-                                                <td>@premium.Period</td>
-                                                <td>@(premium.IsFinalAdjusted ? "Yes" : "No")</td>
-                                                <td class="text-end">@premium.GrossSubjectPremium?.ToString("N2")</td>
-                                                <td class="text-end">@premium.AdjustableRate?.ToString("N4")</td>
-                                                <td class="text-end">@premium.MinimumPremium?.ToString("N2")</td>
+                                    }
+                                </tbody>
+                            </table>
+                        }
 
-                                                <td>
-                                                    <button type="button" class="btn btn-danger btn-sm" @onclick="() => SoftDeletePremium(premium)">Remove</button>
-                                                </td>
-                                            </tr>
-                                        }
-                                    </tbody>
-                                </table>
-                            }
-
-                            <h6 class="mt-4">Add New Policy Premium</h6>
-                            <div class="row g-2 align-items-center">
-                                <div class="col-2">
-                                    <InputText class="form-control" @bind-Value="newPremium.Period" placeholder="YYYYMM" />
+                        <h6 class="mt-4">Add New Policy Premium</h6>
+                        <div class="row g-2 align-items-center">
+                            <div class="col-2">
+                                <InputText class="form-control" @bind-Value="newPremium.Period" placeholder="YYYYMM" />
+                            </div>
+                            <div class="col-2">
+                                <InputNumber class="form-control" @bind-Value="newPremium.GrossSubjectPremium" placeholder="Gross Subject Premium" />
+                            </div>
+                            <div class="col-2">
+                                <InputNumber class="form-control" @bind-Value="newPremium.AdjustableRate" placeholder="Adjustable Rate" />
+                            </div>
+                            <div class="col-2">
+                                <InputNumber class="form-control" @bind-Value="newPremium.MinimumPremium" placeholder="Minimum Premum" />
+                            </div>
+                            <div class="col-2">
+                                <div class="form-check">
+                                    <InputCheckbox class="form-check-input" @bind-Value="newPremium.IsFinalAdjusted" />
+                                    <label class="form-check-label ms-1">Final</label>
                                 </div>
-                                <div class="col-2">
-                                    <InputNumber class="form-control" @bind-Value="newPremium.GrossSubjectPremium" placeholder="Gross Subject Premium" />
-                                </div>
-                                <div class="col-2">
-                                    <InputNumber class="form-control" @bind-Value="newPremium.AdjustableRate" placeholder="Adjustable Rate" />
-                                </div>
-                                <div class="col-2">
-                                    <InputNumber class="form-control" @bind-Value="newPremium.MinimumPremium" placeholder="Minimum Premum" />
-                                </div>
-                                <div class="col-2">
-                                    <div class="form-check">
-                                        <InputCheckbox class="form-check-input" @bind-Value="newPremium.IsFinalAdjusted" />
-                                        <label class="form-check-label ms-1">Final</label>
-                                    </div>
-                                </div>
-                                <div class="col-2">
-                                    <button type="button" class="btn btn-primary w-100" @onclick="AddPremium">Add</button>
-                                </div>
+                            </div>
+                            <div class="col-2">
+                                <button type="button" class="btn btn-primary w-100" @onclick="AddPremium">Add</button>
                             </div>
                         </div>
                     </div>
-                }
+                </div>                
                 <div class="card shadow mb-4 border">
                     <div class="card-header">Policy Details</div>
                     <div class="card-body">

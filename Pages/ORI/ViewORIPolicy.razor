@@ -244,48 +244,45 @@ else
     </div>
 </div>
 <div class="row">
-    <div class="col-md-6">
-        @if (new[] { "F", "X", "T" }.Contains(PolicyDetails.PolicyType))
-        {
-            <div class="card shadow mb-4 border">
-                <div class="card-header">
-                    Premium
-                </div>
-                <div class="card-body">
-                    @if (policyPremiums is null || !policyPremiums.Any())
-                    {
-                        <p>No Policy Premiums added.</p>
-                    }
-                    else
-                    {
-                        <table class="table table-sm align-middle">
-                            <thead>
-                                <tr>
-                                    <th>Period</th>
-                                    <th>Final</th>
-
-                                    <th class="text-end">Gross Subject Premium</th>
-                                    <th class="text-end">Adjustable Rate</th>
-                                    <th class="text-end">Minimum Premium</th>                                   
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var premium in policyPremiums.Where(p => !p.IsDeleted))
-                                {
-                                    <tr>
-                                        <td>@premium.Period</td>
-                                        <td>@(premium.IsFinalAdjusted ? "Yes" : "No")</td>
-                                        <td class="text-end">@premium.GrossSubjectPremium?.ToString("N2")</td>
-                                        <td class="text-end">@premium.AdjustableRate?.ToString("N4")</td>
-                                        <td class="text-end">@premium.MinimumPremium?.ToString("N2")</td>                                       
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    }
-                </div>
+    <div class="col-md-6">        
+        <div class="card shadow mb-4 border">
+            <div class="card-header">
+                Premium
             </div>
-        }
+            <div class="card-body">
+                @if (policyPremiums is null || !policyPremiums.Any())
+                {
+                    <p>No Policy Premiums added.</p>
+                }
+                else
+                {
+                    <table class="table table-sm align-middle">
+                        <thead>
+                            <tr>
+                                <th>Period</th>
+                                <th>Final</th>
+
+                                <th class="text-end">Gross Subject Premium</th>
+                                <th class="text-end">Adjustable Rate</th>
+                                <th class="text-end">Minimum Premium</th>                                   
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var premium in policyPremiums.Where(p => !p.IsDeleted))
+                            {
+                                <tr>
+                                    <td>@premium.Period</td>
+                                    <td>@(premium.IsFinalAdjusted ? "Yes" : "No")</td>
+                                    <td class="text-end">@premium.GrossSubjectPremium?.ToString("N2")</td>
+                                    <td class="text-end">@premium.AdjustableRate?.ToString("N4")</td>
+                                    <td class="text-end">@premium.MinimumPremium?.ToString("N2")</td>                                       
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>        
         <div class="card shadow mb-4 border">
             <div class="card-header">Allocations</div>
             <div class="card-body">
