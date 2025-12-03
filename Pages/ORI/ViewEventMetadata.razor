@@ -99,7 +99,9 @@ else if (EventDetails != null)
 		}
 
 		try
-		{
+		{	
+			PrismRunID = await PrismService.GetRunIDForSandbox();
+
 			EventDetails = await ORIService.GetEventMetadata(EventCode);
 			if (EventDetails != null)
 			{

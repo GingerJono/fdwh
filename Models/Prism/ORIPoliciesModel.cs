@@ -4,6 +4,7 @@
     {
         public string ORIPolicyReference { get; set; } = string.Empty;
         public string? ORIPillar { get; set; }
+        public bool UseContractCurrency { get; set; }
         public DateTime? FXRateApplicationDate { get; set; }
         public string? FXTreatment { get; set; }
         public string? PolicyType { get; set; }

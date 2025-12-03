@@ -20,7 +20,7 @@
         public string? PerilRegion { get; set; }
         public double? FXRate { get; set; }
         public double? UltimateClaimsInContractCcy { get; set; }
-        public bool? is_proportional { get; set; }
+        public bool? UseContractCurrency { get; set; }
         public string? Currency { get; set; }
     }
 }
