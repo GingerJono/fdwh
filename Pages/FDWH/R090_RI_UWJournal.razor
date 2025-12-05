@@ -99,12 +99,43 @@
             </table>
         </div>
     </div>
+@* Error Modal *@
+@if (showErrorModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Report Error</h5>
+                    <button type="button" class="btn-close btn-close-white" @onclick="CloseErrorModal"></button>
+                </div>
+                <div class="modal-body">
+                    <h6>Error Message:</h6>
+                    <div class="alert alert-danger">@errorMessage</div>
+
+                    @if (!string.IsNullOrEmpty(errorStackTrace))
+                    {
+                        <h6 class="mt-3">Stack Trace:</h6>
+                        <pre class="bg-light p-3 border rounded" style="max-height: 400px; overflow-y: auto; font-size: 0.85em;">@errorStackTrace</pre>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseErrorModal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 }
 
 @code {
     private const int REPORT_ID = 90;
     private bool showInfo = true;
     private bool isRunning = false;
+    private bool showErrorModal = false;
+    private string errorMessage = string.Empty;
+    private string errorStackTrace = string.Empty;
     private HashSet<int> expandedParams = new();
     private ReportParams paramModel = new() { ProcessingMonth = 202509, FromMonth = 202506 };
     private List<FDWHReportRun> runs = new();
@@ -142,6 +173,12 @@
                 .Where(r => r.ReportID == REPORT_ID)
                 .OrderByDescending(r => r.RunDate)
                 .ToList();
+                }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+            errorStackTrace = ex.StackTrace ?? ex.InnerException?.StackTrace ?? string.Empty;
+            showErrorModal = true;
         }
         finally
         {
