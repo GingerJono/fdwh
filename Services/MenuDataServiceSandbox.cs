@@ -1,6 +1,6 @@
 public class MenuDataServiceSandbox
 {
-   	private List<MainMenuItems> MenuData = new List<MainMenuItems>()
+	private List<MainMenuItems> MenuData = new List<MainMenuItems>()
 	{
 		new MainMenuItems(
 			menuTitle: "Main"
@@ -27,23 +27,23 @@ public class MenuDataServiceSandbox
 					active: false,
 					dirChange: false
 				),
-                new MainMenuItems (
+				new MainMenuItems (
 
-                    path: "EventMetadata",
-                    type: "link",
-                    title: "Events",
-                    selected: false,
-                    active: false,
-                    dirChange: false
-                ),
-                new MainMenuItems (
+					path: "EventMetadata",
+					type: "link",
+					title: "Events",
+					selected: false,
+					active: false,
+					dirChange: false
+				),
+				new MainMenuItems (
 					path: "ORIUSMs",
 					type: "link",
 					title: "USMs",
 					selected: false,
 					active: false,
 					dirChange: false
-				),				
+				),
 				new MainMenuItems (
 					path: "LORSList",
 					type: "link",
@@ -84,15 +84,15 @@ public class MenuDataServiceSandbox
 					active: false,
 					dirChange: false
 				),
-                new MainMenuItems (
-                    path: "PrismAdjustments",
-                    type: "link",
-                    title: "Adjustments",
-                    selected: false,
-                    active: false,
-                    dirChange: false
-                ),
-                }
+				new MainMenuItems (
+					path: "PrismAdjustments",
+					type: "link",
+					title: "Adjustments",
+					selected: false,
+					active: false,
+					dirChange: false
+				),
+				}
 			),
 		new MainMenuItems(
 			type: "sub",
@@ -132,7 +132,37 @@ public class MenuDataServiceSandbox
 					dirChange: false
 				),
 			}
-		)
+		),
+		new MainMenuItems(
+			type: "sub",
+			title: "FDWH Reporting",
+			icon: "",
+			svg: "<svg xmlns='http://www.w3.org/2000/svg' class='w-6 h-6 side-menu__icon' fill='none' viewBox='0 0 24 24' stroke-width='1.5' stroke='currentColor'><path stroke-linecap='round' stroke-linejoin='round' d='M3 3h18v18H3V3zm3 3v12m6-12v12m6-12v12' /></svg>",
+			badgeValue: "",
+			badgeClass: "",
+			selected: false,
+			active: false,
+			dirChange: false,
+			children: new MainMenuItems[]
+			{
+				new MainMenuItems(
+					path: "FDWH/Reports",
+					type: "link",
+					title: "Reports",
+					selected: false,
+					active: false,
+					dirChange: false
+				),
+				new MainMenuItems(
+					path: "FDWH/ReportRuns",
+					type: "link",
+					title: "Report Runs",
+					selected: false,
+					active: false,
+					dirChange: false
+				)
+			}
+		),
 	};
 
 	public List<MainMenuItems> GetMenuData()

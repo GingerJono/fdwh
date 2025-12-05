@@ -1,0 +1,202 @@
+@page "/FDWH/R071_RIPsJournalMvt"
+@inject Sandbox.Services.FDWHReportingService ReportingService
+@inject IJSRuntime JS
+@inject Helpers.SandboxContext SandboxContext
+@using System.Text.Json
+@using Sandbox.Models.FDWH
+
+<h3 class="mb-3">R071 - RIPs Journal Movement</h3>
+
+<div class="card mb-4 shadow-sm border-0">
+    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+        <span class="fw-semibold">Report Information</span>
+        <button class="btn btn-sm btn-outline-secondary" @onclick="ToggleInfo">
+            @(showInfo ? "Hide" : "Show")
+        </button>
+    </div>
+    @if (showInfo)
+    {
+        <div class="card-body">
+            <p><strong>Description:</strong> RIPs (Reinsurance to Close Premiums) Journal - Movement between two processing months.</p>
+            <p><strong>Parameters:</strong></p>
+            <ul>
+                <li><strong>ProcessingMonth</strong> - Current processing month (YYYYMM format)</li>
+                <li><strong>FromMonth</strong> - Starting month for movement (YYYYMM format)</li>
+            </ul>
+        </div>
+    }
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-primary text-white">Run Report</div>
+    <div class="card-body">
+        <EditForm Model="@paramModel" OnValidSubmit="RunReport">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Processing Month (YYYYMM)</label>
+                    <InputNumber @bind-Value="paramModel.ProcessingMonth" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">From Month (YYYYMM)</label>
+                    <InputNumber @bind-Value="paramModel.FromMonth" class="form-control" />
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-success" disabled="@isRunning">
+                        @if (isRunning)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2"></span>
+                            <span>Running...</span>
+                        }
+                        else
+                        {
+                            <span>Run and Download</span>
+                        }
+                    </button>
+                </div>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@if (runs?.Count > 0)
+{
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-light fw-semibold">Previous Runs</div>
+        <div class="card-body p-0">
+            <table class="table table-sm table-hover mb-0 align-middle">
+                <thead class="table-secondary">
+                    <tr>
+                        <th>Date (UTC)</th>
+                        <th>Run By</th>
+                        <th>Rows</th>
+                        <th>Parameters</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var r in runs)
+                    {
+                        <tr>
+                            <td>@r.RunDate.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td>@r.RunBy</td>
+                            <td>@r.RowCount</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-dark"
+                                        @onclick="() => ToggleParams(r.RunID)">
+                                    @(expandedParams.Contains(r.RunID) ? "Hide" : "Show")
+                                </button>
+                            </td>
+                        </tr>
+                        @if (expandedParams.Contains(r.RunID))
+                        {
+                            <tr class="bg-light">
+                                <td colspan="4" style="white-space: pre-wrap;">
+                                    <code>@r.ParametersJSON</code>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+@* Error Modal *@
+@if (showErrorModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Report Error</h5>
+                    <button type="button" class="btn-close btn-close-white" @onclick="CloseErrorModal"></button>
+                </div>
+                <div class="modal-body">
+                    <h6>Error Message:</h6>
+                    <div class="alert alert-danger">@errorMessage</div>
+
+                    @if (!string.IsNullOrEmpty(errorStackTrace))
+                    {
+                        <h6 class="mt-3">Stack Trace:</h6>
+                        <pre class="bg-light p-3 border rounded" style="max-height: 400px; overflow-y: auto; font-size: 0.85em;">@errorStackTrace</pre>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseErrorModal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+}
+
+@code {
+    private const int REPORT_ID = 71;
+    private bool showInfo = true;
+    private bool isRunning = false;
+    private bool showErrorModal = false;
+    private string errorMessage = string.Empty;
+    private string errorStackTrace = string.Empty;
+    private HashSet<int> expandedParams = new();
+    private ReportParams paramModel = new() { ProcessingMonth = 202509, FromMonth = 202506 };
+    private List<FDWHReportRun> runs = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        runs = (await ReportingService.GetReportRunsAsync())
+            .Where(r => r.ReportID == REPORT_ID)
+            .OrderByDescending(r => r.RunDate)
+            .ToList();
+    }
+
+    private async Task RunReport()
+    {
+        isRunning = true;
+        try
+        {
+            var parameters = new Dictionary<string, object> {
+                { "@ProcessingMonth", paramModel.ProcessingMonth },
+                { "@frommonth", paramModel.FromMonth }
+            };
+
+            var bytes = await ReportingService.RunReportAndExportAsync(
+                REPORT_ID,
+                "reporting.r071_RIPsJournalMvt",
+                parameters,
+                SandboxContext.EffectiveUserName ?? "unknown",
+                1);
+
+            var fileName = $"R071_RIPsJournalMvt_{paramModel.ProcessingMonth}_{DateTime.UtcNow:yyyyMMddHHmmss}.xlsx";
+            using var streamRef = new DotNetStreamReference(new MemoryStream(bytes));
+            await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
+
+            runs = (await ReportingService.GetReportRunsAsync())
+                .Where(r => r.ReportID == REPORT_ID)
+                .OrderByDescending(r => r.RunDate)
+                .ToList();
+                }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+            errorStackTrace = ex.StackTrace ?? ex.InnerException?.StackTrace ?? string.Empty;
+            showErrorModal = true;
+        }
+        finally
+        {
+            isRunning = false;
+        }
+    }
+
+    private void ToggleInfo() => showInfo = !showInfo;
+
+    private void ToggleParams(int runId)
+    {
+        if (!expandedParams.Add(runId))
+            expandedParams.Remove(runId);
+    }
+
+    public class ReportParams
+    {
+        public int ProcessingMonth { get; set; }
+        public int FromMonth { get; set; }
+    }
+}
