@@ -25,7 +25,7 @@ namespace Sandbox.Services
 		{
 			using var conn = new SqlConnection(GetSandboxConnection());
 			using var cmd = new SqlCommand(@"
-				INSERT INTO dbo.ReportRuns 
+				INSERT INTO dbo.ReportRuns
 					(ReportID, RunBy, ParametersJSON, ReportVersion, FilePath, [RowCount])
 				OUTPUT INSERTED.RunID
 				VALUES (@ReportID, @RunBy, @Params, @Version, @FilePath, @RowCount)", conn);
@@ -48,36 +48,47 @@ namespace Sandbox.Services
 			string runBy,
 			int version)
 		{
-			var dt = new DataTable();
-			using var conn = new SqlConnection(GetFDWHConnection());
-			using var cmd = new SqlCommand(storedProc, conn) { CommandType = CommandType.StoredProcedure };
-			foreach (var p in parameters) cmd.Parameters.AddWithValue(p.Key, p.Value ?? DBNull.Value);
-			await conn.OpenAsync();
-			using var adapter = new SqlDataAdapter(cmd);
-			adapter.Fill(dt);
+			try
+			{
+				var dt = new DataTable();
+				using var conn = new SqlConnection(GetFDWHConnection());
+				using var cmd = new SqlCommand(storedProc, conn) { CommandType = CommandType.StoredProcedure, CommandTimeout = 300 };
+				foreach (var p in parameters) cmd.Parameters.AddWithValue(p.Key, p.Value ?? DBNull.Value);
+				await conn.OpenAsync();
+				using var adapter = new SqlDataAdapter(cmd);
+				adapter.Fill(dt);
 
-			using var package = new ExcelPackage();
-			var outputSheet = package.Workbook.Worksheets.Add("Output");
-			outputSheet.Cells["A1"].LoadFromDataTable(dt, true);
+				using var package = new ExcelPackage();
+				var outputSheet = package.Workbook.Worksheets.Add("Output");
+				outputSheet.Cells["A1"].LoadFromDataTable(dt, true);
 
-			var controlSheet = package.Workbook.Worksheets.Add("Control");
-			controlSheet.Cells["A1"].Value = "Report ID";
-			controlSheet.Cells["B1"].Value = reportId;
-			controlSheet.Cells["A2"].Value = "Run By";
-			controlSheet.Cells["B2"].Value = runBy;
-			controlSheet.Cells["A3"].Value = "Run Date (UTC)";
-			controlSheet.Cells["B3"].Value = DateTime.UtcNow;
-			controlSheet.Cells["A4"].Value = "Version";
-			controlSheet.Cells["B4"].Value = version;
-			controlSheet.Cells["A5"].Value = "Parameters JSON";
-			controlSheet.Cells["B5"].Value = System.Text.Json.JsonSerializer.Serialize(parameters);
-			controlSheet.Cells.AutoFitColumns();
+				var controlSheet = package.Workbook.Worksheets.Add("Control");
+				controlSheet.Cells["A1"].Value = "Report ID";
+				controlSheet.Cells["B1"].Value = reportId;
+				controlSheet.Cells["A2"].Value = "Run By";
+				controlSheet.Cells["B2"].Value = runBy;
+				controlSheet.Cells["A3"].Value = "Run Date (UTC)";
+				controlSheet.Cells["B3"].Value = DateTime.UtcNow;
+				controlSheet.Cells["A4"].Value = "Version";
+				controlSheet.Cells["B4"].Value = version;
+				controlSheet.Cells["A5"].Value = "Parameters JSON";
+				controlSheet.Cells["B5"].Value = System.Text.Json.JsonSerializer.Serialize(parameters);
+				controlSheet.Cells.AutoFitColumns();
 
-			await LogRunAsync(reportId, runBy,
-				System.Text.Json.JsonSerializer.Serialize(parameters),
-				version, null, dt.Rows.Count);
+				await LogRunAsync(reportId, runBy,
+					System.Text.Json.JsonSerializer.Serialize(parameters),
+					version, null, dt.Rows.Count);
 
-			return await package.GetAsByteArrayAsync();
+				return await package.GetAsByteArrayAsync();
+			}
+			catch (SqlException ex)
+			{
+				throw new Exception($"SQL Error executing {storedProc}: {ex.Message}", ex);
+			}
+			catch (Exception ex)
+			{
+				throw new Exception($"Error generating report {storedProc}: {ex.Message}", ex);
+			}
 		}
 
 
@@ -87,7 +98,7 @@ namespace Sandbox.Services
 			var runs = new List<FDWHReportRun>();
 			using var conn = new SqlConnection(GetSandboxConnection());
 			using var cmd = new SqlCommand(
-				"SELECT RunID, ReportID, RunBy, RunDate, ReportVersion, [RowCount], FilePath FROM dbo.ReportRuns ORDER BY RunDate DESC", conn);
+				"SELECT RunID, ReportID, RunBy, RunDate, ReportVersion, [RowCount], FilePath, ParametersJSON FROM dbo.ReportRuns ORDER BY RunDate DESC", conn);
 			await conn.OpenAsync();
 			using var reader = await cmd.ExecuteReaderAsync();
 			while (await reader.ReadAsync())
@@ -100,7 +111,8 @@ namespace Sandbox.Services
 					RunDate = reader.GetDateTime(3),
 					ReportVersion = reader.GetInt32(4),
 					RowCount = reader.IsDBNull(5) ? 0 : reader.GetInt32(5),
-					FilePath = reader.IsDBNull(6) ? null : reader.GetString(6)
+					FilePath = reader.IsDBNull(6) ? null : reader.GetString(6),
+					ParametersJSON = reader.IsDBNull(7) ? null : reader.GetString(7)
 				});
 			}
 			return runs;
