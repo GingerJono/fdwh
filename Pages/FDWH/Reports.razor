@@ -4,6 +4,14 @@
 
 <h3 class="mb-4">FDWH Reports</h3>
 
+@if (hasError)
+{
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <strong>Note:</strong> @errorMessage
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
 <div class="card shadow-sm border-0">
     <div class="card-header bg-primary text-white">
         <h5 class="mb-0">Available Reports</h5>
@@ -59,42 +67,60 @@
 
 @code {
     private List<ReportInfo> reportList = new();
+    private bool hasError = false;
+    private string errorMessage = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
-        var allRuns = await ReportingService.GetReportRunsAsync();
-        var runStats = allRuns
-            .GroupBy(r => r.ReportID)
-            .ToDictionary(
-                g => g.Key,
-                g => new { Count = g.Count(), LastUser = g.OrderByDescending(r => r.RunDate).First().RunBy }
-            );
-
+        // Initialize report list first (always works)
         reportList = new List<ReportInfo>
         {
-            new ReportInfo(10, "R010", "Quarter Results Flat File", "Master report with RunType (ITD/MVT)", "/FDWH/R010_QtrResultsFlatFile"),
-            // new ReportInfo(11, "R011", "Quarter Results ITD", "Quarter Results Flat File - Inception to Date", "/FDWH/R011_QtrResultsFlatFileITD"),
-            // new ReportInfo(12, "R012", "Quarter Results Movement", "Quarter Results Flat File - Movement", "/FDWH/R012_QtrResultsFlatFileMvt"),
-            new ReportInfo(20, "R020", "Gross UW Figures Detail", "Master report with RunType (ITD/MVT)", "/FDWH/R020_GrossUWFiguresDetail"),
-            // new ReportInfo(21, "R021", "Gross UW Figures ITD", "Gross UW Figures Detail - Inception to Date", "/FDWH/R021_GrossUWFiguresDetailITD"),
-            // new ReportInfo(22, "R022", "Gross UW Figures Movement", "Gross UW Figures Detail - Movement", "/FDWH/R022_GrossUWFiguresDetailMvt"),
-            new ReportInfo(30, "R030", "Gross IBNR Journal", "Gross IBNR Journal entries", "/FDWH/R030_GrossIBNRJournal"),
-            new ReportInfo(40, "R040", "Gross ULAE Journal", "Gross ULAE Journal entries", "/FDWH/R040_GrossULAEJournal"),
-            new ReportInfo(50, "R050", "Future Premium Journal", "Future Premium Journal entries", "/FDWH/R050_FuturePremiumJournal"),
-            new ReportInfo(60, "R060", "Future Premium Summary", "Summary of Future Premium", "/FDWH/R060_FuturePremiumSummary"),
-            new ReportInfo(70, "R070", "RIPs Journal", "RIPs Journal entries", "/FDWH/R070_RIPsJournal"),
-            new ReportInfo(71, "R071", "RIPs Journal Movement", "RIPs Journal - Movement", "/FDWH/R071_RIPsJournalMvt"),
-            new ReportInfo(80, "R080", "Gross UW Journal", "Gross Underwriting Journal entries", "/FDWH/R080_GrossUWJournal"),
-            new ReportInfo(90, "R090", "RI UW Journal", "Reinsurance Underwriting Journal", "/FDWH/R090_RI_UWJournal")
+            new ReportInfo(10, "R010", "Quarter Results Flat File", "Master report with RunType (ITD/MVT)", "FDWH/R010_QtrResultsFlatFile"),
+            // new ReportInfo(11, "R011", "Quarter Results ITD", "Quarter Results Flat File - Inception to Date", "FDWH/R011_QtrResultsFlatFileITD"),
+            // new ReportInfo(12, "R012", "Quarter Results Movement", "Quarter Results Flat File - Movement", "FDWH/R012_QtrResultsFlatFileMvt"),
+            new ReportInfo(20, "R020", "Gross UW Figures Detail", "Master report with RunType (ITD/MVT)", "FDWH/R020_GrossUWFiguresDetail"),
+            // new ReportInfo(21, "R021", "Gross UW Figures ITD", "Gross UW Figures Detail - Inception to Date", "FDWH/R021_GrossUWFiguresDetailITD"),
+            // new ReportInfo(22, "R022", "Gross UW Figures Movement", "Gross UW Figures Detail - Movement", "FDWH/R022_GrossUWFiguresDetailMvt"),
+            new ReportInfo(30, "R030", "Gross IBNR Journal", "Gross IBNR Journal entries", "FDWH/R030_GrossIBNRJournal"),
+            new ReportInfo(40, "R040", "Gross ULAE Journal", "Gross ULAE Journal entries", "FDWH/R040_GrossULAEJournal"),
+            new ReportInfo(50, "R050", "Future Premium Journal", "Future Premium Journal entries", "FDWH/R050_FuturePremiumJournal"),
+            new ReportInfo(60, "R060", "Future Premium Summary", "Summary of Future Premium", "FDWH/R060_FuturePremiumSummary"),
+            new ReportInfo(70, "R070", "RIPs Journal", "RIPs Journal entries", "FDWH/R070_RIPsJournal"),
+            new ReportInfo(71, "R071", "RIPs Journal Movement", "RIPs Journal - Movement", "FDWH/R071_RIPsJournalMvt"),
+            new ReportInfo(80, "R080", "Gross UW Journal", "Gross Underwriting Journal entries", "FDWH/R080_GrossUWJournal"),
+            new ReportInfo(90, "R090", "RI UW Journal", "Reinsurance Underwriting Journal", "FDWH/R090_RI_UWJournal")
         };
 
-        foreach (var report in reportList)
+        // Try to load run statistics, but don't fail if it errors
+        try
         {
-            if (runStats.TryGetValue(report.ReportID, out var stats))
+            var allRuns = await ReportingService.GetReportRunsAsync();
+
+            if (allRuns != null && allRuns.Count > 0)
             {
-                report.RunCount = stats.Count;
-                report.LastRunBy = stats.LastUser;
+                var runStats = allRuns
+                    .GroupBy(r => r.ReportID)
+                    .ToDictionary(
+                        g => g.Key,
+                        g => new { Count = g.Count(), LastUser = g.OrderByDescending(r => r.RunDate).FirstOrDefault()?.RunBy ?? "Unknown" }
+                    );
+
+                foreach (var report in reportList)
+                {
+                    if (runStats.TryGetValue(report.ReportID, out var stats))
+                    {
+                        report.RunCount = stats.Count;
+                        report.LastRunBy = stats.LastUser;
+                    }
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            // Log the error but don't crash - statistics are nice to have but not critical
+            hasError = true;
+            errorMessage = $"Unable to load run statistics: {ex.Message}";
+            // Reports will still be accessible, just without statistics
         }
     }
 
