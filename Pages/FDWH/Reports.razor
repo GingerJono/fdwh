@@ -4,6 +4,14 @@
 
 <h3 class="mb-4">FDWH Reports</h3>
 
+@if (hasError)
+{
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <strong>Note:</strong> @errorMessage
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
 <div class="card shadow-sm border-0">
     <div class="card-header bg-primary text-white">
         <h5 class="mb-0">Available Reports</h5>
@@ -59,17 +67,12 @@
 
 @code {
     private List<ReportInfo> reportList = new();
+    private bool hasError = false;
+    private string errorMessage = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
-        var allRuns = await ReportingService.GetReportRunsAsync();
-        var runStats = allRuns
-            .GroupBy(r => r.ReportID)
-            .ToDictionary(
-                g => g.Key,
-                g => new { Count = g.Count(), LastUser = g.OrderByDescending(r => r.RunDate).First().RunBy }
-            );
-
+        // Initialize report list first (always works)
         reportList = new List<ReportInfo>
         {
             new ReportInfo(10, "R010", "Quarter Results Flat File", "Master report with RunType (ITD/MVT)", "/FDWH/R010_QtrResultsFlatFile"),
@@ -88,13 +91,36 @@
             new ReportInfo(90, "R090", "RI UW Journal", "Reinsurance Underwriting Journal", "/FDWH/R090_RI_UWJournal")
         };
 
-        foreach (var report in reportList)
+        // Try to load run statistics, but don't fail if it errors
+        try
         {
-            if (runStats.TryGetValue(report.ReportID, out var stats))
+            var allRuns = await ReportingService.GetReportRunsAsync();
+
+            if (allRuns != null && allRuns.Count > 0)
             {
-                report.RunCount = stats.Count;
-                report.LastRunBy = stats.LastUser;
+                var runStats = allRuns
+                    .GroupBy(r => r.ReportID)
+                    .ToDictionary(
+                        g => g.Key,
+                        g => new { Count = g.Count(), LastUser = g.OrderByDescending(r => r.RunDate).FirstOrDefault()?.RunBy ?? "Unknown" }
+                    );
+
+                foreach (var report in reportList)
+                {
+                    if (runStats.TryGetValue(report.ReportID, out var stats))
+                    {
+                        report.RunCount = stats.Count;
+                        report.LastRunBy = stats.LastUser;
+                    }
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            // Log the error but don't crash - statistics are nice to have but not critical
+            hasError = true;
+            errorMessage = $"Unable to load run statistics: {ex.Message}";
+            // Reports will still be accessible, just without statistics
         }
     }
 
