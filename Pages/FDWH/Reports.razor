@@ -2,28 +2,176 @@
 @inject Sandbox.Services.FDWHReportingService ReportingService
 @using Sandbox.Models.FDWH
 
-<h3>FDWH Reports</h3>
+<h3 class="mb-4">FDWH Reports</h3>
 
-@if (reports == null)
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Available Reports</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <!-- R010 Series -->
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 border">
+                            <div class="card-body">
+                                <h6 class="card-title">R010 - Quarter Results Flat File</h6>
+                                <p class="card-text small">Master report with RunType (ITD/MVT)</p>
+                                <a href="/FDWH/R010_QtrResultsFlatFile" class="btn btn-sm btn-primary">View Report</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 border">
+                            <div class="card-body">
+                                <h6 class="card-title">R011 - Quarter Results ITD</h6>
+                                <p class="card-text small">Quarter Results Flat File - Inception to Date</p>
+                                <a href="/FDWH/R011_QtrResultsFlatFileITD" class="btn btn-sm btn-primary">View Report</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 border">
+                            <div class="card-body">
+                                <h6 class="card-title">R012 - Quarter Results Movement</h6>
+                                <p class="card-text small">Quarter Results Flat File - Movement</p>
+                                <a href="/FDWH/R012_QtrResultsFlatFileMvt" class="btn btn-sm btn-primary">View Report</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- R020 Series -->
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 border">
+                            <div class="card-body">
+                                <h6 class="card-title">R020 - Gross UW Figures Detail</h6>
+                                <p class="card-text small">Master report with RunType (ITD/MVT)</p>
+                                <a href="/FDWH/R020_GrossUWFiguresDetail" class="btn btn-sm btn-primary">View Report</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 border">
+                            <div class="card-body">
+                                <h6 class="card-title">R021 - Gross UW Figures ITD</h6>
+                                <p class="card-text small">Gross UW Figures Detail - Inception to Date</p>
+                                <a href="/FDWH/R021_GrossUWFiguresDetailITD" class="btn btn-sm btn-primary">View Report</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 border">
+                            <div class="card-body">
+                                <h6 class="card-title">R022 - Gross UW Figures Movement</h6>
+                                <p class="card-text small">Gross UW Figures Detail - Movement</p>
+                                <a href="/FDWH/R022_GrossUWFiguresDetailMvt" class="btn btn-sm btn-primary">View Report</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Journal Reports -->
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 border">
+                            <div class="card-body">
+                                <h6 class="card-title">R030 - Gross IBNR Journal</h6>
+                                <p class="card-text small">Gross IBNR Journal entries</p>
+                                <a href="/FDWH/R030_GrossIBNRJournal" class="btn btn-sm btn-primary">View Report</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 border">
+                            <div class="card-body">
+                                <h6 class="card-title">R040 - Gross ULAE Journal</h6>
+                                <p class="card-text small">Gross ULAE Journal entries</p>
+                                <a href="/FDWH/R040_GrossULAEJournal" class="btn btn-sm btn-primary">View Report</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 border">
+                            <div class="card-body">
+                                <h6 class="card-title">R050 - Future Premium Journal</h6>
+                                <p class="card-text small">Future Premium Journal entries</p>
+                                <a href="/FDWH/R050_FuturePremiumJournal" class="btn btn-sm btn-primary">View Report</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 border">
+                            <div class="card-body">
+                                <h6 class="card-title">R060 - Future Premium Summary</h6>
+                                <p class="card-text small">Summary of Future Premium</p>
+                                <a href="/FDWH/R060_FuturePremiumSummary" class="btn btn-sm btn-primary">View Report</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 border">
+                            <div class="card-body">
+                                <h6 class="card-title">R070 - RIPs Journal</h6>
+                                <p class="card-text small">RIPs Journal entries</p>
+                                <a href="/FDWH/R070_RIPsJournal" class="btn btn-sm btn-primary">View Report</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 border">
+                            <div class="card-body">
+                                <h6 class="card-title">R071 - RIPs Journal Movement</h6>
+                                <p class="card-text small">RIPs Journal - Movement</p>
+                                <a href="/FDWH/R071_RIPsJournalMvt" class="btn btn-sm btn-primary">View Report</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 border">
+                            <div class="card-body">
+                                <h6 class="card-title">R080 - Gross UW Journal</h6>
+                                <p class="card-text small">Gross Underwriting Journal entries</p>
+                                <a href="/FDWH/R080_GrossUWJournal" class="btn btn-sm btn-primary">View Report</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 border">
+                            <div class="card-body">
+                                <h6 class="card-title">R090 - RI UW Journal</h6>
+                                <p class="card-text small">Reinsurance Underwriting Journal</p>
+                                <a href="/FDWH/R090_RI_UWJournal" class="btn btn-sm btn-primary">View Report</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (reports != null && reports.Count > 0)
 {
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <table class="table table-bordered table-sm">
-        <thead><tr><th>Name</th><th>Description</th><th>Version</th><th></th></tr></thead>
-        <tbody>
-            @foreach (var r in reports)
-            {
-                <tr>
-                    <td>@r.ReportName</td>
-                    <td>@r.Description</td>
-                    <td>@r.VersionNumber</td>
-                    <td><a href="/FDWH/Report/@r.ReportID">View</a></td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">Database Reports (Legacy)</h5>
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered table-sm">
+                <thead><tr><th>Name</th><th>Description</th><th>Version</th><th></th></tr></thead>
+                <tbody>
+                    @foreach (var r in reports)
+                    {
+                        <tr>
+                            <td>@r.ReportName</td>
+                            <td>@r.Description</td>
+                            <td>@r.VersionNumber</td>
+                            <td><a href="/FDWH/Report/@r.ReportID">View</a></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
 }
 
 @code {

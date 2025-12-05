@@ -1,0 +1,158 @@
+@page "/FDWH/R070_RIPsJournal"
+@inject Sandbox.Services.FDWHReportingService ReportingService
+@inject IJSRuntime JS
+@inject Helpers.SandboxContext SandboxContext
+@using System.Text.Json
+@using Sandbox.Models.FDWH
+
+<h3 class="mb-3">R070 - RIPs Journal</h3>
+
+<div class="card mb-4 shadow-sm border-0">
+    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+        <span class="fw-semibold">Report Information</span>
+        <button class="btn btn-sm btn-outline-secondary" @onclick="ToggleInfo">
+            @(showInfo ? "Hide" : "Show")
+        </button>
+    </div>
+    @if (showInfo)
+    {
+        <div class="card-body">
+            <p><strong>Description:</strong> RIPs (Reinsurance to Close Premiums) Journal entries.</p>
+            <p><strong>Parameters:</strong></p>
+            <ul>
+                <li><strong>ProcessingMonth</strong> - Processing month (YYYYMM format)</li>
+            </ul>
+        </div>
+    }
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-primary text-white">Run Report</div>
+    <div class="card-body">
+        <EditForm Model="@paramModel" OnValidSubmit="RunReport">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Processing Month (YYYYMM)</label>
+                    <InputNumber @bind-Value="paramModel.ProcessingMonth" class="form-control" />
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-success" disabled="@isRunning">
+                        @if (isRunning)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2"></span>
+                            <span>Running...</span>
+                        }
+                        else
+                        {
+                            <span>Run and Download</span>
+                        }
+                    </button>
+                </div>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@if (runs?.Count > 0)
+{
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-light fw-semibold">Previous Runs</div>
+        <div class="card-body p-0">
+            <table class="table table-sm table-hover mb-0 align-middle">
+                <thead class="table-secondary">
+                    <tr>
+                        <th>Date (UTC)</th>
+                        <th>Run By</th>
+                        <th>Rows</th>
+                        <th>Parameters</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var r in runs)
+                    {
+                        <tr>
+                            <td>@r.RunDate.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td>@r.RunBy</td>
+                            <td>@r.RowCount</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-dark"
+                                        @onclick="() => ToggleParams(r.RunID)">
+                                    @(expandedParams.Contains(r.RunID) ? "Hide" : "Show")
+                                </button>
+                            </td>
+                        </tr>
+                        @if (expandedParams.Contains(r.RunID))
+                        {
+                            <tr class="bg-light">
+                                <td colspan="4" style="white-space: pre-wrap;">
+                                    <code>@r.ParametersJSON</code>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@code {
+    private const int REPORT_ID = 70;
+    private bool showInfo = true;
+    private bool isRunning = false;
+    private HashSet<int> expandedParams = new();
+    private ReportParams paramModel = new() { ProcessingMonth = 202509 };
+    private List<FDWHReportRun> runs = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        runs = (await ReportingService.GetReportRunsAsync())
+            .Where(r => r.ReportID == REPORT_ID)
+            .OrderByDescending(r => r.RunDate)
+            .ToList();
+    }
+
+    private async Task RunReport()
+    {
+        isRunning = true;
+        try
+        {
+            var parameters = new Dictionary<string, object> {
+                { "@ProcessingMonth", paramModel.ProcessingMonth }
+            };
+
+            var bytes = await ReportingService.RunReportAndExportAsync(
+                REPORT_ID,
+                "reporting.r070_RIPsJournal",
+                parameters,
+                SandboxContext.EffectiveUserName ?? "unknown",
+                1);
+
+            var fileName = $"R070_RIPsJournal_{paramModel.ProcessingMonth}_{DateTime.UtcNow:yyyyMMddHHmmss}.xlsx";
+            using var streamRef = new DotNetStreamReference(new MemoryStream(bytes));
+            await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
+
+            runs = (await ReportingService.GetReportRunsAsync())
+                .Where(r => r.ReportID == REPORT_ID)
+                .OrderByDescending(r => r.RunDate)
+                .ToList();
+        }
+        finally
+        {
+            isRunning = false;
+        }
+    }
+
+    private void ToggleInfo() => showInfo = !showInfo;
+
+    private void ToggleParams(int runId)
+    {
+        if (!expandedParams.Add(runId))
+            expandedParams.Remove(runId);
+    }
+
+    public class ReportParams
+    {
+        public int ProcessingMonth { get; set; }
+    }
+}
