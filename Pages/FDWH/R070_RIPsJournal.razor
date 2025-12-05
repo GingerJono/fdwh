@@ -188,6 +188,13 @@
             expandedParams.Remove(runId);
     }
 
+    private void CloseErrorModal()
+    {
+        showErrorModal = false;
+        errorMessage = string.Empty;
+        errorStackTrace = string.Empty;
+    }
+
     public class ReportParams
     {
         public int ProcessingMonth { get; set; }
