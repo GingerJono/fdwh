@@ -33,7 +33,12 @@
             <div class="row g-3">
                 <div class="col-md-6">
                     <label class="form-label">Processing Month (YYYYMM)</label>
-                    <InputNumber @bind-Value="paramModel.ProcessingMonth" class="form-control" />
+                    <InputSelect @bind-Value="paramModel.ProcessingMonth" class="form-select">
+                        @foreach (var month in availableMonths)
+                        {
+                            <option value="@month">@month</option>
+                        }
+                    </InputSelect>
                 </div>
                 <div class="col-12">
                     <button type="submit" class="btn btn-success" disabled="@isRunning">
@@ -134,9 +139,20 @@
     private HashSet<int> expandedParams = new();
     private ReportParams paramModel = new() { ProcessingMonth = 202509 };
     private List<FDWHReportRun> runs = new();
+    private List<int> availableMonths = new();
 
     protected override async Task OnInitializedAsync()
     {
+        availableMonths = await ReportingService.GetAvailableProcessingMonthsAsync();
+
+        // Set defaults to the most recent month if available, otherwise keep existing default
+        if (availableMonths.Count > 0)
+        {
+            if (!availableMonths.Contains(paramModel.ProcessingMonth))
+                paramModel.ProcessingMonth = availableMonths[0];
+        }
+
+
         runs = (await ReportingService.GetReportRunsAsync())
             .Where(r => r.ReportID == REPORT_ID)
             .OrderByDescending(r => r.RunDate)

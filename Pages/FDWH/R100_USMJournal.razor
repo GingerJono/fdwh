@@ -1,11 +1,11 @@
-@page "/FDWH/R050_FuturePremiumJournal"
+@page "/FDWH/R100_USMJournal"
 @inject Sandbox.Services.FDWHReportingService ReportingService
 @inject IJSRuntime JS
 @inject Helpers.SandboxContext SandboxContext
 @using System.Text.Json
 @using Sandbox.Models.FDWH
 
-<h3 class="mb-3">R050 - Future Premium Journal</h3>
+<h3 class="mb-3">R100 - USM Journal</h3>
 
 <div class="card mb-4 shadow-sm border-0">
     <div class="card-header bg-light d-flex justify-content-between align-items-center">
@@ -17,7 +17,7 @@
     @if (showInfo)
     {
         <div class="card-body">
-            <p><strong>Description:</strong> Future Premium Journal entries.</p>
+            <p><strong>Description:</strong> USM (Unique Signing Message) Journal entries for inward and outward premiums and claims.</p>
             <p><strong>Parameters:</strong></p>
             <ul>
                 <li><strong>ProcessingMonth</strong> - Current processing month (YYYYMM format)</li>
@@ -140,7 +140,7 @@
 }
 
 @code {
-    private const int REPORT_ID = 50;
+    private const int REPORT_ID = 100;
     private bool showInfo = true;
     private bool isRunning = false;
     private bool showErrorModal = false;
@@ -155,16 +155,16 @@
     {
         availableMonths = await ReportingService.GetAvailableProcessingMonthsAsync();
 
-        // Set defaults to the most recent months if available, otherwise keep existing defaults
+        // Set defaults to the most recent months if available
         if (availableMonths.Count > 0)
         {
-            if (!availableMonths.Contains(paramModel.ProcessingMonth))
-                paramModel.ProcessingMonth = availableMonths[0];
-            if (availableMonths.Count > 1 && !availableMonths.Contains(paramModel.FromMonth))
+            paramModel.ProcessingMonth = availableMonths[0];
+            if (availableMonths.Count > 1)
+            {
                 paramModel.FromMonth = availableMonths[1];
+            }
         }
 
-        
         runs = (await ReportingService.GetReportRunsAsync())
             .Where(r => r.ReportID == REPORT_ID)
             .OrderByDescending(r => r.RunDate)
@@ -183,12 +183,12 @@
 
             var bytes = await ReportingService.RunReportAndExportAsync(
                 REPORT_ID,
-                "reporting.r050_FuturePremiumJournal",
+                "reporting.r100_USMJournal",
                 parameters,
                 SandboxContext.EffectiveUserName ?? "unknown",
                 1);
 
-            var fileName = $"R050_FuturePremiumJournal_{paramModel.ProcessingMonth}_{DateTime.UtcNow:yyyyMMddHHmmss}.xlsx";
+            var fileName = $"R100_USMJournal_{paramModel.ProcessingMonth}_{DateTime.UtcNow:yyyyMMddHHmmss}.xlsx";
             using var streamRef = new DotNetStreamReference(new MemoryStream(bytes));
             await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
 

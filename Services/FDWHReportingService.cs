@@ -143,5 +143,23 @@ namespace Sandbox.Services
 			return reports;
 		}
 
+		public async Task<List<int>> GetAvailableProcessingMonthsAsync()
+		{
+			var months = new List<int>();
+			using var conn = new SqlConnection(GetFDWHConnection());
+			using var cmd = new SqlCommand(@"
+				SELECT DISTINCT ProcessingMonth
+				FROM dbo.tbRuns
+				WHERE ProcessingMonth IS NOT NULL", conn);
+
+			await conn.OpenAsync();
+			using var reader = await cmd.ExecuteReaderAsync();
+			while (await reader.ReadAsync())
+			{
+				months.Add(reader.GetInt32(0));
+			}
+			return months;
+		}
+
 	}
 }
