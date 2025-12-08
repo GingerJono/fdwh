@@ -160,8 +160,8 @@
         {
             if (!availableMonths.Contains(paramModel.ProcessingMonth))
                 paramModel.ProcessingMonth = availableMonths[0];
-            if (availableMonths.Count > 1 && !availableMonths.Contains(paramModel.FromMonth))
-                paramModel.FromMonth = availableMonths[1];
+            if (availableMonths.Count > 0 && !availableMonths.Contains(paramModel.FromMonth))
+                paramModel.FromMonth = availableMonths[0];
         }
 
         
