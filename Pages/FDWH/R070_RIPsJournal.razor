@@ -145,16 +145,14 @@
     {
         availableMonths = await ReportingService.GetAvailableProcessingMonthsAsync();
 
-        // Set defaults to the most recent months if available, otherwise keep existing defaults
+        // Set defaults to the most recent month if available, otherwise keep existing default
         if (availableMonths.Count > 0)
         {
             if (!availableMonths.Contains(paramModel.ProcessingMonth))
                 paramModel.ProcessingMonth = availableMonths[0];
-            if (availableMonths.Count > 1 && !availableMonths.Contains(paramModel.FromMonth))
-                paramModel.FromMonth = availableMonths[1];
         }
 
-        
+
         runs = (await ReportingService.GetReportRunsAsync())
             .Where(r => r.ReportID == REPORT_ID)
             .OrderByDescending(r => r.RunDate)
