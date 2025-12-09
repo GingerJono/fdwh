@@ -21,17 +21,7 @@ else if (EventDetails != null)
             <li class="breadcrumb-item"><a href="ViewEventMetadata/@EventDetails.EventCode">VIEW EVENT</a></li>
             <li class="breadcrumb-item active" aria-current="page">EDIT EVENT: @EventDetails.EventCode</li>
         </ol>
-    </nav>
-
-    <!-- Informational Note -->
-    <div class="alert alert-info">
-        <h5><i class="ri-information-line"></i> About This Page</h5>
-        <p>
-            This page allows you to filter the list of potential ORI Policies that can be used to recover from this event.
-            The <strong>Peril</strong> and <strong>Peril Region</strong> fields are key filters that help refine applicable policies.
-            You can select a predefined value or leave them blank.
-        </p>
-    </div>
+    </nav>   
 
     <div class="card shadow mb-4 border">
         <div class="card-header">Edit Event Metadata</div>
@@ -43,11 +33,15 @@ else if (EventDetails != null)
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Event Start Date </label>
-                    <input type="text" class="form-control" value="@EventDetails.EventStartDate" disabled>
+                    <input type="text" class="form-control" value="@(EventDetails.EventStartDate?.ToString("dd/MM/yyyy"))" disabled>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Event Start Date Override</label>
-                    <InputText class="form-control" @bind-Value="EventDetails.EventStartDateOverride" />
+                    <InputDate class="form-control" @bind-Value="EventDetails.EventStartDateOverride" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Claim Made Date Override</label>
+                    <InputDate class="form-control" @bind-Value="EventDetails.ClaimMadeDateOverride" />
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Peril</label>

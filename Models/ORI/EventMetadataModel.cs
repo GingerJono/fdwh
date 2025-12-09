@@ -8,8 +8,10 @@ namespace Sandbox.Models.ORI
         public string? EventDescription { get; set; }
         public string Peril { get; set; }
 		public string PerilRegion { get; set; }
-		public string EventStartDate { get; set; }
-        public string EventStartDateOverride { get; set; }
+		public DateTime? EventStartDate { get; set; }
+        public DateTime? EventStartDateOverride { get; set; }
+		public DateTime? ClaimMadeDateOverride { get; set; }
+
         public int NumberOfClaims { get; set; }
         public double IncurredUSDQtr { get; set; }
         public string Notes { get; set; }

@@ -894,11 +894,6 @@ namespace Sandbox.Services
             using var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
             await connection.OpenAsync();
 
-            if (string.IsNullOrEmpty(model.EventStartDateOverride))
-            {
-                model.EventStartDateOverride = null;
-            }
-
             var parameters = new DynamicParameters();
             parameters.Add("@EventCode", model.EventCode, DbType.String);
             parameters.Add("@Peril", model.Peril, DbType.String);
@@ -906,6 +901,7 @@ namespace Sandbox.Services
             parameters.Add("@Notes", model.Notes, DbType.String);
             parameters.Add("@LastUpdatedBy", model.LastUpdatedBy, DbType.String);
             parameters.Add("@EventStartDateOverride", model.EventStartDateOverride, DbType.DateTime);
+            parameters.Add("@ClaimMadeDateOverride", model.ClaimMadeDateOverride, DbType.DateTime);
 
             await connection.ExecuteAsync(
                 "ORI.spUpsertEventMetadata",

@@ -45,8 +45,9 @@ else if (EventDetails != null)
 							<tr><th>Event Code</th><td>@EventDetails.EventCode</td></tr>
 							<tr><th>Peril</th><td>@EventDetails.Peril</td></tr>
 							<tr><th>Region</th><td>@EventDetails.PerilRegion</td></tr>
-							<tr><th>Event Start Date</th><td>@EventDetails.EventStartDate</td></tr>
-							<tr><th>Event Start Date Override</th><td>@EventDetails.EventStartDateOverride</td></tr>
+							<tr><th>Event Start Date</th><td>@(EventDetails.EventStartDate?.ToString("dd/MM/yyyy") ?? "")</td></tr>
+							<tr><th>Event Start Date Override</th><td>@(EventDetails.EventStartDateOverride?.ToString("dd/MM/yyyy") ?? "")</td></tr>
+							<tr><th>Claim Made Date Override</th><td>@(EventDetails.ClaimMadeDateOverride?.ToString("dd/MM/yyyy") ?? "")</td></tr>
 							<tr><th>Notes</th><td>@EventDetails.Notes</td></tr>
 							<tr><th>Last Updated</th><td>@EventDetails.LastUpdated.ToString("yyyy-MM-dd HH:mm")</td></tr>
 							<tr><th>Updated By</th><td>@EventDetails.LastUpdatedBy</td></tr>
