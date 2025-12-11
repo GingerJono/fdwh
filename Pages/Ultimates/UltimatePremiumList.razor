@@ -1,0 +1,139 @@
+@page "/Ultimates/Premium"
+@using sandboxapp.Models.Ultimates
+@using sandboxapp.Services
+@inject UltimatesService UltimatesService
+@inject NavigationManager NavigationManager
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/Ultimates/Premium">ULTIMATES</a></li>
+        <li class="breadcrumb-item active" aria-current="page">PREMIUM</li>
+    </ol>
+</nav>
+
+<div class="row mb-3">
+    <div class="col">
+        <h1>Ultimate Premium Tracking</h1>
+        <p class="text-muted">View and edit underwriter selections of Ultimate Premium by Class and YOA</p>
+    </div>
+</div>
+
+@if (isLoading)
+{
+    <div class="text-center p-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2">Loading Ultimate Premium data...</p>
+    </div>
+}
+else if (summaryList != null && summaryList.Any())
+{
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Class / YOA Summary</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Class</th>
+                            <th>YOA</th>
+                            <th class="text-end">Records</th>
+                            <th class="text-end">Total Gross Premium</th>
+                            <th class="text-end">Total Net Premium</th>
+                            <th class="text-end">Total RIPs</th>
+                            <th class="text-end">Total PC</th>
+                            <th>Last Updated</th>
+                            <th>Updated By</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var summary in summaryList)
+                        {
+                            <tr>
+                                <td><strong>@summary.Class</strong></td>
+                                <td>@summary.YOA</td>
+                                <td class="text-end">@summary.RecordCount</td>
+                                <td class="text-end">@FormatCurrency(summary.TotalUltimateGrossPremium)</td>
+                                <td class="text-end">@FormatCurrency(summary.TotalUltimateNetPremium)</td>
+                                <td class="text-end">@FormatCurrency(summary.TotalUltimateRIPs)</td>
+                                <td class="text-end">@FormatCurrency(summary.TotalUltimatePC)</td>
+                                <td>@FormatDate(summary.LastUpdatedDate)</td>
+                                <td>@summary.LastUpdatedBy</td>
+                                <td class="text-center">
+                                    <a href="/Ultimates/Premium/Edit/@summary.Class/@summary.YOA"
+                                       class="btn btn-sm btn-primary">
+                                        <i class="bi bi-pencil"></i> Edit
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr class="table-secondary fw-bold">
+                            <td colspan="2">TOTAL</td>
+                            <td class="text-end">@summaryList.Sum(s => s.RecordCount)</td>
+                            <td class="text-end">@FormatCurrency(summaryList.Sum(s => s.TotalUltimateGrossPremium))</td>
+                            <td class="text-end">@FormatCurrency(summaryList.Sum(s => s.TotalUltimateNetPremium))</td>
+                            <td class="text-end">@FormatCurrency(summaryList.Sum(s => s.TotalUltimateRIPs))</td>
+                            <td class="text-end">@FormatCurrency(summaryList.Sum(s => s.TotalUltimatePC))</td>
+                            <td colspan="3"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-info">
+        <h5>No Ultimate Premium Data Found</h5>
+        <p>No Ultimate Premium data has been entered yet. Use the database scripts to populate initial data.</p>
+    </div>
+}
+
+@code {
+    private List<UltimatePremiumSummaryModel>? summaryList;
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        isLoading = true;
+        try
+        {
+            var data = await UltimatesService.GetUltimatePremiumList();
+            summaryList = data.ToList();
+        }
+        catch (Exception ex)
+        {
+            // Log error - in production, show error message to user
+            Console.WriteLine($"Error loading Ultimate Premium list: {ex.Message}");
+            summaryList = new List<UltimatePremiumSummaryModel>();
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private string FormatCurrency(decimal? value)
+    {
+        if (!value.HasValue) return "-";
+        return value.Value.ToString("N0");
+    }
+
+    private string FormatDate(DateTime? date)
+    {
+        if (!date.HasValue) return "-";
+        return date.Value.ToString("dd MMM yyyy");
+    }
+}

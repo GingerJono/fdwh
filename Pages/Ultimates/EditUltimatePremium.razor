@@ -1,0 +1,414 @@
+@page "/Ultimates/Premium/Edit/{Class}/{YOA:int}"
+@using sandboxapp.Models.Ultimates
+@using sandboxapp.Services
+@inject UltimatesService UltimatesService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/Ultimates/Premium">ULTIMATES</a></li>
+        <li class="breadcrumb-item"><a href="/Ultimates/Premium">PREMIUM</a></li>
+        <li class="breadcrumb-item active" aria-current="page">EDIT @Class / @YOA</li>
+    </ol>
+</nav>
+
+@if (isLoading)
+{
+    <div class="text-center p-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2">Loading Ultimate Premium data...</p>
+    </div>
+}
+else if (model != null)
+{
+    <div class="row mb-3">
+        <div class="col">
+            <h1>Edit Ultimate Premium: @Class / @YOA</h1>
+            @if (model.LastUpdatedDate.HasValue)
+            {
+                <p class="text-muted">
+                    Last updated: @model.LastUpdatedDate.Value.ToString("dd MMM yyyy HH:mm")
+                    by @model.LastUpdatedBy
+                </p>
+            }
+        </div>
+    </div>
+
+    <EditForm Model="model" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <!-- Summary Card -->
+        <div class="card mb-4 border-primary">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Summary Totals</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="text-center p-3 bg-light rounded">
+                            <small class="text-muted">Total Gross Premium</small>
+                            <h4 class="mb-0">@FormatCurrency(model.TotalUltimateGrossPremium)</h4>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center p-3 bg-light rounded">
+                            <small class="text-muted">Total Net Premium</small>
+                            <h4 class="mb-0">@FormatCurrency(model.TotalUltimateNetPremium)</h4>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center p-3 bg-light rounded">
+                            <small class="text-muted">Total RIPs</small>
+                            <h4 class="mb-0">@FormatCurrency(model.TotalUltimateRIPs)</h4>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center p-3 bg-light rounded">
+                            <small class="text-muted">Total PC</small>
+                            <h4 class="mb-0">@FormatCurrency(model.TotalUltimatePC)</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Editable Grid -->
+        <div class="card mb-4">
+            <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Ultimate Premium Details</h5>
+                <button type="button" class="btn btn-sm btn-light" @onclick="AddNewRecord">
+                    <i class="bi bi-plus-circle"></i> Add Row
+                </button>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover mb-0">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th>Reserving Class</th>
+                                <th>Distribution Channel</th>
+                                <th>Currency</th>
+                                <th class="text-end">Ultimate Gross Premium</th>
+                                <th class="text-end">Ultimate Net Premium</th>
+                                <th class="text-end">Ultimate RIPs</th>
+                                <th class="text-end">Ultimate PC</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var record in model.Records)
+                            {
+                                <tr class="@(record.IsNew ? "table-success" : record.IsModified ? "table-warning" : "")">
+                                    <td>
+                                        @if (record.IsNew)
+                                        {
+                                            <InputText class="form-control form-control-sm"
+                                                       @bind-Value="record.ReservingClass"
+                                                       @oninput="() => MarkAsModified(record)" />
+                                        }
+                                        else
+                                        {
+                                            <span>@record.ReservingClass</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (record.IsNew)
+                                        {
+                                            <InputSelect class="form-select form-select-sm"
+                                                         @bind-Value="record.DistributionChannel"
+                                                         @oninput="() => MarkAsModified(record)">
+                                                <option value="">Select...</option>
+                                                <option value="EU">EU</option>
+                                                <option value="LNDN">LNDN</option>
+                                            </InputSelect>
+                                        }
+                                        else
+                                        {
+                                            <span>@record.DistributionChannel</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (record.IsNew)
+                                        {
+                                            <InputText class="form-control form-control-sm"
+                                                       @bind-Value="record.Currency"
+                                                       @oninput="() => MarkAsModified(record)" />
+                                        }
+                                        else
+                                        {
+                                            <span>@record.Currency</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <InputNumber class="form-control form-control-sm text-end"
+                                                     @bind-Value="record.UltimateGrossPremium"
+                                                     @oninput="() => MarkAsModified(record)" />
+                                    </td>
+                                    <td>
+                                        <InputNumber class="form-control form-control-sm text-end"
+                                                     @bind-Value="record.UltimateNetPremium"
+                                                     @oninput="() => MarkAsModified(record)" />
+                                    </td>
+                                    <td>
+                                        <InputNumber class="form-control form-control-sm text-end"
+                                                     @bind-Value="record.UltimateRIPs"
+                                                     @oninput="() => MarkAsModified(record)" />
+                                    </td>
+                                    <td>
+                                        <InputNumber class="form-control form-control-sm text-end"
+                                                     @bind-Value="record.UltimatePC"
+                                                     @oninput="() => MarkAsModified(record)" />
+                                    </td>
+                                    <td class="text-center">
+                                        @if (record.IsNew)
+                                        {
+                                            <button type="button" class="btn btn-danger btn-sm"
+                                                    @onclick="() => RemoveNewRecord(record)">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                            @if (model.Records.Count == 0)
+                            {
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted py-4">
+                                        No records found. Click "Add Row" to create the first record.
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="row mb-4">
+            <div class="col">
+                <button type="submit" class="btn btn-success btn-lg">
+                    <i class="bi bi-save"></i> Save Changes
+                </button>
+                <button type="button" class="btn btn-secondary btn-lg ms-2" @onclick="NavigateBack">
+                    <i class="bi bi-x-circle"></i> Cancel
+                </button>
+                @if (saveMessage != null)
+                {
+                    <span class="ms-3 text-success fw-bold">@saveMessage</span>
+                }
+                @if (errorMessage != null)
+                {
+                    <span class="ms-3 text-danger fw-bold">@errorMessage</span>
+                }
+            </div>
+        </div>
+    </EditForm>
+
+    <!-- History Section -->
+    <div class="card mb-4">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">Update History</h5>
+        </div>
+        <div class="card-body">
+            @if (historyLoading)
+            {
+                <p class="text-muted">Loading history...</p>
+            }
+            else if (historyList != null && historyList.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Update ID</th>
+                                <th>Update Date</th>
+                                <th>Updated By</th>
+                                <th class="text-end">Records</th>
+                                <th class="text-end">Total Gross Premium</th>
+                                <th class="text-end">Total Net Premium</th>
+                                <th class="text-end">Total RIPs</th>
+                                <th class="text-end">Total PC</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var history in historyList)
+                            {
+                                <tr>
+                                    <td><strong>#@history.UpdateID</strong></td>
+                                    <td>@FormatDate(history.UpdateDate)</td>
+                                    <td>@history.UpdatedBy</td>
+                                    <td class="text-end">@history.RecordCount</td>
+                                    <td class="text-end">@FormatCurrency(history.TotalUltimateGrossPremium)</td>
+                                    <td class="text-end">@FormatCurrency(history.TotalUltimateNetPremium)</td>
+                                    <td class="text-end">@FormatCurrency(history.TotalUltimateRIPs)</td>
+                                    <td class="text-end">@FormatCurrency(history.TotalUltimatePC)</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <p class="text-muted">No history available yet.</p>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string Class { get; set; } = string.Empty;
+
+    [Parameter]
+    public int YOA { get; set; }
+
+    private UltimatePremiumEditModel? model;
+    private List<UltimatePremiumHistoryModel>? historyList;
+    private bool isLoading = true;
+    private bool historyLoading = true;
+    private string? saveMessage;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+        await LoadHistory();
+    }
+
+    private async Task LoadData()
+    {
+        isLoading = true;
+        try
+        {
+            model = await UltimatesService.GetUltimatePremiumByClassYOA(Class, YOA);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error loading data: {ex.Message}";
+            model = new UltimatePremiumEditModel { Class = Class, YOA = YOA };
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task LoadHistory()
+    {
+        historyLoading = true;
+        try
+        {
+            var history = await UltimatesService.GetUltimatePremiumHistory(Class, YOA);
+            historyList = history.ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading history: {ex.Message}");
+            historyList = new List<UltimatePremiumHistoryModel>();
+        }
+        finally
+        {
+            historyLoading = false;
+        }
+    }
+
+    private void AddNewRecord()
+    {
+        var newRecord = new UltimatePremiumRecordModel
+            {
+                Class = Class,
+                YOA = YOA,
+                ReservingClass = string.Empty,
+                DistributionChannel = string.Empty,
+                Currency = string.Empty,
+                IsNew = true,
+                IsModified = true
+            };
+
+        model?.Records.Add(newRecord);
+    }
+
+    private void RemoveNewRecord(UltimatePremiumRecordModel record)
+    {
+        if (record.IsNew)
+        {
+            model?.Records.Remove(record);
+        }
+    }
+
+    private void MarkAsModified(UltimatePremiumRecordModel record)
+    {
+        record.IsModified = true;
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        saveMessage = null;
+        errorMessage = null;
+
+        try
+        {
+            // Validate that all new records have required fields
+            var invalidRecords = model?.Records.Where(r =>
+                r.IsNew && (string.IsNullOrWhiteSpace(r.ReservingClass) ||
+                           string.IsNullOrWhiteSpace(r.DistributionChannel) ||
+                           string.IsNullOrWhiteSpace(r.Currency))).ToList();
+
+            if (invalidRecords?.Any() == true)
+            {
+                errorMessage = "Please fill in all required fields for new records (Reserving Class, Distribution Channel, Currency).";
+                return;
+            }
+
+            // Validate Distribution Channel
+            var invalidChannels = model?.Records.Where(r =>
+                !string.IsNullOrEmpty(r.DistributionChannel) &&
+                r.DistributionChannel != "EU" &&
+                r.DistributionChannel != "LNDN").ToList();
+
+            if (invalidChannels?.Any() == true)
+            {
+                errorMessage = "Distribution Channel must be either 'EU' or 'LNDN'.";
+                return;
+            }
+
+            if (model != null)
+            {
+                await UltimatesService.SaveUltimatePremium(model);
+                saveMessage = "Changes saved successfully!";
+
+                // Reload data to get updated values
+                await Task.Delay(1000); // Brief delay to show save message
+                await LoadData();
+                await LoadHistory();
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error saving changes: {ex.Message}";
+        }
+    }
+
+    private void NavigateBack()
+    {
+        NavigationManager.NavigateTo("/Ultimates/Premium");
+    }
+
+    private string FormatCurrency(decimal? value)
+    {
+        if (!value.HasValue) return "-";
+        return value.Value.ToString("N0");
+    }
+
+    private string FormatDate(DateTime? date)
+    {
+        if (!date.HasValue) return "-";
+        return date.Value.ToString("dd MMM yyyy HH:mm");
+    }
+}
