@@ -34,23 +34,23 @@ else if (gridRows != null)
     <!-- Tabs -->
     <ul class="nav nav-tabs mb-3" role="tablist">
         <li class="nav-item">
-            <button class="nav-link @(activeTab == "GrossPremium" ? "active" : "")" type="button" @onclick='() => activeTab = "GrossPremium"'>
-                Gross Premium @GetTabBadge("GrossPremium")
+            <button class="nav-link @(activeTab == "GrossPremium" ? "active" : "")" type="button" @onclick="@(() => SwitchTab("GrossPremium"))">
+                Gross Premium @if (IsTabModified("GrossPremium")) { <span class="badge bg-warning ms-1">●</span> }
             </button>
         </li>
         <li class="nav-item">
-            <button class="nav-link @(activeTab == "NetPremium" ? "active" : "")" type="button" @onclick='() => activeTab = "NetPremium"'>
-                Net Premium @GetTabBadge("NetPremium")
+            <button class="nav-link @(activeTab == "NetPremium" ? "active" : "")" type="button" @onclick="@(() => SwitchTab("NetPremium"))">
+                Net Premium @if (IsTabModified("NetPremium")) { <span class="badge bg-warning ms-1">●</span> }
             </button>
         </li>
         <li class="nav-item">
-            <button class="nav-link @(activeTab == "RIPs" ? "active" : "")" type="button" @onclick='() => activeTab = "RIPs"'>
-                RIPs @GetTabBadge("RIPs")
+            <button class="nav-link @(activeTab == "RIPs" ? "active" : "")" type="button" @onclick="@(() => SwitchTab("RIPs"))">
+                RIPs @if (IsTabModified("RIPs")) { <span class="badge bg-warning ms-1">●</span> }
             </button>
         </li>
         <li class="nav-item">
-            <button class="nav-link @(activeTab == "PC" ? "active" : "")" type="button" @onclick='() => activeTab = "PC"'>
-                PC @GetTabBadge("PC")
+            <button class="nav-link @(activeTab == "PC" ? "active" : "")" type="button" @onclick="@(() => SwitchTab("PC"))">
+                PC @if (IsTabModified("PC")) { <span class="badge bg-warning ms-1">●</span> }
             </button>
         </li>
     </ul>
@@ -112,7 +112,9 @@ else if (gridRows != null)
                                     var cell = row.GetOrCreateCell(curr);
                                     <td>
                                         <div class="d-flex flex-column gap-1">
-                                            <select class="form-select form-select-sm" @bind="cell.ValueType" @bind:after="() => OnCellChanged(cell)">
+                                            <select class="form-select form-select-sm"
+                                                    value="@cell.ValueType"
+                                                    @onchange="@(e => OnValueTypeChanged(cell, e.Value?.ToString()))">
                                                 <option value="Written">Written</option>
                                                 <option value="Signed">Signed</option>
                                                 <option value="Plan">Plan</option>
@@ -120,19 +122,31 @@ else if (gridRows != null)
                                             </select>
                                             @if (activeTab == "GrossPremium")
                                             {
-                                                <input type="number" class="form-control form-control-sm text-end" @bind="cell.GrossPremium" @bind:after="() => OnCellChanged(cell)" disabled="@(cell.ValueType != "Value")" step="0.01" />
+                                                <input type="number" class="form-control form-control-sm text-end"
+                                                       value="@cell.GrossPremium"
+                                                       @onchange="@(e => OnValueChanged(cell, "GrossPremium", e.Value?.ToString()))"
+                                                       disabled="@(cell.ValueType != "Value")" step="0.01" />
                                             }
                                             else if (activeTab == "NetPremium")
                                             {
-                                                <input type="number" class="form-control form-control-sm text-end" @bind="cell.NetPremium" @bind:after="() => OnCellChanged(cell)" disabled="@(cell.ValueType != "Value")" step="0.01" />
+                                                <input type="number" class="form-control form-control-sm text-end"
+                                                       value="@cell.NetPremium"
+                                                       @onchange="@(e => OnValueChanged(cell, "NetPremium", e.Value?.ToString()))"
+                                                       disabled="@(cell.ValueType != "Value")" step="0.01" />
                                             }
                                             else if (activeTab == "RIPs")
                                             {
-                                                <input type="number" class="form-control form-control-sm text-end" @bind="cell.RIPs" @bind:after="() => OnCellChanged(cell)" disabled="@(cell.ValueType != "Value")" step="0.01" />
+                                                <input type="number" class="form-control form-control-sm text-end"
+                                                       value="@cell.RIPs"
+                                                       @onchange="@(e => OnValueChanged(cell, "RIPs", e.Value?.ToString()))"
+                                                       disabled="@(cell.ValueType != "Value")" step="0.01" />
                                             }
                                             else if (activeTab == "PC")
                                             {
-                                                <input type="number" class="form-control form-control-sm text-end" @bind="cell.PC" @bind:after="() => OnCellChanged(cell)" disabled="@(cell.ValueType != "Value")" step="0.01" />
+                                                <input type="number" class="form-control form-control-sm text-end"
+                                                       value="@cell.PC"
+                                                       @onchange="@(e => OnValueChanged(cell, "PC", e.Value?.ToString()))"
+                                                       disabled="@(cell.ValueType != "Value")" step="0.01" />
                                             }
                                         </div>
                                     </td>
@@ -140,7 +154,7 @@ else if (gridRows != null)
                                 <td class="text-center">
                                     @if (row.IsNew)
                                     {
-                                        <button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveRow(row)">
+                                        <button type="button" class="btn btn-danger btn-sm" @onclick="@(() => RemoveRow(row))">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     }
@@ -159,7 +173,7 @@ else if (gridRows != null)
             <button type="button" class="btn btn-success btn-lg" @onclick="SaveChanges">
                 <i class="bi bi-save"></i> Save Changes
             </button>
-            <button type="button" class="btn btn-secondary btn-lg ms-2" @onclick="() => NavigationManager.NavigateTo("/Ultimates/Premium")">
+            <button type="button" class="btn btn-secondary btn-lg ms-2" @onclick="@(() => NavigationManager.NavigateTo("/Ultimates/Premium"))">
                 <i class="bi bi-x-circle"></i> Cancel
             </button>
             @if (!string.IsNullOrEmpty(message))
@@ -220,6 +234,7 @@ else if (gridRows != null)
         {
             var model = await UltimatesService.GetUltimatePremiumByClassYOA(Class, YOA);
 
+            gridRows.Clear();
             var grouped = model.Records.GroupBy(r => new { r.ReservingClass, r.DistributionChannel });
 
             foreach (var group in grouped)
@@ -255,11 +270,59 @@ else if (gridRows != null)
         }
     }
 
-    private void OnCellChanged(CurrencyCell cell)
+    private void SwitchTab(string tab)
     {
+        activeTab = tab;
+        StateHasChanged();
+    }
+
+    private void OnValueTypeChanged(CurrencyCell cell, string? newValueType)
+    {
+        if (newValueType == null) return;
+
+        cell.ValueType = newValueType;
+        cell.IsModified = true;
+
+        // Clear values when switching away from "Value"
+        if (cell.ValueType != "Value")
+        {
+            cell.GrossPremium = null;
+            cell.NetPremium = null;
+            cell.RIPs = null;
+            cell.PC = null;
+        }
+
+        var row = gridRows.FirstOrDefault(r => r.Cells.Values.Contains(cell));
+        if (row != null) row.IsModified = true;
+
+        StateHasChanged();
+    }
+
+    private void OnValueChanged(CurrencyCell cell, string metric, string? newValue)
+    {
+        if (string.IsNullOrEmpty(newValue))
+        {
+            SetCellValue(cell, metric, null);
+        }
+        else if (decimal.TryParse(newValue, out var decValue))
+        {
+            SetCellValue(cell, metric, decValue);
+        }
+
         cell.IsModified = true;
         var row = gridRows.FirstOrDefault(r => r.Cells.Values.Contains(cell));
         if (row != null) row.IsModified = true;
+    }
+
+    private void SetCellValue(CurrencyCell cell, string metric, decimal? value)
+    {
+        switch (metric)
+        {
+            case "GrossPremium": cell.GrossPremium = value; break;
+            case "NetPremium": cell.NetPremium = value; break;
+            case "RIPs": cell.RIPs = value; break;
+            case "PC": cell.PC = value; break;
+        }
     }
 
     private void AddRow()
@@ -328,10 +391,9 @@ else if (gridRows != null)
         _ => tab
     };
 
-    private RenderFragment GetTabBadge(string tab)
+    private bool IsTabModified(string tab)
     {
-        var hasChanges = gridRows.Any(r => r.Cells.Values.Any(c => c.IsModified && HasValue(c, tab)));
-        return hasChanges ? @<span class="badge bg-warning ms-1">●</span> : null;
+        return gridRows.Any(r => r.Cells.Values.Any(c => c.IsModified && HasValue(c, tab)));
     }
 
     private bool HasValue(CurrencyCell cell, string tab) => tab switch
