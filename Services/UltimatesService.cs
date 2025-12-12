@@ -74,8 +74,8 @@ namespace sandboxapp.Services
                     Class = className,
                     YOA = yoa,
                     Records = records?.ToList() ?? new List<UltimatePremiumRecordModel>(),
-                    LastUpdatedDate = records?.Max(r => r.LastUpdatedDate),
-                    LastUpdatedBy = records?.FirstOrDefault()?.LastUpdatedBy
+                    UpdateDate = records?.Max(r => r.UpdateDate),
+                    UpdatedBy = records?.FirstOrDefault()?.UpdatedBy
                 };
 
                 return model;
@@ -171,7 +171,7 @@ namespace sandboxapp.Services
 
         /// <summary>
         /// Save Ultimate Premium data for a Class/YOA
-        /// Creates new versions (UpdateIDs) for audit trail
+        /// Creates a single Updates record and multiple Premium records for audit trail
         /// </summary>
         public async Task SaveUltimatePremium(UltimatePremiumEditModel model)
         {
@@ -187,11 +187,24 @@ namespace sandboxapp.Services
 
                 try
                 {
-                    // Insert new versions for all modified or new records
-                    // This creates a new UpdateID for each record
+                    // Step 1: Create an Updates record to get a batch UpdateID
+                    var updateParams = new DynamicParameters();
+                    updateParams.Add("@UpdatedBy", userName, DbType.String);
+                    updateParams.Add("@Comments", $"Updated {model.Class}/{model.YOA}", DbType.String);
+
+                    var updateId = await connection.ExecuteScalarAsync<int>(
+                        @"INSERT INTO [Ultimates].[Updates] (UpdateDate, UpdatedBy, Comments)
+                          VALUES (GETDATE(), @UpdatedBy, @Comments);
+                          SELECT CAST(SCOPE_IDENTITY() as int)",
+                        updateParams,
+                        transaction: transaction
+                    );
+
+                    // Step 2: Insert new versions for all modified or new records with the same UpdateID
                     foreach (var record in model.Records.Where(r => r.IsModified || r.IsNew))
                     {
                         var parameters = new DynamicParameters();
+                        parameters.Add("@UpdateID", updateId, DbType.Int32);
                         parameters.Add("@Class", model.Class, DbType.String);
                         parameters.Add("@ReservingClass", record.ReservingClass, DbType.String);
                         parameters.Add("@YOA", model.YOA, DbType.Int32);
@@ -201,7 +214,6 @@ namespace sandboxapp.Services
                         parameters.Add("@UltimateNetPremium", record.UltimateNetPremium, DbType.Decimal);
                         parameters.Add("@UltimateRIPs", record.UltimateRIPs, DbType.Decimal);
                         parameters.Add("@UltimatePC", record.UltimatePC, DbType.Decimal);
-                        parameters.Add("@LastUpdatedBy", userName, DbType.String);
 
                         await connection.ExecuteAsync(
                             "Ultimates.spUpsertUltimatePremium",
@@ -212,8 +224,8 @@ namespace sandboxapp.Services
                     }
 
                     transaction.Commit();
-                    _logger.LogInformation("Successfully saved Ultimate Premium for Class={Class}, YOA={YOA} by {User}",
-                        model.Class, model.YOA, userName);
+                    _logger.LogInformation("Successfully saved Ultimate Premium for Class={Class}, YOA={YOA} with UpdateID={UpdateID} by {User}",
+                        model.Class, model.YOA, updateId, userName);
                 }
                 catch (Exception)
                 {

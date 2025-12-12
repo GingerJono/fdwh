@@ -23,7 +23,7 @@ namespace sandboxapp.Models.Ultimates
         public decimal TotalUltimatePC => Records.Sum(r => r.UltimatePC ?? 0);
 
         // Audit info
-        public DateTime? LastUpdatedDate { get; set; }
-        public string? LastUpdatedBy { get; set; }
+        public DateTime? UpdateDate { get; set; }
+        public string? UpdatedBy { get; set; }
     }
 }

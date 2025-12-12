@@ -30,10 +30,8 @@ BEGIN
         UltimateNetPremium,
         UltimateRIPs,
         UltimatePC,
-        CreatedDate,
-        CreatedBy,
-        LastUpdatedDate,
-        LastUpdatedBy
+        UpdateDate,
+        UpdatedBy
     FROM [Ultimates].[vwUltimatePremiumSnapshot]
     ORDER BY Class, YOA, ReservingClass, DistributionChannel, Currency
 END
@@ -69,10 +67,8 @@ BEGIN
         UltimateNetPremium,
         UltimateRIPs,
         UltimatePC,
-        CreatedDate,
-        CreatedBy,
-        LastUpdatedDate,
-        LastUpdatedBy
+        UpdateDate,
+        UpdatedBy
     FROM [Ultimates].[vwUltimatePremiumSnapshot]
     WHERE Class = @Class
         AND YOA = @YOA
@@ -101,21 +97,22 @@ BEGIN
     -- Get all historical updates grouped by UpdateID
     -- Show sum of all combos for each update
     SELECT
-        UpdateID,
-        Class,
-        YOA,
+        up.UpdateID,
+        up.Class,
+        up.YOA,
         COUNT(*) AS RecordCount,
-        SUM(UltimateGrossPremium) AS TotalUltimateGrossPremium,
-        SUM(UltimateNetPremium) AS TotalUltimateNetPremium,
-        SUM(UltimateRIPs) AS TotalUltimateRIPs,
-        SUM(UltimatePC) AS TotalUltimatePC,
-        MAX(CreatedDate) AS UpdateDate,
-        MAX(COALESCE(LastUpdatedBy, CreatedBy)) AS UpdatedBy
-    FROM [Ultimates].[UltimatePremium]
-    WHERE Class = @Class
-        AND YOA = @YOA
-    GROUP BY UpdateID, Class, YOA
-    ORDER BY UpdateID DESC
+        SUM(up.UltimateGrossPremium) AS TotalUltimateGrossPremium,
+        SUM(up.UltimateNetPremium) AS TotalUltimateNetPremium,
+        SUM(up.UltimateRIPs) AS TotalUltimateRIPs,
+        SUM(up.UltimatePC) AS TotalUltimatePC,
+        u.UpdateDate,
+        u.UpdatedBy
+    FROM [Ultimates].[UltimatePremium] up
+    INNER JOIN [Ultimates].[Updates] u ON up.UpdateID = u.UpdateID
+    WHERE up.Class = @Class
+        AND up.YOA = @YOA
+    GROUP BY up.UpdateID, up.Class, up.YOA, u.UpdateDate, u.UpdatedBy
+    ORDER BY up.UpdateID DESC
 END
 GO
 
@@ -137,24 +134,23 @@ BEGIN
     SET NOCOUNT ON;
 
     SELECT
-        UltimatePremiumID,
-        UpdateID,
-        Class,
-        ReservingClass,
-        YOA,
-        DistributionChannel,
-        Currency,
-        UltimateGrossPremium,
-        UltimateNetPremium,
-        UltimateRIPs,
-        UltimatePC,
-        CreatedDate,
-        CreatedBy,
-        LastUpdatedDate,
-        LastUpdatedBy
-    FROM [Ultimates].[UltimatePremium]
-    WHERE UpdateID = @UpdateID
-    ORDER BY ReservingClass, DistributionChannel, Currency
+        up.UltimatePremiumID,
+        up.UpdateID,
+        up.Class,
+        up.ReservingClass,
+        up.YOA,
+        up.DistributionChannel,
+        up.Currency,
+        up.UltimateGrossPremium,
+        up.UltimateNetPremium,
+        up.UltimateRIPs,
+        up.UltimatePC,
+        u.UpdateDate,
+        u.UpdatedBy
+    FROM [Ultimates].[UltimatePremium] up
+    INNER JOIN [Ultimates].[Updates] u ON up.UpdateID = u.UpdateID
+    WHERE up.UpdateID = @UpdateID
+    ORDER BY up.ReservingClass, up.DistributionChannel, up.Currency
 END
 GO
 
@@ -165,12 +161,14 @@ GO
 -- SP: Upsert Ultimate Premium
 -- Inserts a new version for each record
 -- Always creates new records for audit trail
+-- Requires UpdateID from Updates table
 -- =============================================
 IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[Ultimates].[spUpsertUltimatePremium]') AND type in (N'P', N'PC'))
     DROP PROCEDURE [Ultimates].[spUpsertUltimatePremium]
 GO
 
 CREATE PROCEDURE [Ultimates].[spUpsertUltimatePremium]
+    @UpdateID INT,
     @Class NVARCHAR(100),
     @ReservingClass NVARCHAR(100),
     @YOA INT,
@@ -179,16 +177,15 @@ CREATE PROCEDURE [Ultimates].[spUpsertUltimatePremium]
     @UltimateGrossPremium DECIMAL(18,2),
     @UltimateNetPremium DECIMAL(18,2),
     @UltimateRIPs DECIMAL(18,2),
-    @UltimatePC DECIMAL(18,2),
-    @LastUpdatedBy NVARCHAR(100)
+    @UltimatePC DECIMAL(18,2)
 AS
 BEGIN
     SET NOCOUNT ON;
 
-    -- Always insert a new record for audit trail
-    -- This creates a new UpdateID automatically
+    -- Insert a new record for audit trail with provided UpdateID
     INSERT INTO [Ultimates].[UltimatePremium]
     (
+        UpdateID,
         Class,
         ReservingClass,
         YOA,
@@ -197,14 +194,11 @@ BEGIN
         UltimateGrossPremium,
         UltimateNetPremium,
         UltimateRIPs,
-        UltimatePC,
-        CreatedDate,
-        CreatedBy,
-        LastUpdatedDate,
-        LastUpdatedBy
+        UltimatePC
     )
     VALUES
     (
+        @UpdateID,
         @Class,
         @ReservingClass,
         @YOA,
@@ -213,15 +207,8 @@ BEGIN
         @UltimateGrossPremium,
         @UltimateNetPremium,
         @UltimateRIPs,
-        @UltimatePC,
-        GETDATE(),
-        @LastUpdatedBy,
-        GETDATE(),
-        @LastUpdatedBy
+        @UltimatePC
     )
-
-    -- Return the new UpdateID
-    SELECT SCOPE_IDENTITY() AS NewUpdateID
 END
 GO
 
@@ -245,7 +232,7 @@ BEGIN
         Class,
         COUNT(DISTINCT YOA) AS YOACount,
         COUNT(*) AS RecordCount,
-        MAX(LastUpdatedDate) AS LastUpdatedDate
+        MAX(UpdateDate) AS LastUpdatedDate
     FROM [Ultimates].[vwUltimatePremiumSnapshot]
     GROUP BY Class
     ORDER BY Class
@@ -304,7 +291,7 @@ BEGIN
         YOA,
         COUNT(*) AS RecordCount,
         SUM(UltimateGrossPremium) AS TotalUltimateGrossPremium,
-        MAX(LastUpdatedDate) AS LastUpdatedDate
+        MAX(UpdateDate) AS LastUpdatedDate
     FROM [Ultimates].[vwUltimatePremiumSnapshot]
     WHERE Class = @Class
     GROUP BY YOA

@@ -37,11 +37,9 @@ namespace sandboxapp.Models.Ultimates
         public decimal? UltimateRIPs { get; set; } // Reinstatement Premiums
         public decimal? UltimatePC { get; set; } // Profit Commission
 
-        // Audit Fields
-        public DateTime? CreatedDate { get; set; }
-        public string? CreatedBy { get; set; }
-        public DateTime? LastUpdatedDate { get; set; }
-        public string? LastUpdatedBy { get; set; }
+        // Audit Fields (from Updates table)
+        public DateTime? UpdateDate { get; set; }
+        public string? UpdatedBy { get; set; }
 
         // UI Helper - Track if this is a new row being added
         public bool IsNew { get; set; } = false;

@@ -13,9 +13,34 @@ END
 GO
 
 -- =============================================
+-- Updates Table: Tracks batch updates
+-- Each edit session creates one Updates record
+-- Multiple UltimatePremium records reference the same UpdateID
+-- =============================================
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[Ultimates].[Updates]') AND type in (N'U'))
+BEGIN
+    CREATE TABLE [Ultimates].[Updates]
+    (
+        [UpdateID] INT IDENTITY(1,1) NOT NULL,
+        [UpdateDate] DATETIME2 NOT NULL DEFAULT GETDATE(),
+        [UpdatedBy] NVARCHAR(100) NOT NULL,
+        [Comments] NVARCHAR(500) NULL,
+
+        CONSTRAINT [PK_Updates] PRIMARY KEY CLUSTERED ([UpdateID] ASC)
+    )
+
+    PRINT 'Table [Ultimates].[Updates] created successfully'
+END
+ELSE
+BEGIN
+    PRINT 'Table [Ultimates].[Updates] already exists'
+END
+GO
+
+-- =============================================
 -- Main Table: UltimatePremium
 -- Stores all versions/updates of Ultimate Premium data
--- Fully audited with UpdateID tracking
+-- Fully audited with UpdateID tracking (FK to Updates table)
 -- =============================================
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[Ultimates].[UltimatePremium]') AND type in (N'U'))
 BEGIN
@@ -24,8 +49,8 @@ BEGIN
         -- Primary Key
         [UltimatePremiumID] INT IDENTITY(1,1) NOT NULL,
 
-        -- Audit/Version Tracking
-        [UpdateID] INT IDENTITY(1,1) NOT NULL,
+        -- Audit/Version Tracking (FK to Updates table)
+        [UpdateID] INT NOT NULL,
 
         -- Business Keys (Resolution Level)
         [Class] NVARCHAR(100) NOT NULL,
@@ -40,14 +65,9 @@ BEGIN
         [UltimateRIPs] DECIMAL(18,2) NULL, -- Reinstatement Premiums
         [UltimatePC] DECIMAL(18,2) NULL, -- Profit Commission
 
-        -- Audit Fields
-        [CreatedDate] DATETIME2 NOT NULL DEFAULT GETDATE(),
-        [CreatedBy] NVARCHAR(100) NOT NULL,
-        [LastUpdatedDate] DATETIME2 NULL,
-        [LastUpdatedBy] NVARCHAR(100) NULL,
-
         -- Constraints
         CONSTRAINT [PK_UltimatePremium] PRIMARY KEY CLUSTERED ([UltimatePremiumID] ASC),
+        CONSTRAINT [FK_UltimatePremium_Updates] FOREIGN KEY ([UpdateID]) REFERENCES [Ultimates].[Updates]([UpdateID]),
         CONSTRAINT [CHK_UltimatePremium_DistributionChannel] CHECK ([DistributionChannel] IN ('EU', 'LNDN'))
     )
 
@@ -94,11 +114,10 @@ AS
         up.UltimateNetPremium,
         up.UltimateRIPs,
         up.UltimatePC,
-        up.CreatedDate,
-        up.CreatedBy,
-        up.LastUpdatedDate,
-        up.LastUpdatedBy
+        u.UpdateDate,
+        u.UpdatedBy
     FROM [Ultimates].[UltimatePremium] up
+    INNER JOIN [Ultimates].[Updates] u ON up.UpdateID = u.UpdateID
     INNER JOIN (
         -- Get the latest UpdateID for each unique combination
         SELECT
@@ -142,8 +161,8 @@ AS
         SUM(UltimateNetPremium) AS TotalUltimateNetPremium,
         SUM(UltimateRIPs) AS TotalUltimateRIPs,
         SUM(UltimatePC) AS TotalUltimatePC,
-        MAX(LastUpdatedDate) AS LastUpdatedDate,
-        MAX(LastUpdatedBy) AS LastUpdatedBy
+        MAX(UpdateDate) AS LastUpdatedDate,
+        MAX(UpdatedBy) AS LastUpdatedBy
     FROM [Ultimates].[vwUltimatePremiumSnapshot]
     GROUP BY Class, YOA
 GO

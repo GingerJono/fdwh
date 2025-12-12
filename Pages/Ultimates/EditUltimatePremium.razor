@@ -27,11 +27,11 @@ else if (model != null)
     <div class="row mb-3">
         <div class="col">
             <h1>Edit Ultimate Premium: @Class / @YOA</h1>
-            @if (model.LastUpdatedDate.HasValue)
+            @if (model.UpdateDate.HasValue)
             {
                 <p class="text-muted">
-                    Last updated: @model.LastUpdatedDate.Value.ToString("dd MMM yyyy HH:mm")
-                    by @model.LastUpdatedBy
+                    Last updated: @model.UpdateDate.Value.ToString("dd MMM yyyy HH:mm")
+                    by @model.UpdatedBy
                 </p>
             }
         </div>
