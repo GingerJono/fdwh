@@ -71,12 +71,16 @@ else if (gridRows != null)
                             <th style="width:200px;">Reserving Class</th>
                             <th style="width:120px;">Channel</th>
                             <th style="width:140px;">Value Type</th>
+                            <th class="text-center bg-light" style="min-width:120px;">Plan<br/><small class="text-muted">(CNV CCY)</small></th>
+                            <th class="text-center bg-light" style="min-width:120px;">Written<br/><small class="text-muted">(CNV CCY)</small></th>
+                            <th class="text-center bg-light" style="min-width:120px;">Signed<br/><small class="text-muted">(CNV CCY)</small></th>
                             @foreach (var curr in currencies)
                             {
                                 <th class="text-center" style="min-width:150px;">
                                     <span class="@CurrencyUtility.GetCurrencyFlagClass(curr)" style="width:1.33em;height:1em;display:inline-block;vertical-align:middle;"></span> @curr
                                 </th>
                             }
+                            <th class="text-center bg-info text-white" style="min-width:120px;">CNV Total</th>
                             <th style="width:80px;"></th>
                         </tr>
                     </thead>
@@ -118,6 +122,16 @@ else if (gridRows != null)
                                         <option value="Value">Value</option>
                                     </select>
                                 </td>
+                                <!-- DWH values (read-only) -->
+                                <td class="text-end bg-light">
+                                    <span class="text-muted">@GetPlanValue(row)?.ToString("N2")</span>
+                                </td>
+                                <td class="text-end bg-light">
+                                    <span class="text-muted">@GetWrittenValue(row)?.ToString("N2")</span>
+                                </td>
+                                <td class="text-end bg-light">
+                                    <span class="text-muted">@GetSignedValue(row)?.ToString("N2")</span>
+                                </td>
                                 @foreach (var curr in currencies)
                                 {
                                     var cell = row.GetOrCreateCell(curr);
@@ -152,6 +166,16 @@ else if (gridRows != null)
                                         }
                                     </td>
                                 }
+                                <!-- CNV Total -->
+                                <td class="text-end bg-info bg-opacity-10 fw-bold">
+                                    @{
+                                        var cnvTotal = GetCNVTotal(row);
+                                        if (cnvTotal.HasValue)
+                                        {
+                                            <span>@cnvTotal.Value.ToString("N2")</span>
+                                        }
+                                    }
+                                </td>
                                 <td class="text-center">
                                     @if (row.IsNew)
                                     {
@@ -195,6 +219,7 @@ else if (gridRows != null)
     private List<GridRow> gridRows = new();
     private string message = "";
     private bool isError = false;
+    private List<FXRate> fxRates = new();
 
     private class GridRow
     {
@@ -204,6 +229,23 @@ else if (gridRows != null)
         public Dictionary<string, CurrencyCell> Cells { get; set; } = new();
         public bool IsNew { get; set; }
         public HashSet<string> ModifiedMetrics { get; set; } = new(); // Track which metrics were modified
+
+        // DWH values in CNV CCY (placeholder - to be fetched from DWH)
+        public decimal? PlanGrossPremium { get; set; }
+        public decimal? WrittenGrossPremium { get; set; }
+        public decimal? SignedGrossPremium { get; set; }
+
+        public decimal? PlanNetPremium { get; set; }
+        public decimal? WrittenNetPremium { get; set; }
+        public decimal? SignedNetPremium { get; set; }
+
+        public decimal? PlanRIPs { get; set; }
+        public decimal? WrittenRIPs { get; set; }
+        public decimal? SignedRIPs { get; set; }
+
+        public decimal? PlanPC { get; set; }
+        public decimal? WrittenPC { get; set; }
+        public decimal? SignedPC { get; set; }
 
         public CurrencyCell GetOrCreateCell(string currency)
         {
@@ -233,6 +275,7 @@ else if (gridRows != null)
         try
         {
             var model = await UltimatesService.GetUltimatePremiumByClassYOA(Class, YOA);
+            fxRates = await UltimatesService.GetFXRates(YOA);
 
             gridRows.Clear();
             var grouped = model.Records.GroupBy(r => new { r.ReservingClass, r.DistributionChannel });
@@ -254,6 +297,9 @@ else if (gridRows != null)
                     cell.RIPs = rec.UltimateRIPs;
                     cell.PC = rec.UltimatePC;
                 }
+
+                // TODO: Fetch DWH values for this row
+                await FetchDWHValuesForRow(row);
 
                 gridRows.Add(row);
             }
@@ -282,24 +328,53 @@ else if (gridRows != null)
 
         row.ValueType = newValueType;
 
-        // Clear all metric values when switching away from "Value"
-        if (row.ValueType != "Value")
+        // Populate the 5 currency cells from the selected DWH value
+        if (row.ValueType == "Plan")
         {
+            PopulateCurrenciesFromDWH(row, "Plan");
+        }
+        else if (row.ValueType == "Written")
+        {
+            PopulateCurrenciesFromDWH(row, "Written");
+        }
+        else if (row.ValueType == "Signed")
+        {
+            PopulateCurrenciesFromDWH(row, "Signed");
+        }
+        else if (row.ValueType == "Value")
+        {
+            // Clear all currency values when switching to manual "Value" mode
             foreach (var cell in row.Cells.Values)
             {
-                cell.GrossPremium = null;
-                cell.NetPremium = null;
-                cell.RIPs = null;
-                cell.PC = null;
+                SetCellValue(cell, activeTab, null);
             }
-            // Mark all metrics as modified since we cleared them
-            row.ModifiedMetrics.Add("GrossPremium");
-            row.ModifiedMetrics.Add("NetPremium");
-            row.ModifiedMetrics.Add("RIPs");
-            row.ModifiedMetrics.Add("PC");
         }
 
+        // Mark the current metric as modified
+        row.ModifiedMetrics.Add(activeTab);
         StateHasChanged();
+    }
+
+    private void PopulateCurrenciesFromDWH(GridRow row, string valueType)
+    {
+        // Get the DWH value for the current tab
+        decimal? dwhValue = valueType switch
+        {
+            "Plan" => GetPlanValue(row),
+            "Written" => GetWrittenValue(row),
+            "Signed" => GetSignedValue(row),
+            _ => null
+        };
+
+        if (!dwhValue.HasValue) return;
+
+        // Populate all 5 currency cells with the DWH value
+        // (The DWH value is already in CNV CCY, so we distribute it across currencies)
+        foreach (var curr in currencies)
+        {
+            var cell = row.GetOrCreateCell(curr);
+            SetCellValue(cell, activeTab, dwhValue);
+        }
     }
 
     private void OnValueChanged(GridRow row, CurrencyCell cell, string metric, string? newValue)
@@ -410,5 +485,90 @@ else if (gridRows != null)
     {
         // Only highlight row if the current active tab's metric was modified
         return row.ModifiedMetrics.Contains(activeTab);
+    }
+
+    // Helper methods to get DWH values for current tab
+    private decimal? GetPlanValue(GridRow row) => activeTab switch
+    {
+        "GrossPremium" => row.PlanGrossPremium,
+        "NetPremium" => row.PlanNetPremium,
+        "RIPs" => row.PlanRIPs,
+        "PC" => row.PlanPC,
+        _ => null
+    };
+
+    private decimal? GetWrittenValue(GridRow row) => activeTab switch
+    {
+        "GrossPremium" => row.WrittenGrossPremium,
+        "NetPremium" => row.WrittenNetPremium,
+        "RIPs" => row.WrittenRIPs,
+        "PC" => row.WrittenPC,
+        _ => null
+    };
+
+    private decimal? GetSignedValue(GridRow row) => activeTab switch
+    {
+        "GrossPremium" => row.SignedGrossPremium,
+        "NetPremium" => row.SignedNetPremium,
+        "RIPs" => row.SignedRIPs,
+        "PC" => row.SignedPC,
+        _ => null
+    };
+
+    // TODO: Replace with actual DWH fetch logic
+    private async Task FetchDWHValuesForRow(GridRow row)
+    {
+        // PLACEHOLDER: Replace this with actual DWH fetch logic
+        // For now, just set some dummy values for testing
+        row.PlanGrossPremium = 0m;
+        row.WrittenGrossPremium = 0m;
+        row.SignedGrossPremium = 0m;
+
+        row.PlanNetPremium = 0m;
+        row.WrittenNetPremium = 0m;
+        row.SignedNetPremium = 0m;
+
+        row.PlanRIPs = 0m;
+        row.WrittenRIPs = 0m;
+        row.SignedRIPs = 0m;
+
+        row.PlanPC = 0m;
+        row.WrittenPC = 0m;
+        row.SignedPC = 0m;
+
+        await Task.CompletedTask;
+    }
+
+    // Calculate CNV Total (sum of 5 currency cells converted to base currency)
+    private decimal? GetCNVTotal(GridRow row)
+    {
+        decimal total = 0m;
+        bool hasAnyValue = false;
+
+        foreach (var curr in currencies)
+        {
+            var cell = row.GetOrCreateCell(curr);
+            decimal? value = activeTab switch
+            {
+                "GrossPremium" => cell.GrossPremium,
+                "NetPremium" => cell.NetPremium,
+                "RIPs" => cell.RIPs,
+                "PC" => cell.PC,
+                _ => null
+            };
+
+            if (value.HasValue)
+            {
+                hasAnyValue = true;
+                // Convert to base currency (GBP)
+                var rate = fxRates.FirstOrDefault(r => r.Currency == curr);
+                if (rate != null && rate.Rate > 0)
+                {
+                    total += value.Value / rate.Rate;
+                }
+            }
+        }
+
+        return hasAnyValue ? total : null;
     }
 }
