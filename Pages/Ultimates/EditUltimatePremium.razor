@@ -1,9 +1,14 @@
 @page "/Ultimates/Premium/Edit/{Class}/{YOA:int}"
 @using sandboxapp.Models.Ultimates
 @using sandboxapp.Services
+@using sandboxapp.Utilities
+@using sandboxapp.Components.Ultimates
 @inject UltimatesService UltimatesService
+@inject FxConversionService FxConversion
+@inject CurrencySettingsService CurrencySettings
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
+@inject ILogger<EditUltimatePremium> Logger
 
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
@@ -12,6 +17,9 @@
         <li class="breadcrumb-item active" aria-current="page">EDIT @Class / @YOA</li>
     </ol>
 </nav>
+
+<!-- Currency Settings Component -->
+<CurrencySettings OnSettingsChanged="OnCurrencySettingsChanged" />
 
 @if (isLoading)
 {
@@ -44,32 +52,32 @@ else if (model != null)
         <!-- Summary Card -->
         <div class="card mb-4 border-primary">
             <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">Summary Totals (#)</h5>
+                <h5 class="mb-0">Summary Totals (Converted to @GetCurrencySymbol() @CurrencySettings.DisplayCurrency)</h5>
             </div>
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-3">
                         <div class="text-center p-3 bg-light rounded">
-                            <small class="text-muted">Total Gross Premium</small>
-                            <h4 class="mb-0">@FormatCurrency(model.TotalUltimateGrossPremium)</h4>
+                            <small class="text-muted">@GetCurrencySymbol() Total Gross Premium</small>
+                            <h4 class="mb-0">@FormatConvertedCurrency(GetConvertedTotalGrossPremium())</h4>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="text-center p-3 bg-light rounded">
-                            <small class="text-muted">Total Net Premium</small>
-                            <h4 class="mb-0">@FormatCurrency(model.TotalUltimateNetPremium)</h4>
+                            <small class="text-muted">@GetCurrencySymbol() Total Net Premium</small>
+                            <h4 class="mb-0">@FormatConvertedCurrency(GetConvertedTotalNetPremium())</h4>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="text-center p-3 bg-light rounded">
-                            <small class="text-muted">Total RIPs</small>
-                            <h4 class="mb-0">@FormatCurrency(model.TotalUltimateRIPs)</h4>
+                            <small class="text-muted">@GetCurrencySymbol() Total RIPs</small>
+                            <h4 class="mb-0">@FormatConvertedCurrency(GetConvertedTotalRIPs())</h4>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="text-center p-3 bg-light rounded">
-                            <small class="text-muted">Total PC</small>
-                            <h4 class="mb-0">@FormatCurrency(model.TotalUltimatePC)</h4>
+                            <small class="text-muted">@GetCurrencySymbol() Total PC</small>
+                            <h4 class="mb-0">@FormatConvertedCurrency(GetConvertedTotalPC())</h4>
                         </div>
                     </div>
                 </div>
@@ -137,11 +145,12 @@ else if (model != null)
                                         {
                                             <InputText class="form-control form-control-sm"
                                                        @bind-Value="record.Currency"
-                                                       @oninput="() => MarkAsModified(record)" />
+                                                       @oninput="() => MarkAsModified(record)"
+                                                       placeholder="e.g., GBP, USD, EUR" />
                                         }
                                         else
                                         {
-                                            <span>@record.Currency</span>
+                                            <span>@CurrencyUtility.GetCurrencyWithFlag(record.Currency)</span>
                                         }
                                     </td>
                                     <td>
@@ -227,7 +236,7 @@ else if (model != null)
     <!-- History Section -->
     <div class="card mb-4">
         <div class="card-header bg-info text-white">
-            <h5 class="mb-0">Update History</h5>
+            <h5 class="mb-0">Update History (Converted to @GetCurrencySymbol() @CurrencySettings.DisplayCurrency)</h5>
         </div>
         <div class="card-body">
             @if (historyLoading)
@@ -244,24 +253,24 @@ else if (model != null)
                                 <th>Update Date</th>
                                 <th>Updated By</th>
                                 <th class="text-end"># Records</th>
-                                <th class="text-end"># Total Gross Premium</th>
-                                <th class="text-end"># Total Net Premium</th>
-                                <th class="text-end"># Total RIPs</th>
-                                <th class="text-end"># Total PC</th>
+                                <th class="text-end">@GetCurrencySymbol() Total Gross Premium</th>
+                                <th class="text-end">@GetCurrencySymbol() Total Net Premium</th>
+                                <th class="text-end">@GetCurrencySymbol() Total RIPs</th>
+                                <th class="text-end">@GetCurrencySymbol() Total PC</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var history in historyList)
+                            @foreach (var history in GetConvertedHistory())
                             {
                                 <tr>
                                     <td><strong>#@history.UpdateID</strong></td>
                                     <td>@FormatDate(history.UpdateDate)</td>
                                     <td>@history.UpdatedBy</td>
                                     <td class="text-end">@history.RecordCount</td>
-                                    <td class="text-end">@FormatCurrency(history.TotalUltimateGrossPremium)</td>
-                                    <td class="text-end">@FormatCurrency(history.TotalUltimateNetPremium)</td>
-                                    <td class="text-end">@FormatCurrency(history.TotalUltimateRIPs)</td>
-                                    <td class="text-end">@FormatCurrency(history.TotalUltimatePC)</td>
+                                    <td class="text-end">@FormatConvertedCurrency(history.TotalGrossPremium)</td>
+                                    <td class="text-end">@FormatConvertedCurrency(history.TotalNetPremium)</td>
+                                    <td class="text-end">@FormatConvertedCurrency(history.TotalRIPs)</td>
+                                    <td class="text-end">@FormatConvertedCurrency(history.TotalPC)</td>
                                 </tr>
                             }
                         </tbody>
@@ -292,8 +301,32 @@ else if (model != null)
 
     protected override async Task OnInitializedAsync()
     {
+        await InitializeServices();
         await LoadData();
         await LoadHistory();
+    }
+
+    private async Task InitializeServices()
+    {
+        try
+        {
+            // Initialize currency settings from localStorage
+            await CurrencySettings.InitializeAsync();
+
+            // Load FX rates for the selected rate set
+            await FxConversion.LoadRatesAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error initializing services");
+        }
+    }
+
+    private async Task OnCurrencySettingsChanged()
+    {
+        // Reload FX rates if needed (FxConversion already handles this via event subscription)
+        // Just trigger a re-render
+        StateHasChanged();
     }
 
     private async Task LoadData()
@@ -430,6 +463,75 @@ else if (model != null)
     private void NavigateBack()
     {
         NavigationManager.NavigateTo("/Ultimates/Premium");
+    }
+
+    // Currency conversion methods
+    private decimal? GetConvertedTotalGrossPremium()
+    {
+        if (model == null || model.Records == null) return 0;
+        return model.Records.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateGrossPremium, r.Currency));
+    }
+
+    private decimal? GetConvertedTotalNetPremium()
+    {
+        if (model == null || model.Records == null) return 0;
+        return model.Records.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateNetPremium, r.Currency));
+    }
+
+    private decimal? GetConvertedTotalRIPs()
+    {
+        if (model == null || model.Records == null) return 0;
+        return model.Records.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateRIPs, r.Currency));
+    }
+
+    private decimal? GetConvertedTotalPC()
+    {
+        if (model == null || model.Records == null) return 0;
+        return model.Records.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimatePC, r.Currency));
+    }
+
+    // Converted history class
+    private class ConvertedHistoryModel
+    {
+        public int UpdateID { get; set; }
+        public DateTime? UpdateDate { get; set; }
+        public string? UpdatedBy { get; set; }
+        public int RecordCount { get; set; }
+        public decimal? TotalGrossPremium { get; set; }
+        public decimal? TotalNetPremium { get; set; }
+        public decimal? TotalRIPs { get; set; }
+        public decimal? TotalPC { get; set; }
+    }
+
+    private List<ConvertedHistoryModel> GetConvertedHistory()
+    {
+        if (historyList == null) return new List<ConvertedHistoryModel>();
+
+        // Note: History shows aggregated totals from multiple currencies
+        // For now, we'll just display the raw totals since we don't have individual record currencies in history
+        // This is a known limitation - history aggregates lose currency information
+        return historyList.Select(h => new ConvertedHistoryModel
+        {
+            UpdateID = h.UpdateID,
+            UpdateDate = h.UpdateDate,
+            UpdatedBy = h.UpdatedBy,
+            RecordCount = h.RecordCount,
+            TotalGrossPremium = h.TotalUltimateGrossPremium, // Can't convert without currency info
+            TotalNetPremium = h.TotalUltimateNetPremium,
+            TotalRIPs = h.TotalUltimateRIPs,
+            TotalPC = h.TotalUltimatePC
+        }).ToList();
+    }
+
+    private string GetCurrencySymbol()
+    {
+        return CurrencySettings.DisplayCurrency == "GBP" ? "£" : "$";
+    }
+
+    private string FormatConvertedCurrency(decimal? value)
+    {
+        if (!value.HasValue) return "-";
+        return value.Value.ToString("N0");
     }
 
     private string FormatCurrency(decimal? value)

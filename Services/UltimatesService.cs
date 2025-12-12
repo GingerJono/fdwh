@@ -292,5 +292,59 @@ namespace sandboxapp.Services
                 throw;
             }
         }
+
+        /// <summary>
+        /// Get all active FX rate sets
+        /// </summary>
+        public async Task<IEnumerable<FxRateSetModel>> GetFxRateSets()
+        {
+            try
+            {
+                using var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
+                await connection.OpenAsync();
+
+                var result = await connection.QueryAsync<FxRateSetModel>(
+                    "Ultimates.spGetFxRateSets",
+                    commandType: CommandType.StoredProcedure
+                );
+
+                return result ?? Enumerable.Empty<FxRateSetModel>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving FX rate sets");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Get FX rates for a specific rate set
+        /// </summary>
+        public async Task<IEnumerable<FxRateModel>> GetFxRates(int? fxRateSetId = null, string? rateSetName = null)
+        {
+            try
+            {
+                using var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
+                await connection.OpenAsync();
+
+                var parameters = new DynamicParameters();
+                parameters.Add("@FxRateSetID", fxRateSetId, DbType.Int32);
+                parameters.Add("@RateSetName", rateSetName, DbType.String);
+
+                var result = await connection.QueryAsync<FxRateModel>(
+                    "Ultimates.spGetFxRates",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                );
+
+                return result ?? Enumerable.Empty<FxRateModel>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving FX rates for RateSetID={RateSetID}, RateSetName={RateSetName}",
+                    fxRateSetId, rateSetName);
+                throw;
+            }
+        }
     }
 }
