@@ -1,0 +1,20 @@
+@using sandboxapp.Utilities
+
+@if (!string.IsNullOrWhiteSpace(CurrencyCode))
+{
+    <span class="@CurrencyUtility.GetCurrencyFlagClass(CurrencyCode)"
+          style="width: 1.33em; height: 1em; display: inline-block; vertical-align: middle;"
+          title="@CurrencyCode"></span>
+    @if (ShowCode)
+    {
+        <text> @CurrencyCode</text>
+    }
+}
+
+@code {
+    [Parameter]
+    public string? CurrencyCode { get; set; }
+
+    [Parameter]
+    public bool ShowCode { get; set; } = true;
+}

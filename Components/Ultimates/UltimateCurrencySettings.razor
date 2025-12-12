@@ -1,5 +1,6 @@
 @using sandboxapp.Services
 @using sandboxapp.Models.Ultimates
+@using sandboxapp.Utilities
 @inject CurrencySettingsService CurrencySettings
 @inject FxConversionService FxConversion
 @inject UltimatesService UltimatesService
@@ -25,7 +26,7 @@
                            checked="@(selectedDisplayCurrency == "GBP")"
                            @onchange="@(() => OnDisplayCurrencyChanged("GBP"))" />
                     <label class="btn btn-outline-primary" for="currencyGBP">
-                        🇬🇧 GBP (£)
+                        <span class="@CurrencyUtility.GetCurrencyFlagClass("GBP")" style="width: 1.33em; height: 1em; display: inline-block; vertical-align: middle;"></span> GBP (£)
                     </label>
 
                     <input type="radio"
@@ -36,7 +37,7 @@
                            checked="@(selectedDisplayCurrency == "USD")"
                            @onchange="@(() => OnDisplayCurrencyChanged("USD"))" />
                     <label class="btn btn-outline-primary" for="currencyUSD">
-                        🇺🇸 USD ($)
+                        <span class="@CurrencyUtility.GetCurrencyFlagClass("USD")" style="width: 1.33em; height: 1em; display: inline-block; vertical-align: middle;"></span> USD ($)
                     </label>
                 </div>
             </div>

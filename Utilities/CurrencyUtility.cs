@@ -3,8 +3,43 @@ namespace sandboxapp.Utilities
     public static class CurrencyUtility
     {
         /// <summary>
-        /// Gets the Unicode flag emoji for a given currency code
+        /// Gets the flag-icons CSS class for a given currency code (Windows-compatible)
+        /// Returns classes like "fi fi-gb" for use with flag-icons library
         /// </summary>
+        public static string GetCurrencyFlagClass(string currencyCode)
+        {
+            var countryCode = currencyCode?.ToUpper() switch
+            {
+                "GBP" => "gb", // United Kingdom
+                "USD" => "us", // United States
+                "EUR" => "eu", // European Union
+                "JPY" => "jp", // Japan
+                "AUD" => "au", // Australia
+                "CAD" => "ca", // Canada
+                "CHF" => "ch", // Switzerland
+                "NZD" => "nz", // New Zealand
+                "SGD" => "sg", // Singapore
+                "HKD" => "hk", // Hong Kong
+                "SEK" => "se", // Sweden
+                "NOK" => "no", // Norway
+                "DKK" => "dk", // Denmark
+                "PLN" => "pl", // Poland
+                "CNY" => "cn", // China
+                "INR" => "in", // India
+                "BRL" => "br", // Brazil
+                "ZAR" => "za", // South Africa
+                "MXN" => "mx", // Mexico
+                "KRW" => "kr", // South Korea
+                _ => "un"       // United Nations (default)
+            };
+
+            return $"fi fi-{countryCode}";
+        }
+
+        /// <summary>
+        /// Gets the Unicode flag emoji for a given currency code (may not work on Windows)
+        /// </summary>
+        [Obsolete("Use GetCurrencyFlagClass for cross-platform support")]
         public static string GetCurrencyFlag(string currencyCode)
         {
             return currencyCode?.ToUpper() switch
