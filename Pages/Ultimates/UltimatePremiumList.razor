@@ -2,7 +2,6 @@
 @using sandboxapp.Models.Ultimates
 @using sandboxapp.Services
 @using sandboxapp.Utilities
-@using sandboxapp.Components.Ultimates
 @inject UltimatesService UltimatesService
 @inject FxConversionService FxConversion
 @inject CurrencySettingsService CurrencySettings
@@ -24,7 +23,7 @@
 </div>
 
 <!-- Currency Settings Component -->
-<CurrencySettings OnSettingsChanged="OnCurrencySettingsChanged" />
+<UltimateCurrencySettings OnSettingsChanged="OnCurrencySettingsChanged" />
 
 @if (isLoading)
 {
