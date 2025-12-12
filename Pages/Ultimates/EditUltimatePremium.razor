@@ -3,10 +3,7 @@
 @using sandboxapp.Services
 @using sandboxapp.Utilities
 @inject UltimatesService UltimatesService
-@inject FxConversionService FxConversion
-@inject CurrencySettingsService CurrencySettings
 @inject NavigationManager NavigationManager
-@inject IJSRuntime JSRuntime
 @inject ILogger<EditUltimatePremium> Logger
 
 <nav aria-label="breadcrumb">
@@ -17,315 +14,217 @@
     </ol>
 </nav>
 
-<!-- Currency Settings Component -->
-<UltimateCurrencySettings OnSettingsChanged="OnCurrencySettingsChanged" />
-
 @if (isLoading)
 {
     <div class="text-center p-5">
         <div class="spinner-border text-primary" role="status">
             <span class="visually-hidden">Loading...</span>
         </div>
-        <p class="mt-2">Loading Ultimate Premium data...</p>
+        <p class="mt-2">Loading...</p>
     </div>
 }
-else if (model != null)
+else if (gridRows != null)
 {
     <div class="row mb-3">
         <div class="col">
             <h1>Edit Ultimate Premium: @Class / @YOA</h1>
-            @if (model.UpdateDate.HasValue)
-            {
-                <p class="text-muted">
-                    Last updated: @model.UpdateDate.Value.ToString("yyyy-MM-dd HH:mm")
-                    by @model.UpdatedBy
-                </p>
-            }
         </div>
     </div>
 
-    <EditForm Model="model" OnValidSubmit="HandleValidSubmit">
-        <DataAnnotationsValidator />
-        <ValidationSummary />
+    <!-- Tabs -->
+    <ul class="nav nav-tabs mb-3" role="tablist">
+        <li class="nav-item">
+            <button class="nav-link @(activeTab == "GrossPremium" ? "active" : "")" type="button" @onclick="@(() => SwitchTab("GrossPremium"))">
+                Gross Premium @if (IsTabModified("GrossPremium")) { <span class="badge bg-warning ms-1">●</span> }
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link @(activeTab == "NetPremium" ? "active" : "")" type="button" @onclick="@(() => SwitchTab("NetPremium"))">
+                Net Premium @if (IsTabModified("NetPremium")) { <span class="badge bg-warning ms-1">●</span> }
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link @(activeTab == "RIPs" ? "active" : "")" type="button" @onclick="@(() => SwitchTab("RIPs"))">
+                RIPs @if (IsTabModified("RIPs")) { <span class="badge bg-warning ms-1">●</span> }
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link @(activeTab == "PC" ? "active" : "")" type="button" @onclick="@(() => SwitchTab("PC"))">
+                PC @if (IsTabModified("PC")) { <span class="badge bg-warning ms-1">●</span> }
+            </button>
+        </li>
+    </ul>
 
-        <!-- Summary Card -->
-        <div class="card mb-4 border-primary">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">Summary Totals (Converted to @GetCurrencySymbol() @CurrencySettings.DisplayCurrency)</h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-3">
-                        <div class="text-center p-3 bg-light rounded">
-                            <small class="text-muted">@GetCurrencySymbol() Total Gross Premium</small>
-                            <h4 class="mb-0">@FormatConvertedCurrency(GetConvertedTotalGrossPremium())</h4>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="text-center p-3 bg-light rounded">
-                            <small class="text-muted">@GetCurrencySymbol() Total Net Premium</small>
-                            <h4 class="mb-0">@FormatConvertedCurrency(GetConvertedTotalNetPremium())</h4>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="text-center p-3 bg-light rounded">
-                            <small class="text-muted">@GetCurrencySymbol() Total RIPs</small>
-                            <h4 class="mb-0">@FormatConvertedCurrency(GetConvertedTotalRIPs())</h4>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="text-center p-3 bg-light rounded">
-                            <small class="text-muted">@GetCurrencySymbol() Total PC</small>
-                            <h4 class="mb-0">@FormatConvertedCurrency(GetConvertedTotalPC())</h4>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <!-- Grid -->
+    <div class="card">
+        <div class="card-header bg-secondary text-white d-flex justify-content-between">
+            <h5 class="mb-0">@GetTabTitle(activeTab)</h5>
+            <button type="button" class="btn btn-sm btn-light" @onclick="AddRow">
+                <i class="bi bi-plus-circle"></i> Add Row
+            </button>
         </div>
-
-        <!-- Editable Grid -->
-        <div class="card mb-4">
-            <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Ultimate Premium Details</h5>
-                <button type="button" class="btn btn-sm btn-light" @onclick="AddNewRecord">
-                    <i class="bi bi-plus-circle"></i> Add Row
-                </button>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-sm table-hover mb-0">
-                        <thead class="table-light sticky-top">
-                            <tr>
-                                <th>Reserving Class</th>
-                                <th>Dist. Channel</th>
-                                <th>Currency</th>
-                                <th style="width: 130px;">Value Type</th>
-                                <th class="text-end">Gross Premium</th>
-                                <th class="text-end">Net Premium</th>
-                                <th class="text-end">RIPs</th>
-                                <th class="text-end">PC</th>
-                                <th class="text-center">Actions</th>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-sm table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width:200px;">Reserving Class</th>
+                            <th style="width:120px;">Channel</th>
+                            <th style="width:140px;">Value Type</th>
+                            @foreach (var curr in currencies)
+                            {
+                                <th class="text-center" style="min-width:150px;">
+                                    <span class="@CurrencyUtility.GetCurrencyFlagClass(curr)" style="width:1.33em;height:1em;display:inline-block;vertical-align:middle;"></span> @curr
+                                </th>
+                            }
+                            <th style="width:80px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var row in gridRows)
+                        {
+                            <tr class="@(row.IsNew ? "table-success" : IsRowModifiedForTab(row) ? "table-warning" : "")">
+                                <td>
+                                    @if (row.IsNew)
+                                    {
+                                        <input type="text" class="form-control form-control-sm" @bind="row.ReservingClass" />
+                                    }
+                                    else
+                                    {
+                                        <span>@row.ReservingClass</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (row.IsNew)
+                                    {
+                                        <select class="form-select form-select-sm" @bind="row.DistributionChannel">
+                                            <option value="">Select...</option>
+                                            <option value="EU">EU</option>
+                                            <option value="LNDN">LNDN</option>
+                                        </select>
+                                    }
+                                    else
+                                    {
+                                        <span>@row.DistributionChannel</span>
+                                    }
+                                </td>
+                                <td>
+                                    <select class="form-select form-select-sm"
+                                            value="@row.ValueType"
+                                            @onchange="@(e => OnRowValueTypeChanged(row, e.Value?.ToString()))">
+                                        <option value="Written">Written</option>
+                                        <option value="Signed">Signed</option>
+                                        <option value="Plan">Plan</option>
+                                        <option value="Value">Value</option>
+                                    </select>
+                                </td>
+                                @foreach (var curr in currencies)
+                                {
+                                    var cell = row.GetOrCreateCell(curr);
+                                    <td>
+                                        @if (activeTab == "GrossPremium")
+                                        {
+                                            <input type="number" class="form-control form-control-sm text-end"
+                                                   value="@cell.GrossPremium"
+                                                   @onchange="@(e => OnValueChanged(row, cell, "GrossPremium", e.Value?.ToString()))"
+                                                   disabled="@(row.ValueType != "Value")" step="0.01" />
+                                        }
+                                        else if (activeTab == "NetPremium")
+                                        {
+                                            <input type="number" class="form-control form-control-sm text-end"
+                                                   value="@cell.NetPremium"
+                                                   @onchange="@(e => OnValueChanged(row, cell, "NetPremium", e.Value?.ToString()))"
+                                                   disabled="@(row.ValueType != "Value")" step="0.01" />
+                                        }
+                                        else if (activeTab == "RIPs")
+                                        {
+                                            <input type="number" class="form-control form-control-sm text-end"
+                                                   value="@cell.RIPs"
+                                                   @onchange="@(e => OnValueChanged(row, cell, "RIPs", e.Value?.ToString()))"
+                                                   disabled="@(row.ValueType != "Value")" step="0.01" />
+                                        }
+                                        else if (activeTab == "PC")
+                                        {
+                                            <input type="number" class="form-control form-control-sm text-end"
+                                                   value="@cell.PC"
+                                                   @onchange="@(e => OnValueChanged(row, cell, "PC", e.Value?.ToString()))"
+                                                   disabled="@(row.ValueType != "Value")" step="0.01" />
+                                        }
+                                    </td>
+                                }
+                                <td class="text-center">
+                                    @if (row.IsNew)
+                                    {
+                                        <button type="button" class="btn btn-danger btn-sm" @onclick="@(() => RemoveRow(row))">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    }
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var record in model.Records)
-                            {
-                                <tr class="@(record.IsNew ? "table-success" : record.IsModified ? "table-warning" : "")">
-                                    <td>
-                                        @if (record.IsNew)
-                                        {
-                                            <InputText class="form-control form-control-sm"
-                                                       @bind-Value="record.ReservingClass"
-                                                       @oninput="() => MarkAsModified(record)" />
-                                        }
-                                        else
-                                        {
-                                            <span>@record.ReservingClass</span>
-                                        }
-                                    </td>
-                                    <td>
-                                        @if (record.IsNew)
-                                        {
-                                            <InputSelect class="form-select form-select-sm"
-                                                         @bind-Value="record.DistributionChannel"
-                                                         @oninput="() => MarkAsModified(record)">
-                                                <option value="">Select...</option>
-                                                <option value="EU">EU</option>
-                                                <option value="LNDN">LNDN</option>
-                                            </InputSelect>
-                                        }
-                                        else
-                                        {
-                                            <span>@record.DistributionChannel</span>
-                                        }
-                                    </td>
-                                    <td>
-                                        @if (record.IsNew)
-                                        {
-                                            <InputText class="form-control form-control-sm"
-                                                       @bind-Value="record.Currency"
-                                                       @oninput="() => MarkAsModified(record)"
-                                                       placeholder="e.g., GBP, USD, EUR" />
-                                        }
-                                        else
-                                        {
-                                            <span>@CurrencyUtility.GetCurrencyWithFlag(record.Currency)</span>
-                                        }
-                                    </td>
-                                    <td>
-                                        <InputSelect class="form-select form-select-sm"
-                                                     @bind-Value="record.ValueType"
-                                                     @onchange="() => OnValueTypeChanged(record)">
-                                            <option value="Written">Set to Written</option>
-                                            <option value="Signed">Set to Signed</option>
-                                            <option value="Plan">Set to Plan</option>
-                                            <option value="Value">Set to Value</option>
-                                        </InputSelect>
-                                    </td>
-                                    <td>
-                                        <InputNumber class="form-control form-control-sm text-end"
-                                                     @bind-Value="record.UltimateGrossPremium"
-                                                     @oninput="() => MarkAsModified(record)"
-                                                     disabled="@(record.ValueType != "Value")" />
-                                    </td>
-                                    <td>
-                                        <InputNumber class="form-control form-control-sm text-end"
-                                                     @bind-Value="record.UltimateNetPremium"
-                                                     @oninput="() => MarkAsModified(record)"
-                                                     disabled="@(record.ValueType != "Value")" />
-                                    </td>
-                                    <td>
-                                        <InputNumber class="form-control form-control-sm text-end"
-                                                     @bind-Value="record.UltimateRIPs"
-                                                     @oninput="() => MarkAsModified(record)"
-                                                     disabled="@(record.ValueType != "Value")" />
-                                    </td>
-                                    <td>
-                                        <InputNumber class="form-control form-control-sm text-end"
-                                                     @bind-Value="record.UltimatePC"
-                                                     @oninput="() => MarkAsModified(record)"
-                                                     disabled="@(record.ValueType != "Value")" />
-                                    </td>
-                                    <td class="text-center">
-                                        @if (record.IsNew)
-                                        {
-                                            <button type="button" class="btn btn-danger btn-sm"
-                                                    @onclick="() => RemoveNewRecord(record)">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        }
-                                    </td>
-                                </tr>
-                            }
-                            @if (model.Records.Count == 0)
-                            {
-                                <tr>
-                                    <td colspan="9" class="text-center text-muted py-4">
-                                        No records found. Click "Add Row" to create the first record.
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
+                        }
+                    </tbody>
+                </table>
             </div>
         </div>
+    </div>
 
-        <!-- Action Buttons -->
-        <div class="row mb-4">
-            <div class="col">
-                <button type="submit" class="btn btn-success btn-lg">
-                    <i class="bi bi-save"></i> Save Changes
-                </button>
-                <button type="button" class="btn btn-secondary btn-lg ms-2" @onclick="NavigateBack">
-                    <i class="bi bi-x-circle"></i> Cancel
-                </button>
-                @if (saveMessage != null)
-                {
-                    <span class="ms-3 text-success fw-bold">@saveMessage</span>
-                }
-                @if (errorMessage != null)
-                {
-                    <span class="ms-3 text-danger fw-bold">@errorMessage</span>
-                }
-            </div>
-        </div>
-    </EditForm>
-
-    <!-- History Section -->
-    <div class="card mb-4">
-        <div class="card-header bg-info text-white">
-            <h5 class="mb-0">Update History (Converted to @GetCurrencySymbol() @CurrencySettings.DisplayCurrency)</h5>
-        </div>
-        <div class="card-body">
-            @if (historyLoading)
+    <!-- Actions -->
+    <div class="row my-4">
+        <div class="col">
+            <button type="button" class="btn btn-success btn-lg" @onclick="SaveChanges">
+                <i class="bi bi-save"></i> Save Changes
+            </button>
+            <button type="button" class="btn btn-secondary btn-lg ms-2" @onclick="@(() => NavigationManager.NavigateTo("/Ultimates/Premium"))">
+                <i class="bi bi-x-circle"></i> Cancel
+            </button>
+            @if (!string.IsNullOrEmpty(message))
             {
-                <p class="text-muted">Loading history...</p>
-            }
-            else if (historyList != null && historyList.Any())
-            {
-                <div class="table-responsive">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>Update ID</th>
-                                <th>Update Date</th>
-                                <th>Updated By</th>
-                                <th class="text-end"># Records</th>
-                                <th class="text-end">@GetCurrencySymbol() Total Gross Premium</th>
-                                <th class="text-end">@GetCurrencySymbol() Total Net Premium</th>
-                                <th class="text-end">@GetCurrencySymbol() Total RIPs</th>
-                                <th class="text-end">@GetCurrencySymbol() Total PC</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var history in GetConvertedHistory())
-                            {
-                                <tr>
-                                    <td><strong>#@history.UpdateID</strong></td>
-                                    <td>@FormatDate(history.UpdateDate)</td>
-                                    <td>@history.UpdatedBy</td>
-                                    <td class="text-end">@history.RecordCount</td>
-                                    <td class="text-end">@FormatConvertedCurrency(history.TotalGrossPremium)</td>
-                                    <td class="text-end">@FormatConvertedCurrency(history.TotalNetPremium)</td>
-                                    <td class="text-end">@FormatConvertedCurrency(history.TotalRIPs)</td>
-                                    <td class="text-end">@FormatConvertedCurrency(history.TotalPC)</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            }
-            else
-            {
-                <p class="text-muted">No history available yet.</p>
+                <span class="ms-3 @(isError ? "text-danger" : "text-success") fw-bold">@message</span>
             }
         </div>
     </div>
 }
 
 @code {
-    [Parameter]
-    public string Class { get; set; } = string.Empty;
+    [Parameter] public string Class { get; set; } = string.Empty;
+    [Parameter] public int YOA { get; set; }
 
-    [Parameter]
-    public int YOA { get; set; }
-
-    private UltimatePremiumEditModel? model;
-    private List<UltimatePremiumHistoryModel>? historyList;
     private bool isLoading = true;
-    private bool historyLoading = true;
-    private string? saveMessage;
-    private string? errorMessage;
+    private string activeTab = "GrossPremium";
+    private List<string> currencies = new() { "GBP", "USD", "CAD", "EUR", "JPY" };
+    private List<GridRow> gridRows = new();
+    private string message = "";
+    private bool isError = false;
+
+    private class GridRow
+    {
+        public string ReservingClass { get; set; } = "";
+        public string DistributionChannel { get; set; } = "";
+        public string ValueType { get; set; } = "Value"; // One ValueType per row
+        public Dictionary<string, CurrencyCell> Cells { get; set; } = new();
+        public bool IsNew { get; set; }
+        public HashSet<string> ModifiedMetrics { get; set; } = new(); // Track which metrics were modified
+
+        public CurrencyCell GetOrCreateCell(string currency)
+        {
+            if (!Cells.ContainsKey(currency))
+                Cells[currency] = new CurrencyCell { Currency = currency };
+            return Cells[currency];
+        }
+    }
+
+    private class CurrencyCell
+    {
+        public string Currency { get; set; } = "";
+        public decimal? GrossPremium { get; set; }
+        public decimal? NetPremium { get; set; }
+        public decimal? RIPs { get; set; }
+        public decimal? PC { get; set; }
+    }
 
     protected override async Task OnInitializedAsync()
     {
-        await InitializeServices();
         await LoadData();
-        await LoadHistory();
-    }
-
-    private async Task InitializeServices()
-    {
-        try
-        {
-            // Initialize currency settings from localStorage
-            await CurrencySettings.InitializeAsync();
-
-            // Load FX rates for the selected rate set
-            await FxConversion.LoadRatesAsync();
-        }
-        catch (Exception ex)
-        {
-            Logger.LogError(ex, "Error initializing services");
-        }
-    }
-
-    private async Task OnCurrencySettingsChanged()
-    {
-        // Reload FX rates if needed (FxConversion already handles this via event subscription)
-        // Just trigger a re-render
-        StateHasChanged();
     }
 
     private async Task LoadData()
@@ -333,12 +232,37 @@ else if (model != null)
         isLoading = true;
         try
         {
-            model = await UltimatesService.GetUltimatePremiumByClassYOA(Class, YOA);
+            var model = await UltimatesService.GetUltimatePremiumByClassYOA(Class, YOA);
+
+            gridRows.Clear();
+            var grouped = model.Records.GroupBy(r => new { r.ReservingClass, r.DistributionChannel });
+
+            foreach (var group in grouped)
+            {
+                var row = new GridRow
+                {
+                    ReservingClass = group.Key.ReservingClass,
+                    DistributionChannel = group.Key.DistributionChannel,
+                    ValueType = group.First().ValueType // Use ValueType from first record
+                };
+
+                foreach (var rec in group)
+                {
+                    var cell = row.GetOrCreateCell(rec.Currency);
+                    cell.GrossPremium = rec.UltimateGrossPremium;
+                    cell.NetPremium = rec.UltimateNetPremium;
+                    cell.RIPs = rec.UltimateRIPs;
+                    cell.PC = rec.UltimatePC;
+                }
+
+                gridRows.Add(row);
+            }
         }
         catch (Exception ex)
         {
-            errorMessage = $"Error loading data: {ex.Message}";
-            model = new UltimatePremiumEditModel { Class = Class, YOA = YOA };
+            Logger.LogError(ex, "Error loading data");
+            message = $"Error: {ex.Message}";
+            isError = true;
         }
         finally
         {
@@ -346,202 +270,145 @@ else if (model != null)
         }
     }
 
-    private async Task LoadHistory()
+    private void SwitchTab(string tab)
     {
-        historyLoading = true;
-        try
-        {
-            var history = await UltimatesService.GetUltimatePremiumHistory(Class, YOA);
-            historyList = history.ToList();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error loading history: {ex.Message}");
-            historyList = new List<UltimatePremiumHistoryModel>();
-        }
-        finally
-        {
-            historyLoading = false;
-        }
+        activeTab = tab;
+        StateHasChanged();
     }
 
-    private void AddNewRecord()
+    private void OnRowValueTypeChanged(GridRow row, string? newValueType)
     {
-        var newRecord = new UltimatePremiumRecordModel
+        if (newValueType == null) return;
+
+        row.ValueType = newValueType;
+
+        // Clear all metric values when switching away from "Value"
+        if (row.ValueType != "Value")
+        {
+            foreach (var cell in row.Cells.Values)
             {
-                Class = Class,
-                YOA = YOA,
-                ReservingClass = string.Empty,
-                DistributionChannel = string.Empty,
-                Currency = string.Empty,
-                ValueType = "Value", // Default to Value
-                IsNew = true,
-                IsModified = true
-            };
-
-        model?.Records.Add(newRecord);
-    }
-
-    private void RemoveNewRecord(UltimatePremiumRecordModel record)
-    {
-        if (record.IsNew)
-        {
-            model?.Records.Remove(record);
-        }
-    }
-
-    private void MarkAsModified(UltimatePremiumRecordModel record)
-    {
-        record.IsModified = true;
-    }
-
-    private void OnValueTypeChanged(UltimatePremiumRecordModel record)
-    {
-        record.IsModified = true;
-
-        // If changing away from "Value", clear the premium fields
-        if (record.ValueType != "Value")
-        {
-            record.UltimateGrossPremium = null;
-            record.UltimateNetPremium = null;
-            record.UltimateRIPs = null;
-            record.UltimatePC = null;
+                cell.GrossPremium = null;
+                cell.NetPremium = null;
+                cell.RIPs = null;
+                cell.PC = null;
+            }
+            // Mark all metrics as modified since we cleared them
+            row.ModifiedMetrics.Add("GrossPremium");
+            row.ModifiedMetrics.Add("NetPremium");
+            row.ModifiedMetrics.Add("RIPs");
+            row.ModifiedMetrics.Add("PC");
         }
 
         StateHasChanged();
     }
 
-    private async Task HandleValidSubmit()
+    private void OnValueChanged(GridRow row, CurrencyCell cell, string metric, string? newValue)
     {
-        saveMessage = null;
-        errorMessage = null;
+        if (string.IsNullOrEmpty(newValue))
+        {
+            SetCellValue(cell, metric, null);
+        }
+        else if (decimal.TryParse(newValue, out var decValue))
+        {
+            SetCellValue(cell, metric, decValue);
+        }
+
+        // Mark this specific metric as modified
+        row.ModifiedMetrics.Add(metric);
+    }
+
+    private void SetCellValue(CurrencyCell cell, string metric, decimal? value)
+    {
+        switch (metric)
+        {
+            case "GrossPremium": cell.GrossPremium = value; break;
+            case "NetPremium": cell.NetPremium = value; break;
+            case "RIPs": cell.RIPs = value; break;
+            case "PC": cell.PC = value; break;
+        }
+    }
+
+    private void AddRow()
+    {
+        var newRow = new GridRow { IsNew = true };
+        newRow.ModifiedMetrics.Add("GrossPremium");
+        newRow.ModifiedMetrics.Add("NetPremium");
+        newRow.ModifiedMetrics.Add("RIPs");
+        newRow.ModifiedMetrics.Add("PC");
+        gridRows.Add(newRow);
+    }
+
+    private void RemoveRow(GridRow row)
+    {
+        if (row.IsNew) gridRows.Remove(row);
+    }
+
+    private async Task SaveChanges()
+    {
+        message = "";
+        isError = false;
 
         try
         {
-            // Validate that all new records have required fields
-            var invalidRecords = model?.Records.Where(r =>
-                r.IsNew && (string.IsNullOrWhiteSpace(r.ReservingClass) ||
-                           string.IsNullOrWhiteSpace(r.DistributionChannel) ||
-                           string.IsNullOrWhiteSpace(r.Currency))).ToList();
+            var editModel = new UltimatePremiumEditModel { Class = Class, YOA = YOA };
 
-            if (invalidRecords?.Any() == true)
+            foreach (var row in gridRows.Where(r => r.IsNew || r.ModifiedMetrics.Any()))
             {
-                errorMessage = "Please fill in all required fields for new records (Reserving Class, Distribution Channel, Currency).";
-                return;
+                foreach (var cell in row.Cells.Values)
+                {
+                    // Only save if this row has modified metrics or is new
+                    if (row.IsNew || row.ModifiedMetrics.Any())
+                    {
+                        editModel.Records.Add(new UltimatePremiumRecordModel
+                        {
+                            Class = Class,
+                            YOA = YOA,
+                            ReservingClass = row.ReservingClass,
+                            DistributionChannel = row.DistributionChannel,
+                            Currency = cell.Currency,
+                            ValueType = row.ValueType,
+                            UltimateGrossPremium = cell.GrossPremium,
+                            UltimateNetPremium = cell.NetPremium,
+                            UltimateRIPs = cell.RIPs,
+                            UltimatePC = cell.PC,
+                            IsModified = true
+                        });
+                    }
+                }
             }
 
-            // Validate Distribution Channel
-            var invalidChannels = model?.Records.Where(r =>
-                !string.IsNullOrEmpty(r.DistributionChannel) &&
-                r.DistributionChannel != "EU" &&
-                r.DistributionChannel != "LNDN").ToList();
+            await UltimatesService.SaveUltimatePremium(editModel);
+            message = "✓ Saved successfully!";
 
-            if (invalidChannels?.Any() == true)
-            {
-                errorMessage = "Distribution Channel must be either 'EU' or 'LNDN'.";
-                return;
-            }
-
-            if (model != null)
-            {
-                await UltimatesService.SaveUltimatePremium(model);
-                saveMessage = "Changes saved successfully!";
-
-                // Reload data to get updated values
-                await Task.Delay(1000); // Brief delay to show save message
-                await LoadData();
-                await LoadHistory();
-            }
+            await Task.Delay(1500);
+            await LoadData();
         }
         catch (Exception ex)
         {
-            errorMessage = $"Error saving changes: {ex.Message}";
+            Logger.LogError(ex, "Error saving");
+            message = $"Error: {ex.Message}";
+            isError = true;
         }
     }
 
-    private void NavigateBack()
+    private string GetTabTitle(string tab) => tab switch
     {
-        NavigationManager.NavigateTo("/Ultimates/Premium");
+        "GrossPremium" => "Ultimate Gross Premium",
+        "NetPremium" => "Ultimate Net Premium",
+        "RIPs" => "Ultimate RIPs",
+        "PC" => "Ultimate PC",
+        _ => tab
+    };
+
+    private bool IsTabModified(string tab)
+    {
+        // Only show badge if THIS specific metric was modified
+        return gridRows.Any(r => r.ModifiedMetrics.Contains(tab));
     }
 
-    // Currency conversion methods
-    private decimal? GetConvertedTotalGrossPremium()
+    private bool IsRowModifiedForTab(GridRow row)
     {
-        if (model == null || model.Records == null) return 0;
-        return model.Records.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateGrossPremium, r.Currency));
-    }
-
-    private decimal? GetConvertedTotalNetPremium()
-    {
-        if (model == null || model.Records == null) return 0;
-        return model.Records.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateNetPremium, r.Currency));
-    }
-
-    private decimal? GetConvertedTotalRIPs()
-    {
-        if (model == null || model.Records == null) return 0;
-        return model.Records.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateRIPs, r.Currency));
-    }
-
-    private decimal? GetConvertedTotalPC()
-    {
-        if (model == null || model.Records == null) return 0;
-        return model.Records.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimatePC, r.Currency));
-    }
-
-    // Converted history class
-    private class ConvertedHistoryModel
-    {
-        public int UpdateID { get; set; }
-        public DateTime? UpdateDate { get; set; }
-        public string? UpdatedBy { get; set; }
-        public int RecordCount { get; set; }
-        public decimal? TotalGrossPremium { get; set; }
-        public decimal? TotalNetPremium { get; set; }
-        public decimal? TotalRIPs { get; set; }
-        public decimal? TotalPC { get; set; }
-    }
-
-    private List<ConvertedHistoryModel> GetConvertedHistory()
-    {
-        if (historyList == null) return new List<ConvertedHistoryModel>();
-
-        // Note: History shows aggregated totals from multiple currencies
-        // For now, we'll just display the raw totals since we don't have individual record currencies in history
-        // This is a known limitation - history aggregates lose currency information
-        return historyList.Select(h => new ConvertedHistoryModel
-        {
-            UpdateID = h.UpdateID,
-            UpdateDate = h.UpdateDate,
-            UpdatedBy = h.UpdatedBy,
-            RecordCount = h.RecordCount,
-            TotalGrossPremium = h.TotalUltimateGrossPremium, // Can't convert without currency info
-            TotalNetPremium = h.TotalUltimateNetPremium,
-            TotalRIPs = h.TotalUltimateRIPs,
-            TotalPC = h.TotalUltimatePC
-        }).ToList();
-    }
-
-    private string GetCurrencySymbol()
-    {
-        return CurrencySettings.DisplayCurrency == "GBP" ? "£" : "$";
-    }
-
-    private string FormatConvertedCurrency(decimal? value)
-    {
-        if (!value.HasValue) return "-";
-        return value.Value.ToString("N0");
-    }
-
-    private string FormatCurrency(decimal? value)
-    {
-        if (!value.HasValue) return "-";
-        return value.Value.ToString("N0");
-    }
-
-    private string FormatDate(DateTime? date)
-    {
-        if (!date.HasValue) return "-";
-        return date.Value.ToString("yyyy-MM-dd HH:mm");
+        // Only highlight row if the current active tab's metric was modified
+        return row.ModifiedMetrics.Contains(activeTab);
     }
 }
