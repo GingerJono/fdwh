@@ -12,6 +12,7 @@ namespace sandboxapp.Models.Ultimates
 
         // Counts
         public int RecordCount { get; set; }
+        public int UpdateCount { get; set; } // Number of times this Class/YOA has been updated
 
         // Aggregated totals (from current snapshot)
         public decimal? TotalUltimateGrossPremium { get; set; }

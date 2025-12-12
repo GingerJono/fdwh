@@ -31,6 +31,10 @@ namespace sandboxapp.Models.Ultimates
         [Required]
         public string Currency { get; set; } = string.Empty;
 
+        // Value Type (how the value is set)
+        [Required]
+        public string ValueType { get; set; } = "Value"; // 'Written', 'Signed', 'Plan', 'Value'
+
         // Ultimate Premium Fields
         public decimal? UltimateGrossPremium { get; set; }
         public decimal? UltimateNetPremium { get; set; }

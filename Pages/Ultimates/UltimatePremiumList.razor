@@ -27,8 +27,84 @@
         <p class="mt-2">Loading Ultimate Premium data...</p>
     </div>
 }
-else if (summaryList != null && summaryList.Any())
+else if (allSummaryList != null && allSummaryList.Any())
 {
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card border-primary">
+                <div class="card-body text-center">
+                    <h6 class="text-muted text-uppercase mb-2">Overall Total (#)</h6>
+                    <h2 class="mb-0 text-primary">@FormatCurrency(allSummaryList.Sum(s => s.TotalUltimateGrossPremium))</h2>
+                    <small class="text-muted">Ultimate Gross Premium</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-success">
+                <div class="card-body text-center">
+                    <h6 class="text-muted text-uppercase mb-2">Latest Update</h6>
+                    <h2 class="mb-0 text-success">@FormatDate(allSummaryList.Max(s => s.LastUpdatedDate))</h2>
+                    <small class="text-muted">Most recent change</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-info">
+                <div class="card-body text-center">
+                    <h6 class="text-muted text-uppercase mb-2">Total Updates</h6>
+                    <h2 class="mb-0 text-info">@allSummaryList.Sum(s => s.UpdateCount)</h2>
+                    <small class="text-muted">Across all Class/YOA combinations</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">Filters</h5>
+        </div>
+        <div class="card-body">
+            <!-- YOA Filter Pills -->
+            <div class="mb-3">
+                <label class="form-label fw-bold">Year of Account:</label>
+                <div class="d-flex flex-wrap gap-2">
+                    <button class="btn btn-sm @(selectedYOA == null ? "btn-primary" : "btn-outline-primary")"
+                            @onclick="() => FilterByYOA(null)">
+                        All YOAs
+                    </button>
+                    @foreach (var yoa in availableYOAs)
+                    {
+                        <button class="btn btn-sm @(selectedYOA == yoa ? "btn-primary" : "btn-outline-primary")"
+                                @onclick="() => FilterByYOA(yoa)">
+                            @yoa
+                        </button>
+                    }
+                </div>
+            </div>
+
+            <!-- Class Filter Pills -->
+            <div class="mb-0">
+                <label class="form-label fw-bold">Class:</label>
+                <div class="d-flex flex-wrap gap-2">
+                    <button class="btn btn-sm @(selectedClass == null ? "btn-success" : "btn-outline-success")"
+                            @onclick="() => FilterByClass(null)">
+                        All Classes
+                    </button>
+                    @foreach (var className in availableClasses)
+                    {
+                        <button class="btn btn-sm @(selectedClass == className ? "btn-success" : "btn-outline-success")"
+                                @onclick="() => FilterByClass(className)">
+                            @className
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Table -->
     <div class="card">
         <div class="card-header bg-primary text-white">
             <h5 class="mb-0">Class / YOA Summary</h5>
@@ -40,23 +116,25 @@ else if (summaryList != null && summaryList.Any())
                         <tr>
                             <th>Class</th>
                             <th>YOA</th>
-                            <th class="text-end">Records</th>
-                            <th class="text-end">Total Gross Premium</th>
-                            <th class="text-end">Total Net Premium</th>
-                            <th class="text-end">Total RIPs</th>
-                            <th class="text-end">Total PC</th>
+                            <th class="text-end"># Records</th>
+                            <th class="text-end"># Updates</th>
+                            <th class="text-end"># Total Gross Premium</th>
+                            <th class="text-end"># Total Net Premium</th>
+                            <th class="text-end"># Total RIPs</th>
+                            <th class="text-end"># Total PC</th>
                             <th>Last Updated</th>
                             <th>Updated By</th>
                             <th class="text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var summary in summaryList)
+                        @foreach (var summary in filteredSummaryList)
                         {
                             <tr>
                                 <td><strong>@summary.Class</strong></td>
-                                <td>@summary.YOA</td>
+                                <td><strong>@summary.YOA</strong></td>
                                 <td class="text-end">@summary.RecordCount</td>
+                                <td class="text-end"><span class="badge bg-info">@summary.UpdateCount</span></td>
                                 <td class="text-end">@FormatCurrency(summary.TotalUltimateGrossPremium)</td>
                                 <td class="text-end">@FormatCurrency(summary.TotalUltimateNetPremium)</td>
                                 <td class="text-end">@FormatCurrency(summary.TotalUltimateRIPs)</td>
@@ -74,12 +152,13 @@ else if (summaryList != null && summaryList.Any())
                     </tbody>
                     <tfoot>
                         <tr class="table-secondary fw-bold">
-                            <td colspan="2">TOTAL</td>
-                            <td class="text-end">@summaryList.Sum(s => s.RecordCount)</td>
-                            <td class="text-end">@FormatCurrency(summaryList.Sum(s => s.TotalUltimateGrossPremium))</td>
-                            <td class="text-end">@FormatCurrency(summaryList.Sum(s => s.TotalUltimateNetPremium))</td>
-                            <td class="text-end">@FormatCurrency(summaryList.Sum(s => s.TotalUltimateRIPs))</td>
-                            <td class="text-end">@FormatCurrency(summaryList.Sum(s => s.TotalUltimatePC))</td>
+                            <td colspan="2">FILTERED TOTAL</td>
+                            <td class="text-end">@filteredSummaryList.Sum(s => s.RecordCount)</td>
+                            <td class="text-end">@filteredSummaryList.Sum(s => s.UpdateCount)</td>
+                            <td class="text-end">@FormatCurrency(filteredSummaryList.Sum(s => s.TotalUltimateGrossPremium))</td>
+                            <td class="text-end">@FormatCurrency(filteredSummaryList.Sum(s => s.TotalUltimateNetPremium))</td>
+                            <td class="text-end">@FormatCurrency(filteredSummaryList.Sum(s => s.TotalUltimateRIPs))</td>
+                            <td class="text-end">@FormatCurrency(filteredSummaryList.Sum(s => s.TotalUltimatePC))</td>
                             <td colspan="3"></td>
                         </tr>
                     </tfoot>
@@ -97,8 +176,17 @@ else
 }
 
 @code {
-    private List<UltimatePremiumSummaryModel>? summaryList;
+    private List<UltimatePremiumSummaryModel>? allSummaryList;
+    private List<UltimatePremiumSummaryModel> filteredSummaryList = new();
     private bool isLoading = true;
+
+    // Filter state
+    private int? selectedYOA = null;
+    private string? selectedClass = null;
+
+    // Available filter values
+    private List<int> availableYOAs = new();
+    private List<string> availableClasses = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -111,18 +199,47 @@ else
         try
         {
             var data = await UltimatesService.GetUltimatePremiumList();
-            summaryList = data.ToList();
+            allSummaryList = data.ToList();
+
+            // Extract available filter values
+            availableYOAs = allSummaryList.Select(s => s.YOA).Distinct().OrderByDescending(y => y).ToList();
+            availableClasses = allSummaryList.Select(s => s.Class).Distinct().OrderBy(c => c).ToList();
+
+            // Apply initial filter
+            ApplyFilters();
         }
         catch (Exception ex)
         {
-            // Log error - in production, show error message to user
             Console.WriteLine($"Error loading Ultimate Premium list: {ex.Message}");
-            summaryList = new List<UltimatePremiumSummaryModel>();
+            allSummaryList = new List<UltimatePremiumSummaryModel>();
+            filteredSummaryList = new List<UltimatePremiumSummaryModel>();
         }
         finally
         {
             isLoading = false;
         }
+    }
+
+    private void FilterByYOA(int? yoa)
+    {
+        selectedYOA = yoa;
+        ApplyFilters();
+    }
+
+    private void FilterByClass(string? className)
+    {
+        selectedClass = className;
+        ApplyFilters();
+    }
+
+    private void ApplyFilters()
+    {
+        if (allSummaryList == null) return;
+
+        filteredSummaryList = allSummaryList
+            .Where(s => selectedYOA == null || s.YOA == selectedYOA)
+            .Where(s => selectedClass == null || s.Class == selectedClass)
+            .ToList();
     }
 
     private string FormatCurrency(decimal? value)
@@ -134,6 +251,6 @@ else
     private string FormatDate(DateTime? date)
     {
         if (!date.HasValue) return "-";
-        return date.Value.ToString("dd MMM yyyy");
+        return date.Value.ToString("yyyy-MM-dd HH:mm");
     }
 }

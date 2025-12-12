@@ -210,6 +210,7 @@ namespace sandboxapp.Services
                         parameters.Add("@YOA", model.YOA, DbType.Int32);
                         parameters.Add("@DistributionChannel", record.DistributionChannel, DbType.String);
                         parameters.Add("@Currency", record.Currency, DbType.String);
+                        parameters.Add("@ValueType", record.ValueType, DbType.String);
                         parameters.Add("@UltimateGrossPremium", record.UltimateGrossPremium, DbType.Decimal);
                         parameters.Add("@UltimateNetPremium", record.UltimateNetPremium, DbType.Decimal);
                         parameters.Add("@UltimateRIPs", record.UltimateRIPs, DbType.Decimal);

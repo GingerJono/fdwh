@@ -59,6 +59,9 @@ BEGIN
         [DistributionChannel] NVARCHAR(10) NOT NULL, -- 'EU' or 'LNDN'
         [Currency] NVARCHAR(10) NOT NULL,
 
+        -- Value Type (how the value is set)
+        [ValueType] NVARCHAR(20) NOT NULL DEFAULT 'Value', -- 'Written', 'Signed', 'Plan', 'Value'
+
         -- Ultimate Premium Fields
         [UltimateGrossPremium] DECIMAL(18,2) NULL,
         [UltimateNetPremium] DECIMAL(18,2) NULL,
@@ -68,7 +71,8 @@ BEGIN
         -- Constraints
         CONSTRAINT [PK_UltimatePremium] PRIMARY KEY CLUSTERED ([UltimatePremiumID] ASC),
         CONSTRAINT [FK_UltimatePremium_Updates] FOREIGN KEY ([UpdateID]) REFERENCES [Ultimates].[Updates]([UpdateID]),
-        CONSTRAINT [CHK_UltimatePremium_DistributionChannel] CHECK ([DistributionChannel] IN ('EU', 'LNDN'))
+        CONSTRAINT [CHK_UltimatePremium_DistributionChannel] CHECK ([DistributionChannel] IN ('EU', 'LNDN')),
+        CONSTRAINT [CHK_UltimatePremium_ValueType] CHECK ([ValueType] IN ('Written', 'Signed', 'Plan', 'Value'))
     )
 
     -- Indexes for common queries
@@ -110,6 +114,7 @@ AS
         up.YOA,
         up.DistributionChannel,
         up.Currency,
+        up.ValueType,
         up.UltimateGrossPremium,
         up.UltimateNetPremium,
         up.UltimateRIPs,
@@ -154,17 +159,20 @@ GO
 CREATE VIEW [Ultimates].[vwUltimatePremiumSummaryByClassYOA]
 AS
     SELECT
-        Class,
-        YOA,
+        snapshot.Class,
+        snapshot.YOA,
         COUNT(*) AS RecordCount,
-        SUM(UltimateGrossPremium) AS TotalUltimateGrossPremium,
-        SUM(UltimateNetPremium) AS TotalUltimateNetPremium,
-        SUM(UltimateRIPs) AS TotalUltimateRIPs,
-        SUM(UltimatePC) AS TotalUltimatePC,
-        MAX(UpdateDate) AS LastUpdatedDate,
-        MAX(UpdatedBy) AS LastUpdatedBy
-    FROM [Ultimates].[vwUltimatePremiumSnapshot]
-    GROUP BY Class, YOA
+        SUM(snapshot.UltimateGrossPremium) AS TotalUltimateGrossPremium,
+        SUM(snapshot.UltimateNetPremium) AS TotalUltimateNetPremium,
+        SUM(snapshot.UltimateRIPs) AS TotalUltimateRIPs,
+        SUM(snapshot.UltimatePC) AS TotalUltimatePC,
+        MAX(snapshot.UpdateDate) AS LastUpdatedDate,
+        MAX(snapshot.UpdatedBy) AS LastUpdatedBy,
+        (SELECT COUNT(DISTINCT up.UpdateID)
+         FROM [Ultimates].[UltimatePremium] up
+         WHERE up.Class = snapshot.Class AND up.YOA = snapshot.YOA) AS UpdateCount
+    FROM [Ultimates].[vwUltimatePremiumSnapshot] snapshot
+    GROUP BY snapshot.Class, snapshot.YOA
 GO
 
 PRINT 'View [Ultimates].[vwUltimatePremiumSummaryByClassYOA] created successfully'
