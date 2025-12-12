@@ -3,6 +3,7 @@
 @using sandboxapp.Services
 @using sandboxapp.Utilities
 @inject UltimatesService UltimatesService
+@inject FxConversionService FxConversion
 @inject NavigationManager NavigationManager
 @inject ILogger<EditUltimatePremium> Logger
 
@@ -219,7 +220,6 @@ else if (gridRows != null)
     private List<GridRow> gridRows = new();
     private string message = "";
     private bool isError = false;
-    private List<FXRate> fxRates = new();
 
     private class GridRow
     {
@@ -275,7 +275,6 @@ else if (gridRows != null)
         try
         {
             var model = await UltimatesService.GetUltimatePremiumByClassYOA(Class, YOA);
-            fxRates = await UltimatesService.GetFXRates(YOA);
 
             gridRows.Clear();
             var grouped = model.Records.GroupBy(r => new { r.ReservingClass, r.DistributionChannel });
@@ -539,7 +538,7 @@ else if (gridRows != null)
         await Task.CompletedTask;
     }
 
-    // Calculate CNV Total (sum of 5 currency cells converted to base currency)
+    // Calculate CNV Total (sum of 5 currency cells converted to base currency GBP)
     private decimal? GetCNVTotal(GridRow row)
     {
         decimal total = 0m;
@@ -560,11 +559,11 @@ else if (gridRows != null)
             if (value.HasValue)
             {
                 hasAnyValue = true;
-                // Convert to base currency (GBP)
-                var rate = fxRates.FirstOrDefault(r => r.Currency == curr);
-                if (rate != null && rate.Rate > 0)
+                // Convert to base currency (GBP) using FxConversionService
+                var convertedValue = FxConversion.Convert(value, curr, "GBP");
+                if (convertedValue.HasValue)
                 {
-                    total += value.Value / rate.Rate;
+                    total += convertedValue.Value;
                 }
             }
         }
