@@ -30,7 +30,7 @@ else if (model != null)
             @if (model.UpdateDate.HasValue)
             {
                 <p class="text-muted">
-                    Last updated: @model.UpdateDate.Value.ToString("dd MMM yyyy HH:mm")
+                    Last updated: @model.UpdateDate.Value.ToString("yyyy-MM-dd HH:mm")
                     by @model.UpdatedBy
                 </p>
             }
@@ -44,7 +44,7 @@ else if (model != null)
         <!-- Summary Card -->
         <div class="card mb-4 border-primary">
             <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">Summary Totals</h5>
+                <h5 class="mb-0">Summary Totals (#)</h5>
             </div>
             <div class="card-body">
                 <div class="row">
@@ -90,12 +90,13 @@ else if (model != null)
                         <thead class="table-light sticky-top">
                             <tr>
                                 <th>Reserving Class</th>
-                                <th>Distribution Channel</th>
+                                <th>Dist. Channel</th>
                                 <th>Currency</th>
-                                <th class="text-end">Ultimate Gross Premium</th>
-                                <th class="text-end">Ultimate Net Premium</th>
-                                <th class="text-end">Ultimate RIPs</th>
-                                <th class="text-end">Ultimate PC</th>
+                                <th style="width: 130px;">Value Type</th>
+                                <th class="text-end">Gross Premium</th>
+                                <th class="text-end">Net Premium</th>
+                                <th class="text-end">RIPs</th>
+                                <th class="text-end">PC</th>
                                 <th class="text-center">Actions</th>
                             </tr>
                         </thead>
@@ -144,24 +145,38 @@ else if (model != null)
                                         }
                                     </td>
                                     <td>
+                                        <InputSelect class="form-select form-select-sm"
+                                                     @bind-Value="record.ValueType"
+                                                     @onchange="() => OnValueTypeChanged(record)">
+                                            <option value="Written">Set to Written</option>
+                                            <option value="Signed">Set to Signed</option>
+                                            <option value="Plan">Set to Plan</option>
+                                            <option value="Value">Set to Value</option>
+                                        </InputSelect>
+                                    </td>
+                                    <td>
                                         <InputNumber class="form-control form-control-sm text-end"
                                                      @bind-Value="record.UltimateGrossPremium"
-                                                     @oninput="() => MarkAsModified(record)" />
+                                                     @oninput="() => MarkAsModified(record)"
+                                                     disabled="@(record.ValueType != "Value")" />
                                     </td>
                                     <td>
                                         <InputNumber class="form-control form-control-sm text-end"
                                                      @bind-Value="record.UltimateNetPremium"
-                                                     @oninput="() => MarkAsModified(record)" />
+                                                     @oninput="() => MarkAsModified(record)"
+                                                     disabled="@(record.ValueType != "Value")" />
                                     </td>
                                     <td>
                                         <InputNumber class="form-control form-control-sm text-end"
                                                      @bind-Value="record.UltimateRIPs"
-                                                     @oninput="() => MarkAsModified(record)" />
+                                                     @oninput="() => MarkAsModified(record)"
+                                                     disabled="@(record.ValueType != "Value")" />
                                     </td>
                                     <td>
                                         <InputNumber class="form-control form-control-sm text-end"
                                                      @bind-Value="record.UltimatePC"
-                                                     @oninput="() => MarkAsModified(record)" />
+                                                     @oninput="() => MarkAsModified(record)"
+                                                     disabled="@(record.ValueType != "Value")" />
                                     </td>
                                     <td class="text-center">
                                         @if (record.IsNew)
@@ -177,7 +192,7 @@ else if (model != null)
                             @if (model.Records.Count == 0)
                             {
                                 <tr>
-                                    <td colspan="8" class="text-center text-muted py-4">
+                                    <td colspan="9" class="text-center text-muted py-4">
                                         No records found. Click "Add Row" to create the first record.
                                     </td>
                                 </tr>
@@ -228,11 +243,11 @@ else if (model != null)
                                 <th>Update ID</th>
                                 <th>Update Date</th>
                                 <th>Updated By</th>
-                                <th class="text-end">Records</th>
-                                <th class="text-end">Total Gross Premium</th>
-                                <th class="text-end">Total Net Premium</th>
-                                <th class="text-end">Total RIPs</th>
-                                <th class="text-end">Total PC</th>
+                                <th class="text-end"># Records</th>
+                                <th class="text-end"># Total Gross Premium</th>
+                                <th class="text-end"># Total Net Premium</th>
+                                <th class="text-end"># Total RIPs</th>
+                                <th class="text-end"># Total PC</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -327,6 +342,7 @@ else if (model != null)
                 ReservingClass = string.Empty,
                 DistributionChannel = string.Empty,
                 Currency = string.Empty,
+                ValueType = "Value", // Default to Value
                 IsNew = true,
                 IsModified = true
             };
@@ -345,6 +361,22 @@ else if (model != null)
     private void MarkAsModified(UltimatePremiumRecordModel record)
     {
         record.IsModified = true;
+    }
+
+    private void OnValueTypeChanged(UltimatePremiumRecordModel record)
+    {
+        record.IsModified = true;
+
+        // If changing away from "Value", clear the premium fields
+        if (record.ValueType != "Value")
+        {
+            record.UltimateGrossPremium = null;
+            record.UltimateNetPremium = null;
+            record.UltimateRIPs = null;
+            record.UltimatePC = null;
+        }
+
+        StateHasChanged();
     }
 
     private async Task HandleValidSubmit()
@@ -409,6 +441,6 @@ else if (model != null)
     private string FormatDate(DateTime? date)
     {
         if (!date.HasValue) return "-";
-        return date.Value.ToString("dd MMM yyyy HH:mm");
+        return date.Value.ToString("yyyy-MM-dd HH:mm");
     }
 }
