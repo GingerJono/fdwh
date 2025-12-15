@@ -128,6 +128,9 @@ builder.Services.AddScoped<ORIService>();
 builder.Services.AddScoped<PrismService>();
 builder.Services.AddScoped<FDWHReportingService>();
 builder.Services.AddScoped<ExceptionService>();
+builder.Services.AddScoped<sandboxapp.Services.UltimatesService>();
+builder.Services.AddScoped<sandboxapp.Services.CurrencySettingsService>();
+builder.Services.AddScoped<sandboxapp.Services.FxConversionService>();
 builder.Services.AddScoped<CookieManager>();
 builder.Services.AddScoped<CytoraCheckingFilterState>();
 

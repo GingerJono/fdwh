@@ -1,0 +1,166 @@
+@using sandboxapp.Services
+@using sandboxapp.Models.Ultimates
+@using sandboxapp.Utilities
+@inject CurrencySettingsService CurrencySettings
+@inject FxConversionService FxConversion
+@inject UltimatesService UltimatesService
+@inject ILogger<UltimateCurrencySettings> Logger
+
+<div class="card border-info mb-3">
+    <div class="card-header bg-info text-white">
+        <h6 class="mb-0">
+            <i class="bi bi-currency-exchange me-2"></i>Currency Display Settings
+        </h6>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <!-- Display Currency Selection -->
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">Display Currency</label>
+                <div class="btn-group w-100" role="group">
+                    <input type="radio"
+                           class="btn-check"
+                           name="displayCurrency"
+                           id="currencyGBP"
+                           value="GBP"
+                           checked="@(selectedDisplayCurrency == "GBP")"
+                           @onchange="@(() => OnDisplayCurrencyChanged("GBP"))" />
+                    <label class="btn btn-outline-primary" for="currencyGBP">
+                        <span class="@CurrencyUtility.GetCurrencyFlagClass("GBP")" style="width: 1.33em; height: 1em; display: inline-block; vertical-align: middle;"></span> GBP (£)
+                    </label>
+
+                    <input type="radio"
+                           class="btn-check"
+                           name="displayCurrency"
+                           id="currencyUSD"
+                           value="USD"
+                           checked="@(selectedDisplayCurrency == "USD")"
+                           @onchange="@(() => OnDisplayCurrencyChanged("USD"))" />
+                    <label class="btn btn-outline-primary" for="currencyUSD">
+                        <span class="@CurrencyUtility.GetCurrencyFlagClass("USD")" style="width: 1.33em; height: 1em; display: inline-block; vertical-align: middle;"></span> USD ($)
+                    </label>
+                </div>
+            </div>
+
+            <!-- FX Rate Set Selection -->
+            <div class="col-md-6">
+                <label for="fxRateSet" class="form-label fw-semibold">FX Rate Set</label>
+                <select id="fxRateSet"
+                        class="form-select"
+                        value="@selectedFxRateSetId"
+                        @onchange="OnFxRateSetChanged">
+                    @if (rateSets == null || !rateSets.Any())
+                    {
+                        <option value="">Loading...</option>
+                    }
+                    else
+                    {
+                        @foreach (var rateSet in rateSets)
+                        {
+                            <option value="@rateSet.FxRateSetID">
+                                @rateSet.RateSetName
+                                @if (rateSet.EffectiveDate.HasValue)
+                                {
+                                    <text> - @rateSet.EffectiveDate.Value.ToString("dd MMM yyyy")</text>
+                                }
+                            </option>
+                        }
+                    }
+                </select>
+            </div>
+        </div>
+
+        @if (showSavedMessage)
+        {
+            <div class="alert alert-success alert-dismissible fade show mt-3 mb-0" role="alert">
+                <i class="bi bi-check-circle me-2"></i>Settings saved successfully!
+                <button type="button" class="btn-close" @onclick="() => showSavedMessage = false"></button>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public EventCallback OnSettingsChanged { get; set; }
+
+    private List<FxRateSetModel> rateSets = new();
+    private string selectedDisplayCurrency = "GBP";
+    private int selectedFxRateSetId = 1;
+    private bool showSavedMessage = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Initialize currency settings from localStorage
+            await CurrencySettings.InitializeAsync();
+
+            // Load current settings
+            selectedDisplayCurrency = CurrencySettings.DisplayCurrency;
+            selectedFxRateSetId = CurrencySettings.SelectedFxRateSetId;
+
+            // Load available FX rate sets
+            var rateSetsData = await UltimatesService.GetFxRateSets();
+            rateSets = rateSetsData.ToList();
+
+            // Load FX rates for the selected rate set
+            await FxConversion.LoadRatesAsync();
+
+            Logger.LogInformation("Currency settings component initialized: DisplayCurrency={DisplayCurrency}, RateSetId={RateSetId}",
+                selectedDisplayCurrency, selectedFxRateSetId);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error initializing currency settings component");
+        }
+    }
+
+    private async Task OnDisplayCurrencyChanged(string currency)
+    {
+        try
+        {
+            selectedDisplayCurrency = currency;
+            await CurrencySettings.SetDisplayCurrencyAsync(currency);
+
+            showSavedMessage = true;
+            await Task.Delay(3000);
+            showSavedMessage = false;
+
+            // Notify parent component to refresh
+            await OnSettingsChanged.InvokeAsync();
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error changing display currency to {Currency}", currency);
+        }
+    }
+
+    private async Task OnFxRateSetChanged(ChangeEventArgs e)
+    {
+        try
+        {
+            if (int.TryParse(e.Value?.ToString(), out int rateSetId))
+            {
+                selectedFxRateSetId = rateSetId;
+                await CurrencySettings.SetFxRateSetAsync(rateSetId);
+
+                // Reload FX rates for the new rate set
+                await FxConversion.LoadRatesAsync();
+
+                showSavedMessage = true;
+                await Task.Delay(3000);
+                showSavedMessage = false;
+
+                // Notify parent component to refresh
+                await OnSettingsChanged.InvokeAsync();
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error changing FX rate set to {RateSetId}", e.Value);
+        }
+    }
+}

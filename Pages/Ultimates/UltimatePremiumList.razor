@@ -1,0 +1,374 @@
+@page "/Ultimates/Premium"
+@using sandboxapp.Models.Ultimates
+@using sandboxapp.Services
+@using sandboxapp.Utilities
+@inject UltimatesService UltimatesService
+@inject FxConversionService FxConversion
+@inject CurrencySettingsService CurrencySettings
+@inject NavigationManager NavigationManager
+@inject ILogger<UltimatePremiumList> Logger
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/Ultimates/Premium">ULTIMATES</a></li>
+        <li class="breadcrumb-item active" aria-current="page">PREMIUM</li>
+    </ol>
+</nav>
+
+<div class="row mb-3">
+    <div class="col">
+        <h1>Ultimate Premium Tracking</h1>
+        <p class="text-muted">View and edit underwriter selections of Ultimate Premium by Class and YOA</p>
+    </div>
+</div>
+
+<!-- Currency Settings Component -->
+<UltimateCurrencySettings OnSettingsChanged="OnCurrencySettingsChanged" />
+
+@if (isLoading)
+{
+    <div class="text-center p-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2">Loading Ultimate Premium data...</p>
+    </div>
+}
+else if (allRecords != null && allRecords.Any())
+{
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card border-primary">
+                <div class="card-body text-center">
+                    <h6 class="text-muted text-uppercase mb-2">Overall Total @GetCurrencySymbol() Gross Premium</h6>
+                    <h2 class="mb-0 text-primary">@FormatCurrencyConverted(GetTotalGrossPremium())</h2>
+                    <small class="text-muted">Converted to @CurrencySettings.DisplayCurrency</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-success">
+                <div class="card-body text-center">
+                    <h6 class="text-muted text-uppercase mb-2">Latest Update</h6>
+                    <h2 class="mb-0 text-success">@FormatDate(GetLatestUpdateDate())</h2>
+                    <small class="text-muted">Most recent change</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-info">
+                <div class="card-body text-center">
+                    <h6 class="text-muted text-uppercase mb-2">Total Updates</h6>
+                    <h2 class="mb-0 text-info">@GetTotalUpdateCount()</h2>
+                    <small class="text-muted">Across all Class/YOA combinations</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">Filters</h5>
+        </div>
+        <div class="card-body">
+            <!-- YOA Filter Pills -->
+            <div class="mb-3">
+                <label class="form-label fw-bold">Year of Account:</label>
+                <div class="d-flex flex-wrap gap-2">
+                    <button class="btn btn-sm @(selectedYOA == null ? "btn-primary" : "btn-outline-primary")"
+                            @onclick="() => FilterByYOA(null)">
+                        All YOAs
+                    </button>
+                    @foreach (var yoa in availableYOAs)
+                    {
+                        <button class="btn btn-sm @(selectedYOA == yoa ? "btn-primary" : "btn-outline-primary")"
+                                @onclick="() => FilterByYOA(yoa)">
+                            @yoa
+                        </button>
+                    }
+                </div>
+            </div>
+
+            <!-- Class Filter Pills -->
+            <div class="mb-0">
+                <label class="form-label fw-bold">Class:</label>
+                <div class="d-flex flex-wrap gap-2">
+                    <button class="btn btn-sm @(selectedClass == null ? "btn-success" : "btn-outline-success")"
+                            @onclick="() => FilterByClass(null)">
+                        All Classes
+                    </button>
+                    @foreach (var className in availableClasses)
+                    {
+                        <button class="btn btn-sm @(selectedClass == className ? "btn-success" : "btn-outline-success")"
+                                @onclick="() => FilterByClass(className)">
+                            @className
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Class / YOA Summary (Converted to @CurrencySettings.DisplayCurrency)</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Class</th>
+                            <th>YOA</th>
+                            <th class="text-end"># Records</th>
+                            <th class="text-end"># Updates</th>
+                            <th class="text-end">@GetCurrencySymbol() Total Gross Premium</th>
+                            <th class="text-end">@GetCurrencySymbol() Total Net Premium</th>
+                            <th class="text-end">@GetCurrencySymbol() Total RIPs</th>
+                            <th class="text-end">@GetCurrencySymbol() Total PC</th>
+                            <th>Last Updated</th>
+                            <th>Updated By</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var summary in GetFilteredSummaries())
+                        {
+                            <tr>
+                                <td><strong>@summary.Class</strong></td>
+                                <td><strong>@summary.YOA</strong></td>
+                                <td class="text-end">@summary.RecordCount</td>
+                                <td class="text-end"><span class="badge bg-info">@summary.UpdateCount</span></td>
+                                <td class="text-end">@FormatCurrencyConverted(summary.TotalGrossPremium)</td>
+                                <td class="text-end">@FormatCurrencyConverted(summary.TotalNetPremium)</td>
+                                <td class="text-end">@FormatCurrencyConverted(summary.TotalRIPs)</td>
+                                <td class="text-end">@FormatCurrencyConverted(summary.TotalPC)</td>
+                                <td>@FormatDate(summary.LastUpdatedDate)</td>
+                                <td>@summary.LastUpdatedBy</td>
+                                <td class="text-center">
+                                    <a href="/Ultimates/Premium/Edit/@summary.Class/@summary.YOA"
+                                       class="btn btn-sm btn-primary">
+                                        <i class="bi bi-pencil"></i> Edit
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr class="table-secondary fw-bold">
+                            <td colspan="2">FILTERED TOTAL</td>
+                            <td class="text-end">@GetFilteredRecordCount()</td>
+                            <td class="text-end">@GetFilteredUpdateCount()</td>
+                            <td class="text-end">@FormatCurrencyConverted(GetFilteredTotalGrossPremium())</td>
+                            <td class="text-end">@FormatCurrencyConverted(GetFilteredTotalNetPremium())</td>
+                            <td class="text-end">@FormatCurrencyConverted(GetFilteredTotalRIPs())</td>
+                            <td class="text-end">@FormatCurrencyConverted(GetFilteredTotalPC())</td>
+                            <td colspan="3"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-info">
+        <h5>No Ultimate Premium Data Found</h5>
+        <p>No Ultimate Premium data has been entered yet. Use the database scripts to populate initial data.</p>
+    </div>
+}
+
+@code {
+    private List<UltimatePremiumRecordModel>? allRecords;
+    private bool isLoading = true;
+
+    // Filter state
+    private int? selectedYOA = null;
+    private string? selectedClass = null;
+
+    // Available filter values
+    private List<int> availableYOAs = new();
+    private List<string> availableClasses = new();
+
+    // Summary class for display
+    private class ClassYOASummary
+    {
+        public string Class { get; set; } = string.Empty;
+        public int YOA { get; set; }
+        public int RecordCount { get; set; }
+        public int UpdateCount { get; set; }
+        public decimal? TotalGrossPremium { get; set; }
+        public decimal? TotalNetPremium { get; set; }
+        public decimal? TotalRIPs { get; set; }
+        public decimal? TotalPC { get; set; }
+        public DateTime? LastUpdatedDate { get; set; }
+        public string? LastUpdatedBy { get; set; }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await InitializeServices();
+        await LoadData();
+    }
+
+    private async Task InitializeServices()
+    {
+        try
+        {
+            // Initialize currency settings from localStorage
+            await CurrencySettings.InitializeAsync();
+
+            // Load FX rates for the selected rate set
+            await FxConversion.LoadRatesAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error initializing services");
+        }
+    }
+
+    private async Task LoadData()
+    {
+        isLoading = true;
+        try
+        {
+            // Load all records from snapshot (latest version of each record)
+            var data = await UltimatesService.GetUltimatePremiumSnapshot();
+            allRecords = data.ToList();
+
+            // Extract available filter values
+            availableYOAs = allRecords.Select(r => r.YOA).Distinct().OrderByDescending(y => y).ToList();
+            availableClasses = allRecords.Select(r => r.Class).Distinct().OrderBy(c => c).ToList();
+
+            Logger.LogInformation("Loaded {RecordCount} Ultimate Premium records", allRecords.Count);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading Ultimate Premium list");
+            allRecords = new List<UltimatePremiumRecordModel>();
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task OnCurrencySettingsChanged()
+    {
+        // Reload FX rates if needed (FxConversion already handles this via event subscription)
+        // Just trigger a re-render
+        StateHasChanged();
+    }
+
+    private void FilterByYOA(int? yoa)
+    {
+        selectedYOA = yoa;
+    }
+
+    private void FilterByClass(string? className)
+    {
+        selectedClass = className;
+    }
+
+    private IEnumerable<UltimatePremiumRecordModel> GetFilteredRecords()
+    {
+        if (allRecords == null) return Enumerable.Empty<UltimatePremiumRecordModel>();
+
+        return allRecords
+            .Where(r => selectedYOA == null || r.YOA == selectedYOA)
+            .Where(r => selectedClass == null || r.Class == selectedClass);
+    }
+
+    private List<ClassYOASummary> GetFilteredSummaries()
+    {
+        var filtered = GetFilteredRecords();
+
+        return filtered
+            .GroupBy(r => new { r.Class, r.YOA })
+            .Select(g => new ClassYOASummary
+            {
+                Class = g.Key.Class,
+                YOA = g.Key.YOA,
+                RecordCount = g.Count(),
+                UpdateCount = g.Select(r => r.UpdateID).Distinct().Count(),
+                TotalGrossPremium = g.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateGrossPremium, r.Currency)),
+                TotalNetPremium = g.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateNetPremium, r.Currency)),
+                TotalRIPs = g.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateRIPs, r.Currency)),
+                TotalPC = g.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimatePC, r.Currency)),
+                LastUpdatedDate = g.Max(r => r.UpdateDate),
+                LastUpdatedBy = g.OrderByDescending(r => r.UpdateDate).FirstOrDefault()?.UpdatedBy
+            })
+            .OrderBy(s => s.Class)
+            .ThenByDescending(s => s.YOA)
+            .ToList();
+    }
+
+    private decimal? GetTotalGrossPremium()
+    {
+        if (allRecords == null) return 0;
+        return allRecords.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateGrossPremium, r.Currency));
+    }
+
+    private DateTime? GetLatestUpdateDate()
+    {
+        if (allRecords == null) return null;
+        return allRecords.Max(r => r.UpdateDate);
+    }
+
+    private int GetTotalUpdateCount()
+    {
+        if (allRecords == null) return 0;
+        return allRecords.Select(r => r.UpdateID).Distinct().Count();
+    }
+
+    private int GetFilteredRecordCount()
+    {
+        return GetFilteredRecords().Count();
+    }
+
+    private int GetFilteredUpdateCount()
+    {
+        return GetFilteredRecords().Select(r => r.UpdateID).Distinct().Count();
+    }
+
+    private decimal? GetFilteredTotalGrossPremium()
+    {
+        return GetFilteredRecords().Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateGrossPremium, r.Currency));
+    }
+
+    private decimal? GetFilteredTotalNetPremium()
+    {
+        return GetFilteredRecords().Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateNetPremium, r.Currency));
+    }
+
+    private decimal? GetFilteredTotalRIPs()
+    {
+        return GetFilteredRecords().Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateRIPs, r.Currency));
+    }
+
+    private decimal? GetFilteredTotalPC()
+    {
+        return GetFilteredRecords().Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimatePC, r.Currency));
+    }
+
+    private string GetCurrencySymbol()
+    {
+        return CurrencySettings.DisplayCurrency == "GBP" ? "£" : "$";
+    }
+
+    private string FormatCurrencyConverted(decimal? value)
+    {
+        if (!value.HasValue) return "-";
+        return value.Value.ToString("N0");
+    }
+
+    private string FormatDate(DateTime? date)
+    {
+        if (!date.HasValue) return "-";
+        return date.Value.ToString("yyyy-MM-dd HH:mm");
+    }
+}
