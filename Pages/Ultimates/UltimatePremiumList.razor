@@ -182,6 +182,50 @@ else if (allRecords != null && allRecords.Any())
             </div>
         </div>
     </div>
+
+    <!-- Heatmap -->
+    <div class="card mt-4">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0">Gross Premium Heatmap (millions @CurrencySettings.DisplayCurrency)</h5>
+        </div>
+        <div class="card-body p-2">
+            <div class="table-responsive">
+                <table class="table table-bordered table-sm mb-0" style="font-size: 0.85rem;">
+                    <thead>
+                        <tr>
+                            <th class="text-center align-middle" style="padding: 4px 8px;">Class</th>
+                            @foreach (var yoa in availableYOAs)
+                            {
+                                <th class="text-center align-middle" style="padding: 4px 8px;">@yoa</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var className in availableClasses)
+                        {
+                            <tr>
+                                <td class="text-center fw-bold align-middle" style="padding: 4px 8px;">@className</td>
+                                @foreach (var yoa in availableYOAs)
+                                {
+                                    var cellData = GetHeatmapCellData(className, yoa);
+                                    var bgColor = GetHeatmapColor(cellData.GrossPremium);
+                                    var tooltip = GetTooltipContent(cellData);
+
+                                    <td class="text-center align-middle"
+                                        style="padding: 4px 8px; background-color: @bgColor; cursor: pointer;"
+                                        title="@tooltip"
+                                        data-bs-toggle="tooltip"
+                                        data-bs-html="true">
+                                        @FormatMillions(cellData.GrossPremium)
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 }
 else
 {
@@ -398,4 +442,93 @@ else
         if (!date.HasValue) return "-";
         return date.Value.ToString("yyyy-MM-dd HH:mm");
     }
+
+    // Heatmap helper class
+    private class HeatmapCellData
+    {
+        public decimal? GrossPremium { get; set; }
+        public decimal? NetPremium { get; set; }
+        public decimal? RIPs { get; set; }
+        public decimal? PC { get; set; }
+    }
+
+    private HeatmapCellData GetHeatmapCellData(string className, int yoa)
+    {
+        if (allRecords == null) return new HeatmapCellData();
+
+        var records = allRecords
+            .Where(r => r.Class == className && r.YOA == yoa)
+            .ToList();
+
+        if (!records.Any()) return new HeatmapCellData();
+
+        return new HeatmapCellData
+        {
+            GrossPremium = records.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateGrossPremium, r.Currency)),
+            NetPremium = records.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateNetPremium, r.Currency)),
+            RIPs = records.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateRIPs, r.Currency)),
+            PC = records.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimatePC, r.Currency))
+        };
+    }
+
+    private string GetHeatmapColor(decimal? value)
+    {
+        if (!value.HasValue || value.Value == 0) return "#ffffff";
+
+        // Get max value for normalization
+        var maxValue = allRecords?
+            .GroupBy(r => new { r.Class, r.YOA })
+            .Select(g => g.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateGrossPremium, r.Currency)))
+            .Max() ?? 0;
+
+        if (maxValue == 0) return "#ffffff";
+
+        // Calculate intensity (0 to 1)
+        var intensity = (double)(value.Value / maxValue);
+
+        // Green gradient: white (#ffffff) to dark green (#1e7e34)
+        // Using RGB interpolation
+        var r = (int)(255 - (255 - 30) * intensity);
+        var g = (int)(255 - (255 - 126) * intensity);
+        var b = (int)(255 - (255 - 52) * intensity);
+
+        return $"#{r:X2}{g:X2}{b:X2}";
+    }
+
+    private string GetTooltipContent(HeatmapCellData cellData)
+    {
+        var symbol = GetCurrencySymbol();
+        return $@"
+Gross Premium: {symbol}{FormatMillions(cellData.GrossPremium)}m
+Net Premium: {symbol}{FormatMillions(cellData.NetPremium)}m
+RIPs: {symbol}{FormatMillions(cellData.RIPs)}m
+PC: {symbol}{FormatMillions(cellData.PC)}m";
+    }
+
+    private string FormatMillions(decimal? value)
+    {
+        if (!value.HasValue || value.Value == 0) return "-";
+        return (value.Value / 1_000_000m).ToString("F1");
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        // Initialize Bootstrap tooltips
+        await Task.Run(() =>
+        {
+            // Tooltips are initialized by Bootstrap automatically with data-bs-toggle="tooltip"
+        });
+    }
 }
+
+<script>
+    // Initialize tooltips when the page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
