@@ -36,41 +36,112 @@
 }
 else if (allRecords != null && allRecords.Any())
 {
-    <!-- Summary Cards -->
+    <!-- Summary Cards (Left) and Heatmap (Right) -->
     <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card border-primary">
-                <div class="card-body text-center">
-                    <h6 class="text-muted text-uppercase mb-2">@GetCurrencySymbol() Gross Premium</h6>
-                    <h2 class="mb-0 text-primary">@FormatCurrencyConverted(GetTotalGrossPremium())</h2>
-                    <small class="text-muted">Converted to @CurrencySettings.DisplayCurrency</small>
+        <!-- Left: Summary Cards (6 cards in 2 columns) -->
+        <div class="col-md-6">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="card border-primary h-100">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted text-uppercase mb-2">@GetCurrencySymbol() Gross Premium</h6>
+                            <h2 class="mb-0 text-primary">@FormatCurrencyConverted(GetTotalGrossPremium())</h2>
+                            <small class="text-muted">@CurrencySettings.DisplayCurrency</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card border-success h-100">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted text-uppercase mb-2">@GetCurrencySymbol() Net Premium</h6>
+                            <h2 class="mb-0 text-success">@FormatCurrencyConverted(GetTotalNetPremium())</h2>
+                            <small class="text-muted">@CurrencySettings.DisplayCurrency</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card border-warning h-100">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted text-uppercase mb-2">@GetCurrencySymbol() RIPs</h6>
+                            <h2 class="mb-0 text-warning">@FormatCurrencyConverted(GetTotalRIPs())</h2>
+                            <small class="text-muted">@CurrencySettings.DisplayCurrency</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card border-info h-100">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted text-uppercase mb-2">@GetCurrencySymbol() PC</h6>
+                            <h2 class="mb-0 text-info">@FormatCurrencyConverted(GetTotalPC())</h2>
+                            <small class="text-muted">@CurrencySettings.DisplayCurrency</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card border-secondary h-100">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted text-uppercase mb-2">Latest Update</h6>
+                            <h2 class="mb-0 text-secondary">@FormatDate(GetLatestUpdateDate())</h2>
+                            <small class="text-muted">Most recent change</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card border-dark h-100">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted text-uppercase mb-2">Total Updates</h6>
+                            <h2 class="mb-0 text-dark">@GetTotalUpdateCount()</h2>
+                            <small class="text-muted">All submissions</small>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card border-success">
-                <div class="card-body text-center">
-                    <h6 class="text-muted text-uppercase mb-2">@GetCurrencySymbol() Net Premium</h6>
-                    <h2 class="mb-0 text-success">@FormatCurrencyConverted(GetTotalNetPremium())</h2>
-                    <small class="text-muted">Converted to @CurrencySettings.DisplayCurrency</small>
+
+        <!-- Right: Heatmap -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Gross Premium Heatmap (millions @CurrencySettings.DisplayCurrency)</h5>
                 </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card border-warning">
-                <div class="card-body text-center">
-                    <h6 class="text-muted text-uppercase mb-2">@GetCurrencySymbol() RIPs</h6>
-                    <h2 class="mb-0 text-warning">@FormatCurrencyConverted(GetTotalRIPs())</h2>
-                    <small class="text-muted">Converted to @CurrencySettings.DisplayCurrency</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card border-info">
-                <div class="card-body text-center">
-                    <h6 class="text-muted text-uppercase mb-2">@GetCurrencySymbol() PC</h6>
-                    <h2 class="mb-0 text-info">@FormatCurrencyConverted(GetTotalPC())</h2>
-                    <small class="text-muted">Converted to @CurrencySettings.DisplayCurrency</small>
+                <div class="card-body p-2">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-sm mb-0" style="font-size: 0.85rem;">
+                            <thead>
+                                <tr>
+                                    <th class="text-center align-middle" style="padding: 4px 8px;">Class</th>
+                                    @foreach (var yoa in availableYOAs)
+                                    {
+                                        <th class="text-center align-middle" style="padding: 4px 8px;">@yoa</th>
+                                    }
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var className in availableClasses)
+                                {
+                                    <tr>
+                                        <td class="text-center fw-bold align-middle" style="padding: 4px 8px;">@className</td>
+                                        @foreach (var yoa in availableYOAs)
+                                        {
+                                            var cellData = GetHeatmapCellData(className, yoa);
+                                            var bgColor = GetHeatmapColor(cellData.GrossPremium);
+                                            var textColor = GetHeatmapTextColor(cellData.GrossPremium);
+                                            var tooltip = GetTooltipContent(cellData);
+
+                                            <td class="text-center align-middle"
+                                                style="padding: 4px 8px; background-color: @bgColor; color: @textColor; cursor: pointer;"
+                                                title="@tooltip"
+                                                data-bs-toggle="tooltip"
+                                                data-bs-html="true"
+                                                @onclick="@(() => NavigateToEdit(className, yoa))">
+                                                @FormatMillions(cellData.GrossPremium)
+                                            </td>
+                                        }
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -178,50 +249,6 @@ else if (allRecords != null && allRecords.Any())
                             <td colspan="3"></td>
                         </tr>
                     </tfoot>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <!-- Heatmap -->
-    <div class="card mt-4">
-        <div class="card-header bg-success text-white">
-            <h5 class="mb-0">Gross Premium Heatmap (millions @CurrencySettings.DisplayCurrency)</h5>
-        </div>
-        <div class="card-body p-2">
-            <div class="table-responsive">
-                <table class="table table-bordered table-sm mb-0" style="font-size: 0.85rem;">
-                    <thead>
-                        <tr>
-                            <th class="text-center align-middle" style="padding: 4px 8px;">Class</th>
-                            @foreach (var yoa in availableYOAs)
-                            {
-                                <th class="text-center align-middle" style="padding: 4px 8px;">@yoa</th>
-                            }
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var className in availableClasses)
-                        {
-                            <tr>
-                                <td class="text-center fw-bold align-middle" style="padding: 4px 8px;">@className</td>
-                                @foreach (var yoa in availableYOAs)
-                                {
-                                    var cellData = GetHeatmapCellData(className, yoa);
-                                    var bgColor = GetHeatmapColor(cellData.GrossPremium);
-                                    var tooltip = GetTooltipContent(cellData);
-
-                                    <td class="text-center align-middle"
-                                        style="padding: 4px 8px; background-color: @bgColor; cursor: pointer;"
-                                        title="@tooltip"
-                                        data-bs-toggle="tooltip"
-                                        data-bs-html="true">
-                                        @FormatMillions(cellData.GrossPremium)
-                                    </td>
-                                }
-                            </tr>
-                        }
-                    </tbody>
                 </table>
             </div>
         </div>
@@ -440,7 +467,7 @@ else
     private string FormatDate(DateTime? date)
     {
         if (!date.HasValue) return "-";
-        return date.Value.ToString("yyyy-MM-dd HH:mm");
+        return date.Value.ToString("dd MMM yyyy");
     }
 
     // Heatmap helper class
@@ -493,6 +520,22 @@ else
         var b = (int)(255 - (255 - 52) * intensity);
 
         return $"#{r:X2}{g:X2}{b:X2}";
+    }
+
+    private string GetHeatmapTextColor(decimal? value)
+    {
+        if (!value.HasValue) return "#000000";
+
+        // Convert to millions
+        var millions = value.Value / 1_000_000m;
+
+        // White text for values above 60 million
+        return millions > 60 ? "#ffffff" : "#000000";
+    }
+
+    private void NavigateToEdit(string className, int yoa)
+    {
+        NavigationManager.NavigateTo($"Ultimates/Premium/Edit/{className}/{yoa}");
     }
 
     private string GetTooltipContent(HeatmapCellData cellData)
