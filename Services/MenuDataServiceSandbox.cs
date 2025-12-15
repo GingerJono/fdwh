@@ -163,6 +163,38 @@ public class MenuDataServiceSandbox
 				)
 			}
 		),
+		),
+		new MainMenuItems(
+	type: "sub",
+	title: "Exceptions",
+	icon: "",
+	svg: "<svg xmlns='http://www.w3.org/2000/svg' class='w-6 h-6 side-menu__icon' fill='none' viewBox='0 0 24 24' stroke-width='1.5' stroke='currentColor'><path stroke-linecap='round' stroke-linejoin='round' d='M12 9v3.75m0 3.75h.007v.008H12v-.008zM21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z' /></svg>",
+	badgeValue: "",
+	badgeClass: "",
+	selected: false,
+	active: false,
+	dirChange: false,
+	children: new MainMenuItems[]
+	{
+		new MainMenuItems (
+			path: "MyExceptions",
+			type: "link",
+			title: "My Exceptions",
+			selected: false,
+			active: false,
+			dirChange: false
+		),
+		new MainMenuItems (
+			path: "AllExceptions",
+			type: "link",
+			title: "All Exceptions",
+			selected: false,
+			active: false,
+			dirChange: false
+		)
+	}
+),
+
 	};
 
 	public List<MainMenuItems> GetMenuData()
