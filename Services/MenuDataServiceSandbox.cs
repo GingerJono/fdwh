@@ -163,7 +163,6 @@ public class MenuDataServiceSandbox
 				)
 			}
 		),
-		),
 		new MainMenuItems(
 	type: "sub",
 	title: "Exceptions",
