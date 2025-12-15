@@ -126,7 +126,7 @@ stages:
           Write-Host "Deploying from: $source"
           Write-Host "Deploying to:   $destination"
 
-          $rc = robocopy $source $destination /E /PURGE /R:3 /W:5 /NFL /NDL /NJH /NJS /NP /XD "$destination\wwwroot\uploads\prismadjustments"
+          $rc = robocopy $source $destination /E /PURGE /R:3 /W:5 /NFL /NDL /NJH /NJS /NP /XD exports "$destination\wwwroot\uploads\prismadjustments"
           $exitCode = $LASTEXITCODE
 
           if ($exitCode -ge 8) {
