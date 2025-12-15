@@ -38,30 +38,39 @@ else if (allRecords != null && allRecords.Any())
 {
     <!-- Summary Cards -->
     <div class="row mb-4">
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card border-primary">
                 <div class="card-body text-center">
-                    <h6 class="text-muted text-uppercase mb-2">Overall Total @GetCurrencySymbol() Gross Premium</h6>
+                    <h6 class="text-muted text-uppercase mb-2">@GetCurrencySymbol() Gross Premium</h6>
                     <h2 class="mb-0 text-primary">@FormatCurrencyConverted(GetTotalGrossPremium())</h2>
                     <small class="text-muted">Converted to @CurrencySettings.DisplayCurrency</small>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card border-success">
                 <div class="card-body text-center">
-                    <h6 class="text-muted text-uppercase mb-2">Latest Update</h6>
-                    <h2 class="mb-0 text-success">@FormatDate(GetLatestUpdateDate())</h2>
-                    <small class="text-muted">Most recent change</small>
+                    <h6 class="text-muted text-uppercase mb-2">@GetCurrencySymbol() Net Premium</h6>
+                    <h2 class="mb-0 text-success">@FormatCurrencyConverted(GetTotalNetPremium())</h2>
+                    <small class="text-muted">Converted to @CurrencySettings.DisplayCurrency</small>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
+            <div class="card border-warning">
+                <div class="card-body text-center">
+                    <h6 class="text-muted text-uppercase mb-2">@GetCurrencySymbol() RIPs</h6>
+                    <h2 class="mb-0 text-warning">@FormatCurrencyConverted(GetTotalRIPs())</h2>
+                    <small class="text-muted">Converted to @CurrencySettings.DisplayCurrency</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
             <div class="card border-info">
                 <div class="card-body text-center">
-                    <h6 class="text-muted text-uppercase mb-2">Total Updates</h6>
-                    <h2 class="mb-0 text-info">@GetTotalUpdateCount()</h2>
-                    <small class="text-muted">Across all Class/YOA combinations</small>
+                    <h6 class="text-muted text-uppercase mb-2">@GetCurrencySymbol() PC</h6>
+                    <h2 class="mb-0 text-info">@FormatCurrencyConverted(GetTotalPC())</h2>
+                    <small class="text-muted">Converted to @CurrencySettings.DisplayCurrency</small>
                 </div>
             </div>
         </div>
@@ -311,6 +320,24 @@ else
     {
         if (allRecords == null) return 0;
         return allRecords.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateGrossPremium, r.Currency));
+    }
+
+    private decimal? GetTotalNetPremium()
+    {
+        if (allRecords == null) return 0;
+        return allRecords.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateNetPremium, r.Currency));
+    }
+
+    private decimal? GetTotalRIPs()
+    {
+        if (allRecords == null) return 0;
+        return allRecords.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateRIPs, r.Currency));
+    }
+
+    private decimal? GetTotalPC()
+    {
+        if (allRecords == null) return 0;
+        return allRecords.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimatePC, r.Currency));
     }
 
     private DateTime? GetLatestUpdateDate()
