@@ -164,6 +164,13 @@ else if (versions != null)
     protected override async Task OnInitializedAsync()
     {
         availableMonths = await ReportingService.GetAvailableProcessingMonthsAsync();
+
+        // Set default to latest closed month (first in the sorted list)
+        if (availableMonths.Count > 0)
+        {
+            uploadModel.ProcessingMonth = availableMonths[0];
+        }
+
         await LoadVersionsAsync();
     }
 
@@ -208,8 +215,12 @@ else if (versions != null)
                 // Reload versions list
                 await LoadVersionsAsync();
 
-                // Reset form
+                // Reset form with default month
                 uploadModel = new();
+                if (availableMonths.Count > 0)
+                {
+                    uploadModel.ProcessingMonth = availableMonths[0];
+                }
                 selectedFile = null;
             }
         }
@@ -243,6 +254,7 @@ else if (versions != null)
 
     private async Task DownloadTemplate()
     {
+        uploadMessage = string.Empty;
         try
         {
             var bytes = SUAService.GenerateEmptyTemplate();
@@ -255,6 +267,7 @@ else if (versions != null)
         {
             uploadMessage = $"Template download error: {ex.Message}";
             uploadSuccess = false;
+            StateHasChanged();
         }
     }
 
