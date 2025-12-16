@@ -55,7 +55,7 @@
                 <div class="col-md-3">
                     <label class="form-label">Syndicate</label>
                     <InputSelect @bind-Value="uploadModel.Syndicate" class="form-select" required>
-                        <option value="">-- Select Syndicate --</option>
+                        <option value="0">-- Select Syndicate --</option>
                         <option value="1729">1729</option>
                         <option value="6131">6131</option>
                         <option value="1954">1954</option>
@@ -110,7 +110,7 @@
                             <th>Uploaded By</th>
                             <th>Rows</th>
                             <th>Total Value</th>
-                            <th>Status</th>
+                            <th>Active</th>
                             <th>Comments</th>
                             <th>Actions</th>
                         </tr>
@@ -122,18 +122,18 @@
                                 <td><strong>@version.Version</strong></td>
                                 <td>@version.ProcessingMonth</td>
                                 <td>@version.Syndicate</td>
-                                <td>@version.UploadDate.ToString("yyyy-MM-dd HH:mm")</td>
+                                <td>@(version.UploadedDate?.ToString("yyyy-MM-dd HH:mm") ?? "-")</td>
                                 <td>@version.UploadedBy</td>
                                 <td>@version.RowCount.ToString("N0")</td>
-                                <td>@version.TotalValueSettCcy.ToString("N2")</td>
+                                <td>@version.TotalValueSCC.ToString("N2")</td>
                                 <td>
-                                    <span class="badge @(version.Status == "Success" ? "bg-success" : "bg-danger")">
-                                        @version.Status
+                                    <span class="badge @(version.IsActive == true ? "bg-success" : "bg-secondary")">
+                                        @(version.IsActive == true ? "Active" : "Inactive")
                                     </span>
                                 </td>
                                 <td>@version.Comments</td>
                                 <td>
-                                    <button class="btn btn-sm btn-outline-primary" @onclick="() => DownloadVersion(version.ID, version.Version)">
+                                    <button class="btn btn-sm btn-outline-primary" @onclick="() => DownloadVersion(version.Version)">
                                         <i class="bi bi-download"></i> Download
                                     </button>
                                 </td>
@@ -187,7 +187,7 @@ else if (versions != null)
 
     private async Task HandleUpload()
     {
-        if (selectedFile == null || uploadModel.ProcessingMonth == 0 || string.IsNullOrEmpty(uploadModel.Syndicate))
+        if (selectedFile == null || uploadModel.ProcessingMonth == 0 || uploadModel.Syndicate == 0)
         {
             uploadMessage = "Please fill in all required fields and select a file.";
             uploadSuccess = false;
@@ -235,11 +235,11 @@ else if (versions != null)
         }
     }
 
-    private async Task DownloadVersion(int versionID, string versionNumber)
+    private async Task DownloadVersion(string versionNumber)
     {
         try
         {
-            var bytes = await SUAService.DownloadVersionAsync(versionID);
+            var bytes = await SUAService.DownloadVersionAsync(versionNumber);
             var fileName = $"SUA_{versionNumber}_{DateTime.UtcNow:yyyyMMddHHmmss}.xlsx";
 
             using var streamRef = new DotNetStreamReference(new MemoryStream(bytes));
@@ -276,7 +276,7 @@ else if (versions != null)
     public class UploadModel
     {
         public int ProcessingMonth { get; set; }
-        public string Syndicate { get; set; }
+        public int Syndicate { get; set; }
         public string Comments { get; set; }
     }
 }
