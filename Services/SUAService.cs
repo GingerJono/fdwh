@@ -152,7 +152,7 @@ namespace Sandbox.Services
 				// Insert SUAVersion
 				int versionID;
 				using (var cmd = new SqlCommand(@"
-					INSERT INTO dbo.SUAVersions (Version, ProcessingMonth, Syndicate, Comments, UploadDate, UploadedBy, RowCount, Status)
+					INSERT INTO dbo.SUAVersions (Version, ProcessingMonth, Syndicate, Comments, UploadDate, UploadedBy, [RowCount], Status)
 					OUTPUT INSERTED.ID
 					VALUES (@Version, @ProcessingMonth, @Syndicate, @Comments, @UploadDate, @UploadedBy, @RowCount, @Status)", conn, transaction))
 				{
@@ -219,13 +219,13 @@ namespace Sandbox.Services
 					sv.Comments,
 					sv.UploadDate,
 					sv.UploadedBy,
-					sv.RowCount,
+					sv.[RowCount],
 					sv.Status,
 					ISNULL(SUM(s.ValueSettCcy), 0) as TotalValueSettCcy
 				FROM dbo.SUAVersions sv
 				LEFT JOIN dbo.SUA s ON sv.ID = s.SUAVersionID
 				GROUP BY sv.ID, sv.Version, sv.ProcessingMonth, sv.Syndicate, sv.Comments,
-					sv.UploadDate, sv.UploadedBy, sv.RowCount, sv.Status
+					sv.UploadDate, sv.UploadedBy, sv.[RowCount], sv.Status
 				ORDER BY sv.UploadDate DESC", conn);
 
 			await conn.OpenAsync();
