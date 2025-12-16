@@ -160,6 +160,14 @@ public class MenuDataServiceSandbox
 					selected: false,
 					active: false,
 					dirChange: false
+				),
+				new MainMenuItems(
+					path: "FDWH/SUA",
+					type: "link",
+					title: "SUA",
+					selected: false,
+					active: false,
+					dirChange: false
 				)
 			}
 		),

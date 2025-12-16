@@ -127,6 +127,7 @@ builder.Services.AddScoped<ReportingService>();
 builder.Services.AddScoped<ORIService>();
 builder.Services.AddScoped<PrismService>();
 builder.Services.AddScoped<FDWHReportingService>();
+builder.Services.AddScoped<SUAService>();
 builder.Services.AddScoped<ExceptionService>();
 builder.Services.AddScoped<sandboxapp.Services.UltimatesService>();
 builder.Services.AddScoped<sandboxapp.Services.CurrencySettingsService>();
