@@ -21,7 +21,7 @@ namespace Sandbox.Services
 			ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 		}
 
-		private string GetConnectionString() => _config.GetConnectionString("DaleSandboxConnection");
+		private string GetConnectionString() => _config.GetConnectionString("FDWHConnection");
 
 		public async Task<(bool Success, string Message, int? VersionID)> UploadSUAFileAsync(
 			Stream fileStream,
