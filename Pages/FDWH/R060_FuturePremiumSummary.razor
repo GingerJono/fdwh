@@ -145,11 +145,10 @@
     {
         availableMonths = await ReportingService.GetAvailableProcessingMonthsAsync();
 
-        // Set defaults to the most recent month if available, otherwise keep existing default
+        // R060 defaults: n/a, n/a, n/a, n/a (use latest available)
         if (availableMonths.Count > 0)
         {
-            if (!availableMonths.Contains(paramModel.ProcessingMonth))
-                paramModel.ProcessingMonth = availableMonths[0];
+            paramModel.ProcessingMonth = availableMonths[0];
         }
 
 

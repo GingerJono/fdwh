@@ -150,7 +150,8 @@ namespace Sandbox.Services
 			using var cmd = new SqlCommand(@"
 				SELECT DISTINCT ProcessingMonth
 				FROM dbo.tbRuns
-				WHERE ProcessingMonth IS NOT NULL", conn);
+				WHERE ProcessingMonth IS NOT NULL
+				ORDER BY ProcessingMonth DESC", conn);
 
 			await conn.OpenAsync();
 			using var reader = await cmd.ExecuteReaderAsync();
@@ -163,6 +164,54 @@ namespace Sandbox.Services
 				}
 			}
 			return months;
+		}
+
+		// Helper method to check if a month is a quarter end (03, 06, 09, 12)
+		public static bool IsQuarterEnd(int processingMonth)
+		{
+			int monthPart = processingMonth % 100;
+			return monthPart == 3 || monthPart == 6 || monthPart == 9 || monthPart == 12;
+		}
+
+		// Get the latest quarter-ending month from available months
+		public static int GetLatestQuarterEnd(List<int> availableMonths)
+		{
+			return availableMonths
+				.Where(IsQuarterEnd)
+				.OrderByDescending(m => m)
+				.FirstOrDefault();
+		}
+
+		// Get the previous quarter (3 months before)
+		public static int GetPreviousQuarter(int processingMonth)
+		{
+			int year = processingMonth / 100;
+			int month = processingMonth % 100;
+
+			month -= 3;
+			if (month <= 0)
+			{
+				month += 12;
+				year -= 1;
+			}
+
+			return year * 100 + month;
+		}
+
+		// Get the previous month (1 month before)
+		public static int GetPreviousMonth(int processingMonth)
+		{
+			int year = processingMonth / 100;
+			int month = processingMonth % 100;
+
+			month -= 1;
+			if (month <= 0)
+			{
+				month = 12;
+				year -= 1;
+			}
+
+			return year * 100 + month;
 		}
 
 	}

@@ -4,6 +4,7 @@
 @inject Helpers.SandboxContext SandboxContext
 @using System.Text.Json
 @using Sandbox.Models.FDWH
+@using Sandbox.Services
 
 <h3 class="mb-3">R010 - Quarter Results Flat File</h3>
 
@@ -163,16 +164,26 @@
     {
         availableMonths = await ReportingService.GetAvailableProcessingMonthsAsync();
 
-        // Set defaults to the most recent months if available, otherwise keep existing defaults
+        // R010 defaults: Quarterly, ITD, Latest QE, Prev QE
         if (availableMonths.Count > 0)
         {
-            if (!availableMonths.Contains(paramModel.ProcessingMonth))
+            // Get latest quarter end (Latest QE)
+            var latestQE = FDWHReportingService.GetLatestQuarterEnd(availableMonths);
+            if (latestQE > 0)
+            {
+                paramModel.ProcessingMonth = latestQE;
+                // Get previous quarter end (Prev QE)
+                paramModel.FromMonth = FDWHReportingService.GetPreviousQuarter(latestQE);
+            }
+            else
+            {
+                // Fallback to latest available month if no quarter ends found
                 paramModel.ProcessingMonth = availableMonths[0];
-            if (availableMonths.Count > 0 && !availableMonths.Contains(paramModel.FromMonth))
                 paramModel.FromMonth = availableMonths[0];
+            }
         }
 
-        
+
         runs = (await ReportingService.GetReportRunsAsync())
             .Where(r => r.ReportID == REPORT_ID)
             .OrderByDescending(r => r.RunDate)

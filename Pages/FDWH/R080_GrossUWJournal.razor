@@ -4,6 +4,7 @@
 @inject Helpers.SandboxContext SandboxContext
 @using System.Text.Json
 @using Sandbox.Models.FDWH
+@using Sandbox.Services
 
 <h3 class="mb-3">R080 - Gross UW Journal</h3>
 
@@ -155,16 +156,16 @@
     {
         availableMonths = await ReportingService.GetAvailableProcessingMonthsAsync();
 
-        // Set defaults to the most recent months if available, otherwise keep existing defaults
+        // R080 defaults: Monthly, MVT, Latest Closed Period, One period before "To"
         if (availableMonths.Count > 0)
         {
-            if (!availableMonths.Contains(paramModel.ProcessingMonth))
-                paramModel.ProcessingMonth = availableMonths[0];
-            if (availableMonths.Count > 0 && !availableMonths.Contains(paramModel.FromMonth))
-                paramModel.FromMonth = availableMonths[0];
+            // Latest Closed Period (most recent available month)
+            paramModel.ProcessingMonth = availableMonths[0];
+            // One period before "To"
+            paramModel.FromMonth = FDWHReportingService.GetPreviousMonth(paramModel.ProcessingMonth);
         }
 
-        
+
         runs = (await ReportingService.GetReportRunsAsync())
             .Where(r => r.ReportID == REPORT_ID)
             .OrderByDescending(r => r.RunDate)

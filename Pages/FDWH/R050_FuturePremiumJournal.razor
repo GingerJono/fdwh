@@ -4,6 +4,7 @@
 @inject Helpers.SandboxContext SandboxContext
 @using System.Text.Json
 @using Sandbox.Models.FDWH
+@using Sandbox.Services
 
 <h3 class="mb-3">R050 - Future Premium Journal</h3>
 
@@ -155,16 +156,26 @@
     {
         availableMonths = await ReportingService.GetAvailableProcessingMonthsAsync();
 
-        // Set defaults to the most recent months if available, otherwise keep existing defaults
+        // R050 defaults: Quarterly, ITD, Latest Closed Quarter, n/a
         if (availableMonths.Count > 0)
         {
-            if (!availableMonths.Contains(paramModel.ProcessingMonth))
+            // Get latest quarter end (Latest Closed Quarter)
+            var latestQE = FDWHReportingService.GetLatestQuarterEnd(availableMonths);
+            if (latestQE > 0)
+            {
+                paramModel.ProcessingMonth = latestQE;
+                // FromMonth: n/a - use latest available or same as To
+                paramModel.FromMonth = latestQE;
+            }
+            else
+            {
+                // Fallback to latest available month
                 paramModel.ProcessingMonth = availableMonths[0];
-            if (availableMonths.Count > 0 && !availableMonths.Contains(paramModel.FromMonth))
                 paramModel.FromMonth = availableMonths[0];
+            }
         }
 
-        
+
         runs = (await ReportingService.GetReportRunsAsync())
             .Where(r => r.ReportID == REPORT_ID)
             .OrderByDescending(r => r.RunDate)

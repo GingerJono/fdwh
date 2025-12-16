@@ -155,7 +155,7 @@
     private string errorMessage = string.Empty;
     private string errorStackTrace = string.Empty;
     private HashSet<int> expandedParams = new();
-    private ReportParams paramModel = new() { RunType = "ITD", ProcessingMonth = 202509, FromMonth = 202506 };
+    private ReportParams paramModel = new() { RunType = "MVT", ProcessingMonth = 202509, FromMonth = 202506 };
     private List<FDWHReportRun> runs = new();
     private List<int> availableMonths = new();
 
@@ -163,16 +163,14 @@
     {
         availableMonths = await ReportingService.GetAvailableProcessingMonthsAsync();
 
-        // Set defaults to the most recent months if available, otherwise keep existing defaults
+        // R020 defaults: n/a, MVT, n/a, n/a (use latest available for both)
         if (availableMonths.Count > 0)
         {
-            if (!availableMonths.Contains(paramModel.ProcessingMonth))
-                paramModel.ProcessingMonth = availableMonths[0];
-            if (availableMonths.Count > 0 && !availableMonths.Contains(paramModel.FromMonth))
-                paramModel.FromMonth = availableMonths[0];
+            paramModel.ProcessingMonth = availableMonths[0];
+            paramModel.FromMonth = availableMonths[0];
         }
 
-        
+
         runs = (await ReportingService.GetReportRunsAsync())
             .Where(r => r.ReportID == REPORT_ID)
             .OrderByDescending(r => r.RunDate)
