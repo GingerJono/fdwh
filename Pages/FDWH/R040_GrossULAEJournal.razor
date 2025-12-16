@@ -155,16 +155,26 @@
     {
         availableMonths = await ReportingService.GetAvailableProcessingMonthsAsync();
 
-        // Set defaults to the most recent months if available, otherwise keep existing defaults
+        // R040 defaults: Quarterly, MVT, Latest Closed Quarter, One quarter before "To"
         if (availableMonths.Count > 0)
         {
-            if (!availableMonths.Contains(paramModel.ProcessingMonth))
+            // Get latest quarter end (Latest Closed Quarter)
+            var latestQE = FDWHReportingService.GetLatestQuarterEnd(availableMonths);
+            if (latestQE > 0)
+            {
+                paramModel.ProcessingMonth = latestQE;
+                // One quarter before "To"
+                paramModel.FromMonth = FDWHReportingService.GetPreviousQuarter(latestQE);
+            }
+            else
+            {
+                // Fallback to latest available month
                 paramModel.ProcessingMonth = availableMonths[0];
-            if (availableMonths.Count > 0 && !availableMonths.Contains(paramModel.FromMonth))
                 paramModel.FromMonth = availableMonths[0];
+            }
         }
 
-        
+
         runs = (await ReportingService.GetReportRunsAsync())
             .Where(r => r.ReportID == REPORT_ID)
             .OrderByDescending(r => r.RunDate)

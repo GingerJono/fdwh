@@ -145,11 +145,20 @@
     {
         availableMonths = await ReportingService.GetAvailableProcessingMonthsAsync();
 
-        // Set defaults to the most recent month if available, otherwise keep existing default
+        // R070 defaults: Quarterly, ITD, Latest Closed Quarter, n/a
         if (availableMonths.Count > 0)
         {
-            if (!availableMonths.Contains(paramModel.ProcessingMonth))
+            // Get latest quarter end (Latest Closed Quarter)
+            var latestQE = FDWHReportingService.GetLatestQuarterEnd(availableMonths);
+            if (latestQE > 0)
+            {
+                paramModel.ProcessingMonth = latestQE;
+            }
+            else
+            {
+                // Fallback to latest available month
                 paramModel.ProcessingMonth = availableMonths[0];
+            }
         }
 
 
