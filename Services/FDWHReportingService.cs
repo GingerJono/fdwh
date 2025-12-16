@@ -150,7 +150,8 @@ namespace Sandbox.Services
 			using var cmd = new SqlCommand(@"
 				SELECT DISTINCT ProcessingMonth
 				FROM dbo.tbRuns
-				WHERE ProcessingMonth IS NOT NULL", conn);
+				WHERE ProcessingMonth IS NOT NULL
+				ORDER BY ProcessingMonth DESC", conn);
 
 			await conn.OpenAsync();
 			using var reader = await cmd.ExecuteReaderAsync();
