@@ -4,6 +4,7 @@
 @using sandboxapp.Utilities
 @inject UltimatesService UltimatesService
 @inject FxConversionService FxConversion
+@inject CurrencySettingsService CurrencySettings
 @inject NavigationManager NavigationManager
 @inject ILogger<EditUltimatePremium> Logger
 
@@ -29,6 +30,46 @@ else if (gridRows != null)
     <div class="row mb-3">
         <div class="col">
             <h1>Edit Ultimate Premium: @Class / @YOA</h1>
+        </div>
+    </div>
+
+    <!-- Summary Cards for this Class/YOA -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-primary">
+                <div class="card-body text-center">
+                    <h6 class="text-muted text-uppercase mb-2">@GetCurrencySymbol() Gross Premium</h6>
+                    <h2 class="mb-0 text-primary">@FormatCurrencyConverted(GetTotalForMetric("GrossPremium"))</h2>
+                    <small class="text-muted">@Class / @YOA</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-success">
+                <div class="card-body text-center">
+                    <h6 class="text-muted text-uppercase mb-2">@GetCurrencySymbol() Net Premium</h6>
+                    <h2 class="mb-0 text-success">@FormatCurrencyConverted(GetTotalForMetric("NetPremium"))</h2>
+                    <small class="text-muted">@Class / @YOA</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-warning">
+                <div class="card-body text-center">
+                    <h6 class="text-muted text-uppercase mb-2">@GetCurrencySymbol() RIPs</h6>
+                    <h2 class="mb-0 text-warning">@FormatCurrencyConverted(GetTotalForMetric("RIPs"))</h2>
+                    <small class="text-muted">@Class / @YOA</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-info">
+                <div class="card-body text-center">
+                    <h6 class="text-muted text-uppercase mb-2">@GetCurrencySymbol() PC</h6>
+                    <h2 class="mb-0 text-info">@FormatCurrencyConverted(GetTotalForMetric("PC"))</h2>
+                    <small class="text-muted">@Class / @YOA</small>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -199,7 +240,7 @@ else if (gridRows != null)
             <button type="button" class="btn btn-success btn-lg" @onclick="SaveChanges">
                 <i class="bi bi-save"></i> Save Changes
             </button>
-            <button type="button" class="btn btn-secondary btn-lg ms-2" @onclick="@(() => NavigationManager.NavigateTo("/Ultimates/Premium"))">
+            <button type="button" class="btn btn-secondary btn-lg ms-2" @onclick="@(() => NavigationManager.NavigateTo("Ultimates/Premium"))">
                 <i class="bi bi-x-circle"></i> Cancel
             </button>
             @if (!string.IsNullOrEmpty(message))
@@ -569,5 +610,50 @@ else if (gridRows != null)
         }
 
         return hasAnyValue ? total : null;
+    }
+
+    private string GetCurrencySymbol()
+    {
+        return CurrencySettings.DisplayCurrency == "GBP" ? "£" : "$";
+    }
+
+    private string FormatCurrencyConverted(decimal? value)
+    {
+        if (!value.HasValue) return "-";
+        return value.Value.ToString("N0");
+    }
+
+    private decimal? GetTotalForMetric(string metricName)
+    {
+        if (gridRows == null || !gridRows.Any()) return 0;
+
+        decimal total = 0m;
+        foreach (var row in gridRows)
+        {
+            foreach (var curr in currencies)
+            {
+                var cell = row.GetOrCreateCell(curr);
+                decimal? value = metricName switch
+                {
+                    "GrossPremium" => cell.GrossPremium,
+                    "NetPremium" => cell.NetPremium,
+                    "RIPs" => cell.RIPs,
+                    "PC" => cell.PC,
+                    _ => null
+                };
+
+                if (value.HasValue)
+                {
+                    // Convert to display currency
+                    var convertedValue = FxConversion.ConvertToDisplayCurrency(value, curr);
+                    if (convertedValue.HasValue)
+                    {
+                        total += convertedValue.Value;
+                    }
+                }
+            }
+        }
+
+        return total;
     }
 }
