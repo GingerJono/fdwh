@@ -14,7 +14,7 @@ namespace Sandbox.Models.SUA
 
 	public class SUA
 	{
-		public string Version { get; set; }
+		public int VersionID { get; set; }
 		public int? YOA { get; set; }
 		public string ClassCode { get; set; }
 		public string ClassName { get; set; }

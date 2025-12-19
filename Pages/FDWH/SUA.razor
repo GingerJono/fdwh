@@ -23,10 +23,10 @@
                 <li>File must only have one tab where the name starts with <strong>SUA</strong></li>
                 <li>That tab must have column headers for ALL the required columns in <strong>ROW 1</strong>:
                     <ul>
-                        <li>Version, YOA, ClassCode, ClassName, ReservingClass, DistributionChannel</li>
-                        <li>SettCcy, Item, ClaimsDetail, RIType, ValueSettCcy, Comment</li>
+                        <li>YOA, ClassCode, ClassName, ReservingClass, DistributionChannel</li>
+                        <li>SettCCY, Item, ClaimsDetail, RIType, ValueSCC, Comment</li>
                     </ul>
-                    <em>(Extra columns are allowed)</em>
+                    <em>(Extra columns are allowed. Version is assigned automatically.)</em>
                 </li>
                 <li>Must have more than 1 row of data</li>
             </ol>
@@ -44,7 +44,7 @@
             <div class="row g-3">
                 <div class="col-md-3">
                     <label class="form-label">Processing Month (YYYYMM)</label>
-                    <InputSelect @bind-Value="uploadModel.ProcessingMonth" class="form-select" required>
+                    <InputSelect @bind-Value="uploadModel.ProcessingMonth" class="form-select" required @onchange="OnProcessingMonthOrSyndicateChanged">
                         <option value="0">-- Select Month --</option>
                         @foreach (var month in availableMonths)
                         {
@@ -54,7 +54,7 @@
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">Syndicate</label>
-                    <InputSelect @bind-Value="uploadModel.Syndicate" class="form-select" required>
+                    <InputSelect @bind-Value="uploadModel.Syndicate" class="form-select" required @onchange="OnProcessingMonthOrSyndicateChanged">
                         <option value="0">-- Select Syndicate --</option>
                         <option value="1729">1729</option>
                         <option value="6131">6131</option>
@@ -62,6 +62,33 @@
                     </InputSelect>
                 </div>
                 <div class="col-md-6">
+                    <label class="form-label">Version Selection</label>
+                    <div class="d-flex gap-2">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="versionMode" id="newVersion"
+                                   checked="@(uploadModel.VersionMode == VersionMode.CreateNew)"
+                                   @onchange="() => OnVersionModeChanged(VersionMode.CreateNew)" />
+                            <label class="form-check-label" for="newVersion">Create New</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="versionMode" id="existingVersion"
+                                   checked="@(uploadModel.VersionMode == VersionMode.AddToExisting)"
+                                   @onchange="() => OnVersionModeChanged(VersionMode.AddToExisting)" />
+                            <label class="form-check-label" for="existingVersion">Add to Existing</label>
+                        </div>
+                        @if (uploadModel.VersionMode == VersionMode.AddToExisting)
+                        {
+                            <select @bind="uploadModel.ExistingVersionID" class="form-select form-select-sm flex-grow-1" required>
+                                <option value="0">-- Select Version --</option>
+                                @foreach (var v in existingVersions)
+                                {
+                                    <option value="@v.VersionID">@v.Version</option>
+                                }
+                            </select>
+                        }
+                    </div>
+                </div>
+                <div class="col-md-12">
                     <label class="form-label">Comments</label>
                     <InputText @bind-Value="uploadModel.Comments" class="form-control" placeholder="Optional comments..." />
                 </div>
@@ -133,7 +160,7 @@
                                 </td>
                                 <td>@version.Comments</td>
                                 <td>
-                                    <button class="btn btn-sm btn-outline-primary" @onclick="() => DownloadVersion(version.Version)">
+                                    <button class="btn btn-sm btn-outline-primary" @onclick="() => DownloadVersion(version.VersionID)">
                                         <i class="bi bi-download"></i> Download
                                     </button>
                                 </td>
@@ -160,6 +187,7 @@ else if (versions != null)
     private UploadModel uploadModel = new();
     private List<SUAVersionSummary> versions = new();
     private List<int> availableMonths = new();
+    private List<SUAVersion> existingVersions = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -179,6 +207,30 @@ else if (versions != null)
         versions = await SUAService.GetAllVersionsAsync();
     }
 
+    private async Task OnProcessingMonthOrSyndicateChanged()
+    {
+        if (uploadModel.ProcessingMonth > 0 && uploadModel.Syndicate > 0)
+        {
+            existingVersions = await SUAService.GetVersionsByProcessingMonthAndSyndicateAsync(
+                uploadModel.ProcessingMonth,
+                uploadModel.Syndicate);
+        }
+        else
+        {
+            existingVersions.Clear();
+        }
+        uploadModel.ExistingVersionID = 0;
+    }
+
+    private void OnVersionModeChanged(VersionMode mode)
+    {
+        uploadModel.VersionMode = mode;
+        if (mode == VersionMode.CreateNew)
+        {
+            uploadModel.ExistingVersionID = 0;
+        }
+    }
+
     private void OnFileSelected(InputFileChangeEventArgs e)
     {
         selectedFile = e.File;
@@ -194,6 +246,13 @@ else if (versions != null)
             return;
         }
 
+        if (uploadModel.VersionMode == VersionMode.AddToExisting && uploadModel.ExistingVersionID == 0)
+        {
+            uploadMessage = "Please select an existing version to add to.";
+            uploadSuccess = false;
+            return;
+        }
+
         isUploading = true;
         uploadMessage = string.Empty;
 
@@ -205,7 +264,8 @@ else if (versions != null)
                 uploadModel.ProcessingMonth,
                 uploadModel.Syndicate,
                 uploadModel.Comments,
-                SandboxContext.EffectiveUserName ?? "unknown");
+                SandboxContext.EffectiveUserName ?? "unknown",
+                uploadModel.VersionMode == VersionMode.AddToExisting ? uploadModel.ExistingVersionID : null);
 
             uploadSuccess = result.Success;
             uploadMessage = result.Message;
@@ -222,6 +282,7 @@ else if (versions != null)
                     uploadModel.ProcessingMonth = availableMonths[0];
                 }
                 selectedFile = null;
+                existingVersions.Clear();
             }
         }
         catch (Exception ex)
@@ -235,12 +296,13 @@ else if (versions != null)
         }
     }
 
-    private async Task DownloadVersion(string versionNumber)
+    private async Task DownloadVersion(int versionID)
     {
         try
         {
-            var bytes = await SUAService.DownloadVersionAsync(versionNumber);
-            var fileName = $"SUA_{versionNumber}_{DateTime.UtcNow:yyyyMMddHHmmss}.xlsx";
+            var bytes = await SUAService.DownloadVersionAsync(versionID);
+            var version = versions.FirstOrDefault(v => v.VersionID == versionID);
+            var fileName = $"SUA_{version?.Version ?? versionID.ToString()}_{DateTime.UtcNow:yyyyMMddHHmmss}.xlsx";
 
             using var streamRef = new DotNetStreamReference(new MemoryStream(bytes));
             await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
@@ -273,10 +335,18 @@ else if (versions != null)
 
     private void ToggleInstructions() => showInstructions = !showInstructions;
 
+    public enum VersionMode
+    {
+        CreateNew,
+        AddToExisting
+    }
+
     public class UploadModel
     {
         public int ProcessingMonth { get; set; }
         public int Syndicate { get; set; }
         public string Comments { get; set; }
+        public VersionMode VersionMode { get; set; } = VersionMode.CreateNew;
+        public int ExistingVersionID { get; set; }
     }
 }
