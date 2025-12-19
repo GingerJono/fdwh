@@ -32,8 +32,13 @@ namespace Sandbox.Services
 		{
 			try
 			{
+				// Copy to MemoryStream to avoid "Synchronous reads are not supported" error
+				using var memoryStream = new MemoryStream();
+				await fileStream.CopyToAsync(memoryStream);
+				memoryStream.Position = 0;
+
 				// Load Excel file
-				using var package = new ExcelPackage(fileStream);
+				using var package = new ExcelPackage(memoryStream);
 
 				// Find worksheet that starts with "SUA"
 				var worksheet = package.Workbook.Worksheets.FirstOrDefault(ws => ws.Name.StartsWith("SUA", StringComparison.OrdinalIgnoreCase));
