@@ -218,7 +218,7 @@ namespace Sandbox.Services
 					sv.UploadedDate,
 					sv.UploadedBy,
 					sv.IsActive,
-					COUNT(s.Version) as RowCount,
+					COUNT(s.Version) as [RowCount],
 					ISNULL(SUM(s.ValueSCC), 0) as TotalValueSCC
 				FROM dbo.SUAVersions sv
 				LEFT JOIN dbo.SUA s ON sv.Version = s.Version
