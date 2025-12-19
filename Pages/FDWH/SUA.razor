@@ -44,7 +44,7 @@
             <div class="row g-3">
                 <div class="col-md-3">
                     <label class="form-label">Processing Month (YYYYMM)</label>
-                    <InputSelect @bind-Value="uploadModel.ProcessingMonth" class="form-select" required @onchange="OnProcessingMonthOrSyndicateChanged">
+                    <InputSelect @bind-Value="uploadModel.ProcessingMonth" class="form-select" required>
                         <option value="0">-- Select Month --</option>
                         @foreach (var month in availableMonths)
                         {
@@ -54,41 +54,18 @@
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">Syndicate</label>
-                    <InputSelect @bind-Value="uploadModel.Syndicate" class="form-select" required @onchange="OnProcessingMonthOrSyndicateChanged">
+                    <InputSelect @bind-Value="uploadModel.Syndicate" class="form-select" required>
                         <option value="0">-- Select Syndicate --</option>
                         <option value="1729">1729</option>
                         <option value="6131">6131</option>
                         <option value="1954">1954</option>
                     </InputSelect>
                 </div>
-                <div class="col-md-6">
-                    <label class="form-label">Version Selection</label>
-                    <div class="d-flex gap-2">
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="versionMode" id="newVersion"
-                                   checked="@(uploadModel.VersionMode == VersionMode.CreateNew)"
-                                   @onchange="() => OnVersionModeChanged(VersionMode.CreateNew)" />
-                            <label class="form-check-label" for="newVersion">Create New</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="versionMode" id="existingVersion"
-                                   checked="@(uploadModel.VersionMode == VersionMode.AddToExisting)"
-                                   @onchange="() => OnVersionModeChanged(VersionMode.AddToExisting)" />
-                            <label class="form-check-label" for="existingVersion">Add to Existing</label>
-                        </div>
-                        @if (uploadModel.VersionMode == VersionMode.AddToExisting)
-                        {
-                            <select @bind="uploadModel.ExistingVersionID" class="form-select form-select-sm flex-grow-1" required>
-                                <option value="0">-- Select Version --</option>
-                                @foreach (var v in existingVersions)
-                                {
-                                    <option value="@v.VersionID">@v.Version</option>
-                                }
-                            </select>
-                        }
-                    </div>
+                <div class="col-md-3">
+                    <label class="form-label">Version</label>
+                    <InputText @bind-Value="uploadModel.Version" class="form-control" placeholder="e.g., 202509.01" required />
                 </div>
-                <div class="col-md-12">
+                <div class="col-md-9">
                     <label class="form-label">Comments</label>
                     <InputText @bind-Value="uploadModel.Comments" class="form-control" placeholder="Optional comments..." />
                 </div>
@@ -187,7 +164,6 @@ else if (versions != null)
     private UploadModel uploadModel = new();
     private List<SUAVersionSummary> versions = new();
     private List<int> availableMonths = new();
-    private List<SUAVersion> existingVersions = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -207,30 +183,6 @@ else if (versions != null)
         versions = await SUAService.GetAllVersionsAsync();
     }
 
-    private async Task OnProcessingMonthOrSyndicateChanged()
-    {
-        if (uploadModel.ProcessingMonth > 0 && uploadModel.Syndicate > 0)
-        {
-            existingVersions = await SUAService.GetVersionsByProcessingMonthAndSyndicateAsync(
-                uploadModel.ProcessingMonth,
-                uploadModel.Syndicate);
-        }
-        else
-        {
-            existingVersions.Clear();
-        }
-        uploadModel.ExistingVersionID = 0;
-    }
-
-    private void OnVersionModeChanged(VersionMode mode)
-    {
-        uploadModel.VersionMode = mode;
-        if (mode == VersionMode.CreateNew)
-        {
-            uploadModel.ExistingVersionID = 0;
-        }
-    }
-
     private void OnFileSelected(InputFileChangeEventArgs e)
     {
         selectedFile = e.File;
@@ -239,16 +191,9 @@ else if (versions != null)
 
     private async Task HandleUpload()
     {
-        if (selectedFile == null || uploadModel.ProcessingMonth == 0 || uploadModel.Syndicate == 0)
+        if (selectedFile == null || uploadModel.ProcessingMonth == 0 || uploadModel.Syndicate == 0 || string.IsNullOrWhiteSpace(uploadModel.Version))
         {
             uploadMessage = "Please fill in all required fields and select a file.";
-            uploadSuccess = false;
-            return;
-        }
-
-        if (uploadModel.VersionMode == VersionMode.AddToExisting && uploadModel.ExistingVersionID == 0)
-        {
-            uploadMessage = "Please select an existing version to add to.";
             uploadSuccess = false;
             return;
         }
@@ -261,11 +206,11 @@ else if (versions != null)
             using var stream = selectedFile.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024); // 10MB limit
             var result = await SUAService.UploadSUAFileAsync(
                 stream,
+                uploadModel.Version,
                 uploadModel.ProcessingMonth,
                 uploadModel.Syndicate,
                 uploadModel.Comments,
-                SandboxContext.EffectiveUserName ?? "unknown",
-                uploadModel.VersionMode == VersionMode.AddToExisting ? uploadModel.ExistingVersionID : null);
+                SandboxContext.EffectiveUserName ?? "unknown");
 
             uploadSuccess = result.Success;
             uploadMessage = result.Message;
@@ -282,7 +227,6 @@ else if (versions != null)
                     uploadModel.ProcessingMonth = availableMonths[0];
                 }
                 selectedFile = null;
-                existingVersions.Clear();
             }
         }
         catch (Exception ex)
@@ -335,18 +279,11 @@ else if (versions != null)
 
     private void ToggleInstructions() => showInstructions = !showInstructions;
 
-    public enum VersionMode
-    {
-        CreateNew,
-        AddToExisting
-    }
-
     public class UploadModel
     {
         public int ProcessingMonth { get; set; }
         public int Syndicate { get; set; }
+        public string Version { get; set; }
         public string Comments { get; set; }
-        public VersionMode VersionMode { get; set; } = VersionMode.CreateNew;
-        public int ExistingVersionID { get; set; }
     }
 }

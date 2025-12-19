@@ -25,11 +25,11 @@ namespace Sandbox.Services
 
 		public async Task<(bool Success, string Message, int? VersionID)> UploadSUAFileAsync(
 			Stream fileStream,
+			string version,
 			int processingMonth,
 			int syndicate,
 			string comments,
-			string uploadedBy,
-			int? existingVersionID = null)
+			string uploadedBy)
 		{
 			try
 			{
@@ -73,23 +73,6 @@ namespace Sandbox.Services
 					return (false, "Error: File must contain at least one data row", null);
 				}
 
-				// Get or create version
-				int versionID;
-				string versionNumber;
-
-				if (existingVersionID.HasValue)
-				{
-					// Adding to existing version
-					versionID = existingVersionID.Value;
-					versionNumber = await GetVersionNumberByIDAsync(versionID);
-				}
-				else
-				{
-					// Create new version
-					versionNumber = await GetNextVersionNumberAsync(processingMonth);
-					versionID = -1; // Will be set after insert
-				}
-
 				// Read data rows
 				var suaRecords = new List<SUA>();
 				for (int row = 2; row <= worksheet.Dimension.Rows; row++)
@@ -122,52 +105,14 @@ namespace Sandbox.Services
 				}
 
 				// Insert into database
-				versionID = await InsertSUADataAsync(versionNumber, processingMonth, syndicate, comments, uploadedBy, suaRecords, existingVersionID);
+				var versionID = await InsertSUADataAsync(version, processingMonth, syndicate, comments, uploadedBy, suaRecords);
 
-				return (true, $"Successfully uploaded {suaRecords.Count} rows to version {versionNumber}", versionID);
+				return (true, $"Successfully uploaded {suaRecords.Count} rows to version {version}", versionID);
 			}
 			catch (Exception ex)
 			{
 				return (false, $"Error processing file: {ex.Message}", null);
 			}
-		}
-
-		private async Task<string> GetVersionNumberByIDAsync(int versionID)
-		{
-			using var conn = new SqlConnection(GetConnectionString());
-			using var cmd = new SqlCommand(@"
-				SELECT Version
-				FROM dbo.SUAVersions
-				WHERE VersionID = @VersionID", conn);
-
-			cmd.Parameters.AddWithValue("@VersionID", versionID);
-
-			await conn.OpenAsync();
-			var result = await cmd.ExecuteScalarAsync();
-
-			return result?.ToString() ?? throw new Exception($"Version with ID {versionID} not found");
-		}
-
-		private async Task<string> GetNextVersionNumberAsync(int processingMonth)
-		{
-			using var conn = new SqlConnection(GetConnectionString());
-			using var cmd = new SqlCommand(@"
-				SELECT MAX(CAST(SUBSTRING(Version, CHARINDEX('.', Version) + 1, LEN(Version)) AS INT))
-				FROM dbo.SUAVersions
-				WHERE ProcessingMonth = @ProcessingMonth", conn);
-
-			cmd.Parameters.AddWithValue("@ProcessingMonth", processingMonth);
-
-			await conn.OpenAsync();
-			var result = await cmd.ExecuteScalarAsync();
-
-			int nextIncrement = 1;
-			if (result != null && result != DBNull.Value)
-			{
-				nextIncrement = Convert.ToInt32(result) + 1;
-			}
-
-			return $"{processingMonth}.{nextIncrement:D2}";
 		}
 
 		private async Task<int> InsertSUADataAsync(
@@ -176,8 +121,7 @@ namespace Sandbox.Services
 			int syndicate,
 			string comments,
 			string uploadedBy,
-			List<SUA> records,
-			int? existingVersionID)
+			List<SUA> records)
 		{
 			using var conn = new SqlConnection(GetConnectionString());
 			await conn.OpenAsync();
@@ -185,31 +129,22 @@ namespace Sandbox.Services
 			using var transaction = conn.BeginTransaction();
 			try
 			{
+				// Insert new SUAVersion
 				int versionID;
-
-				if (existingVersionID.HasValue)
+				using (var cmd = new SqlCommand(@"
+					INSERT INTO dbo.SUAVersions (Version, ProcessingMonth, Syndicate, Comments, UploadedDate, UploadedBy, IsActive)
+					OUTPUT INSERTED.VersionID
+					VALUES (@Version, @ProcessingMonth, @Syndicate, @Comments, @UploadedDate, @UploadedBy, @IsActive)", conn, transaction))
 				{
-					// Use existing version
-					versionID = existingVersionID.Value;
-				}
-				else
-				{
-					// Insert new SUAVersion
-					using (var cmd = new SqlCommand(@"
-						INSERT INTO dbo.SUAVersions (Version, ProcessingMonth, Syndicate, Comments, UploadedDate, UploadedBy, IsActive)
-						OUTPUT INSERTED.VersionID
-						VALUES (@Version, @ProcessingMonth, @Syndicate, @Comments, @UploadedDate, @UploadedBy, @IsActive)", conn, transaction))
-					{
-						cmd.Parameters.AddWithValue("@Version", version);
-						cmd.Parameters.AddWithValue("@ProcessingMonth", processingMonth);
-						cmd.Parameters.AddWithValue("@Syndicate", syndicate);
-						cmd.Parameters.AddWithValue("@Comments", comments ?? (object)DBNull.Value);
-						cmd.Parameters.AddWithValue("@UploadedDate", DateTime.UtcNow);
-						cmd.Parameters.AddWithValue("@UploadedBy", uploadedBy);
-						cmd.Parameters.AddWithValue("@IsActive", true);
+					cmd.Parameters.AddWithValue("@Version", version);
+					cmd.Parameters.AddWithValue("@ProcessingMonth", processingMonth);
+					cmd.Parameters.AddWithValue("@Syndicate", syndicate);
+					cmd.Parameters.AddWithValue("@Comments", comments ?? (object)DBNull.Value);
+					cmd.Parameters.AddWithValue("@UploadedDate", DateTime.UtcNow);
+					cmd.Parameters.AddWithValue("@UploadedBy", uploadedBy);
+					cmd.Parameters.AddWithValue("@IsActive", true);
 
-						versionID = (int)await cmd.ExecuteScalarAsync();
-					}
+					versionID = (int)await cmd.ExecuteScalarAsync();
 				}
 
 				// Insert SUA records with VersionID
@@ -287,39 +222,6 @@ namespace Sandbox.Services
 					IsActive = reader.IsDBNull(7) ? (bool?)null : reader.GetBoolean(7),
 					RowCount = reader.GetInt32(8),
 					TotalValueSCC = reader.GetDecimal(9)
-				});
-			}
-
-			return versions;
-		}
-
-		public async Task<List<SUAVersion>> GetVersionsByProcessingMonthAndSyndicateAsync(int processingMonth, int syndicate)
-		{
-			var versions = new List<SUAVersion>();
-			using var conn = new SqlConnection(GetConnectionString());
-			using var cmd = new SqlCommand(@"
-				SELECT VersionID, Version, ProcessingMonth, Syndicate, Comments, UploadedDate, UploadedBy, IsActive
-				FROM dbo.SUAVersions
-				WHERE ProcessingMonth = @ProcessingMonth AND Syndicate = @Syndicate AND IsActive = 1
-				ORDER BY Version DESC", conn);
-
-			cmd.Parameters.AddWithValue("@ProcessingMonth", processingMonth);
-			cmd.Parameters.AddWithValue("@Syndicate", syndicate);
-
-			await conn.OpenAsync();
-			using var reader = await cmd.ExecuteReaderAsync();
-			while (await reader.ReadAsync())
-			{
-				versions.Add(new SUAVersion
-				{
-					VersionID = reader.GetInt32(0),
-					Version = reader.GetString(1),
-					ProcessingMonth = reader.IsDBNull(2) ? (int?)null : reader.GetInt32(2),
-					Syndicate = reader.IsDBNull(3) ? (int?)null : reader.GetInt32(3),
-					Comments = reader.IsDBNull(4) ? null : reader.GetString(4),
-					UploadedDate = reader.IsDBNull(5) ? (DateTime?)null : reader.GetDateTime(5),
-					UploadedBy = reader.IsDBNull(6) ? null : reader.GetString(6),
-					IsActive = reader.IsDBNull(7) ? (bool?)null : reader.GetBoolean(7)
 				});
 			}
 
