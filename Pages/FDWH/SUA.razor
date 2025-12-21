@@ -1,0 +1,289 @@
+@page "/FDWH/SUA"
+@inject Sandbox.Services.SUAService SUAService
+@inject Sandbox.Services.FDWHReportingService ReportingService
+@inject IJSRuntime JS
+@inject Helpers.SandboxContext SandboxContext
+@using Sandbox.Models.SUA
+@using Microsoft.AspNetCore.Components.Forms
+
+<h3 class="mb-3">SUA Upload</h3>
+
+<div class="card mb-4 shadow-sm border-0">
+    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+        <span class="fw-semibold">Upload Instructions</span>
+        <button class="btn btn-sm btn-outline-secondary" @onclick="ToggleInstructions">
+            @(showInstructions ? "Hide" : "Show")
+        </button>
+    </div>
+    @if (showInstructions)
+    {
+        <div class="card-body">
+            <h6>Template Requirements:</h6>
+            <ol>
+                <li>File must only have one tab where the name starts with <strong>SUA</strong></li>
+                <li>That tab must have column headers for ALL the required columns in <strong>ROW 1</strong>:
+                    <ul>
+                        <li>YOA, ClassCode, ClassName, ReservingClass, DistributionChannel</li>
+                        <li>SettCCY, Item, ClaimsDetail, RIType, ValueSCC, Comment</li>
+                    </ul>
+                    <em>(Extra columns are allowed. Version is assigned automatically.)</em>
+                </li>
+                <li>Must have more than 1 row of data</li>
+            </ol>
+            <button class="btn btn-sm btn-primary" @onclick="DownloadTemplate">
+                <i class="bi bi-download"></i> Download Empty Template
+            </button>
+        </div>
+    }
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-primary text-white">Upload SUA File</div>
+    <div class="card-body">
+        <EditForm Model="@uploadModel" OnValidSubmit="HandleUpload">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Processing Month (YYYYMM)</label>
+                    <InputSelect @bind-Value="uploadModel.ProcessingMonth" class="form-select" required>
+                        <option value="0">-- Select Month --</option>
+                        @foreach (var month in availableMonths)
+                        {
+                            <option value="@month">@month</option>
+                        }
+                    </InputSelect>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Syndicate</label>
+                    <InputSelect @bind-Value="uploadModel.Syndicate" class="form-select" required>
+                        <option value="0">-- Select Syndicate --</option>
+                        <option value="1729">1729</option>
+                        <option value="6131">6131</option>
+                        <option value="1954">1954</option>
+                    </InputSelect>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Version</label>
+                    <InputText @bind-Value="uploadModel.Version" class="form-control" placeholder="e.g., 202509.01" required />
+                </div>
+                <div class="col-md-9">
+                    <label class="form-label">Comments</label>
+                    <InputText @bind-Value="uploadModel.Comments" class="form-control" placeholder="Optional comments..." />
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Excel File</label>
+                    <InputFile OnChange="OnFileSelected" class="form-control" accept=".xlsx" />
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-success" disabled="@(isUploading || selectedFile == null)">
+                        @if (isUploading)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2"></span>
+                            <span>Uploading...</span>
+                        }
+                        else
+                        {
+                            <span><i class="bi bi-upload"></i> Upload File</span>
+                        }
+                    </button>
+                </div>
+            </div>
+        </EditForm>
+
+        @if (!string.IsNullOrEmpty(uploadMessage))
+        {
+            <div class="alert @(uploadSuccess ? "alert-success" : "alert-danger") mt-3" role="alert">
+                @uploadMessage
+            </div>
+        }
+    </div>
+</div>
+
+@if (versions?.Count > 0)
+{
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-light fw-semibold">Uploaded Versions</div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-sm table-hover mb-0 align-middle">
+                    <thead class="table-secondary">
+                        <tr>
+                            <th>Version</th>
+                            <th>Processing Month</th>
+                            <th>Syndicate</th>
+                            <th>Upload Date (UTC)</th>
+                            <th>Uploaded By</th>
+                            <th>Rows</th>
+                            <th>Total Value</th>
+                            <th>Active</th>
+                            <th>Comments</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var version in versions)
+                        {
+                            <tr>
+                                <td><strong>@version.Version</strong></td>
+                                <td>@version.ProcessingMonth</td>
+                                <td>@version.Syndicate</td>
+                                <td>@(version.UploadedDate?.ToString("yyyy-MM-dd HH:mm") ?? "-")</td>
+                                <td>@version.UploadedBy</td>
+                                <td>@version.RowCount.ToString("N0")</td>
+                                <td>@version.TotalValueSCC.ToString("N2")</td>
+                                <td>
+                                    <span class="badge @(version.IsActive == true ? "bg-success" : "bg-secondary")">
+                                        @(version.IsActive == true ? "Active" : "Inactive")
+                                    </span>
+                                </td>
+                                <td>@version.Comments</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" @onclick="() => DownloadVersion(version.VersionID)">
+                                        <i class="bi bi-download"></i> Download
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+else if (versions != null)
+{
+    <p class="text-muted mt-3 fst-italic">No versions uploaded yet.</p>
+}
+
+@code {
+    private bool showInstructions = true;
+    private bool isUploading = false;
+    private bool uploadSuccess = false;
+    private string uploadMessage = string.Empty;
+
+    private IBrowserFile selectedFile;
+    private UploadModel uploadModel = new();
+    private List<SUAVersionSummary> versions = new();
+    private List<int> availableMonths = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        availableMonths = await ReportingService.GetAvailableProcessingMonthsAsync();
+
+        // Set default to latest closed month (first in the sorted list)
+        if (availableMonths.Count > 0)
+        {
+            uploadModel.ProcessingMonth = availableMonths[0];
+        }
+
+        await LoadVersionsAsync();
+    }
+
+    private async Task LoadVersionsAsync()
+    {
+        versions = await SUAService.GetAllVersionsAsync();
+    }
+
+    private void OnFileSelected(InputFileChangeEventArgs e)
+    {
+        selectedFile = e.File;
+        uploadMessage = string.Empty;
+    }
+
+    private async Task HandleUpload()
+    {
+        if (selectedFile == null || uploadModel.ProcessingMonth == 0 || uploadModel.Syndicate == 0 || string.IsNullOrWhiteSpace(uploadModel.Version))
+        {
+            uploadMessage = "Please fill in all required fields and select a file.";
+            uploadSuccess = false;
+            return;
+        }
+
+        isUploading = true;
+        uploadMessage = string.Empty;
+
+        try
+        {
+            using var stream = selectedFile.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024); // 10MB limit
+            var result = await SUAService.UploadSUAFileAsync(
+                stream,
+                uploadModel.Version,
+                uploadModel.ProcessingMonth,
+                uploadModel.Syndicate,
+                uploadModel.Comments,
+                SandboxContext.EffectiveUserName ?? "unknown");
+
+            uploadSuccess = result.Success;
+            uploadMessage = result.Message;
+
+            if (result.Success)
+            {
+                // Reload versions list
+                await LoadVersionsAsync();
+
+                // Reset form with default month
+                uploadModel = new();
+                if (availableMonths.Count > 0)
+                {
+                    uploadModel.ProcessingMonth = availableMonths[0];
+                }
+                selectedFile = null;
+            }
+        }
+        catch (Exception ex)
+        {
+            uploadSuccess = false;
+            uploadMessage = $"Upload error: {ex.Message}";
+        }
+        finally
+        {
+            isUploading = false;
+        }
+    }
+
+    private async Task DownloadVersion(int versionID)
+    {
+        try
+        {
+            var bytes = await SUAService.DownloadVersionAsync(versionID);
+            var version = versions.FirstOrDefault(v => v.VersionID == versionID);
+            var fileName = $"SUA_{version?.Version ?? versionID.ToString()}_{DateTime.UtcNow:yyyyMMddHHmmss}.xlsx";
+
+            using var streamRef = new DotNetStreamReference(new MemoryStream(bytes));
+            await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
+        }
+        catch (Exception ex)
+        {
+            uploadMessage = $"Download error: {ex.Message}";
+            uploadSuccess = false;
+        }
+    }
+
+    private async Task DownloadTemplate()
+    {
+        uploadMessage = string.Empty;
+        try
+        {
+            var bytes = SUAService.GenerateEmptyTemplate();
+            var fileName = $"SUA_Template_{DateTime.UtcNow:yyyyMMdd}.xlsx";
+
+            using var streamRef = new DotNetStreamReference(new MemoryStream(bytes));
+            await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
+        }
+        catch (Exception ex)
+        {
+            uploadMessage = $"Template download error: {ex.Message}";
+            uploadSuccess = false;
+            StateHasChanged();
+        }
+    }
+
+    private void ToggleInstructions() => showInstructions = !showInstructions;
+
+    public class UploadModel
+    {
+        public int ProcessingMonth { get; set; }
+        public int Syndicate { get; set; }
+        public string Version { get; set; }
+        public string Comments { get; set; }
+    }
+}
