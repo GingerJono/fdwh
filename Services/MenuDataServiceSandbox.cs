@@ -131,6 +131,14 @@ public class MenuDataServiceSandbox
 					active: false,
 					dirChange: false
 				),
+				new MainMenuItems (
+					path: "NOCs",
+					type: "link",
+					title: "NOCs",
+					selected: false,
+					active: false,
+					dirChange: false
+				),
 			}
 		),
 		new MainMenuItems(

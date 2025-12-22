@@ -1,0 +1,188 @@
+@page "/NOCs"
+@inject Sandbox.Services.WindowpaneService WindowpaneService
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager
+@using Sandbox.Models.Windowpane
+
+<div class="row mt-4 mb-4">
+    <h3>Notice of Cancellations (NOCs)</h3>
+    <p class="text-muted">Policies with outstanding premiums approaching or past settlement due date</p>
+</div>
+
+@if (NOCs == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="card shadow mb-4 border">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover text-nowrap">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Policy Reference</th>
+                        <th>Assured Name</th>
+                        <th>Underwriter</th>
+                        <th>Status</th>
+                        <th>Inception Date</th>
+                        <th>Settlement Due</th>
+                        <th>Days Overdue</th>
+                        <th>Currency</th>
+                        <th>Premium Due</th>
+                        <th>Broker</th>
+                        <th>Contact</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var noc in NOCs)
+                    {
+                        var daysOverdue = noc.Settlement_Due_Date.HasValue
+                            ? (DateTime.Now.Date - noc.Settlement_Due_Date.Value.Date).Days
+                            : 0;
+                        var rowClass = daysOverdue > 30 ? "table-danger" : (daysOverdue > 14 ? "table-warning" : "");
+
+                        <tr class="@rowClass">
+                            <td>@noc.Policy_Reference</td>
+                            <td>@noc.Assured_Name</td>
+                            <td>@noc.Line_Underwriter_Initials</td>
+                            <td>@noc.Policy_Status_Description</td>
+                            <td>@noc.Inception_Date?.ToString("dd/MM/yyyy")</td>
+                            <td>@noc.Settlement_Due_Date?.ToString("dd/MM/yyyy")</td>
+                            <td>@daysOverdue</td>
+                            <td>@noc.EPI_Settlement_Currency</td>
+                            <td>@noc.EPI_Settlement_Currency @noc.Actual_Estimated_Premium?.ToString("N2")</td>
+                            <td>@noc.Broking_Company_Name</td>
+                            <td>@noc.Broker_Contact_Name</td>
+                            <td>
+                                <button class="btn btn-sm btn-primary" @onclick="() => ShowEmailModal(noc)">
+                                    Generate Email
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    @if (NOCs.Count() == 0)
+    {
+        <div class="alert alert-info">
+            <strong>No NOCs found.</strong> There are currently no policies requiring cancellation notices.
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            <strong>Total:</strong> @NOCs.Count() policies requiring attention
+        </div>
+    }
+}
+
+@if (showModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@emailSubject</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label"><strong>To:</strong></label>
+                        <input type="text" class="form-control" placeholder="Enter recipient email address" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Subject:</strong></label>
+                        <div class="form-control-plaintext">@emailSubject</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Body:</strong></label>
+                        <div class="border rounded p-3" style="white-space: pre-wrap; font-family: 'Courier New', monospace; background-color: #f8f9fa;">@emailBody</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseModal">Close</button>
+                    <button type="button" class="btn btn-primary" @onclick="CopyToClipboard">Copy Email Body</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private IEnumerable<NOCItem> NOCs;
+    private bool showModal = false;
+    private string emailSubject = "";
+    private string emailBody = "";
+    private NOCItem currentNOC;
+
+    protected override async Task OnInitializedAsync()
+    {
+        NOCs = (await WindowpaneService.GetNOCsAsync()).ToList();
+    }
+
+    private void ShowEmailModal(NOCItem noc)
+    {
+        currentNOC = noc;
+        emailSubject = $"Pending Cancellation: {noc.Assured_Name} (our ref: {noc.Policy_Reference})";
+        emailBody = GenerateEmailBody(noc);
+        showModal = true;
+    }
+
+    private void CloseModal()
+    {
+        showModal = false;
+    }
+
+    private async Task CopyToClipboard()
+    {
+        // Note: Clipboard API requires JavaScript interop in Blazor
+        // For now, this is a placeholder - would need JS implementation
+        await Task.CompletedTask;
+    }
+
+    private string GenerateEmailBody(NOCItem noc)
+    {
+        var inceptionDate = noc.Inception_Date ?? DateTime.Now;
+        var settlementDueDate = noc.Settlement_Due_Date ?? DateTime.Now;
+        var currentDate = DateTime.Now.Date;
+
+        var daysAllowedToPay = (settlementDueDate.Date - inceptionDate.Date).Days;
+        var daysOverdue = (currentDate - settlementDueDate.Date).Days;
+        var daysRemaining = (settlementDueDate.Date - currentDate).Days;
+
+        string paymentStatusText;
+        if (currentDate > settlementDueDate.Date)
+        {
+            paymentStatusText = $"The premium remains unpaid and is now {daysOverdue} days overdue.";
+        }
+        else
+        {
+            paymentStatusText = $"The premium remains unpaid with {daysRemaining} days remaining until the settlement due date.";
+        }
+
+        var premiumAmount = $"{noc.EPI_Settlement_Currency} {noc.Actual_Estimated_Premium:N2}";
+
+        return $@"Dear {noc.Broker_Contact_Name},
+
+Re: {noc.Assured_Name} - Policy Reference: {noc.Policy_Reference}
+
+I write with reference to the above policy, which incepted on {inceptionDate:dd MMMM yyyy}.
+
+We note that the premium of {premiumAmount} remains unpaid. The settlement due date for this policy was {settlementDueDate:dd MMMM yyyy}, being {daysAllowedToPay} days from inception.
+
+{paymentStatusText}
+
+Please be advised that failure to settle the outstanding premium by the settlement due date will result in automatic cancellation of this policy in accordance with the contract terms.
+
+We would be grateful if you could arrange for immediate payment or contact us to discuss this matter urgently.
+
+Should you have any queries regarding this notice, please do not hesitate to contact {noc.Line_Underwriter_Initials} or myself.
+
+We look forward to hearing from you.
+
+Yours sincerely,";
+    }
+}

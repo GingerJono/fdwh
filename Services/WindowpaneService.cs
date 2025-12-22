@@ -464,6 +464,15 @@ namespace Sandbox.Services
 				new { JobID = jobId }
 			);
 		}
+
+		public async Task<IEnumerable<NOCItem>> GetNOCsAsync()
+		{
+			using var db = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
+			return await db.QueryAsync<NOCItem>(
+				"Windowpane.spNOCList",
+				commandType: CommandType.StoredProcedure
+			);
+		}
 		#endregion
 	}
 	public class CytoraCheckingFilterState
