@@ -24,11 +24,11 @@
 <div class="filter-section">
     <div class="compact-filter">
         <label class="form-label me-2">Inception Month:</label>
-        <input type="month" class="form-control form-control-sm" @bind="inceptionMonth" @bind:after="LoadData" style="width:160px;" />
+        <input type="month" class="form-control form-control-sm" value="@inceptionMonth" @onchange="OnInceptionMonthChanged" style="width:160px;" />
     </div>
     <div class="compact-filter">
         <label class="form-label me-2">Class:</label>
-        <input type="text" class="form-control form-control-sm" @bind="selectedClass" @bind:after="LoadData" style="width:100px;" />
+        <input type="text" class="form-control form-control-sm" value="@selectedClass" @onchange="OnClassChanged" style="width:100px;" />
     </div>
     <div class="compact-filter">
         <button class="btn btn-sm btn-primary" @onclick="LoadData">Refresh</button>
@@ -122,6 +122,18 @@ else
 
         inceptionMonth = defaultInceptionMonth.ToString("yyyy-MM");
 
+        await LoadData();
+    }
+
+    private async Task OnInceptionMonthChanged(ChangeEventArgs e)
+    {
+        inceptionMonth = e.Value?.ToString() ?? "";
+        await LoadData();
+    }
+
+    private async Task OnClassChanged(ChangeEventArgs e)
+    {
+        selectedClass = e.Value?.ToString() ?? "";
         await LoadData();
     }
 
