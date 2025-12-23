@@ -31,7 +31,7 @@ BEGIN
            pfa.Limit_Currency,
            pfa.Limit,
            pfa.Excess,
-           pfa.Policy_Status_Description,
+           pfa.Line_Status_Code,
            pfa.Technical_Premium_Percent,
            pfa.Rate_Pct_Gross,
            pfa.Consortium_Code,
