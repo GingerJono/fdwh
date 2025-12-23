@@ -1,0 +1,482 @@
+@page "/HighLevelWorkflow"
+@inject Sandbox.Services.WindowpaneService WindowpaneService
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager
+@using Sandbox.Models.Windowpane
+
+<style>
+    .workflow-table { font-size: 0.85rem; }
+    .workflow-table th, .workflow-table td { padding: 0.25rem 0.4rem; white-space: nowrap; }
+    .status-box { display: inline-block; width: 24px; height: 24px; border: 1px solid #666; cursor: pointer; }
+    .status-dark-green { background-color: #2d7a3e; }
+    .status-light-green { background-color: #7bc96f; }
+    .status-yellow { background-color: #ffd966; }
+    .status-grey { background-color: #d3d3d3; }
+    .status-red { background-color: #dc3545; }
+    .filter-section { margin-bottom: 1rem; }
+    .filter-btn-group { display: inline-block; margin-right: 1.5rem; margin-bottom: 0.5rem; }
+    .filter-btn { padding: 0.25rem 0.75rem; font-size: 0.875rem; border-radius: 0.25rem; border: 1px solid #4a5568; background-color: white; color: #4a5568; cursor: pointer; margin-right: 0.25rem; }
+    .filter-btn.active { background-color: #4299e1; color: white; border-color: #4299e1; }
+    .filter-btn:hover:not(.active) { background-color: #e2e8f0; }
+    .premium-xl { background-color: #1e3a8a; color: white; }
+    .premium-lg { background-color: #3b82f6; color: white; }
+    .premium-md { background-color: #60a5fa; color: white; }
+    .premium-sm { background-color: #93c5fd; color: black; }
+    .premium-xs { background-color: #dbeafe; color: black; }
+    .renewal-flag { float: right; margin-left: 5px; }
+    .summary-card { background-color: white; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .summary-card h6 { font-size: 0.875rem; color: #64748b; margin-bottom: 0.5rem; }
+    .summary-card .value { font-size: 1.5rem; font-weight: 600; color: #1e293b; }
+</style>
+
+<div class="row mt-3 mb-3">
+    <div class="col">
+        <h3>High-Level Workflow</h3>
+    </div>
+</div>
+
+<!-- Summary Cards -->
+@if (WorkflowItems != null)
+{
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="summary-card">
+                <h6>Bound Risks</h6>
+                <div class="value">@BoundRisksCount</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="summary-card">
+                <h6>Bound Premium (USD)</h6>
+                <div class="value">@BoundPremiumUSD</div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Filters -->
+<div class="filter-section">
+    <div class="filter-btn-group">
+        <label class="form-label d-block mb-2" style="font-weight: 600;">Inception Month:</label>
+        @foreach (var month in availableMonths.Take(12))
+        {
+            <button class="filter-btn @(month == inceptionMonth ? "active" : "")"
+                    @onclick="() => SelectInceptionMonth(month)">
+                @month
+            </button>
+        }
+    </div>
+    <div class="filter-btn-group">
+        <label class="form-label d-block mb-2" style="font-weight: 600;">Class:</label>
+        @foreach (var cls in availableClasses)
+        {
+            <button class="filter-btn @(cls == selectedClass ? "active" : "")"
+                    @onclick="() => SelectClass(cls)">
+                @cls
+            </button>
+        }
+    </div>
+</div>
+
+@if (WorkflowItems == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="card shadow mb-4 border">
+        <div class="table-responsive">
+            <table class="table table-sm table-striped table-hover workflow-table text-nowrap">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Policy Ref</th>
+                        <th>Assured</th>
+                        <th>U/W</th>
+                        <th>Incept</th>
+                        <th>Premium</th>
+                        <th>Broker</th>
+                        <th>Line%</th>
+                        <th colspan="2">Links</th>
+                        <th title="Status">Stat</th>
+                        <th title="Technical Premium">TP</th>
+                        <th title="Rate">Rate</th>
+                        <th title="Consortium">Cons</th>
+                        <th title="Companion">Comp</th>
+                        <th title="Settlement">Sett</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in SortedWorkflowItems)
+                    {
+                        <tr>
+                            <td>@item.Policy_Reference</td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(item.Renewed_From_Line_Id))
+                                {
+                                    <span class="renewal-flag" title="Renewal from @item.Renewed_From_Line_Id">♻️</span>
+                                }
+                                @item.Assured_Name
+                            </td>
+                            <td>@item.Line_Underwriter_Initials</td>
+                            <td title="@GetInceptionTooltip(item)">@item.Inception_Date?.ToString("yyyy-MM-dd")</td>
+                            <td class="@GetPremiumClass(item)">@FormatPremium(item.EPI_Settlement_Currency, item.Actual_Estimated_Premium)</td>
+                            <td title="@GetBrokerTooltip(item)">@FormatBroker(item.Broker_Pseudonym, item.Broker_Number)</td>
+                            <td>@FormatLine(item.Reporting_Line_Percent, item.Limit_Currency, item.Limit, item.Excess)</td>
+                            <td>@GetWorkbenchCell(item)</td>
+                            <td>@GetSandboxCell(item)</td>
+                            <td>@GetPolicyStatusBox(item)</td>
+                            <td>@GetTechnicalPremiumBox(item)</td>
+                            <td>@GetRateBox(item)</td>
+                            <td>@GetConsortiumBox(item)</td>
+                            <td>@GetCompanionBox(item)</td>
+                            <td>@GetSettlementBox(item)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    @if (SortedWorkflowItems.Count() == 0)
+    {
+        <div class="alert alert-info">No policies found for the selected inception month and class.</div>
+    }
+    else
+    {
+        <div class="alert alert-info">Total: @SortedWorkflowItems.Count() policies</div>
+    }
+}
+
+@code {
+    private IEnumerable<HighLevelWorkflowItem> WorkflowItems;
+    private string inceptionMonth;
+    private string selectedClass = "PO";
+    private List<string> availableMonths = new List<string>();
+    private List<string> availableClasses = new List<string> { "All Classes", "CA", "EN", "HC", "MR", "PF", "PI", "PL", "PO", "PR", "PS", "SI" };
+
+    private int BoundRisksCount => SortedWorkflowItems.Count(i => IsStatusInSLUIC(i));
+
+    private string BoundPremiumUSD
+    {
+        get
+        {
+            var total = SortedWorkflowItems
+                .Where(i => IsStatusInSLUIC(i))
+                .Sum(i => i.Actual_Estimated_Premium ?? 0);
+
+            if (total >= 1000000)
+                return $"USD {(total / 1000000):N1}m";
+            else if (total >= 1000)
+                return $"USD {(total / 1000):N0}k";
+            else
+                return $"USD {total:N0}";
+        }
+    }
+
+    private IEnumerable<HighLevelWorkflowItem> SortedWorkflowItems
+    {
+        get
+        {
+            if (WorkflowItems == null) return Enumerable.Empty<HighLevelWorkflowItem>();
+
+            var statusOrder = new Dictionary<string, int>
+            {
+                { "S", 1 }, { "L", 2 }, { "U", 3 }, { "I", 4 }, { "C", 5 },
+                { "N", 6 }, { "D", 7 }, { "X", 8 }
+            };
+
+            return WorkflowItems.OrderBy(i =>
+            {
+                var status = i.Line_Status_Code?.ToUpper() ?? "";
+                return statusOrder.ContainsKey(status) ? statusOrder[status] : 99;
+            });
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Generate available months (12 months forward from current)
+        var today = DateTime.Now;
+        availableMonths = Enumerable.Range(0, 12)
+            .Select(offset => today.AddMonths(offset))
+            .Select(d => new DateTime(d.Year, d.Month, 1))
+            .Select(d => d.ToString("yyyy-MM"))
+            .ToList();
+
+        // Set default inception month
+        DateTime defaultInceptionMonth;
+        if (today.Day <= 7)
+        {
+            defaultInceptionMonth = new DateTime(today.Year, today.Month, 1);
+        }
+        else
+        {
+            defaultInceptionMonth = today.AddMonths(1);
+            defaultInceptionMonth = new DateTime(defaultInceptionMonth.Year, defaultInceptionMonth.Month, 1);
+        }
+
+        inceptionMonth = defaultInceptionMonth.ToString("yyyy-MM");
+
+        await LoadData();
+    }
+
+    private async Task SelectInceptionMonth(string month)
+    {
+        inceptionMonth = month;
+        await LoadData();
+    }
+
+    private async Task SelectClass(string cls)
+    {
+        selectedClass = cls == "All Classes" ? "" : cls;
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        if (string.IsNullOrWhiteSpace(inceptionMonth) || string.IsNullOrWhiteSpace(selectedClass))
+        {
+            WorkflowItems = Enumerable.Empty<HighLevelWorkflowItem>();
+            return;
+        }
+
+        var inceptionMonthDate = DateTime.Parse(inceptionMonth + "-01");
+        WorkflowItems = (await WindowpaneService.GetHighLevelWorkflowAsync(inceptionMonthDate, selectedClass)).ToList();
+    }
+
+    private string GetPremiumClass(HighLevelWorkflowItem item)
+    {
+        var premium = item.Actual_Estimated_Premium ?? 0;
+
+        if (premium > 100000) return "premium-xl";
+        else if (premium >= 50000 && premium <= 100000) return "premium-lg";
+        else if (premium >= 25000 && premium < 50000) return "premium-md";
+        else if (premium >= 10000 && premium < 25000) return "premium-sm";
+        else return "premium-xs";
+    }
+
+    private string FormatPremium(string currency, decimal? premium)
+    {
+        if (!premium.HasValue || premium.Value == 0) return "";
+
+        if (premium.Value >= 1000000)
+            return $"{currency} {(premium.Value / 1000000):0.0}m";
+        else if (premium.Value >= 1000)
+            return $"{currency} {(premium.Value / 1000):0}k";
+        else
+            return $"{currency} {premium.Value:0}";
+    }
+
+    private string FormatBroker(string pseudonym, string number)
+    {
+        if (string.IsNullOrEmpty(pseudonym) && string.IsNullOrEmpty(number)) return "";
+        return $"{pseudonym} {number}";
+    }
+
+    private string GetBrokerTooltip(HighLevelWorkflowItem item)
+    {
+        return $"Pseudonym: {item.Broker_Pseudonym}\nNumber: {item.Broker_Number}\nCompany: {item.Broking_Company_Name}\nContact: {item.Broker_Contact_Name}";
+    }
+
+    private string GetInceptionTooltip(HighLevelWorkflowItem item)
+    {
+        return $"Inception: {item.Inception_Date?.ToString("yyyy-MM-dd")}\nExpiry: {item.Expiry_Date?.ToString("yyyy-MM-dd")}";
+    }
+
+    private string FormatLine(decimal? percent, string currency, decimal? limit, decimal? excess)
+    {
+        if (!percent.HasValue || !limit.HasValue) return "";
+
+        var limitStr = limit.Value >= 1000000 ? $"{(limit.Value / 1000000):0.0}m" : $"{(limit.Value / 1000):0}k";
+        string structure;
+
+        if (!excess.HasValue || excess.Value == 0)
+            structure = $"Pri {limitStr}";
+        else
+        {
+            var excessStr = excess.Value >= 1000000 ? $"{(excess.Value / 1000000):0.0}m" : $"{(excess.Value / 1000):0}k";
+            structure = $"{limitStr} x {excessStr}";
+        }
+
+        return $"{percent:0.0}% of {currency} {structure}";
+    }
+
+    private RenderFragment GetWorkbenchCell(HighLevelWorkflowItem item)
+    {
+        if (item.RiskID.HasValue && item.RiskID.Value > 0)
+        {
+            var url = $"https://dale-prod.globalriskwire.com/workbench/risks/{item.RiskID.Value}";
+            return @<a href="@url" target="_blank" class="btn btn-xs btn-primary" style="font-size:0.7em;padding:0.1rem 0.3rem;">WB</a>;
+        }
+        else
+        {
+            return @<span class="text-danger">✗</span>;
+        }
+    }
+
+    private RenderFragment GetSandboxCell(HighLevelWorkflowItem item)
+    {
+        if (!string.IsNullOrEmpty(item.Policy_Reference) && item.Policy_Reference.Length >= 10)
+        {
+            var progRef = item.Policy_Reference.Substring(0, 10);
+            var url = $"https://localhost:44387/ViewProgram/{progRef}";
+            return @<a href="@url" target="_blank" class="btn btn-xs btn-secondary" style="font-size:0.7em;padding:0.1rem 0.3rem;">SB</a>;
+        }
+        else
+        {
+            return @<span></span>;
+        }
+    }
+
+    private bool IsStatusInSLUIC(HighLevelWorkflowItem item)
+    {
+        var status = item.Line_Status_Code?.ToUpper() ?? "";
+        return status == "S" || status == "L" || status == "U" || status == "I" || status == "C";
+    }
+
+    private bool IsStatusNotInSLUIC(HighLevelWorkflowItem item)
+    {
+        return !IsStatusInSLUIC(item);
+    }
+
+    private RenderFragment GetPolicyStatusBox(HighLevelWorkflowItem item)
+    {
+        var status = item.Line_Status_Code?.ToUpper() ?? "";
+        string color;
+
+        if (status == "S") color = "status-dark-green";
+        else if (status == "L") color = "status-dark-green";
+        else if (status == "U" || status == "C") color = "status-light-green";
+        else if (status == "I") color = "status-yellow";
+        else if (status == "Q") color = "status-grey";
+        else color = "status-red"; // N, D, X, other
+
+        return @<span class="status-box @color" title="Status: @item.Line_Status_Code"></span>;
+    }
+
+    private RenderFragment GetTechnicalPremiumBox(HighLevelWorkflowItem item)
+    {
+        if (IsStatusNotInSLUIC(item))
+            return @<span class="status-box status-grey"></span>;
+
+        var value = item.Technical_Premium_Percent;
+        string color;
+        string tooltip = $"Technical Premium: {(value.HasValue ? value.Value.ToString("0.00") + "%" : "N/A")}";
+
+        if (!value.HasValue || value.Value == 0)
+            color = "status-grey";
+        else if (value.Value >= 50.9m && value.Value <= 51.1m)
+            color = "status-yellow";
+        else
+            color = "status-dark-green";
+
+        return @<span class="status-box @color" title="@tooltip"></span>;
+    }
+
+    private RenderFragment GetRateBox(HighLevelWorkflowItem item)
+    {
+        if (IsStatusNotInSLUIC(item))
+            return @<span class="status-box status-grey"></span>;
+
+        var value = item.Rate_Pct_Gross;
+        string color;
+        string tooltip = $"Rate: {(value.HasValue ? value.Value.ToString("0.00") + "%" : "N/A")}";
+
+        if (!value.HasValue)
+            color = "status-grey";
+        else if (value.Value == 0)
+            color = "status-yellow";
+        else
+            color = "status-dark-green";
+
+        return @<span class="status-box @color" title="@tooltip"></span>;
+    }
+
+    private RenderFragment GetConsortiumBox(HighLevelWorkflowItem item)
+    {
+        if (IsStatusNotInSLUIC(item))
+            return @<span class="status-box status-grey"></span>;
+
+        var hasValue = !string.IsNullOrEmpty(item.Consortium_Code);
+        string color = hasValue ? "status-dark-green" : "status-grey";
+        string tooltip = hasValue
+            ? $"Consortium: {item.Consortium_Code}\nLine %: {(item.Consortium_Line_Percent.HasValue ? item.Consortium_Line_Percent.Value.ToString("0.00") + "%" : "N/A")}"
+            : "No Consortium";
+
+        return @<span class="status-box @color" title="@tooltip"></span>;
+    }
+
+    private RenderFragment GetCompanionBox(HighLevelWorkflowItem item)
+    {
+        if (IsStatusNotInSLUIC(item))
+            return @<span class="status-box status-grey"></span>;
+
+        var companion = item.Companion_Name ?? "";
+        string color;
+        string tooltip;
+
+        if (string.IsNullOrEmpty(companion))
+        {
+            color = "status-grey";
+            tooltip = "No Companion";
+        }
+        else if (companion.ToUpper() == "NO AVIVA")
+        {
+            color = "status-grey";
+            tooltip = "Companion: NO AVIVA";
+        }
+        else if (item.Signed_Line_Pct.HasValue)
+        {
+            color = "status-dark-green";
+            tooltip = $"Companion: {companion}\nWritten %: {(item.Written_Line_Pct.HasValue ? item.Written_Line_Pct.Value.ToString("0.00") + "%" : "N/A")}\nSigned %: {item.Signed_Line_Pct.Value:0.00}%";
+        }
+        else
+        {
+            color = "status-light-green";
+            tooltip = $"Companion: {companion}\nWritten %: {(item.Written_Line_Pct.HasValue ? item.Written_Line_Pct.Value.ToString("0.00") + "%" : "N/A")}\nSigned %: N/A";
+        }
+
+        return @<span class="status-box @color" title="@tooltip"></span>;
+    }
+
+    private RenderFragment GetSettlementBox(HighLevelWorkflowItem item)
+    {
+        if (IsStatusNotInSLUIC(item))
+            return @<span class="status-box status-grey"></span>;
+
+        var isPastDue = item.Settlement_Due_Date.HasValue && item.Settlement_Due_Date.Value < DateTime.Now;
+        var usmPrem = item.USMPrem;
+        var epiPrem = item.Actual_Estimated_Premium ?? 0;
+        var usmPercent = epiPrem > 0 ? (usmPrem / epiPrem) * 100 : 0;
+
+        string color;
+        string tooltip;
+
+        if (isPastDue && usmPrem == 0)
+        {
+            color = "status-red";
+            tooltip = $"Settlement OVERDUE\nDue: {item.Settlement_Due_Date?.ToString("yyyy-MM-dd")}\nUSM: {item.EPI_Settlement_Currency} {usmPrem:N2} (0%)";
+        }
+        else if (!isPastDue && usmPrem > 0)
+        {
+            color = "status-yellow";
+            tooltip = $"Settlement Pending\nDue: {item.Settlement_Due_Date?.ToString("yyyy-MM-dd")}\nUSM: {item.EPI_Settlement_Currency} {usmPrem:N2} ({usmPercent:0}%)";
+        }
+        else if (usmPercent >= 90)
+        {
+            color = "status-dark-green";
+            tooltip = $"Settlement OK\nDue: {item.Settlement_Due_Date?.ToString("yyyy-MM-dd")}\nUSM: {item.EPI_Settlement_Currency} {usmPrem:N2} ({usmPercent:0}%)";
+        }
+        else if (usmPrem > 0)
+        {
+            color = "status-light-green";
+            tooltip = $"Settlement Partial\nDue: {item.Settlement_Due_Date?.ToString("yyyy-MM-dd")}\nUSM: {item.EPI_Settlement_Currency} {usmPrem:N2} ({usmPercent:0}%)";
+        }
+        else
+        {
+            color = "status-grey";
+            tooltip = $"No Settlement\nDue: {item.Settlement_Due_Date?.ToString("yyyy-MM-dd")}\nUSM: {item.EPI_Settlement_Currency} 0.00";
+        }
+
+        return @<span class="status-box @color" title="@tooltip"></span>;
+    }
+}

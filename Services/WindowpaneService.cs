@@ -473,6 +473,16 @@ namespace Sandbox.Services
 				commandType: CommandType.StoredProcedure
 			);
 		}
+
+		public async Task<IEnumerable<HighLevelWorkflowItem>> GetHighLevelWorkflowAsync(DateTime inceptionMonth, string classParam)
+		{
+			using var db = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
+			return await db.QueryAsync<HighLevelWorkflowItem>(
+				"Windowpane.spHighLevelWorkflow",
+				new { InceptionMonth = inceptionMonth, Class = classParam },
+				commandType: CommandType.StoredProcedure
+			);
+		}
 		#endregion
 	}
 	public class CytoraCheckingFilterState
