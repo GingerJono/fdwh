@@ -15,6 +15,12 @@
     .filter-section { margin-bottom: 1rem; }
     .compact-filter { display: inline-block; margin-right: 1rem; }
     .compact-filter select { width: auto; display: inline-block; }
+    .premium-xs { font-size: 0.8em; color: #888; }
+    .premium-sm { font-size: 0.9em; color: #666; }
+    .premium-md { font-size: 1.0em; color: #333; }
+    .premium-lg { font-size: 1.1em; font-weight: 500; color: #000; }
+    .premium-xl { font-size: 1.2em; font-weight: 600; color: #d9534f; }
+    .renewal-flag { float: right; margin-left: 5px; }
 </style>
 
 <div class="row mt-3 mb-2">
@@ -24,14 +30,16 @@
 <div class="filter-section">
     <div class="compact-filter">
         <label class="form-label me-2">Inception Month:</label>
-        <input type="month" class="form-control form-control-sm" value="@inceptionMonth" @onchange="OnInceptionMonthChanged" style="width:160px;" />
+        <select class="form-select form-select-sm" value="@inceptionMonth" @onchange="OnInceptionMonthChanged" style="width:160px;">
+            @foreach (var month in availableMonths)
+            {
+                <option value="@month">@month</option>
+            }
+        </select>
     </div>
     <div class="compact-filter">
         <label class="form-label me-2">Class:</label>
         <input type="text" class="form-control form-control-sm" value="@selectedClass" @onchange="OnClassChanged" style="width:100px;" />
-    </div>
-    <div class="compact-filter">
-        <button class="btn btn-sm btn-primary" @onclick="LoadData">Refresh</button>
     </div>
 </div>
 
@@ -53,27 +61,34 @@ else
                         <th>Premium</th>
                         <th>Broker</th>
                         <th>Line%</th>
-                        <th>WB</th>
-                        <th title="Policy Status">PS</th>
+                        <th colspan="2">Links</th>
+                        <th title="Status">Stat</th>
                         <th title="Technical Premium">TP</th>
-                        <th title="Rate">RT</th>
-                        <th title="Consortium">CN</th>
-                        <th title="Companion">CP</th>
-                        <th title="Settlement/USM">ST</th>
+                        <th title="Rate">Rate</th>
+                        <th title="Consortium">Cons</th>
+                        <th title="Companion">Comp</th>
+                        <th title="Settlement">Sett</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var item in WorkflowItems ?? Enumerable.Empty<HighLevelWorkflowItem>())
+                    @foreach (var item in SortedWorkflowItems)
                     {
                         <tr>
                             <td>@item.Policy_Reference</td>
-                            <td>@item.Assured_Name</td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(item.Renewed_From_Line_Id))
+                                {
+                                    <span class="renewal-flag" title="Renewal from @item.Renewed_From_Line_Id">♻️</span>
+                                }
+                                @item.Assured_Name
+                            </td>
                             <td>@item.Line_Underwriter_Initials</td>
                             <td title="@GetInceptionTooltip(item)">@item.Inception_Date?.ToString("yyyy-MM-dd")</td>
-                            <td>@FormatPremium(item.EPI_Settlement_Currency, item.Actual_Estimated_Premium)</td>
+                            <td>@GetPremiumCell(item)</td>
                             <td title="@GetBrokerTooltip(item)">@FormatBroker(item.Broker_Pseudonym, item.Broker_Number)</td>
                             <td>@FormatLine(item.Reporting_Line_Percent, item.Limit_Currency, item.Limit, item.Excess)</td>
                             <td>@GetWorkbenchCell(item)</td>
+                            <td>@GetSandboxCell(item)</td>
                             <td>@GetPolicyStatusBox(item)</td>
                             <td>@GetTechnicalPremiumBox(item)</td>
                             <td>@GetRateBox(item)</td>
@@ -87,13 +102,13 @@ else
         </div>
     </div>
 
-    @if (WorkflowItems?.Count() == 0)
+    @if (SortedWorkflowItems.Count() == 0)
     {
         <div class="alert alert-info">No policies found for the selected inception month and class.</div>
     }
-    else if (WorkflowItems != null)
+    else
     {
-        <div class="alert alert-info">Total: @WorkflowItems.Count() policies</div>
+        <div class="alert alert-info">Total: @SortedWorkflowItems.Count() policies</div>
     }
 }
 
@@ -101,21 +116,47 @@ else
     private IEnumerable<HighLevelWorkflowItem> WorkflowItems;
     private string inceptionMonth;
     private string selectedClass = "PO";
+    private List<string> availableMonths = new List<string>();
+
+    private IEnumerable<HighLevelWorkflowItem> SortedWorkflowItems
+    {
+        get
+        {
+            if (WorkflowItems == null) return Enumerable.Empty<HighLevelWorkflowItem>();
+
+            var statusOrder = new Dictionary<string, int>
+            {
+                { "S", 1 }, { "L", 2 }, { "U", 3 }, { "I", 4 }, { "C", 5 },
+                { "N", 6 }, { "D", 7 }, { "X", 8 }
+            };
+
+            return WorkflowItems.OrderBy(i =>
+            {
+                var status = i.Line_Status_Code?.ToUpper() ?? "";
+                return statusOrder.ContainsKey(status) ? statusOrder[status] : 99;
+            });
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
-        // Set default inception month based on day of month
+        // Generate available months (24 months: 12 back, 12 forward)
         var today = DateTime.Now;
-        DateTime defaultInceptionMonth;
+        availableMonths = Enumerable.Range(-12, 25)
+            .Select(offset => today.AddMonths(offset))
+            .Select(d => new DateTime(d.Year, d.Month, 1))
+            .OrderByDescending(d => d)
+            .Select(d => d.ToString("yyyy-MM"))
+            .ToList();
 
+        // Set default inception month
+        DateTime defaultInceptionMonth;
         if (today.Day <= 7)
         {
-            // Days 1-7: use current month
             defaultInceptionMonth = new DateTime(today.Year, today.Month, 1);
         }
         else
         {
-            // Day 8+: use next month
             defaultInceptionMonth = today.AddMonths(1);
             defaultInceptionMonth = new DateTime(defaultInceptionMonth.Year, defaultInceptionMonth.Month, 1);
         }
@@ -145,10 +186,24 @@ else
             return;
         }
 
-        // Parse the month string (yyyy-MM) to a DateTime (first day of the month)
         var inceptionMonthDate = DateTime.Parse(inceptionMonth + "-01");
-
         WorkflowItems = (await WindowpaneService.GetHighLevelWorkflowAsync(inceptionMonthDate, selectedClass)).ToList();
+    }
+
+    private RenderFragment GetPremiumCell(HighLevelWorkflowItem item)
+    {
+        var premium = item.Actual_Estimated_Premium ?? 0;
+        string sizeClass;
+
+        if (premium < 100000) sizeClass = "premium-xs";
+        else if (premium < 500000) sizeClass = "premium-sm";
+        else if (premium < 1000000) sizeClass = "premium-md";
+        else if (premium < 5000000) sizeClass = "premium-lg";
+        else sizeClass = "premium-xl";
+
+        var formattedPremium = FormatPremium(item.EPI_Settlement_Currency, item.Actual_Estimated_Premium);
+
+        return @<span class="@sizeClass">@formattedPremium</span>;
     }
 
     private string FormatPremium(string currency, decimal? premium)
@@ -199,10 +254,10 @@ else
 
     private RenderFragment GetWorkbenchCell(HighLevelWorkflowItem item)
     {
-        if (item.RiskID.HasValue)
+        if (item.RiskID.HasValue && item.RiskID.Value > 0)
         {
             var url = $"https://dale-prod.globalriskwire.com/workbench/risks/{item.RiskID.Value}";
-            return @<a href="@url" target="_blank" class="btn btn-xs btn-primary">WB</a>;
+            return @<a href="@url" target="_blank" class="btn btn-xs btn-primary" style="font-size:0.7em;padding:0.1rem 0.3rem;">WB</a>;
         }
         else
         {
@@ -210,29 +265,44 @@ else
         }
     }
 
-    private bool IsStatusGreyOrRed(HighLevelWorkflowItem item)
+    private RenderFragment GetSandboxCell(HighLevelWorkflowItem item)
     {
-        var status = item.Policy_Status_Description?.ToUpper() ?? "";
-        return status == "Q" || status == "N" || status == "D" || status == "X";
+        if (!string.IsNullOrEmpty(item.Policy_Reference) && item.Policy_Reference.Length >= 10)
+        {
+            var progRef = item.Policy_Reference.Substring(0, 10);
+            var url = $"https://localhost:44387/ViewProgram/{progRef}";
+            return @<a href="@url" target="_blank" class="btn btn-xs btn-secondary" style="font-size:0.7em;padding:0.1rem 0.3rem;">SB</a>;
+        }
+        else
+        {
+            return @<span></span>;
+        }
+    }
+
+    private bool IsStatusNotInSLUIC(HighLevelWorkflowItem item)
+    {
+        var status = item.Line_Status_Code?.ToUpper() ?? "";
+        return !(status == "S" || status == "L" || status == "U" || status == "I" || status == "C");
     }
 
     private RenderFragment GetPolicyStatusBox(HighLevelWorkflowItem item)
     {
-        var status = item.Policy_Status_Description?.ToUpper() ?? "";
+        var status = item.Line_Status_Code?.ToUpper() ?? "";
         string color;
 
         if (status == "S") color = "status-dark-green";
+        else if (status == "L") color = "status-dark-green";
         else if (status == "U" || status == "C") color = "status-light-green";
         else if (status == "I") color = "status-yellow";
         else if (status == "Q") color = "status-grey";
-        else color = "status-red"; // N, D, X
+        else color = "status-red"; // N, D, X, other
 
-        return @<span class="status-box @color" title="Status: @item.Policy_Status_Description"></span>;
+        return @<span class="status-box @color" title="Status: @item.Line_Status_Code"></span>;
     }
 
     private RenderFragment GetTechnicalPremiumBox(HighLevelWorkflowItem item)
     {
-        if (IsStatusGreyOrRed(item))
+        if (IsStatusNotInSLUIC(item))
             return @<span class="status-box status-grey"></span>;
 
         var value = item.Technical_Premium_Percent;
@@ -241,7 +311,7 @@ else
 
         if (!value.HasValue || value.Value == 0)
             color = "status-grey";
-        else if (value.Value > 165)
+        else if (value.Value >= 50.9m && value.Value <= 51.1m)
             color = "status-yellow";
         else
             color = "status-dark-green";
@@ -251,7 +321,7 @@ else
 
     private RenderFragment GetRateBox(HighLevelWorkflowItem item)
     {
-        if (IsStatusGreyOrRed(item))
+        if (IsStatusNotInSLUIC(item))
             return @<span class="status-box status-grey"></span>;
 
         var value = item.Rate_Pct_Gross;
@@ -270,7 +340,7 @@ else
 
     private RenderFragment GetConsortiumBox(HighLevelWorkflowItem item)
     {
-        if (IsStatusGreyOrRed(item))
+        if (IsStatusNotInSLUIC(item))
             return @<span class="status-box status-grey"></span>;
 
         var hasValue = !string.IsNullOrEmpty(item.Consortium_Code);
@@ -284,7 +354,7 @@ else
 
     private RenderFragment GetCompanionBox(HighLevelWorkflowItem item)
     {
-        if (IsStatusGreyOrRed(item))
+        if (IsStatusNotInSLUIC(item))
             return @<span class="status-box status-grey"></span>;
 
         var companion = item.Companion_Name ?? "";
@@ -293,7 +363,7 @@ else
 
         if (string.IsNullOrEmpty(companion))
         {
-            color = "status-red";
+            color = "status-grey";
             tooltip = "No Companion";
         }
         else if (companion.ToUpper() == "NO AVIVA")
@@ -317,7 +387,7 @@ else
 
     private RenderFragment GetSettlementBox(HighLevelWorkflowItem item)
     {
-        if (IsStatusGreyOrRed(item))
+        if (IsStatusNotInSLUIC(item))
             return @<span class="status-box status-grey"></span>;
 
         var isPastDue = item.Settlement_Due_Date.HasValue && item.Settlement_Due_Date.Value < DateTime.Now;

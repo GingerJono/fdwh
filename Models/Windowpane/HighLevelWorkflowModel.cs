@@ -23,7 +23,7 @@ namespace Sandbox.Models.Windowpane
 		public string Limit_Currency { get; set; }
 		public decimal? Limit { get; set; }
 		public decimal? Excess { get; set; }
-		public string Policy_Status_Description { get; set; }
+		public string Line_Status_Code { get; set; }
 		public decimal? Technical_Premium_Percent { get; set; }
 		public decimal? Rate_Pct_Gross { get; set; }
 		public string Consortium_Code { get; set; }
