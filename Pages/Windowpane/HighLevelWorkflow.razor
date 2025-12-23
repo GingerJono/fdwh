@@ -23,24 +23,15 @@
 
 <div class="filter-section">
     <div class="compact-filter">
-        <label class="form-label me-2">YOA:</label>
-        <select class="form-select form-select-sm" @bind="selectedYOA" style="width:120px;">
-            <option value="">All</option>
-            @foreach (var yoa in availableYOAs)
-            {
-                <option value="@yoa">@yoa</option>
-            }
-        </select>
+        <label class="form-label me-2">Inception Month:</label>
+        <input type="month" class="form-control form-control-sm" @bind="inceptionMonth" @bind:event="onchange" @onchange="LoadData" style="width:160px;" />
     </div>
     <div class="compact-filter">
         <label class="form-label me-2">Class:</label>
-        <select class="form-select form-select-sm" @bind="selectedClass" style="width:120px;">
-            <option value="">All</option>
-            @foreach (var cls in availableClasses)
-            {
-                <option value="@cls">@cls</option>
-            }
-        </select>
+        <input type="text" class="form-control form-control-sm" @bind="selectedClass" @bind:event="onchange" @onchange="LoadData" style="width:100px;" />
+    </div>
+    <div class="compact-filter">
+        <button class="btn btn-sm btn-primary" @onclick="LoadData">Refresh</button>
     </div>
 </div>
 
@@ -72,7 +63,7 @@ else
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var item in FilteredItems)
+                    @foreach (var item in WorkflowItems ?? Enumerable.Empty<HighLevelWorkflowItem>())
                     {
                         <tr>
                             <td>@item.Policy_Reference</td>
@@ -96,47 +87,56 @@ else
         </div>
     </div>
 
-    @if (FilteredItems.Count() == 0)
+    @if (WorkflowItems?.Count() == 0)
     {
-        <div class="alert alert-info">No policies found matching the selected filters.</div>
+        <div class="alert alert-info">No policies found for the selected inception month and class.</div>
     }
-    else
+    else if (WorkflowItems != null)
     {
-        <div class="alert alert-info">Total: @FilteredItems.Count() policies</div>
+        <div class="alert alert-info">Total: @WorkflowItems.Count() policies</div>
     }
 }
 
 @code {
     private IEnumerable<HighLevelWorkflowItem> WorkflowItems;
-    private string selectedYOA = "";
-    private string selectedClass = "";
-    private List<string> availableYOAs = new List<string>();
-    private List<string> availableClasses = new List<string>();
-
-    private IEnumerable<HighLevelWorkflowItem> FilteredItems =>
-        WorkflowItems?
-            .Where(i =>
-                (string.IsNullOrEmpty(selectedYOA) || i.Year_Of_Account?.ToString() == selectedYOA) &&
-                (string.IsNullOrEmpty(selectedClass) || i.Class == selectedClass))
-        ?? Enumerable.Empty<HighLevelWorkflowItem>();
+    private string inceptionMonth;
+    private string selectedClass = "PO";
 
     protected override async Task OnInitializedAsync()
     {
-        WorkflowItems = (await WindowpaneService.GetHighLevelWorkflowAsync()).ToList();
+        // Set default inception month based on day of month
+        var today = DateTime.Now;
+        DateTime defaultInceptionMonth;
 
-        availableYOAs = WorkflowItems
-            .Where(i => i.Year_Of_Account.HasValue)
-            .Select(i => i.Year_Of_Account.Value.ToString())
-            .Distinct()
-            .OrderByDescending(y => y)
-            .ToList();
+        if (today.Day <= 7)
+        {
+            // Days 1-7: use current month
+            defaultInceptionMonth = new DateTime(today.Year, today.Month, 1);
+        }
+        else
+        {
+            // Day 8+: use next month
+            defaultInceptionMonth = today.AddMonths(1);
+            defaultInceptionMonth = new DateTime(defaultInceptionMonth.Year, defaultInceptionMonth.Month, 1);
+        }
 
-        availableClasses = WorkflowItems
-            .Where(i => !string.IsNullOrEmpty(i.Class))
-            .Select(i => i.Class)
-            .Distinct()
-            .OrderBy(c => c)
-            .ToList();
+        inceptionMonth = defaultInceptionMonth.ToString("yyyy-MM");
+
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        if (string.IsNullOrWhiteSpace(inceptionMonth) || string.IsNullOrWhiteSpace(selectedClass))
+        {
+            WorkflowItems = Enumerable.Empty<HighLevelWorkflowItem>();
+            return;
+        }
+
+        // Parse the month string (yyyy-MM) to a DateTime (first day of the month)
+        var inceptionMonthDate = DateTime.Parse(inceptionMonth + "-01");
+
+        WorkflowItems = (await WindowpaneService.GetHighLevelWorkflowAsync(inceptionMonthDate, selectedClass)).ToList();
     }
 
     private string FormatPremium(string currency, decimal? premium)
