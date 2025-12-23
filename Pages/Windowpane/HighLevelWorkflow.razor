@@ -1,0 +1,347 @@
+@page "/HighLevelWorkflow"
+@inject Sandbox.Services.WindowpaneService WindowpaneService
+@inject Microsoft.AspNetCore.Components.NavigationManager NavigationManager
+@using Sandbox.Models.Windowpane
+
+<style>
+    .workflow-table { font-size: 0.85rem; }
+    .workflow-table th, .workflow-table td { padding: 0.25rem 0.4rem; white-space: nowrap; }
+    .status-box { display: inline-block; width: 24px; height: 24px; border: 1px solid #666; cursor: pointer; }
+    .status-dark-green { background-color: #2d7a3e; }
+    .status-light-green { background-color: #7bc96f; }
+    .status-yellow { background-color: #ffd966; }
+    .status-grey { background-color: #d3d3d3; }
+    .status-red { background-color: #dc3545; }
+    .filter-section { margin-bottom: 1rem; }
+    .compact-filter { display: inline-block; margin-right: 1rem; }
+    .compact-filter select { width: auto; display: inline-block; }
+</style>
+
+<div class="row mt-3 mb-2">
+    <h3>High-Level Workflow</h3>
+</div>
+
+<div class="filter-section">
+    <div class="compact-filter">
+        <label class="form-label me-2">YOA:</label>
+        <select class="form-select form-select-sm" @bind="selectedYOA" style="width:120px;">
+            <option value="">All</option>
+            @foreach (var yoa in availableYOAs)
+            {
+                <option value="@yoa">@yoa</option>
+            }
+        </select>
+    </div>
+    <div class="compact-filter">
+        <label class="form-label me-2">Class:</label>
+        <select class="form-select form-select-sm" @bind="selectedClass" style="width:120px;">
+            <option value="">All</option>
+            @foreach (var cls in availableClasses)
+            {
+                <option value="@cls">@cls</option>
+            }
+        </select>
+    </div>
+</div>
+
+@if (WorkflowItems == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="card shadow mb-4 border">
+        <div class="table-responsive">
+            <table class="table table-sm table-striped table-hover workflow-table text-nowrap">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Policy Ref</th>
+                        <th>Assured</th>
+                        <th>U/W</th>
+                        <th>Incept</th>
+                        <th>Premium</th>
+                        <th>Broker</th>
+                        <th>Line%</th>
+                        <th>WB</th>
+                        <th title="Policy Status">PS</th>
+                        <th title="Technical Premium">TP</th>
+                        <th title="Rate">RT</th>
+                        <th title="Consortium">CN</th>
+                        <th title="Companion">CP</th>
+                        <th title="Settlement/USM">ST</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in FilteredItems)
+                    {
+                        <tr>
+                            <td>@item.Policy_Reference</td>
+                            <td>@item.Assured_Name</td>
+                            <td>@item.Line_Underwriter_Initials</td>
+                            <td title="@GetInceptionTooltip(item)">@item.Inception_Date?.ToString("yyyy-MM-dd")</td>
+                            <td>@FormatPremium(item.EPI_Settlement_Currency, item.Actual_Estimated_Premium)</td>
+                            <td title="@GetBrokerTooltip(item)">@FormatBroker(item.Broker_Pseudonym, item.Broker_Number)</td>
+                            <td>@FormatLine(item.Reporting_Line_Percent, item.Limit_Currency, item.Limit, item.Excess)</td>
+                            <td>@GetWorkbenchCell(item)</td>
+                            <td>@GetPolicyStatusBox(item)</td>
+                            <td>@GetTechnicalPremiumBox(item)</td>
+                            <td>@GetRateBox(item)</td>
+                            <td>@GetConsortiumBox(item)</td>
+                            <td>@GetCompanionBox(item)</td>
+                            <td>@GetSettlementBox(item)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    @if (FilteredItems.Count() == 0)
+    {
+        <div class="alert alert-info">No policies found matching the selected filters.</div>
+    }
+    else
+    {
+        <div class="alert alert-info">Total: @FilteredItems.Count() policies</div>
+    }
+}
+
+@code {
+    private IEnumerable<HighLevelWorkflowItem> WorkflowItems;
+    private string selectedYOA = "";
+    private string selectedClass = "";
+    private List<string> availableYOAs = new List<string>();
+    private List<string> availableClasses = new List<string>();
+
+    private IEnumerable<HighLevelWorkflowItem> FilteredItems =>
+        WorkflowItems?
+            .Where(i =>
+                (string.IsNullOrEmpty(selectedYOA) || i.Year_Of_Account?.ToString() == selectedYOA) &&
+                (string.IsNullOrEmpty(selectedClass) || i.Class == selectedClass))
+        ?? Enumerable.Empty<HighLevelWorkflowItem>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        WorkflowItems = (await WindowpaneService.GetHighLevelWorkflowAsync()).ToList();
+
+        availableYOAs = WorkflowItems
+            .Where(i => i.Year_Of_Account.HasValue)
+            .Select(i => i.Year_Of_Account.Value.ToString())
+            .Distinct()
+            .OrderByDescending(y => y)
+            .ToList();
+
+        availableClasses = WorkflowItems
+            .Where(i => !string.IsNullOrEmpty(i.Class))
+            .Select(i => i.Class)
+            .Distinct()
+            .OrderBy(c => c)
+            .ToList();
+    }
+
+    private string FormatPremium(string currency, decimal? premium)
+    {
+        if (!premium.HasValue || premium.Value == 0) return "";
+
+        if (premium.Value >= 1000000)
+            return $"{currency} {(premium.Value / 1000000):0.0}m";
+        else if (premium.Value >= 1000)
+            return $"{currency} {(premium.Value / 1000):0}k";
+        else
+            return $"{currency} {premium.Value:0}";
+    }
+
+    private string FormatBroker(string pseudonym, string number)
+    {
+        if (string.IsNullOrEmpty(pseudonym) && string.IsNullOrEmpty(number)) return "";
+        return $"{pseudonym} {number}";
+    }
+
+    private string GetBrokerTooltip(HighLevelWorkflowItem item)
+    {
+        return $"Pseudonym: {item.Broker_Pseudonym}\nNumber: {item.Broker_Number}\nCompany: {item.Broking_Company_Name}\nContact: {item.Broker_Contact_Name}";
+    }
+
+    private string GetInceptionTooltip(HighLevelWorkflowItem item)
+    {
+        return $"Inception: {item.Inception_Date?.ToString("yyyy-MM-dd")}\nExpiry: {item.Expiry_Date?.ToString("yyyy-MM-dd")}";
+    }
+
+    private string FormatLine(decimal? percent, string currency, decimal? limit, decimal? excess)
+    {
+        if (!percent.HasValue || !limit.HasValue) return "";
+
+        var limitStr = limit.Value >= 1000000 ? $"{(limit.Value / 1000000):0.0}m" : $"{(limit.Value / 1000):0}k";
+        string structure;
+
+        if (!excess.HasValue || excess.Value == 0)
+            structure = $"Pri {limitStr}";
+        else
+        {
+            var excessStr = excess.Value >= 1000000 ? $"{(excess.Value / 1000000):0.0}m" : $"{(excess.Value / 1000):0}k";
+            structure = $"{limitStr} x {excessStr}";
+        }
+
+        return $"{percent:0.0}% of {currency} {structure}";
+    }
+
+    private RenderFragment GetWorkbenchCell(HighLevelWorkflowItem item)
+    {
+        if (item.RiskID.HasValue)
+        {
+            var url = $"https://dale-prod.globalriskwire.com/workbench/risks/{item.RiskID.Value}";
+            return @<a href="@url" target="_blank" class="btn btn-xs btn-primary">WB</a>;
+        }
+        else
+        {
+            return @<span class="text-danger">✗</span>;
+        }
+    }
+
+    private bool IsStatusGreyOrRed(HighLevelWorkflowItem item)
+    {
+        var status = item.Policy_Status_Description?.ToUpper() ?? "";
+        return status == "Q" || status == "N" || status == "D" || status == "X";
+    }
+
+    private RenderFragment GetPolicyStatusBox(HighLevelWorkflowItem item)
+    {
+        var status = item.Policy_Status_Description?.ToUpper() ?? "";
+        string color;
+
+        if (status == "S") color = "status-dark-green";
+        else if (status == "U" || status == "C") color = "status-light-green";
+        else if (status == "I") color = "status-yellow";
+        else if (status == "Q") color = "status-grey";
+        else color = "status-red"; // N, D, X
+
+        return @<span class="status-box @color" title="Status: @item.Policy_Status_Description"></span>;
+    }
+
+    private RenderFragment GetTechnicalPremiumBox(HighLevelWorkflowItem item)
+    {
+        if (IsStatusGreyOrRed(item))
+            return @<span class="status-box status-grey"></span>;
+
+        var value = item.Technical_Premium_Percent;
+        string color;
+        string tooltip = $"Technical Premium: {(value.HasValue ? value.Value.ToString("0.00") + "%" : "N/A")}";
+
+        if (!value.HasValue || value.Value == 0)
+            color = "status-grey";
+        else if (value.Value > 165)
+            color = "status-yellow";
+        else
+            color = "status-dark-green";
+
+        return @<span class="status-box @color" title="@tooltip"></span>;
+    }
+
+    private RenderFragment GetRateBox(HighLevelWorkflowItem item)
+    {
+        if (IsStatusGreyOrRed(item))
+            return @<span class="status-box status-grey"></span>;
+
+        var value = item.Rate_Pct_Gross;
+        string color;
+        string tooltip = $"Rate: {(value.HasValue ? value.Value.ToString("0.00") + "%" : "N/A")}";
+
+        if (!value.HasValue)
+            color = "status-grey";
+        else if (value.Value == 0)
+            color = "status-yellow";
+        else
+            color = "status-dark-green";
+
+        return @<span class="status-box @color" title="@tooltip"></span>;
+    }
+
+    private RenderFragment GetConsortiumBox(HighLevelWorkflowItem item)
+    {
+        if (IsStatusGreyOrRed(item))
+            return @<span class="status-box status-grey"></span>;
+
+        var hasValue = !string.IsNullOrEmpty(item.Consortium_Code);
+        string color = hasValue ? "status-dark-green" : "status-grey";
+        string tooltip = hasValue
+            ? $"Consortium: {item.Consortium_Code}\nLine %: {(item.Consortium_Line_Percent.HasValue ? item.Consortium_Line_Percent.Value.ToString("0.00") + "%" : "N/A")}"
+            : "No Consortium";
+
+        return @<span class="status-box @color" title="@tooltip"></span>;
+    }
+
+    private RenderFragment GetCompanionBox(HighLevelWorkflowItem item)
+    {
+        if (IsStatusGreyOrRed(item))
+            return @<span class="status-box status-grey"></span>;
+
+        var companion = item.Companion_Name ?? "";
+        string color;
+        string tooltip;
+
+        if (string.IsNullOrEmpty(companion))
+        {
+            color = "status-red";
+            tooltip = "No Companion";
+        }
+        else if (companion.ToUpper() == "NO AVIVA")
+        {
+            color = "status-grey";
+            tooltip = "Companion: NO AVIVA";
+        }
+        else if (item.Signed_Line_Pct.HasValue)
+        {
+            color = "status-dark-green";
+            tooltip = $"Companion: {companion}\nWritten %: {(item.Written_Line_Pct.HasValue ? item.Written_Line_Pct.Value.ToString("0.00") + "%" : "N/A")}\nSigned %: {item.Signed_Line_Pct.Value:0.00}%";
+        }
+        else
+        {
+            color = "status-light-green";
+            tooltip = $"Companion: {companion}\nWritten %: {(item.Written_Line_Pct.HasValue ? item.Written_Line_Pct.Value.ToString("0.00") + "%" : "N/A")}\nSigned %: N/A";
+        }
+
+        return @<span class="status-box @color" title="@tooltip"></span>;
+    }
+
+    private RenderFragment GetSettlementBox(HighLevelWorkflowItem item)
+    {
+        if (IsStatusGreyOrRed(item))
+            return @<span class="status-box status-grey"></span>;
+
+        var isPastDue = item.Settlement_Due_Date.HasValue && item.Settlement_Due_Date.Value < DateTime.Now;
+        var usmPrem = item.USMPrem;
+        var epiPrem = item.Actual_Estimated_Premium ?? 0;
+        var usmPercent = epiPrem > 0 ? (usmPrem / epiPrem) * 100 : 0;
+
+        string color;
+        string tooltip;
+
+        if (isPastDue && usmPrem == 0)
+        {
+            color = "status-red";
+            tooltip = $"Settlement OVERDUE\nDue: {item.Settlement_Due_Date?.ToString("yyyy-MM-dd")}\nUSM: {item.EPI_Settlement_Currency} {usmPrem:N2} (0%)";
+        }
+        else if (!isPastDue && usmPrem > 0)
+        {
+            color = "status-yellow";
+            tooltip = $"Settlement Pending\nDue: {item.Settlement_Due_Date?.ToString("yyyy-MM-dd")}\nUSM: {item.EPI_Settlement_Currency} {usmPrem:N2} ({usmPercent:0}%)";
+        }
+        else if (usmPercent >= 90)
+        {
+            color = "status-dark-green";
+            tooltip = $"Settlement OK\nDue: {item.Settlement_Due_Date?.ToString("yyyy-MM-dd")}\nUSM: {item.EPI_Settlement_Currency} {usmPrem:N2} ({usmPercent:0}%)";
+        }
+        else if (usmPrem > 0)
+        {
+            color = "status-light-green";
+            tooltip = $"Settlement Partial\nDue: {item.Settlement_Due_Date?.ToString("yyyy-MM-dd")}\nUSM: {item.EPI_Settlement_Currency} {usmPrem:N2} ({usmPercent:0}%)";
+        }
+        else
+        {
+            color = "status-grey";
+            tooltip = $"No Settlement\nDue: {item.Settlement_Due_Date?.ToString("yyyy-MM-dd")}\nUSM: {item.EPI_Settlement_Currency} 0.00";
+        }
+
+        return @<span class="status-box @color" title="@tooltip"></span>;
+    }
+}

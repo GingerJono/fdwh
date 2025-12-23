@@ -139,6 +139,14 @@ public class MenuDataServiceSandbox
 					active: false,
 					dirChange: false
 				),
+				new MainMenuItems (
+					path: "HighLevelWorkflow",
+					type: "link",
+					title: "High-Level Workflow",
+					selected: false,
+					active: false,
+					dirChange: false
+				),
 			}
 		),
 		new MainMenuItems(
