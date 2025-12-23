@@ -704,25 +704,25 @@ else if (PolicyDetails != null)
                                 <tbody>
                                     <tr>
                                         <td>
-                                            <InputText @bind-Value="newAllocation.YOA" class="form-control" readonly />
+                                            <InputText @bind-Value="newAllocation.YOA" class="form-control" />
                                         </td>
                                         <td>
-                                            <InputText @bind-Value="newAllocation.Class" class="form-control" readonly />
+                                            <InputText @bind-Value="newAllocation.Class" class="form-control" />
                                         </td>
                                         <td>
-                                            <InputText @bind-Value="newAllocation.Syndicate" class="form-control" readonly />
+                                            <InputText @bind-Value="newAllocation.Syndicate" class="form-control" />
                                         </td>
                                         <td>
-                                            <InputNumber @bind-Value="newAllocation.YOAAllocation" class="form-control text-end" readonly />
+                                            <InputNumber @bind-Value="newAllocation.YOAAllocation" class="form-control text-end" />
                                         </td>
                                         <td>
-                                            <InputNumber @bind-Value="newAllocation.ClassAllocation" class="form-control text-end" readonly />
+                                            <InputNumber @bind-Value="newAllocation.ClassAllocation" class="form-control text-end"  />
                                         </td>
                                         <td>
-                                            <InputNumber @bind-Value="newAllocation.SyndicateAllocation" class="form-control text-end" readonly />
+                                            <InputNumber @bind-Value="newAllocation.SyndicateAllocation" class="form-control text-end" />
                                         </td>
                                         <td>
-                                            <InputNumber @bind-Value="newAllocation.Allocation" class="form-control text-end" readonly />
+                                            <InputNumber @bind-Value="newAllocation.Allocation" class="form-control text-end" />
                                         </td>
                                         <td>
                                             <button type="button" class="btn btn-primary" @onclick="() => AddAllocation()">
@@ -1079,7 +1079,7 @@ else if (PolicyDetails != null)
     // Methods for adding and reming agg deductibles
     private void SetNextAvailableAggDeductiblePriority()
     {
-        int nextPriority = 1;
+        int nextPriority = 0;
         var usedPriorities = PolicyDetails.AggDeductibles.Select(d => d.ApplicationPriority).ToHashSet();
 
         while (usedPriorities.Contains(nextPriority))

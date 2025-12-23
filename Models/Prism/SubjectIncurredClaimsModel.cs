@@ -2,11 +2,14 @@
 {
     public class SubjectIncurredClaimsModel
     {
-        public long? RunID { get; set; }
+
         public string? ORIPolicyReference { get; set; }
         public string? ContractCcy { get; set; }
+        public string? SettlementCcy { get; set; }
+        public string? Currency { get; set; }
         public string? FXRateApplicationDate { get; set; }
         public string? PolicyType { get; set; }
+        public string? PolicySubType { get; set; }
         public string? WholeOrOrder { get; set; }
         public string? ClaimReference { get; set; }
         public string? UCR { get; set; }
@@ -26,8 +29,9 @@
         public string? SCMRiskCode { get; set; }
         public string? EventCode { get; set; }
         public bool? NonSpecificLoss { get; set; }
+        public bool? HasClash { get; set; }
         public string? OriginalCcy { get; set; }
-        public string? SettlementCcy { get; set; }
+
         public double? OutstandingFee { get; set; }
         public double? OutstandingIndemnity { get; set; }
         public double? SettledFee { get; set; }
@@ -44,6 +48,8 @@
         public double? FXRate { get; set; }
         public double? PaidInContractCcy { get; set; }
         public double? IncurredInContractCcy { get; set; }
-        public string? Currency { get; set; }
+
+        public long? RunID { get; set; }
+
     }
 }

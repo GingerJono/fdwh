@@ -7,6 +7,7 @@
         public string? ContractCcy { get; set; }
         public DateTime? FXRateApplicationDate { get; set; }
         public string? PolicyType { get; set; }
+        public string? PolicySubType { get; set; }
         public string? WholeOrOrder { get; set; }
         public string? Class { get; set; }
         public string? ReservingClass { get; set; }
