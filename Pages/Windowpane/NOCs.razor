@@ -8,7 +8,7 @@
     <p class="text-muted">Policies with outstanding premiums approaching or past settlement due date</p>
 </div>
 
-@if (NOCs == null)
+@if (_NOCs == null)
 {
     <p><em>Loading...</em></p>
 }
@@ -34,7 +34,7 @@ else
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var noc in NOCs)
+                    @foreach (var noc in _NOCs)
                     {
                         var daysOverdue = noc.Settlement_Due_Date.HasValue
                             ? (DateTime.Now.Date - noc.Settlement_Due_Date.Value.Date).Days
@@ -65,7 +65,7 @@ else
         </div>
     </div>
 
-    @if (NOCs.Count() == 0)
+    @if (_NOCs.Count() == 0)
     {
         <div class="alert alert-info">
             <strong>No NOCs found.</strong> There are currently no policies requiring cancellation notices.
@@ -74,7 +74,7 @@ else
     else
     {
         <div class="alert alert-info">
-            <strong>Total:</strong> @NOCs.Count() policies requiring attention
+            <strong>Total:</strong> @_NOCs.Count() policies requiring attention
         </div>
     }
 }
@@ -112,7 +112,7 @@ else
 }
 
 @code {
-    private IEnumerable<NOCItem> NOCs;
+    private IEnumerable<NOCItem> _NOCs;
     private bool showModal = false;
     private string emailSubject = "";
     private string emailBody = "";
@@ -120,7 +120,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        NOCs = (await WindowpaneService.GetNOCsAsync()).ToList();
+        _NOCs = (await WindowpaneService.GetNOCsAsync()).ToList();
     }
 
     private void ShowEmailModal(NOCItem noc)
