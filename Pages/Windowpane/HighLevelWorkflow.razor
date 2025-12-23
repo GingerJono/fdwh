@@ -13,33 +13,67 @@
     .status-grey { background-color: #d3d3d3; }
     .status-red { background-color: #dc3545; }
     .filter-section { margin-bottom: 1rem; }
-    .compact-filter { display: inline-block; margin-right: 1rem; }
-    .compact-filter select { width: auto; display: inline-block; }
-    .premium-xs { font-size: 0.8em; color: #888; }
-    .premium-sm { font-size: 0.9em; color: #666; }
-    .premium-md { font-size: 1.0em; color: #333; }
-    .premium-lg { font-size: 1.1em; font-weight: 500; color: #000; }
-    .premium-xl { font-size: 1.2em; font-weight: 600; color: #d9534f; }
+    .filter-btn-group { display: inline-block; margin-right: 1.5rem; margin-bottom: 0.5rem; }
+    .filter-btn { padding: 0.25rem 0.75rem; font-size: 0.875rem; border-radius: 0.25rem; border: 1px solid #4a5568; background-color: white; color: #4a5568; cursor: pointer; margin-right: 0.25rem; }
+    .filter-btn.active { background-color: #4299e1; color: white; border-color: #4299e1; }
+    .filter-btn:hover:not(.active) { background-color: #e2e8f0; }
+    .premium-xl { background-color: #1e3a8a; color: white; }
+    .premium-lg { background-color: #3b82f6; color: white; }
+    .premium-md { background-color: #60a5fa; color: white; }
+    .premium-sm { background-color: #93c5fd; color: black; }
+    .premium-xs { background-color: #dbeafe; color: black; }
     .renewal-flag { float: right; margin-left: 5px; }
+    .summary-card { background-color: white; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .summary-card h6 { font-size: 0.875rem; color: #64748b; margin-bottom: 0.5rem; }
+    .summary-card .value { font-size: 1.5rem; font-weight: 600; color: #1e293b; }
 </style>
 
-<div class="row mt-3 mb-2">
-    <h3>High-Level Workflow</h3>
+<div class="row mt-3 mb-3">
+    <div class="col">
+        <h3>High-Level Workflow</h3>
+    </div>
 </div>
 
-<div class="filter-section">
-    <div class="compact-filter">
-        <label class="form-label me-2">Inception Month:</label>
-        <select class="form-select form-select-sm" value="@inceptionMonth" @onchange="OnInceptionMonthChanged" style="width:160px;">
-            @foreach (var month in availableMonths)
-            {
-                <option value="@month">@month</option>
-            }
-        </select>
+<!-- Summary Cards -->
+@if (WorkflowItems != null)
+{
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="summary-card">
+                <h6>Bound Risks</h6>
+                <div class="value">@BoundRisksCount</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="summary-card">
+                <h6>Bound Premium (USD)</h6>
+                <div class="value">@BoundPremiumUSD</div>
+            </div>
+        </div>
     </div>
-    <div class="compact-filter">
-        <label class="form-label me-2">Class:</label>
-        <input type="text" class="form-control form-control-sm" value="@selectedClass" @onchange="OnClassChanged" style="width:100px;" />
+}
+
+<!-- Filters -->
+<div class="filter-section">
+    <div class="filter-btn-group">
+        <label class="form-label d-block mb-2" style="font-weight: 600;">Inception Month:</label>
+        @foreach (var month in availableMonths.Take(12))
+        {
+            <button class="filter-btn @(month == inceptionMonth ? "active" : "")"
+                    @onclick="() => SelectInceptionMonth(month)">
+                @month
+            </button>
+        }
+    </div>
+    <div class="filter-btn-group">
+        <label class="form-label d-block mb-2" style="font-weight: 600;">Class:</label>
+        @foreach (var cls in availableClasses)
+        {
+            <button class="filter-btn @(cls == selectedClass ? "active" : "")"
+                    @onclick="() => SelectClass(cls)">
+                @cls
+            </button>
+        }
     </div>
 </div>
 
@@ -84,7 +118,7 @@ else
                             </td>
                             <td>@item.Line_Underwriter_Initials</td>
                             <td title="@GetInceptionTooltip(item)">@item.Inception_Date?.ToString("yyyy-MM-dd")</td>
-                            <td>@GetPremiumCell(item)</td>
+                            <td class="@GetPremiumClass(item)">@FormatPremium(item.EPI_Settlement_Currency, item.Actual_Estimated_Premium)</td>
                             <td title="@GetBrokerTooltip(item)">@FormatBroker(item.Broker_Pseudonym, item.Broker_Number)</td>
                             <td>@FormatLine(item.Reporting_Line_Percent, item.Limit_Currency, item.Limit, item.Excess)</td>
                             <td>@GetWorkbenchCell(item)</td>
@@ -117,6 +151,26 @@ else
     private string inceptionMonth;
     private string selectedClass = "PO";
     private List<string> availableMonths = new List<string>();
+    private List<string> availableClasses = new List<string> { "All Classes", "CA", "EN", "HC", "MR", "PF", "PI", "PL", "PO", "PR", "PS", "SI" };
+
+    private int BoundRisksCount => SortedWorkflowItems.Count(i => IsStatusInSLUIC(i));
+
+    private string BoundPremiumUSD
+    {
+        get
+        {
+            var total = SortedWorkflowItems
+                .Where(i => IsStatusInSLUIC(i))
+                .Sum(i => i.Actual_Estimated_Premium ?? 0);
+
+            if (total >= 1000000)
+                return $"USD {(total / 1000000):N1}m";
+            else if (total >= 1000)
+                return $"USD {(total / 1000):N0}k";
+            else
+                return $"USD {total:N0}";
+        }
+    }
 
     private IEnumerable<HighLevelWorkflowItem> SortedWorkflowItems
     {
@@ -140,12 +194,11 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        // Generate available months (24 months: 12 back, 12 forward)
+        // Generate available months (12 months forward from current)
         var today = DateTime.Now;
-        availableMonths = Enumerable.Range(-12, 25)
+        availableMonths = Enumerable.Range(0, 12)
             .Select(offset => today.AddMonths(offset))
             .Select(d => new DateTime(d.Year, d.Month, 1))
-            .OrderByDescending(d => d)
             .Select(d => d.ToString("yyyy-MM"))
             .ToList();
 
@@ -166,15 +219,15 @@ else
         await LoadData();
     }
 
-    private async Task OnInceptionMonthChanged(ChangeEventArgs e)
+    private async Task SelectInceptionMonth(string month)
     {
-        inceptionMonth = e.Value?.ToString() ?? "";
+        inceptionMonth = month;
         await LoadData();
     }
 
-    private async Task OnClassChanged(ChangeEventArgs e)
+    private async Task SelectClass(string cls)
     {
-        selectedClass = e.Value?.ToString() ?? "";
+        selectedClass = cls == "All Classes" ? "" : cls;
         await LoadData();
     }
 
@@ -190,20 +243,15 @@ else
         WorkflowItems = (await WindowpaneService.GetHighLevelWorkflowAsync(inceptionMonthDate, selectedClass)).ToList();
     }
 
-    private RenderFragment GetPremiumCell(HighLevelWorkflowItem item)
+    private string GetPremiumClass(HighLevelWorkflowItem item)
     {
         var premium = item.Actual_Estimated_Premium ?? 0;
-        string sizeClass;
 
-        if (premium < 100000) sizeClass = "premium-xs";
-        else if (premium < 500000) sizeClass = "premium-sm";
-        else if (premium < 1000000) sizeClass = "premium-md";
-        else if (premium < 5000000) sizeClass = "premium-lg";
-        else sizeClass = "premium-xl";
-
-        var formattedPremium = FormatPremium(item.EPI_Settlement_Currency, item.Actual_Estimated_Premium);
-
-        return @<span class="@sizeClass">@formattedPremium</span>;
+        if (premium > 100000) return "premium-xl";
+        else if (premium >= 50000 && premium <= 100000) return "premium-lg";
+        else if (premium >= 25000 && premium < 50000) return "premium-md";
+        else if (premium >= 10000 && premium < 25000) return "premium-sm";
+        else return "premium-xs";
     }
 
     private string FormatPremium(string currency, decimal? premium)
@@ -279,10 +327,15 @@ else
         }
     }
 
-    private bool IsStatusNotInSLUIC(HighLevelWorkflowItem item)
+    private bool IsStatusInSLUIC(HighLevelWorkflowItem item)
     {
         var status = item.Line_Status_Code?.ToUpper() ?? "";
-        return !(status == "S" || status == "L" || status == "U" || status == "I" || status == "C");
+        return status == "S" || status == "L" || status == "U" || status == "I" || status == "C";
+    }
+
+    private bool IsStatusNotInSLUIC(HighLevelWorkflowItem item)
+    {
+        return !IsStatusInSLUIC(item);
     }
 
     private RenderFragment GetPolicyStatusBox(HighLevelWorkflowItem item)
