@@ -1,0 +1,85 @@
+parameters:
+  environmentName: ''
+  agentName: ''
+  targetPath: ''
+  iisAppPool: ''
+
+jobs:
+- deployment: Deploy_${{ parameters.environmentName }}
+  displayName: Deploy to ${{ parameters.environmentName }}
+  environment: ${{ parameters.environmentName }}
+
+  pool:
+    name: iis-deployment-pool
+    demands:
+      - agent.name -equals ${{ parameters.agentName }}
+
+  strategy:
+    runOnce:
+      deploy:
+        steps:
+        - download: current
+          artifact: drop
+
+        - task: PowerShell@2
+          displayName: Stop IIS App Pool if running
+          inputs:
+            targetType: inline
+            script: |
+              Import-Module WebAdministration
+              $poolName = "${{ parameters.iisAppPool }}"
+              $appPool = Get-Item "IIS:\AppPools\$poolName"
+
+              if ($appPool.state -eq "Started") {
+                  Write-Host "Stopping app pool $poolName"
+                  Stop-WebAppPool -Name $poolName
+              } else {
+                  Write-Host "App pool already stopped"
+              }
+
+        - task: PowerShell@2
+          displayName: Copy files to IIS
+          inputs:
+            targetType: inline
+            script: |
+              $source = Get-ChildItem "$(Pipeline.Workspace)\drop" -Directory |
+                        Select-Object -First 1 | ForEach-Object { $_.FullName }
+
+              $destination = "${{ parameters.targetPath }}"
+
+              Write-Host "Deploying from $source to $destination"
+
+              robocopy $source $destination /E /PURGE /R:3 /W:5 `
+                /NFL /NDL /NJH /NJS /NP `
+                /XD exports "$destination\wwwroot\uploads\prismadjustments"
+
+              if ($LASTEXITCODE -ge 8) {
+                  throw "Robocopy failed with exit code $LASTEXITCODE"
+              }
+
+        - task: PowerShell@2
+          displayName: Patch web.config
+          inputs:
+            targetType: inline
+            script: |
+              $webConfigPath = "${{ parameters.targetPath }}\web.config"
+              $dll = ".\Sandbox.dll"
+
+              [xml]$xml = Get-Content $webConfigPath
+              $aspNetCore = $xml.SelectSingleNode("//aspNetCore")
+
+              $aspNetCore.SetAttribute("arguments", $dll)
+              $aspNetCore.SetAttribute("stdoutLogEnabled", "true")
+              $aspNetCore.SetAttribute("stdoutLogFile", ".\logs\stdout")
+              $aspNetCore.SetAttribute("hostingModel", "inprocess")
+
+              $xml.Save($webConfigPath)
+              Write-Host "web.config patched"
+
+        - task: PowerShell@2
+          displayName: Start IIS App Pool
+          inputs:
+            targetType: inline
+            script: |
+              Import-Module WebAdministration
+              Start-WebAppPool -Name "${{ parameters.iisAppPool }}"

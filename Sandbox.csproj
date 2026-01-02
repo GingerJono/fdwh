@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Data\Uploads\" />
+    <Folder Include="Deployment\Templates\" />
   </ItemGroup>
   <ItemGroup>
     <Content Update="wwwroot\templates\PrismAdjustmentsTemplate.xlsx">
