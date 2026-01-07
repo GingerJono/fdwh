@@ -36,5 +36,6 @@ namespace Sandbox.Models.Windowpane
 		public int? RiskID { get; set; }
 		public string Class { get; set; }
 		public int? Year_Of_Account { get; set; }
+		public decimal? Exposure { get; set; }
 	}
 }
