@@ -13,8 +13,9 @@
     .status-grey { background-color: #d3d3d3; }
     .status-red { background-color: #dc3545; }
     .filter-section { margin-bottom: 1rem; }
-    .filter-btn-group { display: inline-block; margin-right: 1.5rem; margin-bottom: 0.5rem; }
-    .filter-btn { padding: 0.25rem 0.75rem; font-size: 0.875rem; border-radius: 0.25rem; border: 1px solid #4a5568; background-color: white; color: #4a5568; cursor: pointer; margin-right: 0.25rem; }
+    .filter-row { margin-bottom: 0.75rem; }
+    .filter-btn-group { display: inline-block; margin-right: 1.5rem; }
+    .filter-btn { padding: 0.25rem 0.75rem; font-size: 0.875rem; border-radius: 0.25rem; border: 1px solid #4a5568; background-color: white; color: #4a5568; cursor: pointer; margin-right: 0.25rem; margin-bottom: 0.25rem; }
     .filter-btn.active { background-color: #4299e1; color: white; border-color: #4299e1; }
     .filter-btn:hover:not(.active) { background-color: #e2e8f0; }
     .premium-xl { background-color: #1e3a8a; color: white; }
@@ -26,6 +27,16 @@
     .summary-card { background-color: white; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
     .summary-card h6 { font-size: 0.875rem; color: #64748b; margin-bottom: 0.5rem; }
     .summary-card .value { font-size: 1.5rem; font-weight: 600; color: #1e293b; }
+    .rag-table { font-size: 0.75rem; margin-bottom: 0; }
+    .rag-table th, .rag-table td { padding: 0.4rem; text-align: center; cursor: pointer; border: 1px solid #e2e8f0; }
+    .rag-table td:hover { background-color: #f1f5f9; }
+    .rag-table td.active-filter { background-color: #bfdbfe; font-weight: 600; }
+    .rag-red { background-color: #fee2e2; }
+    .rag-yellow { background-color: #fef3c7; }
+    .rag-green { background-color: #d1fae5; }
+    .rag-grey { background-color: #f3f4f6; }
+    .active-filters { margin-top: 0.5rem; font-size: 0.875rem; }
+    .clear-filter-btn { font-size: 0.75rem; padding: 0.1rem 0.5rem; margin-left: 0.5rem; }
 </style>
 
 <div class="row mt-3 mb-3">
@@ -50,14 +61,81 @@
                 <div class="value">@BoundPremiumUSD</div>
             </div>
         </div>
+        <div class="col-md-6">
+            <div class="summary-card">
+                <h6>RAG Filter Matrix</h6>
+                <table class="table table-sm rag-table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Stat</th>
+                            <th>TP</th>
+                            <th>Rate</th>
+                            <th>Cons</th>
+                            <th>Comp</th>
+                            <th>Sett</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="rag-red">Red</td>
+                            @foreach (var col in new[] { "Stat", "TP", "Rate", "Cons", "Comp", "Sett" })
+                            {
+                                <td class="@GetRagCellClass("Red", col)" @onclick='() => ToggleRagFilter("Red", col)'>
+                                    @GetRagCount("Red", col)
+                                </td>
+                            }
+                        </tr>
+                        <tr>
+                            <td class="rag-yellow">Yellow</td>
+                            @foreach (var col in new[] { "Stat", "TP", "Rate", "Cons", "Comp", "Sett" })
+                            {
+                                <td class="@GetRagCellClass("Yellow", col)" @onclick='() => ToggleRagFilter("Yellow", col)'>
+                                    @GetRagCount("Yellow", col)
+                                </td>
+                            }
+                        </tr>
+                        <tr>
+                            <td class="rag-green">Green</td>
+                            @foreach (var col in new[] { "Stat", "TP", "Rate", "Cons", "Comp", "Sett" })
+                            {
+                                <td class="@GetRagCellClass("Green", col)" @onclick='() => ToggleRagFilter("Green", col)'>
+                                    @GetRagCount("Green", col)
+                                </td>
+                            }
+                        </tr>
+                        <tr>
+                            <td class="rag-grey">Grey</td>
+                            @foreach (var col in new[] { "Stat", "TP", "Rate", "Cons", "Comp", "Sett" })
+                            {
+                                <td class="@GetRagCellClass("Grey", col)" @onclick='() => ToggleRagFilter("Grey", col)'>
+                                    @GetRagCount("Grey", col)
+                                </td>
+                            }
+                        </tr>
+                    </tbody>
+                </table>
+                @if (activeRagFilters.Any())
+                {
+                    <div class="active-filters">
+                        <strong>Active RAG Filters:</strong>
+                        @foreach (var filter in activeRagFilters)
+                        {
+                            <span class="badge bg-primary">@filter.Color - @filter.Column</span>
+                        }
+                        <button class="btn btn-sm btn-outline-secondary clear-filter-btn" @onclick="ClearRagFilters">Clear All</button>
+                    </div>
+                }
+            </div>
+        </div>
     </div>
 }
 
 <!-- Filters -->
 <div class="filter-section">
-    <div class="filter-btn-group">
+    <div class="filter-row">
         <label class="form-label d-block mb-2" style="font-weight: 600;">Inception Month:</label>
-        @foreach (var month in availableMonths.Take(12))
+        @foreach (var month in availableMonths)
         {
             <button class="filter-btn @(month == inceptionMonth ? "active" : "")"
                     @onclick="() => SelectInceptionMonth(month)">
@@ -65,13 +143,27 @@
             </button>
         }
     </div>
-    <div class="filter-btn-group">
+    <div class="filter-row">
         <label class="form-label d-block mb-2" style="font-weight: 600;">Class:</label>
         @foreach (var cls in availableClasses)
         {
-            <button class="filter-btn @(cls == selectedClass ? "active" : "")"
+            <button class="filter-btn @(cls == selectedClass || (cls == "All Classes" && string.IsNullOrEmpty(selectedClass)) ? "active" : "")"
                     @onclick="() => SelectClass(cls)">
                 @cls
+            </button>
+        }
+    </div>
+    <div class="filter-row">
+        <label class="form-label d-block mb-2" style="font-weight: 600;">Underwriter:</label>
+        <button class="filter-btn @(string.IsNullOrEmpty(selectedUnderwriter) ? "active" : "")"
+                @onclick="() => SelectUnderwriter(null)">
+            All
+        </button>
+        @foreach (var uw in availableUnderwriters)
+        {
+            <button class="filter-btn @(uw == selectedUnderwriter ? "active" : "")"
+                    @onclick="() => SelectUnderwriter(uw)">
+                @uw
             </button>
         }
     </div>
@@ -93,6 +185,7 @@ else
                         <th>U/W</th>
                         <th>Incept</th>
                         <th>Premium</th>
+                        <th>Exposure</th>
                         <th>Broker</th>
                         <th>Line%</th>
                         <th colspan="2">Links</th>
@@ -105,7 +198,7 @@ else
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var item in SortedWorkflowItems)
+                    @foreach (var item in FilteredWorkflowItems)
                     {
                         <tr>
                             <td>@item.Policy_Reference</td>
@@ -119,6 +212,7 @@ else
                             <td>@item.Line_Underwriter_Initials</td>
                             <td title="@GetInceptionTooltip(item)">@item.Inception_Date?.ToString("yyyy-MM-dd")</td>
                             <td class="@GetPremiumClass(item)">@FormatPremium(item.EPI_Settlement_Currency, item.Actual_Estimated_Premium)</td>
+                            <td>@FormatExposure(item.Limit_Currency, item.Exposure)</td>
                             <td title="@GetBrokerTooltip(item)">@FormatBroker(item.Broker_Pseudonym, item.Broker_Number)</td>
                             <td>@FormatLine(item.Reporting_Line_Percent, item.Limit_Currency, item.Limit, item.Excess)</td>
                             <td>@GetWorkbenchCell(item)</td>
@@ -136,13 +230,13 @@ else
         </div>
     </div>
 
-    @if (SortedWorkflowItems.Count() == 0)
+    @if (FilteredWorkflowItems.Count() == 0)
     {
-        <div class="alert alert-info">No policies found for the selected inception month and class.</div>
+        <div class="alert alert-info">No policies found matching the selected filters.</div>
     }
     else
     {
-        <div class="alert alert-info">Total: @SortedWorkflowItems.Count() policies</div>
+        <div class="alert alert-info">Total: @FilteredWorkflowItems.Count() policies (filtered from @SortedWorkflowItems.Count())</div>
     }
 }
 
@@ -150,8 +244,17 @@ else
     private IEnumerable<HighLevelWorkflowItem> WorkflowItems;
     private string inceptionMonth;
     private string selectedClass = "PO";
+    private string selectedUnderwriter;
     private List<string> availableMonths = new List<string>();
     private List<string> availableClasses = new List<string> { "All Classes", "CA", "EN", "HC", "MR", "PF", "PI", "PL", "PO", "PR", "PS", "SI" };
+    private List<string> availableUnderwriters = new List<string>();
+    private List<RagFilter> activeRagFilters = new List<RagFilter>();
+
+    private class RagFilter
+    {
+        public string Color { get; set; }
+        public string Column { get; set; }
+    }
 
     private int BoundRisksCount => SortedWorkflowItems.Count(i => IsStatusInSLUIC(i));
 
@@ -192,11 +295,42 @@ else
         }
     }
 
+    private IEnumerable<HighLevelWorkflowItem> FilteredWorkflowItems
+    {
+        get
+        {
+            var items = SortedWorkflowItems.AsEnumerable();
+
+            // Filter by underwriter
+            if (!string.IsNullOrEmpty(selectedUnderwriter))
+            {
+                items = items.Where(i => i.Line_Underwriter_Initials == selectedUnderwriter);
+            }
+
+            // Filter by RAG
+            if (activeRagFilters.Any())
+            {
+                items = items.Where(i =>
+                {
+                    foreach (var filter in activeRagFilters)
+                    {
+                        var ragStatus = GetItemRagStatus(i, filter.Column);
+                        if (ragStatus != filter.Color)
+                            return false;
+                    }
+                    return true;
+                });
+            }
+
+            return items;
+        }
+    }
+
     protected override async Task OnInitializedAsync()
     {
-        // Generate available months (12 months forward from current)
+        // Generate available months (16 months: current - 12 to current + 3)
         var today = DateTime.Now;
-        availableMonths = Enumerable.Range(0, 12)
+        availableMonths = Enumerable.Range(-12, 16)
             .Select(offset => today.AddMonths(offset))
             .Select(d => new DateTime(d.Year, d.Month, 1))
             .Select(d => d.ToString("yyyy-MM"))
@@ -228,19 +362,48 @@ else
     private async Task SelectClass(string cls)
     {
         selectedClass = cls == "All Classes" ? "" : cls;
+        selectedUnderwriter = null;
         await LoadData();
+    }
+
+    private void SelectUnderwriter(string uw)
+    {
+        selectedUnderwriter = uw;
     }
 
     private async Task LoadData()
     {
-        if (string.IsNullOrWhiteSpace(inceptionMonth) || string.IsNullOrWhiteSpace(selectedClass))
+        if (string.IsNullOrWhiteSpace(inceptionMonth))
         {
             WorkflowItems = Enumerable.Empty<HighLevelWorkflowItem>();
             return;
         }
 
+        var classParam = string.IsNullOrWhiteSpace(selectedClass) ? "PO" : selectedClass;
         var inceptionMonthDate = DateTime.Parse(inceptionMonth + "-01");
-        WorkflowItems = (await WindowpaneService.GetHighLevelWorkflowAsync(inceptionMonthDate, selectedClass)).ToList();
+        WorkflowItems = (await WindowpaneService.GetHighLevelWorkflowAsync(inceptionMonthDate, classParam)).ToList();
+
+        // Extract unique underwriters
+        availableUnderwriters = WorkflowItems
+            .Where(i => !string.IsNullOrEmpty(i.Line_Underwriter_Initials))
+            .Select(i => i.Line_Underwriter_Initials)
+            .Distinct()
+            .OrderBy(u => u)
+            .ToList();
+
+        selectedUnderwriter = null;
+    }
+
+    private string FormatExposure(string currency, decimal? exposure)
+    {
+        if (!exposure.HasValue || exposure.Value == 0) return "";
+
+        if (exposure.Value >= 1000000)
+            return $"{currency} {(exposure.Value / 1000000):0.0}m";
+        else if (exposure.Value >= 1000)
+            return $"{currency} {(exposure.Value / 1000):0}k";
+        else
+            return $"{currency} {exposure.Value:0}";
     }
 
     private string GetPremiumClass(HighLevelWorkflowItem item)
@@ -252,6 +415,114 @@ else
         else if (premium >= 25000 && premium < 50000) return "premium-md";
         else if (premium >= 10000 && premium < 25000) return "premium-sm";
         else return "premium-xs";
+    }
+
+    private string GetItemRagStatus(HighLevelWorkflowItem item, string column)
+    {
+        return column switch
+        {
+            "Stat" => GetBoxColor(GetPolicyStatusColor(item)),
+            "TP" => GetBoxColor(GetTechnicalPremiumColor(item)),
+            "Rate" => GetBoxColor(GetRateColor(item)),
+            "Cons" => GetBoxColor(GetConsortiumColor(item)),
+            "Comp" => GetBoxColor(GetCompanionColor(item)),
+            "Sett" => GetBoxColor(GetSettlementColor(item)),
+            _ => "Grey"
+        };
+    }
+
+    private string GetBoxColor(string cssClass)
+    {
+        if (cssClass.Contains("dark-green") || cssClass.Contains("light-green")) return "Green";
+        if (cssClass.Contains("yellow")) return "Yellow";
+        if (cssClass.Contains("red")) return "Red";
+        return "Grey";
+    }
+
+    private int GetRagCount(string color, string column)
+    {
+        return SortedWorkflowItems.Count(i => GetItemRagStatus(i, column) == color);
+    }
+
+    private string GetRagCellClass(string color, string column)
+    {
+        return activeRagFilters.Any(f => f.Color == color && f.Column == column) ? "active-filter" : "";
+    }
+
+    private void ToggleRagFilter(string color, string column)
+    {
+        var existing = activeRagFilters.FirstOrDefault(f => f.Color == color && f.Column == column);
+        if (existing != null)
+        {
+            activeRagFilters.Remove(existing);
+        }
+        else
+        {
+            activeRagFilters.Add(new RagFilter { Color = color, Column = column });
+        }
+    }
+
+    private void ClearRagFilters()
+    {
+        activeRagFilters.Clear();
+    }
+
+    private string GetPolicyStatusColor(HighLevelWorkflowItem item)
+    {
+        var status = item.Line_Status_Code?.ToUpper() ?? "";
+        if (status == "S" || status == "L") return "status-dark-green";
+        if (status == "U" || status == "C") return "status-light-green";
+        if (status == "I") return "status-yellow";
+        if (status == "Q") return "status-grey";
+        return "status-red";
+    }
+
+    private string GetTechnicalPremiumColor(HighLevelWorkflowItem item)
+    {
+        if (IsStatusNotInSLUIC(item)) return "status-grey";
+        var value = item.Technical_Premium_Percent;
+        if (!value.HasValue || value.Value == 0) return "status-grey";
+        if (value.Value >= 50.9m && value.Value <= 51.1m) return "status-yellow";
+        return "status-dark-green";
+    }
+
+    private string GetRateColor(HighLevelWorkflowItem item)
+    {
+        if (IsStatusNotInSLUIC(item)) return "status-grey";
+        var value = item.Rate_Pct_Gross;
+        if (!value.HasValue) return "status-grey";
+        if (value.Value == 0) return "status-yellow";
+        return "status-dark-green";
+    }
+
+    private string GetConsortiumColor(HighLevelWorkflowItem item)
+    {
+        if (IsStatusNotInSLUIC(item)) return "status-grey";
+        return !string.IsNullOrEmpty(item.Consortium_Code) ? "status-dark-green" : "status-grey";
+    }
+
+    private string GetCompanionColor(HighLevelWorkflowItem item)
+    {
+        if (IsStatusNotInSLUIC(item)) return "status-grey";
+        var companion = item.Companion_Name ?? "";
+        if (string.IsNullOrEmpty(companion) || companion.ToUpper() == "NO AVIVA") return "status-grey";
+        if (item.Signed_Line_Pct.HasValue) return "status-dark-green";
+        return "status-light-green";
+    }
+
+    private string GetSettlementColor(HighLevelWorkflowItem item)
+    {
+        if (IsStatusNotInSLUIC(item)) return "status-grey";
+        var isPastDue = item.Settlement_Due_Date.HasValue && item.Settlement_Due_Date.Value < DateTime.Now;
+        var usmPrem = item.USMPrem;
+        var epiPrem = item.Actual_Estimated_Premium ?? 0;
+        var usmPercent = epiPrem > 0 ? (usmPrem / epiPrem) * 100 : 0;
+
+        if (isPastDue && usmPrem == 0) return "status-red";
+        if (!isPastDue && usmPrem > 0) return "status-yellow";
+        if (usmPercent >= 90) return "status-dark-green";
+        if (usmPrem > 0) return "status-light-green";
+        return "status-grey";
     }
 
     private string FormatPremium(string currency, decimal? premium)
@@ -340,142 +611,75 @@ else
 
     private RenderFragment GetPolicyStatusBox(HighLevelWorkflowItem item)
     {
-        var status = item.Line_Status_Code?.ToUpper() ?? "";
-        string color;
-
-        if (status == "S") color = "status-dark-green";
-        else if (status == "L") color = "status-dark-green";
-        else if (status == "U" || status == "C") color = "status-light-green";
-        else if (status == "I") color = "status-yellow";
-        else if (status == "Q") color = "status-grey";
-        else color = "status-red"; // N, D, X, other
-
+        var color = GetPolicyStatusColor(item);
         return @<span class="status-box @color" title="Status: @item.Line_Status_Code"></span>;
     }
 
     private RenderFragment GetTechnicalPremiumBox(HighLevelWorkflowItem item)
     {
-        if (IsStatusNotInSLUIC(item))
-            return @<span class="status-box status-grey"></span>;
-
+        var color = GetTechnicalPremiumColor(item);
         var value = item.Technical_Premium_Percent;
-        string color;
         string tooltip = $"Technical Premium: {(value.HasValue ? value.Value.ToString("0.00") + "%" : "N/A")}";
-
-        if (!value.HasValue || value.Value == 0)
-            color = "status-grey";
-        else if (value.Value >= 50.9m && value.Value <= 51.1m)
-            color = "status-yellow";
-        else
-            color = "status-dark-green";
-
         return @<span class="status-box @color" title="@tooltip"></span>;
     }
 
     private RenderFragment GetRateBox(HighLevelWorkflowItem item)
     {
-        if (IsStatusNotInSLUIC(item))
-            return @<span class="status-box status-grey"></span>;
-
+        var color = GetRateColor(item);
         var value = item.Rate_Pct_Gross;
-        string color;
         string tooltip = $"Rate: {(value.HasValue ? value.Value.ToString("0.00") + "%" : "N/A")}";
-
-        if (!value.HasValue)
-            color = "status-grey";
-        else if (value.Value == 0)
-            color = "status-yellow";
-        else
-            color = "status-dark-green";
-
         return @<span class="status-box @color" title="@tooltip"></span>;
     }
 
     private RenderFragment GetConsortiumBox(HighLevelWorkflowItem item)
     {
-        if (IsStatusNotInSLUIC(item))
-            return @<span class="status-box status-grey"></span>;
-
+        var color = GetConsortiumColor(item);
         var hasValue = !string.IsNullOrEmpty(item.Consortium_Code);
-        string color = hasValue ? "status-dark-green" : "status-grey";
         string tooltip = hasValue
             ? $"Consortium: {item.Consortium_Code}\nLine %: {(item.Consortium_Line_Percent.HasValue ? item.Consortium_Line_Percent.Value.ToString("0.00") + "%" : "N/A")}"
             : "No Consortium";
-
         return @<span class="status-box @color" title="@tooltip"></span>;
     }
 
     private RenderFragment GetCompanionBox(HighLevelWorkflowItem item)
     {
-        if (IsStatusNotInSLUIC(item))
-            return @<span class="status-box status-grey"></span>;
-
+        var color = GetCompanionColor(item);
         var companion = item.Companion_Name ?? "";
-        string color;
         string tooltip;
 
         if (string.IsNullOrEmpty(companion))
-        {
-            color = "status-grey";
             tooltip = "No Companion";
-        }
         else if (companion.ToUpper() == "NO AVIVA")
-        {
-            color = "status-grey";
             tooltip = "Companion: NO AVIVA";
-        }
         else if (item.Signed_Line_Pct.HasValue)
-        {
-            color = "status-dark-green";
             tooltip = $"Companion: {companion}\nWritten %: {(item.Written_Line_Pct.HasValue ? item.Written_Line_Pct.Value.ToString("0.00") + "%" : "N/A")}\nSigned %: {item.Signed_Line_Pct.Value:0.00}%";
-        }
         else
-        {
-            color = "status-light-green";
             tooltip = $"Companion: {companion}\nWritten %: {(item.Written_Line_Pct.HasValue ? item.Written_Line_Pct.Value.ToString("0.00") + "%" : "N/A")}\nSigned %: N/A";
-        }
 
         return @<span class="status-box @color" title="@tooltip"></span>;
     }
 
     private RenderFragment GetSettlementBox(HighLevelWorkflowItem item)
     {
-        if (IsStatusNotInSLUIC(item))
-            return @<span class="status-box status-grey"></span>;
-
+        var color = GetSettlementColor(item);
         var isPastDue = item.Settlement_Due_Date.HasValue && item.Settlement_Due_Date.Value < DateTime.Now;
         var usmPrem = item.USMPrem;
         var epiPrem = item.Actual_Estimated_Premium ?? 0;
         var usmPercent = epiPrem > 0 ? (usmPrem / epiPrem) * 100 : 0;
 
-        string color;
         string tooltip;
-
-        if (isPastDue && usmPrem == 0)
-        {
-            color = "status-red";
+        if (IsStatusNotInSLUIC(item))
+            tooltip = "Not in SLUIC";
+        else if (isPastDue && usmPrem == 0)
             tooltip = $"Settlement OVERDUE\nDue: {item.Settlement_Due_Date?.ToString("yyyy-MM-dd")}\nUSM: {item.EPI_Settlement_Currency} {usmPrem:N2} (0%)";
-        }
         else if (!isPastDue && usmPrem > 0)
-        {
-            color = "status-yellow";
             tooltip = $"Settlement Pending\nDue: {item.Settlement_Due_Date?.ToString("yyyy-MM-dd")}\nUSM: {item.EPI_Settlement_Currency} {usmPrem:N2} ({usmPercent:0}%)";
-        }
         else if (usmPercent >= 90)
-        {
-            color = "status-dark-green";
             tooltip = $"Settlement OK\nDue: {item.Settlement_Due_Date?.ToString("yyyy-MM-dd")}\nUSM: {item.EPI_Settlement_Currency} {usmPrem:N2} ({usmPercent:0}%)";
-        }
         else if (usmPrem > 0)
-        {
-            color = "status-light-green";
             tooltip = $"Settlement Partial\nDue: {item.Settlement_Due_Date?.ToString("yyyy-MM-dd")}\nUSM: {item.EPI_Settlement_Currency} {usmPrem:N2} ({usmPercent:0}%)";
-        }
         else
-        {
-            color = "status-grey";
             tooltip = $"No Settlement\nDue: {item.Settlement_Due_Date?.ToString("yyyy-MM-dd")}\nUSM: {item.EPI_Settlement_Currency} 0.00";
-        }
 
         return @<span class="status-box @color" title="@tooltip"></span>;
     }

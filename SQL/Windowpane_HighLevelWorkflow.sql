@@ -42,7 +42,8 @@ BEGIN
            pfa.Settlement_Due_Date,
            0 AS USMPrem,
            0 AS RiskID,
-           pfa.ProgReference
+           pfa.ProgReference,
+           (pfa.Limit * pfa.Reporting_Line_Percent / 100) AS Exposure
     INTO #Pols
     FROM dale_reporting.reporting.Policy_Full_As_At pfa
     LEFT OUTER JOIN Dale_Reporting.reporting.Policy_Companion comp
