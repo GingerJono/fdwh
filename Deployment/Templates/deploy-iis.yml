@@ -43,7 +43,7 @@ jobs:
             targetType: 'inline'
             script: |
               $source = Get-ChildItem "$(Pipeline.Workspace)\drop" -Directory | Select-Object -First 1 | ForEach-Object { $_.FullName }
-              $destination = "$(targetPath)"
+              $destination = "$( parameters.targetPath )"
           
               Write-Host "Deploying from: $source"
               Write-Host "Deploying to:   $destination"
