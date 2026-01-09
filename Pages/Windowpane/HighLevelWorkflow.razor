@@ -81,7 +81,7 @@
                             <td class="rag-red">Red</td>
                             @foreach (var col in new[] { "Stat", "TP", "Rate", "Cons", "Comp", "Sett" })
                             {
-                                <td class="@GetRagCellClass("Red", col)" @onclick="() => ToggleRagFilter('Red', col)">
+                                <td class="@GetRagCellClass("Red", col)" @onclick='() => ToggleRagFilter("Red", col)'>
                                     @GetRagCount("Red", col)
                                 </td>
                             }
@@ -90,7 +90,7 @@
                             <td class="rag-yellow">Yellow</td>
                             @foreach (var col in new[] { "Stat", "TP", "Rate", "Cons", "Comp", "Sett" })
                             {
-                                <td class="@GetRagCellClass("Yellow", col)" @onclick="() => ToggleRagFilter('Yellow', col)">
+                                <td class="@GetRagCellClass("Yellow", col)" @onclick='() => ToggleRagFilter("Yellow", col)'>
                                     @GetRagCount("Yellow", col)
                                 </td>
                             }
@@ -99,7 +99,7 @@
                             <td class="rag-green">Green</td>
                             @foreach (var col in new[] { "Stat", "TP", "Rate", "Cons", "Comp", "Sett" })
                             {
-                                <td class="@GetRagCellClass("Green", col)" @onclick="() => ToggleRagFilter('Green', col)">
+                                <td class="@GetRagCellClass("Green", col)" @onclick='() => ToggleRagFilter("Green", col)'>
                                     @GetRagCount("Green", col)
                                 </td>
                             }
@@ -108,7 +108,7 @@
                             <td class="rag-grey">Grey</td>
                             @foreach (var col in new[] { "Stat", "TP", "Rate", "Cons", "Comp", "Sett" })
                             {
-                                <td class="@GetRagCellClass("Grey", col)" @onclick="() => ToggleRagFilter('Grey', col)">
+                                <td class="@GetRagCellClass("Grey", col)" @onclick='() => ToggleRagFilter("Grey", col)'>
                                     @GetRagCount("Grey", col)
                                 </td>
                             }
