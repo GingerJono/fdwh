@@ -1,4 +1,4 @@
-parameters:
+﻿parameters:
   environmentName: ''
   agentName: ''
   targetPath: ''
@@ -38,43 +38,55 @@ jobs:
               }
 
         - task: PowerShell@2
-          displayName: Copy files to IIS
+          displayName: 'Copy Files to IIS Folder with Exit Code Handling'
           inputs:
-            targetType: inline
+            targetType: 'inline'
             script: |
-              $source = Get-ChildItem "$(Pipeline.Workspace)\drop" -Directory |
-                        Select-Object -First 1 | ForEach-Object { $_.FullName }
+              $source = Get-ChildItem "$(Pipeline.Workspace)\drop" -Directory | Select-Object -First 1 | ForEach-Object { $_.FullName }
+              $destination = "$(targetPath)"
+          
+              Write-Host "Deploying from: $source"
+              Write-Host "Deploying to:   $destination"
 
-              $destination = "${{ parameters.targetPath }}"
+              $rc = robocopy $source $destination /E /PURGE /R:3 /W:5 /NFL /NDL /NJH /NJS /NP /XD exports "$destination\wwwroot\uploads\prismadjustments"
+              $exitCode = $LASTEXITCODE
 
-              Write-Host "Deploying from $source to $destination"
-
-              robocopy $source $destination /E /PURGE /R:3 /W:5 `
-                /NFL /NDL /NJH /NJS /NP `
-                /XD exports "$destination\wwwroot\uploads\prismadjustments"
-
-              if ($LASTEXITCODE -ge 8) {
-                  throw "Robocopy failed with exit code $LASTEXITCODE"
+              if ($exitCode -ge 8) {
+                  Write-Error "Robocopy failed with exit code $exitCode"
+                  exit $exitCode
+              } else {
+                  Write-Host "Robocopy succeeded with exit code $exitCode"
+                  exit 0
               }
 
         - task: PowerShell@2
-          displayName: Patch web.config
+          displayName: 'Patch web.config: update existing aspNetCore'
           inputs:
-            targetType: inline
+            targetType: 'inline'
             script: |
-              $webConfigPath = "${{ parameters.targetPath }}\web.config"
-              $dll = ".\Sandbox.dll"
+              $webConfigPath = "$( parameters.targetPath )\web.config"
+              $correctDll = ".\Sandbox.dll"
+
+              if (-Not (Test-Path $webConfigPath)) {
+                  Write-Error "web.config not found at $webConfigPath"
+                  exit 1
+              }
 
               [xml]$xml = Get-Content $webConfigPath
               $aspNetCore = $xml.SelectSingleNode("//aspNetCore")
 
-              $aspNetCore.SetAttribute("arguments", $dll)
+              if (-not $aspNetCore) {
+                  Write-Error "<aspNetCore> element not found in web.config"
+                  exit 1
+              }
+
+              $aspNetCore.SetAttribute("arguments", $correctDll)
               $aspNetCore.SetAttribute("stdoutLogEnabled", "true")
               $aspNetCore.SetAttribute("stdoutLogFile", ".\logs\stdout")
               $aspNetCore.SetAttribute("hostingModel", "inprocess")
 
               $xml.Save($webConfigPath)
-              Write-Host "web.config patched"
+              Write-Host "✅ Patched web.config successfully: arguments=$correctDll"
 
         - task: PowerShell@2
           displayName: Start IIS App Pool

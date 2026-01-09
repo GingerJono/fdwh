@@ -587,7 +587,8 @@ namespace Sandbox.Services
                 metaDataParameters.Add("@OverriderBasis", model.OverriderBasis);
                 metaDataParameters.Add("@UWExpensesBasis", model.UWExpensesBasis);
                 metaDataParameters.Add("@PCProfitBasis", model.PCProfitBasis);
-                metaDataParameters.Add("@NilPCOverride", model.NilPCOverride); metaDataParameters.Add("@InceptionOverride", model.InceptionOverride);
+                metaDataParameters.Add("@NilPCOverride", model.NilPCOverride); 
+                metaDataParameters.Add("@InceptionOverride", model.InceptionOverride);
                 metaDataParameters.Add("@ExpiryOverride", model.ExpiryOverride);
                 metaDataParameters.Add("@BasisOfCoverCodeOverride", model.BasisOfCoverCodeOverride);
                 metaDataParameters.Add("@OrderOverride", model.OrderOverride);
@@ -597,7 +598,7 @@ namespace Sandbox.Services
                 metaDataParameters.Add("@PolicyTypeOverride", model.PolicyTypeOverride);
                 metaDataParameters.Add("@PolicySubTypeOverride", model.PolicySubTypeOverride);
                 metaDataParameters.Add("@CessionOverride", model.CessionOverride);
-                metaDataParameters.Add("@LastUpdatedBy", model.LastUpdatedBy);
+                metaDataParameters.Add("@LastUpdatedBy", userNameFinal);
 
                 await db.ExecuteAsync("ORI.spUpsertPolicyDetails", metaDataParameters, commandType: CommandType.StoredProcedure, transaction: transaction);
 
