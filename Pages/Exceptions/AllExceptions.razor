@@ -15,11 +15,34 @@
 else
 {
     <div class="row mb-4">
+        <div class="col-md-6">
+            <label class="form-label">Filter by Class Code</label>
+            <select class="form-select" @onchange="OnClassFilterChanged">
+                <option value="">All Classes</option>
+                @foreach (var classCode in AvailableClasses)
+                {
+                    <option value="@classCode" selected="@(SelectedClass == classCode)">@classCode</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Filter by Rule</label>
+            <select class="form-select" @onchange="OnRuleFilterChanged">
+                <option value="">All Rules</option>
+                @foreach (var rule in AvailableRules)
+                {
+                    <option value="@rule" selected="@(SelectedRule == rule)">@rule</option>
+                }
+            </select>
+        </div>
+    </div>
+
+    <div class="row mb-4">
         <div class="col-md-4">
             <div class="card shadow mb-4 border">
                 <div class="card-body">
                     <h5 class="card-title mb-1">Total Exceptions</h5>
-                    <p class="fs-4 fw-bold mb-0">@AllExceptions_.Count()</p>
+                    <p class="fs-4 fw-bold mb-0">@FilteredExceptions.Count()</p>
                 </div>
             </div>
         </div>
@@ -27,7 +50,7 @@ else
             <div class="card shadow mb-4 border">
                 <div class="card-body">
                     <h5 class="card-title mb-1">Open Exceptions</h5>
-                    <p class="fs-4 fw-bold text-danger mb-0">@AllExceptions_.Count(e => e.Status == "Open")</p>
+                    <p class="fs-4 fw-bold text-danger mb-0">@FilteredExceptions.Count(e => e.Status == "Open")</p>
                 </div>
             </div>
         </div>
@@ -35,7 +58,7 @@ else
             <div class="card shadow mb-4 border">
                 <div class="card-body">
                     <h5 class="card-title mb-1">Recently Updated</h5>
-                    <p class="fs-4 fw-bold text-warning mb-0">@AllExceptions_.Count(e => e.LastUpdated >= DateTime.Now.AddDays(-7))</p>
+                    <p class="fs-4 fw-bold text-warning mb-0">@FilteredExceptions.Count(e => e.LastUpdated >= DateTime.Now.AddDays(-7))</p>
                 </div>
             </div>
         </div>
@@ -144,11 +167,17 @@ else
 
 @code {
     private List<ExceptionRecord> AllExceptions_ = new();
+    private List<ExceptionRecord> FilteredExceptions = new();
     private List<ExceptionRecord> PagedExceptions = new();
     private int CurrentPage = 1;
     private int PageSize = 20;
     private int TotalRecords = 0;
     private List<int> PageSizeOptions = new() { 10, 20, 50, 100 };
+
+    private List<string> AvailableClasses = new();
+    private List<string> AvailableRules = new();
+    private string SelectedClass = "";
+    private string SelectedRule = "";
 
     private const int MaxVisiblePages = 10;
     private int TotalPages => Math.Max(1, (int)Math.Ceiling((double)TotalRecords / PageSize));
@@ -158,13 +187,45 @@ else
     protected override async Task OnInitializedAsync()
     {
         AllExceptions_ = (await ExceptionService.GetExceptions()).ToList();
+
+        // Populate filter options
+        AvailableClasses = AllExceptions_
+            .Where(e => !string.IsNullOrEmpty(e.Class))
+            .Select(e => e.Class!)
+            .Distinct()
+            .OrderBy(c => c)
+            .ToList();
+
+        AvailableRules = AllExceptions_
+            .Where(e => !string.IsNullOrEmpty(e.RuleDescription))
+            .Select(e => e.RuleDescription!)
+            .Distinct()
+            .OrderBy(r => r)
+            .ToList();
+
+        ApplyFilters();
         ApplyPagination();
+    }
+
+    private void ApplyFilters()
+    {
+        FilteredExceptions = AllExceptions_;
+
+        if (!string.IsNullOrEmpty(SelectedClass))
+        {
+            FilteredExceptions = FilteredExceptions.Where(e => e.Class == SelectedClass).ToList();
+        }
+
+        if (!string.IsNullOrEmpty(SelectedRule))
+        {
+            FilteredExceptions = FilteredExceptions.Where(e => e.RuleDescription == SelectedRule).ToList();
+        }
     }
 
     private void ApplyPagination()
     {
-        TotalRecords = AllExceptions_.Count;
-        PagedExceptions = AllExceptions_
+        TotalRecords = FilteredExceptions.Count;
+        PagedExceptions = FilteredExceptions
             .Skip((CurrentPage - 1) * PageSize)
             .Take(PageSize)
             .ToList();
@@ -189,5 +250,23 @@ else
             ApplyPagination();
             await InvokeAsync(StateHasChanged);
         }
+    }
+
+    private async Task OnClassFilterChanged(ChangeEventArgs e)
+    {
+        SelectedClass = e.Value?.ToString() ?? "";
+        CurrentPage = 1;
+        ApplyFilters();
+        ApplyPagination();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task OnRuleFilterChanged(ChangeEventArgs e)
+    {
+        SelectedRule = e.Value?.ToString() ?? "";
+        CurrentPage = 1;
+        ApplyFilters();
+        ApplyPagination();
+        await InvokeAsync(StateHasChanged);
     }
 }

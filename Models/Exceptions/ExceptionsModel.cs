@@ -13,12 +13,15 @@
 		public double? ValueDecimal { get; set; }
 		public DateTime? ValueDate { get; set; }
 		public string? ValueText { get; set; }
-		
+
 		public string? Reason { get; set; }
 		public string? Comment { get; set; }
 		public DateTime CreatedDate { get; set; }
 		public DateTime? LastUpdated { get; set; }
 		public string User { get; set; }
+
+		public string? RuleDescription { get; set; }
+		public string? Class { get; set; }
 	}
 
 	public class ExceptionsList
