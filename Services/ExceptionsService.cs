@@ -116,5 +116,20 @@ namespace Sandbox.Services
 			}
 		}
 
+		public async Task<IEnumerable<ClassTolerance>> GetClassTolerancesAsync()
+		{
+			using (var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection")))
+			{
+				await connection.OpenAsync();
+
+				var result = await connection.QueryAsync<ClassTolerance>(
+					"Exceptions.spGetClassTolerances",
+					commandType: CommandType.StoredProcedure
+				);
+
+				return result;
+			}
+		}
+
 	}
 }

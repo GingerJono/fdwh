@@ -27,7 +27,7 @@ else
             <div class="card shadow mb-4 border">
                 <div class="card-body">
                     <h5 class="card-title mb-1">Open Exceptions</h5>
-                    <p class="fs-4 fw-bold text-danger mb-0">@FilteredExceptions.Count(e => e.Status == "Open")</p>
+                    <p class="fs-4 fw-bold text-danger mb-0">@FilteredExceptions.Count(e => e.Status != "Checked" && e.Status != "Changed")</p>
                 </div>
             </div>
         </div>
@@ -146,7 +146,7 @@ else
                             <td>@ex.RuleID</td>
                             <td>@ex.BusinessID</td>
                             <td>
-                                <span class="@($"badge {(ex.Status?.Equals("Open", StringComparison.OrdinalIgnoreCase) == true ? "bg-danger" : "bg-success")}")">
+                                <span class="badge @GetStatusBadgeClass(ex.Status)">
                                     @ex.Status
                                 </span>
                             </td>
@@ -348,5 +348,21 @@ else
         CurrentPage = 1;
         ApplyFilters();
         ApplyPagination();
+    }
+
+    private string GetStatusBadgeClass(string? status)
+    {
+        return status switch
+        {
+            "New" => "bg-primary",
+            "Disappeared" => "bg-secondary",
+            "Reappeared" => "bg-warning text-dark",
+            "Checked" => "bg-success",
+            "Deferred" => "bg-info text-dark",
+            "Changed" => "bg-success",
+            "Untoleranced" => "bg-danger",
+            "Reflagged" => "bg-danger",
+            _ => "bg-secondary"
+        };
     }
 }
