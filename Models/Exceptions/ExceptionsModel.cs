@@ -63,4 +63,5 @@
 		public int TotalExceptionsCount { get; set; }
 		public int OpenExceptionsCount { get; set; }
 	}
+}
 
