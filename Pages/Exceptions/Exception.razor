@@ -71,14 +71,38 @@ else
     <EditForm Model="@this" OnValidSubmit="() => SubmitAction(SelectedAction)">
         <div class="mb-3">
             <label for="notes" class="form-label">Notes</label>
-            <textarea id="notes" class="form-control" rows="6" @bind="@Notes" disabled="@(IsDisabled || IsViewMode)"></textarea>
+            <textarea id="notes" class="form-control @(IsViewMode ? "view-mode-disabled" : "")" rows="6" @bind="@Notes" disabled="@(IsDisabled || IsViewMode)"></textarea>
         </div>
 
         <div class="mb-3 d-flex gap-2">
-            <button type="button" class="btn btn-outline-success" disabled="@(IsDisabled || IsViewMode)" @onclick='() => SubmitAction("Checked")'>Mark as Checked</button>
-            <button type="button" class="btn btn-outline-warning" disabled="@(IsDisabled || IsViewMode)" @onclick='() => SubmitAction("Changed")'>Mark as Changed</button>
-            <button type="button" class="btn btn-outline-primary" disabled="@(IsDisabled || IsViewMode)" @onclick='() => SubmitAction("Assigned")'>Assign</button>
-            <button type="button" class="btn btn-outline-secondary" disabled="@(IsDisabled || IsViewMode)" @onclick='() => SubmitAction("Deferred")'>Defer</button>
+            <button type="button" class="btn btn-outline-success @(IsViewMode || IsDisabled ? "view-mode-disabled" : "")" disabled="@(IsDisabled || IsViewMode)" @onclick='() => SubmitAction("Checked")'>
+                @if (IsViewMode || IsDisabled)
+                {
+                    <i class="bi bi-lock-fill"></i>
+                }
+                Mark as Checked
+            </button>
+            <button type="button" class="btn btn-outline-warning @(IsViewMode || IsDisabled ? "view-mode-disabled" : "")" disabled="@(IsDisabled || IsViewMode)" @onclick='() => SubmitAction("Changed")'>
+                @if (IsViewMode || IsDisabled)
+                {
+                    <i class="bi bi-lock-fill"></i>
+                }
+                Mark as Changed
+            </button>
+            <button type="button" class="btn btn-outline-primary @(IsViewMode || IsDisabled ? "view-mode-disabled" : "")" disabled="@(IsDisabled || IsViewMode)" @onclick='() => SubmitAction("Assigned")'>
+                @if (IsViewMode || IsDisabled)
+                {
+                    <i class="bi bi-lock-fill"></i>
+                }
+                Assign
+            </button>
+            <button type="button" class="btn btn-outline-secondary @(IsViewMode || IsDisabled ? "view-mode-disabled" : "")" disabled="@(IsDisabled || IsViewMode)" @onclick='() => SubmitAction("Deferred")'>
+                @if (IsViewMode || IsDisabled)
+                {
+                    <i class="bi bi-lock-fill"></i>
+                }
+                Defer
+            </button>
         </div>
     </EditForm>
 
@@ -168,3 +192,21 @@ else
         StateHasChanged();
     }
 }
+
+<style>
+    .view-mode-disabled {
+        opacity: 0.5;
+        cursor: not-allowed !important;
+        background-color: #e9ecef !important;
+        border-color: #dee2e6 !important;
+    }
+
+    .view-mode-disabled:disabled {
+        opacity: 0.5;
+    }
+
+    textarea.view-mode-disabled {
+        background-color: #f8f9fa !important;
+        color: #6c757d !important;
+    }
+</style>

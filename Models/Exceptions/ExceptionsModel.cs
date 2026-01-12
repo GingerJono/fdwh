@@ -64,3 +64,10 @@
 		public int OpenExceptionsCount { get; set; }
 	}
 
+	public class ClassTolerance
+	{
+		public string ClassCode { get; set; } = "";
+		public decimal? DeductionsAbovePercentage { get; set; }
+		public decimal? RateChangeBelowPercentage { get; set; }
+	}
+
