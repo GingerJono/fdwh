@@ -101,5 +101,20 @@ namespace Sandbox.Services
 			}
 		}
 
+		public async Task<IEnumerable<RuleRecord>> GetRulesAsync()
+		{
+			using (var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection")))
+			{
+				await connection.OpenAsync();
+
+				var result = await connection.QueryAsync<RuleRecord>(
+					"Exceptions.spGetRules",
+					commandType: CommandType.StoredProcedure
+				);
+
+				return result;
+			}
+		}
+
 	}
 }

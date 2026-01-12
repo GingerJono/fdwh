@@ -15,29 +15,6 @@
 else
 {
     <div class="row mb-4">
-        <div class="col-md-6">
-            <label class="form-label">Filter by Class Code</label>
-            <select class="form-select" @onchange="OnClassFilterChanged">
-                <option value="">All Classes</option>
-                @foreach (var classCode in AvailableClasses)
-                {
-                    <option value="@classCode" selected="@(SelectedClass == classCode)">@classCode</option>
-                }
-            </select>
-        </div>
-        <div class="col-md-6">
-            <label class="form-label">Filter by Rule</label>
-            <select class="form-select" @onchange="OnRuleFilterChanged">
-                <option value="">All Rules</option>
-                @foreach (var rule in AvailableRules)
-                {
-                    <option value="@rule" selected="@(SelectedRule == rule)">@rule</option>
-                }
-            </select>
-        </div>
-    </div>
-
-    <div class="row mb-4">
         <div class="col-md-4">
             <div class="card shadow mb-4 border">
                 <div class="card-body">
@@ -59,6 +36,74 @@ else
                 <div class="card-body">
                     <h5 class="card-title mb-1">Recently Updated</h5>
                     <p class="fs-4 fw-bold text-warning mb-0">@FilteredExceptions.Count(e => e.LastUpdated >= DateTime.Now.AddDays(-7))</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-header bg-light py-2">
+            <h6 class="mb-0">Filters</h6>
+        </div>
+        <div class="card-body py-2 px-3">
+            <!-- Status Filter Pills (Multi-select) -->
+            <div class="mb-3">
+                <label class="form-label fw-bold mb-1" style="font-size: 0.9rem;">Status:</label>
+                <div class="d-flex flex-wrap gap-1">
+                    <button class="btn btn-sm @(SelectedStatuses.Count == 0 ? "btn-primary" : "btn-outline-primary")"
+                            style="padding: 0.25rem 0.6rem; font-size: 0.8rem;"
+                            @onclick="ClearStatusFilters">
+                        All Statuses
+                    </button>
+                    @foreach (var status in AvailableStatuses)
+                    {
+                        <button class="btn btn-sm @(SelectedStatuses.Contains(status) ? "btn-primary" : "btn-outline-primary")"
+                                style="padding: 0.25rem 0.6rem; font-size: 0.8rem;"
+                                @onclick="() => ToggleStatusFilter(status)">
+                            @status
+                        </button>
+                    }
+                </div>
+            </div>
+
+            <!-- Class Filter Pills -->
+            <div class="mb-3">
+                <label class="form-label fw-bold mb-1" style="font-size: 0.9rem;">Class Code:</label>
+                <div class="d-flex flex-wrap gap-1">
+                    <button class="btn btn-sm @(string.IsNullOrEmpty(SelectedClass) ? "btn-success" : "btn-outline-success")"
+                            style="padding: 0.25rem 0.6rem; font-size: 0.8rem;"
+                            @onclick="() => FilterByClass(null)">
+                        All Classes
+                    </button>
+                    @foreach (var classCode in AvailableClasses)
+                    {
+                        <button class="btn btn-sm @(SelectedClass == classCode ? "btn-success" : "btn-outline-success")"
+                                style="padding: 0.25rem 0.6rem; font-size: 0.8rem;"
+                                @onclick="() => FilterByClass(classCode)">
+                            @classCode
+                        </button>
+                    }
+                </div>
+            </div>
+
+            <!-- Rule Filter Pills -->
+            <div class="mb-0">
+                <label class="form-label fw-bold mb-1" style="font-size: 0.9rem;">Rule:</label>
+                <div class="d-flex flex-wrap gap-1">
+                    <button class="btn btn-sm @(string.IsNullOrEmpty(SelectedRule) ? "btn-info" : "btn-outline-info")"
+                            style="padding: 0.25rem 0.6rem; font-size: 0.8rem;"
+                            @onclick="() => FilterByRule(null)">
+                        All Rules
+                    </button>
+                    @foreach (var rule in AvailableRules)
+                    {
+                        <button class="btn btn-sm @(SelectedRule == rule ? "btn-info" : "btn-outline-info")"
+                                style="padding: 0.25rem 0.6rem; font-size: 0.8rem;"
+                                @onclick="() => FilterByRule(rule)">
+                            @rule
+                        </button>
+                    }
                 </div>
             </div>
         </div>
@@ -176,8 +221,10 @@ else
 
     private List<string> AvailableClasses = new();
     private List<string> AvailableRules = new();
+    private List<string> AvailableStatuses = new();
     private string SelectedClass = "";
     private string SelectedRule = "";
+    private HashSet<string> SelectedStatuses = new();
 
     private const int MaxVisiblePages = 10;
     private int TotalPages => Math.Max(1, (int)Math.Ceiling((double)TotalRecords / PageSize));
@@ -203,6 +250,13 @@ else
             .OrderBy(r => r)
             .ToList();
 
+        AvailableStatuses = AllExceptions_
+            .Where(e => !string.IsNullOrEmpty(e.Status))
+            .Select(e => e.Status!)
+            .Distinct()
+            .OrderBy(s => s)
+            .ToList();
+
         ApplyFilters();
         ApplyPagination();
     }
@@ -219,6 +273,11 @@ else
         if (!string.IsNullOrEmpty(SelectedRule))
         {
             FilteredExceptions = FilteredExceptions.Where(e => e.RuleDescription == SelectedRule).ToList();
+        }
+
+        if (SelectedStatuses.Count > 0)
+        {
+            FilteredExceptions = FilteredExceptions.Where(e => SelectedStatuses.Contains(e.Status)).ToList();
         }
     }
 
@@ -252,21 +311,42 @@ else
         }
     }
 
-    private async Task OnClassFilterChanged(ChangeEventArgs e)
+    private void FilterByClass(string? className)
     {
-        SelectedClass = e.Value?.ToString() ?? "";
+        SelectedClass = className ?? "";
         CurrentPage = 1;
         ApplyFilters();
         ApplyPagination();
-        await InvokeAsync(StateHasChanged);
     }
 
-    private async Task OnRuleFilterChanged(ChangeEventArgs e)
+    private void FilterByRule(string? rule)
     {
-        SelectedRule = e.Value?.ToString() ?? "";
+        SelectedRule = rule ?? "";
         CurrentPage = 1;
         ApplyFilters();
         ApplyPagination();
-        await InvokeAsync(StateHasChanged);
+    }
+
+    private void ToggleStatusFilter(string status)
+    {
+        if (SelectedStatuses.Contains(status))
+        {
+            SelectedStatuses.Remove(status);
+        }
+        else
+        {
+            SelectedStatuses.Add(status);
+        }
+        CurrentPage = 1;
+        ApplyFilters();
+        ApplyPagination();
+    }
+
+    private void ClearStatusFilters()
+    {
+        SelectedStatuses.Clear();
+        CurrentPage = 1;
+        ApplyFilters();
+        ApplyPagination();
     }
 }

@@ -55,17 +55,30 @@ else
         </div>
     </div>
 
+    @if (IsViewMode)
+    {
+        <div class="alert alert-info mb-4">
+            <i class="bi bi-info-circle"></i> This exception is in <strong>View Mode</strong> (Status: @CurrentStatic.Status). Editing is restricted for this status.
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-success mb-4">
+            <i class="bi bi-pencil"></i> This exception is in <strong>Edit Mode</strong> (Status: @CurrentStatic.Status). You can take action on this exception.
+        </div>
+    }
+
     <EditForm Model="@this" OnValidSubmit="() => SubmitAction(SelectedAction)">
         <div class="mb-3">
             <label for="notes" class="form-label">Notes</label>
-            <textarea id="notes" class="form-control" rows="6" @bind="@Notes" disabled="@IsDisabled"></textarea>
+            <textarea id="notes" class="form-control" rows="6" @bind="@Notes" disabled="@(IsDisabled || IsViewMode)"></textarea>
         </div>
 
         <div class="mb-3 d-flex gap-2">
-            <button type="button" class="btn btn-outline-success" disabled="@IsDisabled" @onclick='() => SubmitAction("Checked")'>Mark as Checked</button>
-            <button type="button" class="btn btn-outline-warning" disabled="@IsDisabled" @onclick='() => SubmitAction("Changed")'>Mark as Changed</button>
-            <button type="button" class="btn btn-outline-primary" disabled="@IsDisabled" @onclick='() => SubmitAction("Assigned")'>Assign</button>
-            <button type="button" class="btn btn-outline-secondary" disabled="@IsDisabled" @onclick='() => SubmitAction("Deferred")'>Defer</button>
+            <button type="button" class="btn btn-outline-success" disabled="@(IsDisabled || IsViewMode)" @onclick='() => SubmitAction("Checked")'>Mark as Checked</button>
+            <button type="button" class="btn btn-outline-warning" disabled="@(IsDisabled || IsViewMode)" @onclick='() => SubmitAction("Changed")'>Mark as Changed</button>
+            <button type="button" class="btn btn-outline-primary" disabled="@(IsDisabled || IsViewMode)" @onclick='() => SubmitAction("Assigned")'>Assign</button>
+            <button type="button" class="btn btn-outline-secondary" disabled="@(IsDisabled || IsViewMode)" @onclick='() => SubmitAction("Deferred")'>Defer</button>
         </div>
     </EditForm>
 
@@ -110,6 +123,25 @@ else
     private string Notes = string.Empty;
     private bool IsDisabled = false;
     private string SelectedAction;
+    private bool IsViewMode => GetIsViewMode();
+
+    // View Mode statuses
+    private readonly HashSet<string> ViewModeStatuses = new()
+    {
+        "Disappeared",
+        "Checked",
+        "Changed"
+    };
+
+    // Edit Mode statuses
+    private readonly HashSet<string> EditModeStatuses = new()
+    {
+        "New",
+        "Reappeared",
+        "Deferred",
+        "Untoleranced",
+        "Reflagged"
+    };
 
     protected override async Task OnInitializedAsync()
     {
@@ -117,15 +149,22 @@ else
         CurrentStatic = History.OrderByDescending(h => h.CreatedDate).FirstOrDefault();
     }
 
+    private bool GetIsViewMode()
+    {
+        if (CurrentStatic == null) return false;
+        return ViewModeStatuses.Contains(CurrentStatic.Status);
+    }
+
     private async Task SubmitAction(string action)
     {
-        if (IsDisabled) return;
+        if (IsDisabled || IsViewMode) return;
 
         SelectedAction = action;
         await ExceptionService.UpdateExceptionStatusAsync(RuleID, BusinessID, Environment.UserName, Notes, action);
 
         IsDisabled = true;
         History = await ExceptionService.GetExceptionHistoryAsync(RuleID, BusinessID);
+        CurrentStatic = History.OrderByDescending(h => h.CreatedDate).FirstOrDefault();
         StateHasChanged();
     }
 }
