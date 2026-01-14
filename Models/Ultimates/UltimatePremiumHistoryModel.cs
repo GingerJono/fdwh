@@ -17,7 +17,7 @@ namespace sandboxapp.Models.Ultimates
         public int RecordCount { get; set; }
 
         // Aggregated totals for this update
-        public decimal? TotalUltimateGrossPremium { get; set; }
+        public decimal? TotalUltimatePremium { get; set; }
         public decimal? TotalUltimateNetPremium { get; set; }
         public decimal? TotalUltimateRIPs { get; set; }
         public decimal? TotalUltimatePC { get; set; }

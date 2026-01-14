@@ -17,7 +17,7 @@ namespace sandboxapp.Models.Ultimates
         public List<UltimatePremiumRecordModel> RemovedRecords { get; set; } = new();
 
         // Summary totals (calculated from Records)
-        public decimal TotalUltimateGrossPremium => Records.Sum(r => r.UltimateGrossPremium ?? 0);
+        public decimal TotalUltimatePremium => Records.Sum(r => r.UltimatePremium ?? 0);
         public decimal TotalUltimateNetPremium => Records.Sum(r => r.UltimateNetPremium ?? 0);
         public decimal TotalUltimateRIPs => Records.Sum(r => r.UltimateRIPs ?? 0);
         public decimal TotalUltimatePC => Records.Sum(r => r.UltimatePC ?? 0);

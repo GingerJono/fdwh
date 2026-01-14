@@ -15,7 +15,7 @@ namespace sandboxapp.Models.Ultimates
         public int UpdateCount { get; set; } // Number of times this Class/YOA has been updated
 
         // Aggregated totals (from current snapshot)
-        public decimal? TotalUltimateGrossPremium { get; set; }
+        public decimal? TotalUltimatePremium { get; set; }
         public decimal? TotalUltimateNetPremium { get; set; }
         public decimal? TotalUltimateRIPs { get; set; }
         public decimal? TotalUltimatePC { get; set; }
