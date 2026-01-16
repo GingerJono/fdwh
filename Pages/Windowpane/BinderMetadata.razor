@@ -27,9 +27,9 @@
     .filter-btn:hover:not(.active) {
         background-color: #e2e8f0;
     }
-    .binder-table { font-size: 0.9rem; }
+    .binder-table { font-size: 0.85rem; }
     .binder-table th, .binder-table td {
-        padding: 0.5rem;
+        padding: 0.4rem;
         vertical-align: middle;
     }
     .toggle-switch {
@@ -71,13 +71,31 @@
     input:checked + .toggle-slider:before {
         transform: translateX(26px);
     }
+    .info-box {
+        background-color: #e3f2fd;
+        border-left: 4px solid #2196f3;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        border-radius: 0.25rem;
+    }
+    .info-box p {
+        margin-bottom: 0.5rem;
+    }
+    .info-box p:last-child {
+        margin-bottom: 0;
+    }
 </style>
 
 <div class="row mt-3 mb-3">
     <div class="col">
         <h3>Binder Metadata</h3>
-        <p class="text-muted">Manage binder metadata and claims BDX requirements</p>
     </div>
+</div>
+
+<!-- Information Box -->
+<div class="info-box">
+    <p><strong>This page is to capture supplementary data on Binders.</strong></p>
+    <p><strong>Requires Claims Bdx:</strong> please untick this box for any Binders where we would never expect to receive a Claims Bordereau.</p>
 </div>
 
 <!-- Filters -->
@@ -121,6 +139,10 @@ else
                         <th>Class</th>
                         <th>YOA</th>
                         <th>Requires Claims BDX</th>
+                        <th>Claims BDX in VIPR</th>
+                        <th>Block SCMs</th>
+                        <th>UMZZs</th>
+                        <th>Comments</th>
                         <th>Last Updated</th>
                         <th>Updated By</th>
                         <th>Action</th>
@@ -144,6 +166,17 @@ else
                                 else
                                 {
                                     <span class="badge bg-secondary">Not Set</span>
+                                }
+                            </td>
+                            <td>@(item.ClaimsBdxInVIPR ?? 0)</td>
+                            <td>@(item.BlockSCMs ?? 0)</td>
+                            <td>@(item.UMZZs ?? 0)</td>
+                            <td>
+                                @if (!string.IsNullOrWhiteSpace(item.Comments))
+                                {
+                                    <span title="@item.Comments">
+                                        @(item.Comments.Length > 30 ? item.Comments.Substring(0, 30) + "..." : item.Comments)
+                                    </span>
                                 }
                             </td>
                             <td>@item.LastUpdated?.ToString("dd/MM/yyyy HH:mm")</td>
@@ -178,7 +211,7 @@ else
 @if (showModal)
 {
     <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Edit Binder Metadata</h5>
@@ -187,22 +220,41 @@ else
                 <div class="modal-body">
                     @if (currentItem != null)
                     {
-                        <div class="mb-3">
-                            <label class="form-label"><strong>Policy Reference:</strong></label>
-                            <div class="form-control-plaintext">@currentItem.PolicyRef</div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label"><strong>Policy Reference:</strong></label>
+                                <div class="form-control-plaintext">@currentItem.PolicyRef</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><strong>Year of Account:</strong></label>
+                                <div class="form-control-plaintext">@currentItem.Yoa</div>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label"><strong>Assured Name:</strong></label>
-                            <div class="form-control-plaintext">@currentItem.AssuredName</div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label"><strong>Assured Name:</strong></label>
+                                <div class="form-control-plaintext">@currentItem.AssuredName</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><strong>Class:</strong></label>
+                                <div class="form-control-plaintext">@currentItem.Class</div>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label"><strong>Class:</strong></label>
-                            <div class="form-control-plaintext">@currentItem.Class</div>
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label"><strong>Claims BDX in VIPR:</strong></label>
+                                <div class="form-control-plaintext">@(currentItem.ClaimsBdxInVIPR ?? 0)</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label"><strong>Block SCMs:</strong></label>
+                                <div class="form-control-plaintext">@(currentItem.BlockSCMs ?? 0)</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label"><strong>UMZZs:</strong></label>
+                                <div class="form-control-plaintext">@(currentItem.UMZZs ?? 0)</div>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label"><strong>Year of Account:</strong></label>
-                            <div class="form-control-plaintext">@currentItem.Yoa</div>
-                        </div>
+                        <hr />
                         <div class="mb-3">
                             <label class="form-label"><strong>Requires Claims BDX:</strong></label>
                             <div class="d-flex align-items-center">
@@ -214,6 +266,10 @@ else
                                     <span class="toggle-slider"></span>
                                 </label>
                             </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label"><strong>Comments:</strong></label>
+                            <textarea class="form-control" rows="3" @bind="editComments" placeholder="Enter comments..."></textarea>
                         </div>
                     }
                 </div>
@@ -239,7 +295,7 @@ else
 @code {
     private IEnumerable<BindersMetadataItem> binderMetadata;
     private List<string> availableClasses = new List<string> { "All", "CA", "EN", "HC", "MR", "PF", "PI", "PL", "PO", "PR", "PS", "SI" };
-    private List<string> availableYears = new List<string>();
+    private List<string> availableYears = new List<string> { "All", "2024", "2025", "2026" };
     private string selectedClass = "All";
     private string selectedYear = "All";
 
@@ -247,6 +303,7 @@ else
     private bool isSubmitting = false;
     private BindersMetadataItem currentItem;
     private int editRequiresClaimsBdx = 0;
+    private string editComments = "";
 
     private IEnumerable<BindersMetadataItem> FilteredBinderMetadata
     {
@@ -281,16 +338,6 @@ else
     private async Task LoadData()
     {
         binderMetadata = (await WindowpaneService.GetBindersMetadataAsync()).ToList();
-
-        // Extract unique years from data
-        availableYears = new List<string> { "All" };
-        var years = binderMetadata
-            .Where(i => i.Yoa.HasValue)
-            .Select(i => i.Yoa.Value.ToString())
-            .Distinct()
-            .OrderByDescending(y => y)
-            .ToList();
-        availableYears.AddRange(years);
     }
 
     private void SelectClass(string cls)
@@ -307,6 +354,7 @@ else
     {
         currentItem = item;
         editRequiresClaimsBdx = item.RequiresClaimsBdx ?? 0;
+        editComments = item.Comments ?? "";
         showModal = true;
     }
 
@@ -314,6 +362,7 @@ else
     {
         showModal = false;
         currentItem = null;
+        editComments = "";
     }
 
     private void ToggleRequiresClaimsBdx(ChangeEventArgs e)
@@ -335,7 +384,8 @@ else
             {
                 PolicyRef = currentItem.PolicyRef,
                 RequiresClaimsBdx = editRequiresClaimsBdx,
-                UpdatedBy = username
+                UpdatedBy = username,
+                Comments = editComments
             };
 
             await WindowpaneService.UpdateBindersMetadataAsync(request);

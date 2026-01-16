@@ -502,7 +502,8 @@ namespace Sandbox.Services
 				{
 					PolicyRef = request.PolicyRef,
 					RequiresClaimsBdx = request.RequiresClaimsBdx,
-					UpdatedBy = request.UpdatedBy
+					UpdatedBy = request.UpdatedBy,
+					Comments = request.Comments
 				},
 				commandType: CommandType.StoredProcedure
 			);
