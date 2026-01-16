@@ -483,6 +483,30 @@ namespace Sandbox.Services
 				commandType: CommandType.StoredProcedure
 			);
 		}
+
+		public async Task<IEnumerable<BindersMetadataItem>> GetBindersMetadataAsync()
+		{
+			using var db = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
+			return await db.QueryAsync<BindersMetadataItem>(
+				"Windowpane.spGetBindersMetadata",
+				commandType: CommandType.StoredProcedure
+			);
+		}
+
+		public async Task UpdateBindersMetadataAsync(UpdateBindersMetadataRequest request)
+		{
+			using var db = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
+			await db.ExecuteAsync(
+				"Windowpane.spUpdateBindersMetadata",
+				new
+				{
+					PolicyRef = request.PolicyRef,
+					RequiresClaimsBdx = request.RequiresClaimsBdx,
+					UpdatedBy = request.UpdatedBy
+				},
+				commandType: CommandType.StoredProcedure
+			);
+		}
 		#endregion
 	}
 	public class CytoraCheckingFilterState
