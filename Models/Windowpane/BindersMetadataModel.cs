@@ -1,4 +1,4 @@
-namespace sandboxapp.Models.Windowpane
+namespace Sandbox.Models.Windowpane
 {
     public class BindersMetadataItem
     {
