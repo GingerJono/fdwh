@@ -147,6 +147,14 @@ public class MenuDataServiceSandbox
 					active: false,
 					dirChange: false
 				),
+				new MainMenuItems (
+					path: "BinderMetadata",
+					type: "link",
+					title: "Binder Metadata",
+					selected: false,
+					active: false,
+					dirChange: false
+				),
 			}
 		),
 		new MainMenuItems(
