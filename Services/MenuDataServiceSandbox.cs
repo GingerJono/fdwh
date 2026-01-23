@@ -239,7 +239,7 @@ public class MenuDataServiceSandbox
 			children: new MainMenuItems[]
 			{
 				new MainMenuItems(
-					path: "Ultimates/Premium",
+					path: "Ultimates/UltimatePremium",
 					type: "link",
 					title: "Premium",
 					selected: false,
