@@ -148,14 +148,201 @@ else
         <p>No Premium records match the selected filters.</p>
     </div>
 }
-<!-- Edit Modal Component -->
-@if (showEditModal)
+<!-- Edit Modal (Inline) -->
+@if (showEditModal && selectedPremium != null)
 {
-    <PremiumEditModal
-        Premium="@selectedPremium"
-        IsNew="@isNewRecord"
-        OnClose="CloseEditModal"
-        OnSave="HandleSave" />
+    <!-- Full-screen modal overlay -->
+    <div class="modal-overlay" @onclick="HandleOverlayClick">
+        <div class="modal-container" @onclick:stopPropagation="true">
+            <div class="modal-header-custom">
+                <h3>Edit Premium: @selectedPremium.Class / @selectedPremium.ReservingClass / @selectedPremium.YOA</h3>
+                <button type="button" class="btn-close btn-close-white" @onclick="CloseEditModal"></button>
+            </div>
+
+            <div class="modal-body-custom">
+                <div class="container-fluid">
+                    <!-- Key Fields (read-only for existing) -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="border-bottom pb-2">Identification</h5>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Class</label>
+                            <input type="text" class="form-control" value="@selectedPremium.Class" disabled />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Reserving Class</label>
+                            <input type="text" class="form-control" value="@selectedPremium.ReservingClass" disabled />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Year of Account</label>
+                            <input type="number" class="form-control" value="@selectedPremium.YOA" disabled />
+                        </div>
+                    </div>
+
+                    <!-- Selection Fields -->
+                    <div class="row mb-4 mt-5">
+                        <div class="col-12">
+                            <h5 class="border-bottom pb-2">Selection</h5>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Selection <span class="text-danger">*</span></label>
+                            <select class="form-select" @bind="selectedPremium.Selection" required>
+                                <option value="Plan">Plan</option>
+                                <option value="Written">Written</option>
+                                <option value="Signed">Signed</option>
+                                <option value="Manual">Manual</option>
+                            </select>
+                            <small class="form-text text-muted">
+                                Determines which set of values to use (Plan, Written, Signed, or Manual entry)
+                            </small>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Gross/Net Entry <span class="text-danger">*</span></label>
+                            <select class="form-select" @bind="selectedPremium.GrossNetEntry" required>
+                                <option value="Gross">Gross</option>
+                                <option value="Net">Net</option>
+                            </select>
+                            <small class="form-text text-muted">
+                                Specifies whether entered values represent Gross or Net premium
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Comments -->
+                    <div class="row mb-4 mt-5">
+                        <div class="col-12">
+                            <h5 class="border-bottom pb-2">Comments</h5>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <label class="form-label fw-bold">Update Comments</label>
+                            <textarea class="form-control" rows="4" @bind="selectedPremium.UpdateComments"
+                                      placeholder="Optional comments about this update..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Audit Info (Read-only) -->
+                    <div class="row mb-4 mt-5">
+                        <div class="col-12">
+                            <h5 class="border-bottom pb-2">Audit Information</h5>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Version</label>
+                            <input type="number" class="form-control" value="@selectedPremium.Version" disabled />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Last Updated</label>
+                            <input type="text" class="form-control" value="@selectedPremium.DateUpdated.ToString("yyyy-MM-dd HH:mm")" disabled />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Updated By</label>
+                            <input type="text" class="form-control" value="@selectedPremium.UpdatedBy" disabled />
+                        </div>
+                    </div>
+
+                    <!-- Error Message -->
+                    @if (!string.IsNullOrEmpty(modalErrorMessage))
+                    {
+                        <div class="alert alert-danger" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>@modalErrorMessage
+                        </div>
+                    }
+
+                    <!-- Success Message -->
+                    @if (!string.IsNullOrEmpty(modalSuccessMessage))
+                    {
+                        <div class="alert alert-success" role="alert">
+                            <i class="bi bi-check-circle-fill me-2"></i>@modalSuccessMessage
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="modal-footer-custom">
+                <button type="button" class="btn btn-secondary" @onclick="CloseEditModal">Cancel</button>
+                <button type="button" class="btn btn-primary" @onclick="SavePremium" disabled="@isSaving">
+                    @if (isSaving)
+                    {
+                        <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                    }
+                    <i class="bi bi-save me-2"></i>Save
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1050;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-container {
+            background: white;
+            border-radius: 8px;
+            width: calc(100vw - 80px);
+            max-width: 1400px;
+            height: calc(100vh - 80px);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header-custom {
+            padding: 1.5rem 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header-custom h3 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .modal-body-custom {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        .modal-footer-custom {
+            padding: 1.5rem 2rem;
+            border-top: 1px solid #dee2e6;
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+    </style>
 }
 
 @code {
@@ -167,8 +354,10 @@ else
     private int? selectedYOA = null;
     private bool isLoading = true;
     private bool showEditModal = false;
-    private bool isNewRecord = false;
     private PremiumModel? selectedPremium;
+    private bool isSaving = false;
+    private string? modalErrorMessage;
+    private string? modalSuccessMessage;
 
     protected override async Task OnInitializedAsync()
     {
@@ -268,14 +457,73 @@ else
     {
         showEditModal = false;
         selectedPremium = null;
+        modalErrorMessage = null;
+        modalSuccessMessage = null;
+        isSaving = false;
         StateHasChanged();
     }
 
-    private async Task HandleSave()
+    private async Task HandleOverlayClick()
     {
-        showEditModal = false;
-        await LoadData();
+        // Close modal when clicking outside
+        CloseEditModal();
+    }
+
+    private async Task SavePremium()
+    {
+        if (selectedPremium == null) return;
+
+        modalErrorMessage = null;
+        modalSuccessMessage = null;
+
+        // Validation
+        if (string.IsNullOrWhiteSpace(selectedPremium.Class))
+        {
+            modalErrorMessage = "Class is required";
+            StateHasChanged();
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(selectedPremium.ReservingClass))
+        {
+            modalErrorMessage = "Reserving Class is required";
+            StateHasChanged();
+            return;
+        }
+
+        if (selectedPremium.YOA < 1900 || selectedPremium.YOA > 2100)
+        {
+            modalErrorMessage = "Year of Account must be between 1900 and 2100";
+            StateHasChanged();
+            return;
+        }
+
+        isSaving = true;
         StateHasChanged();
+
+        try
+        {
+            await UltimatesService.SavePremium(selectedPremium);
+            modalSuccessMessage = "Premium saved successfully!";
+            StateHasChanged();
+
+            await Task.Delay(1000);
+
+            showEditModal = false;
+            await LoadData();
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error saving Premium");
+            modalErrorMessage = $"Error saving: {ex.Message}";
+            StateHasChanged();
+        }
+        finally
+        {
+            isSaving = false;
+            StateHasChanged();
+        }
     }
 
     private string GetSelectionBadgeColor(string selection) => selection switch
