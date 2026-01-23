@@ -245,7 +245,7 @@ else
                     <div class="row mb-3">
                         <div class="col-12">
                             <label class="form-label fw-bold">Update Comments</label>
-                            <textarea class="form-control" rows="4" @bind="selectedPremium.UpdateComments" @bind:event="oninput" @oninput="OnFormChanged"
+                            <textarea class="form-control" rows="4" @bind="selectedPremium.UpdateComments" @bind:event="oninput" @bind:after="OnFormChanged"
                                       placeholder="Optional comments about this update..."></textarea>
                         </div>
                     </div>
