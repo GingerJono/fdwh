@@ -35,9 +35,14 @@ namespace sandboxapp.Models.Ultimates
         [Required]
         public string ValueType { get; set; } = "Value"; // 'Written', 'Signed', 'Plan', 'Value'
 
+        // Gross or Net indicator
+        [Required]
+        public string GrossNet { get; set; } = "Gross"; // 'Gross' or 'Net'
+
         // Ultimate Premium Fields
-        public decimal? UltimateGrossPremium { get; set; }
-        public decimal? UltimateNetPremium { get; set; }
+        public decimal? UltimatePremium { get; set; } // Renamed from UltimateGrossPremium - represents either Gross or Net based on GrossNet
+        public decimal? UltimateNetPremium { get; set; } // Calculated based on UltimatePremium and Deductions
+        public decimal? Deductions { get; set; } // Percentage stored as decimal (e.g., 0.15 for 15%)
         public decimal? UltimateRIPs { get; set; } // Reinstatement Premiums
         public decimal? UltimatePC { get; set; } // Profit Commission
 

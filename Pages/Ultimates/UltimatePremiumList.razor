@@ -375,7 +375,7 @@ else
                 YOA = g.Key.YOA,
                 RecordCount = g.Count(),
                 UpdateCount = g.Select(r => r.UpdateID).Distinct().Count(),
-                TotalGrossPremium = g.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateGrossPremium, r.Currency)),
+                TotalGrossPremium = g.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimatePremium, r.Currency)),
                 TotalNetPremium = g.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateNetPremium, r.Currency)),
                 TotalRIPs = g.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateRIPs, r.Currency)),
                 TotalPC = g.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimatePC, r.Currency)),
@@ -390,7 +390,7 @@ else
     private decimal? GetTotalGrossPremium()
     {
         if (allRecords == null) return 0;
-        return allRecords.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateGrossPremium, r.Currency));
+        return allRecords.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimatePremium, r.Currency));
     }
 
     private decimal? GetTotalNetPremium()
@@ -435,7 +435,7 @@ else
 
     private decimal? GetFilteredTotalGrossPremium()
     {
-        return GetFilteredRecords().Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateGrossPremium, r.Currency));
+        return GetFilteredRecords().Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimatePremium, r.Currency));
     }
 
     private decimal? GetFilteredTotalNetPremium()
