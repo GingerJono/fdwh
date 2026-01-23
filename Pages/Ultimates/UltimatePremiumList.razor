@@ -1,29 +1,28 @@
-@page "/Ultimates/Premium"
+@page "/Ultimates/UltimatePremium"
 @using sandboxapp.Models.Ultimates
 @using sandboxapp.Services
-@using sandboxapp.Utilities
 @inject UltimatesService UltimatesService
-@inject FxConversionService FxConversion
-@inject CurrencySettingsService CurrencySettings
 @inject NavigationManager NavigationManager
 @inject ILogger<UltimatePremiumList> Logger
 
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="Ultimates/Premium">ULTIMATES</a></li>
+        <li class="breadcrumb-item"><a href="/Ultimates/UltimatePremium">ULTIMATES</a></li>
         <li class="breadcrumb-item active" aria-current="page">PREMIUM</li>
     </ol>
 </nav>
 
 <div class="row mb-2">
     <div class="col">
-        <h3 class="mb-1">Ultimate Premium Tracking</h3>
-        <p class="text-muted mb-0" style="font-size: 0.85rem;">View and edit underwriter selections of Ultimate Premium by Class and YOA</p>
+        <h1>Ultimate Premium Tracking</h1>
+        <p class="text-muted">View and edit ultimate premium selections by Class, Reserving Class, and YOA</p>
+    </div>
+    <div class="col-auto">
+        <button type="button" class="btn btn-primary" @onclick="OpenCreateModal">
+            <i class="bi bi-plus-circle"></i> Create New
+        </button>
     </div>
 </div>
-
-<!-- Currency Settings Component -->
-<UltimateCurrencySettings OnSettingsChanged="OnCurrencySettingsChanged" />
 
 @if (isLoading)
 {
@@ -31,170 +30,15 @@
         <div class="spinner-border text-primary" role="status">
             <span class="visually-hidden">Loading...</span>
         </div>
-        <p class="mt-2">Loading Ultimate Premium data...</p>
+        <p class="mt-2">Loading Premium data...</p>
     </div>
 }
-else if (allRecords != null && allRecords.Any())
+else if (premiumRecords != null && premiumRecords.Any())
 {
-    <!-- Summary Cards (Left) and Heatmap (Right) -->
-    <div class="row mb-2">
-        <!-- Left: Summary Cards (6 cards in 2 columns) -->
-        <div class="col-md-6">
-            <div class="row g-2">
-                <div class="col-md-6">
-                    <div class="card border-primary h-100">
-                        <div class="card-body text-center py-2 px-2">
-                            <p class="text-muted text-uppercase mb-1" style="font-size: 0.7rem;">@GetCurrencySymbol() Gross Premium</p>
-                            <h4 class="mb-0 text-primary" style="font-size: 1.5rem;">@FormatCurrencyConverted(GetTotalGrossPremium())</h4>
-                            <small class="text-muted" style="font-size: 0.65rem;">@CurrencySettings.DisplayCurrency</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card border-success h-100">
-                        <div class="card-body text-center py-2 px-2">
-                            <p class="text-muted text-uppercase mb-1" style="font-size: 0.7rem;">@GetCurrencySymbol() Net Premium</p>
-                            <h4 class="mb-0 text-success" style="font-size: 1.5rem;">@FormatCurrencyConverted(GetTotalNetPremium())</h4>
-                            <small class="text-muted" style="font-size: 0.65rem;">@CurrencySettings.DisplayCurrency</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card border-warning h-100">
-                        <div class="card-body text-center py-2 px-2">
-                            <p class="text-muted text-uppercase mb-1" style="font-size: 0.7rem;">@GetCurrencySymbol() RIPs</p>
-                            <h4 class="mb-0 text-warning" style="font-size: 1.5rem;">@FormatCurrencyConverted(GetTotalRIPs())</h4>
-                            <small class="text-muted" style="font-size: 0.65rem;">@CurrencySettings.DisplayCurrency</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card border-info h-100">
-                        <div class="card-body text-center py-2 px-2">
-                            <p class="text-muted text-uppercase mb-1" style="font-size: 0.7rem;">@GetCurrencySymbol() PC</p>
-                            <h4 class="mb-0 text-info" style="font-size: 1.5rem;">@FormatCurrencyConverted(GetTotalPC())</h4>
-                            <small class="text-muted" style="font-size: 0.65rem;">@CurrencySettings.DisplayCurrency</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card border-secondary h-100">
-                        <div class="card-body text-center py-2 px-2">
-                            <p class="text-muted text-uppercase mb-1" style="font-size: 0.7rem;">Latest Update</p>
-                            <h4 class="mb-0 text-secondary" style="font-size: 1.5rem;">@FormatDate(GetLatestUpdateDate())</h4>
-                            <small class="text-muted" style="font-size: 0.65rem;">Most recent change</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card border-dark h-100">
-                        <div class="card-body text-center py-2 px-2">
-                            <p class="text-muted text-uppercase mb-1" style="font-size: 0.7rem;">Total Updates</p>
-                            <h4 class="mb-0 text-dark" style="font-size: 1.5rem;">@GetTotalUpdateCount()</h4>
-                            <small class="text-muted" style="font-size: 0.65rem;">All submissions</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Right: Heatmap -->
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header bg-success text-white py-1">
-                    <h6 class="mb-0" style="font-size: 0.85rem;">Gross Premium Heatmap (millions @CurrencySettings.DisplayCurrency)</h6>
-                </div>
-                <div class="card-body p-1">
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-sm mb-0" style="font-size: 0.75rem;">
-                            <thead>
-                                <tr>
-                                    <th class="text-center align-middle" style="padding: 2px 4px;">Class</th>
-                                    @foreach (var yoa in availableYOAs)
-                                    {
-                                        <th class="text-center align-middle" style="padding: 2px 4px;">@yoa</th>
-                                    }
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var className in availableClasses)
-                                {
-                                    <tr>
-                                        <td class="text-center fw-bold align-middle" style="padding: 2px 4px;">@className</td>
-                                        @foreach (var yoa in availableYOAs)
-                                        {
-                                            var cellData = GetHeatmapCellData(className, yoa);
-                                            var bgColor = GetHeatmapColor(cellData.GrossPremium);
-                                            var textColor = GetHeatmapTextColor(cellData.GrossPremium);
-                                            var tooltip = GetTooltipContent(cellData);
-
-                                            <td class="text-center align-middle"
-                                                style="padding: 2px 4px; background-color: @bgColor; color: @textColor; cursor: pointer;"
-                                                title="@tooltip"
-                                                data-bs-toggle="tooltip"
-                                                data-bs-html="true"
-                                                @onclick="@(() => NavigateToEdit(className, yoa))">
-                                                @FormatMillions(cellData.GrossPremium)
-                                            </td>
-                                        }
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Filters -->
-    <div class="card mb-2">
-        <div class="card-header bg-light py-1">
-            <h6 class="mb-0" style="font-size: 0.85rem;">Filters</h6>
-        </div>
-        <div class="card-body py-2 px-3">
-            <!-- YOA Filter Pills -->
-            <div class="mb-2">
-                <label class="form-label fw-bold mb-1" style="font-size: 0.8rem;">Year of Account:</label>
-                <div class="d-flex flex-wrap gap-1">
-                    <button class="btn btn-sm @(selectedYOA == null ? "btn-primary" : "btn-outline-primary")" style="padding: 0.15rem 0.5rem; font-size: 0.75rem;"
-                            @onclick="() => FilterByYOA(null)">
-                        All YOAs
-                    </button>
-                    @foreach (var yoa in availableYOAs)
-                    {
-                        <button class="btn btn-sm @(selectedYOA == yoa ? "btn-primary" : "btn-outline-primary")" style="padding: 0.15rem 0.5rem; font-size: 0.75rem;"
-                                @onclick="() => FilterByYOA(yoa)">
-                            @yoa
-                        </button>
-                    }
-                </div>
-            </div>
-
-            <!-- Class Filter Pills -->
-            <div class="mb-0">
-                <label class="form-label fw-bold mb-1" style="font-size: 0.8rem;">Class:</label>
-                <div class="d-flex flex-wrap gap-1">
-                    <button class="btn btn-sm @(selectedClass == null ? "btn-success" : "btn-outline-success")" style="padding: 0.15rem 0.5rem; font-size: 0.75rem;"
-                            @onclick="() => FilterByClass(null)">
-                        All Classes
-                    </button>
-                    @foreach (var className in availableClasses)
-                    {
-                        <button class="btn btn-sm @(selectedClass == className ? "btn-success" : "btn-outline-success")" style="padding: 0.15rem 0.5rem; font-size: 0.75rem;"
-                                @onclick="() => FilterByClass(className)">
-                            @className
-                        </button>
-                    }
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Data Table -->
     <div class="card">
-        <div class="card-header bg-primary text-white py-1">
-            <h6 class="mb-0" style="font-size: 0.85rem;">Class / YOA Summary (Converted to @CurrencySettings.DisplayCurrency)</h6>
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Premium Selections</h5>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -202,53 +46,38 @@ else if (allRecords != null && allRecords.Any())
                     <thead>
                         <tr>
                             <th>Class</th>
+                            <th>Reserving Class</th>
                             <th>YOA</th>
-                            <th class="text-end"># Records</th>
-                            <th class="text-end"># Updates</th>
-                            <th class="text-end">@GetCurrencySymbol() Total Gross Premium</th>
-                            <th class="text-end">@GetCurrencySymbol() Total Net Premium</th>
-                            <th class="text-end">@GetCurrencySymbol() Total RIPs</th>
-                            <th class="text-end">@GetCurrencySymbol() Total PC</th>
+                            <th>Version</th>
+                            <th>Selection</th>
+                            <th>Gross/Net</th>
                             <th>Last Updated</th>
                             <th>Updated By</th>
+                            <th>Comments</th>
                             <th class="text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var summary in GetFilteredSummaries())
+                        @foreach (var record in premiumRecords.OrderBy(r => r.Class).ThenBy(r => r.ReservingClass).ThenByDescending(r => r.YOA))
                         {
                             <tr>
-                                <td><strong>@summary.Class</strong></td>
-                                <td><strong>@summary.YOA</strong></td>
-                                <td class="text-end">@summary.RecordCount</td>
-                                <td class="text-end"><span class="badge bg-info">@summary.UpdateCount</span></td>
-                                <td class="text-end">@FormatCurrencyConverted(summary.TotalGrossPremium)</td>
-                                <td class="text-end">@FormatCurrencyConverted(summary.TotalNetPremium)</td>
-                                <td class="text-end">@FormatCurrencyConverted(summary.TotalRIPs)</td>
-                                <td class="text-end">@FormatCurrencyConverted(summary.TotalPC)</td>
-                                <td>@FormatDate(summary.LastUpdatedDate)</td>
-                                <td>@summary.LastUpdatedBy</td>
+                                <td><strong>@record.Class</strong></td>
+                                <td><strong>@record.ReservingClass</strong></td>
+                                <td><strong>@record.YOA</strong></td>
+                                <td><span class="badge bg-info">@record.Version</span></td>
+                                <td><span class="badge bg-@GetSelectionBadgeColor(record.Selection)">@record.Selection</span></td>
+                                <td><span class="badge bg-secondary">@record.GrossNetEntry</span></td>
+                                <td>@FormatDate(record.DateUpdated)</td>
+                                <td>@record.UpdatedBy</td>
+                                <td>@(record.UpdateComments ?? "-")</td>
                                 <td class="text-center">
-                                    <a href="Ultimates/Premium/Edit/@summary.Class/@summary.YOA"
-                                       class="btn btn-sm btn-primary">
+                                    <button type="button" class="btn btn-sm btn-primary" @onclick="() => OpenEditModal(record)">
                                         <i class="bi bi-pencil"></i> Edit
-                                    </a>
+                                    </button>
                                 </td>
                             </tr>
                         }
                     </tbody>
-                    <tfoot>
-                        <tr class="table-secondary fw-bold">
-                            <td colspan="2">FILTERED TOTAL</td>
-                            <td class="text-end">@GetFilteredRecordCount()</td>
-                            <td class="text-end">@GetFilteredUpdateCount()</td>
-                            <td class="text-end">@FormatCurrencyConverted(GetFilteredTotalGrossPremium())</td>
-                            <td class="text-end">@FormatCurrencyConverted(GetFilteredTotalNetPremium())</td>
-                            <td class="text-end">@FormatCurrencyConverted(GetFilteredTotalRIPs())</td>
-                            <td class="text-end">@FormatCurrencyConverted(GetFilteredTotalPC())</td>
-                            <td colspan="3"></td>
-                        </tr>
-                    </tfoot>
                 </table>
             </div>
         </div>
@@ -257,58 +86,31 @@ else if (allRecords != null && allRecords.Any())
 else
 {
     <div class="alert alert-info">
-        <h5>No Ultimate Premium Data Found</h5>
-        <p>No Ultimate Premium data has been entered yet. Use the database scripts to populate initial data.</p>
+        <h5>No Premium Data Found</h5>
+        <p>No Premium data has been entered yet. Click "Create New" to add your first record.</p>
     </div>
 }
 
+<!-- Edit Modal Component -->
+@if (showEditModal)
+{
+    <PremiumEditModal
+        Premium="@selectedPremium"
+        IsNew="@isNewRecord"
+        OnClose="CloseEditModal"
+        OnSave="HandleSave" />
+}
+
 @code {
-    private List<UltimatePremiumRecordModel>? allRecords;
+    private List<PremiumListItemModel>? premiumRecords;
     private bool isLoading = true;
-
-    // Filter state
-    private int? selectedYOA = null;
-    private string? selectedClass = null;
-
-    // Available filter values
-    private List<int> availableYOAs = new();
-    private List<string> availableClasses = new();
-
-    // Summary class for display
-    private class ClassYOASummary
-    {
-        public string Class { get; set; } = string.Empty;
-        public int YOA { get; set; }
-        public int RecordCount { get; set; }
-        public int UpdateCount { get; set; }
-        public decimal? TotalGrossPremium { get; set; }
-        public decimal? TotalNetPremium { get; set; }
-        public decimal? TotalRIPs { get; set; }
-        public decimal? TotalPC { get; set; }
-        public DateTime? LastUpdatedDate { get; set; }
-        public string? LastUpdatedBy { get; set; }
-    }
+    private bool showEditModal = false;
+    private bool isNewRecord = false;
+    private PremiumModel? selectedPremium;
 
     protected override async Task OnInitializedAsync()
     {
-        await InitializeServices();
         await LoadData();
-    }
-
-    private async Task InitializeServices()
-    {
-        try
-        {
-            // Initialize currency settings from localStorage
-            await CurrencySettings.InitializeAsync();
-
-            // Load FX rates for the selected rate set
-            await FxConversion.LoadRatesAsync();
-        }
-        catch (Exception ex)
-        {
-            Logger.LogError(ex, "Error initializing services");
-        }
     }
 
     private async Task LoadData()
@@ -316,20 +118,15 @@ else
         isLoading = true;
         try
         {
-            // Load all records from snapshot (latest version of each record)
-            var data = await UltimatesService.GetUltimatePremiumSnapshot();
-            allRecords = data.ToList();
+            var data = await UltimatesService.GetLatestPremiumList();
+            premiumRecords = data.ToList();
 
-            // Extract available filter values
-            availableYOAs = allRecords.Select(r => r.YOA).Distinct().OrderByDescending(y => y).ToList();
-            availableClasses = allRecords.Select(r => r.Class).Distinct().OrderBy(c => c).ToList();
-
-            Logger.LogInformation("Loaded {RecordCount} Ultimate Premium records", allRecords.Count);
+            Logger.LogInformation("Loaded {RecordCount} Premium records", premiumRecords.Count);
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Error loading Ultimate Premium list");
-            allRecords = new List<UltimatePremiumRecordModel>();
+            Logger.LogError(ex, "Error loading Premium list");
+            premiumRecords = new List<PremiumListItemModel>();
         }
         finally
         {
@@ -337,232 +134,56 @@ else
         }
     }
 
-    private async Task OnCurrencySettingsChanged()
+    private void OpenCreateModal()
     {
-        // Reload FX rates if needed (FxConversion already handles this via event subscription)
-        // Just trigger a re-render
-        StateHasChanged();
+        selectedPremium = new PremiumModel();
+        isNewRecord = true;
+        showEditModal = true;
     }
 
-    private void FilterByYOA(int? yoa)
+    private void OpenEditModal(PremiumListItemModel record)
     {
-        selectedYOA = yoa;
-    }
-
-    private void FilterByClass(string? className)
-    {
-        selectedClass = className;
-    }
-
-    private IEnumerable<UltimatePremiumRecordModel> GetFilteredRecords()
-    {
-        if (allRecords == null) return Enumerable.Empty<UltimatePremiumRecordModel>();
-
-        return allRecords
-            .Where(r => selectedYOA == null || r.YOA == selectedYOA)
-            .Where(r => selectedClass == null || r.Class == selectedClass);
-    }
-
-    private List<ClassYOASummary> GetFilteredSummaries()
-    {
-        var filtered = GetFilteredRecords();
-
-        return filtered
-            .GroupBy(r => new { r.Class, r.YOA })
-            .Select(g => new ClassYOASummary
-            {
-                Class = g.Key.Class,
-                YOA = g.Key.YOA,
-                RecordCount = g.Count(),
-                UpdateCount = g.Select(r => r.UpdateID).Distinct().Count(),
-                TotalGrossPremium = g.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimatePremium, r.Currency)),
-                TotalNetPremium = g.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateNetPremium, r.Currency)),
-                TotalRIPs = g.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateRIPs, r.Currency)),
-                TotalPC = g.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimatePC, r.Currency)),
-                LastUpdatedDate = g.Max(r => r.UpdateDate),
-                LastUpdatedBy = g.OrderByDescending(r => r.UpdateDate).FirstOrDefault()?.UpdatedBy
-            })
-            .OrderBy(s => s.Class)
-            .ThenByDescending(s => s.YOA)
-            .ToList();
-    }
-
-    private decimal? GetTotalGrossPremium()
-    {
-        if (allRecords == null) return 0;
-        return allRecords.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimatePremium, r.Currency));
-    }
-
-    private decimal? GetTotalNetPremium()
-    {
-        if (allRecords == null) return 0;
-        return allRecords.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateNetPremium, r.Currency));
-    }
-
-    private decimal? GetTotalRIPs()
-    {
-        if (allRecords == null) return 0;
-        return allRecords.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateRIPs, r.Currency));
-    }
-
-    private decimal? GetTotalPC()
-    {
-        if (allRecords == null) return 0;
-        return allRecords.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimatePC, r.Currency));
-    }
-
-    private DateTime? GetLatestUpdateDate()
-    {
-        if (allRecords == null) return null;
-        return allRecords.Max(r => r.UpdateDate);
-    }
-
-    private int GetTotalUpdateCount()
-    {
-        if (allRecords == null) return 0;
-        return allRecords.Select(r => r.UpdateID).Distinct().Count();
-    }
-
-    private int GetFilteredRecordCount()
-    {
-        return GetFilteredRecords().Count();
-    }
-
-    private int GetFilteredUpdateCount()
-    {
-        return GetFilteredRecords().Select(r => r.UpdateID).Distinct().Count();
-    }
-
-    private decimal? GetFilteredTotalGrossPremium()
-    {
-        return GetFilteredRecords().Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimatePremium, r.Currency));
-    }
-
-    private decimal? GetFilteredTotalNetPremium()
-    {
-        return GetFilteredRecords().Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateNetPremium, r.Currency));
-    }
-
-    private decimal? GetFilteredTotalRIPs()
-    {
-        return GetFilteredRecords().Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateRIPs, r.Currency));
-    }
-
-    private decimal? GetFilteredTotalPC()
-    {
-        return GetFilteredRecords().Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimatePC, r.Currency));
-    }
-
-    private string GetCurrencySymbol()
-    {
-        return CurrencySettings.DisplayCurrency == "GBP" ? "£" : "$";
-    }
-
-    private string FormatCurrencyConverted(decimal? value)
-    {
-        if (!value.HasValue) return "-";
-        return value.Value.ToString("N0");
-    }
-
-    private string FormatDate(DateTime? date)
-    {
-        if (!date.HasValue) return "-";
-        return date.Value.ToString("dd MMM yyyy");
-    }
-
-    // Heatmap helper class
-    private class HeatmapCellData
-    {
-        public decimal? GrossPremium { get; set; }
-        public decimal? NetPremium { get; set; }
-        public decimal? RIPs { get; set; }
-        public decimal? PC { get; set; }
-    }
-
-    private HeatmapCellData GetHeatmapCellData(string className, int yoa)
-    {
-        if (allRecords == null) return new HeatmapCellData();
-
-        var records = allRecords
-            .Where(r => r.Class == className && r.YOA == yoa)
-            .ToList();
-
-        if (!records.Any()) return new HeatmapCellData();
-
-        return new HeatmapCellData
+        // Convert list item to full model for editing
+        selectedPremium = new PremiumModel
         {
-            GrossPremium = records.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateGrossPremium, r.Currency)),
-            NetPremium = records.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateNetPremium, r.Currency)),
-            RIPs = records.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateRIPs, r.Currency)),
-            PC = records.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimatePC, r.Currency))
+            Class = record.Class,
+            ReservingClass = record.ReservingClass,
+            YOA = record.YOA,
+            Version = record.Version,
+            Selection = record.Selection,
+            GrossNetEntry = record.GrossNetEntry,
+            DateUpdated = record.DateUpdated,
+            UpdatedBy = record.UpdatedBy,
+            UpdateComments = record.UpdateComments
         };
+        isNewRecord = false;
+        showEditModal = true;
     }
 
-    private string GetHeatmapColor(decimal? value)
+    private void CloseEditModal()
     {
-        if (!value.HasValue || value.Value == 0) return "#ffffff";
-
-        // Get max value for normalization
-        var maxValue = allRecords?
-            .GroupBy(r => new { r.Class, r.YOA })
-            .Select(g => g.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateGrossPremium, r.Currency)))
-            .Max() ?? 0;
-
-        if (maxValue == 0) return "#ffffff";
-
-        // Calculate intensity (0 to 1)
-        var intensity = (double)(value.Value / maxValue);
-
-        // Green gradient: white (#ffffff) to dark green (#1e7e34)
-        // Using RGB interpolation
-        var r = (int)(255 - (255 - 30) * intensity);
-        var g = (int)(255 - (255 - 126) * intensity);
-        var b = (int)(255 - (255 - 52) * intensity);
-
-        return $"#{r:X2}{g:X2}{b:X2}";
+        showEditModal = false;
+        selectedPremium = null;
     }
 
-    private string GetHeatmapTextColor(decimal? value)
+    private async Task HandleSave()
     {
-        if (!value.HasValue) return "#000000";
-
-        // Convert to millions
-        var millions = value.Value / 1_000_000m;
-
-        // White text for values above 60 million
-        return millions > 60 ? "#ffffff" : "#000000";
+        showEditModal = false;
+        await LoadData();
     }
 
-    private void NavigateToEdit(string className, int yoa)
+    private string GetSelectionBadgeColor(string selection) => selection switch
     {
-        NavigationManager.NavigateTo($"Ultimates/Premium/Edit/{className}/{yoa}");
-    }
+        "Plan" => "primary",
+        "Written" => "success",
+        "Signed" => "warning",
+        "Manual" => "secondary",
+        _ => "secondary"
+    };
 
-    private string GetTooltipContent(HeatmapCellData cellData)
+    private string FormatDate(DateTime date)
     {
-        var symbol = GetCurrencySymbol();
-        return $@"
-Gross Premium: {symbol}{FormatMillions(cellData.GrossPremium)}m
-Net Premium: {symbol}{FormatMillions(cellData.NetPremium)}m
-RIPs: {symbol}{FormatMillions(cellData.RIPs)}m
-PC: {symbol}{FormatMillions(cellData.PC)}m";
-    }
-
-    private string FormatMillions(decimal? value)
-    {
-        if (!value.HasValue || value.Value == 0) return "-";
-        return (value.Value / 1_000_000m).ToString("F1");
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (!firstRender) return;
-
-        // Initialize Bootstrap tooltips
-        await Task.Run(() =>
-        {
-            // Tooltips are initialized by Bootstrap automatically with data-bs-toggle="tooltip"
-        });
+        return date.ToString("yyyy-MM-dd HH:mm");
     }
 }
 

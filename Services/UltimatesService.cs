@@ -6,8 +6,9 @@ using System.Data;
 namespace sandboxapp.Services
 {
     /// <summary>
-    /// Service for Ultimate Premium tracking operations
-    /// Handles CRUD operations for underwriter selections
+    /// Service for Premium tracking operations
+    /// Uses insert-only, versioned snapshot model
+    /// All operations via stored procedures
     /// </summary>
     public class UltimatesService
     {
@@ -26,72 +27,33 @@ namespace sandboxapp.Services
         }
 
         /// <summary>
-        /// Get complete snapshot of all Ultimate Premium data (current latest versions)
+        /// Get all latest Premium records
         /// </summary>
-        public async Task<IEnumerable<UltimatePremiumRecordModel>> GetUltimatePremiumSnapshot()
+        public async Task<IEnumerable<PremiumListItemModel>> GetLatestPremiumList()
         {
             try
             {
                 using var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
                 await connection.OpenAsync();
 
-                var result = await connection.QueryAsync<UltimatePremiumRecordModel>(
-                    "Ultimates.spGetUltimatePremiumSnapshot",
+                var result = await connection.QueryAsync<PremiumListItemModel>(
+                    "Ultimates.spGetLatestUltimatePremium",
                     commandType: CommandType.StoredProcedure
                 );
 
-                return result ?? Enumerable.Empty<UltimatePremiumRecordModel>();
+                return result ?? Enumerable.Empty<PremiumListItemModel>();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving Ultimate Premium snapshot");
+                _logger.LogError(ex, "Error retrieving latest Premium list");
                 throw;
             }
         }
 
         /// <summary>
-        /// Get Ultimate Premium data for a specific Class/YOA (for editing)
+        /// Get latest Premium record for a specific combination
         /// </summary>
-        public async Task<UltimatePremiumEditModel> GetUltimatePremiumByClassYOA(string className, int yoa)
-        {
-            try
-            {
-                using var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
-                await connection.OpenAsync();
-
-                var parameters = new DynamicParameters();
-                parameters.Add("@Class", className, DbType.String);
-                parameters.Add("@YOA", yoa, DbType.Int32);
-
-                var records = await connection.QueryAsync<UltimatePremiumRecordModel>(
-                    "Ultimates.spGetUltimatePremiumByClassYOA",
-                    parameters,
-                    commandType: CommandType.StoredProcedure
-                );
-
-                var model = new UltimatePremiumEditModel
-                {
-                    Class = className,
-                    YOA = yoa,
-                    Records = records?.ToList() ?? new List<UltimatePremiumRecordModel>(),
-                    UpdateDate = records?.Max(r => r.UpdateDate),
-                    UpdatedBy = records?.FirstOrDefault()?.UpdatedBy
-                };
-
-                return model;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving Ultimate Premium for Class={Class}, YOA={YOA}", className, yoa);
-                throw;
-            }
-        }
-
-        /// <summary>
-        /// Get historical updates for a specific Class/YOA
-        /// Returns aggregated summary by UpdateID
-        /// </summary>
-        public async Task<IEnumerable<UltimatePremiumHistoryModel>> GetUltimatePremiumHistory(string className, int yoa)
+        public async Task<PremiumModel?> GetLatestPremiumByKey(string className, string reservingClass, int yoa)
         {
             try
             {
@@ -100,27 +62,29 @@ namespace sandboxapp.Services
 
                 var parameters = new DynamicParameters();
                 parameters.Add("@Class", className, DbType.String);
+                parameters.Add("@ReservingClass", reservingClass, DbType.String);
                 parameters.Add("@YOA", yoa, DbType.Int32);
 
-                var result = await connection.QueryAsync<UltimatePremiumHistoryModel>(
-                    "Ultimates.spGetUltimatePremiumHistoryByClassYOA",
+                var result = await connection.QueryFirstOrDefaultAsync<PremiumModel>(
+                    "Ultimates.spGetLatestUltimatePremiumByClassRsvClassYOA",
                     parameters,
                     commandType: CommandType.StoredProcedure
                 );
 
-                return result ?? Enumerable.Empty<UltimatePremiumHistoryModel>();
+                return result;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving Ultimate Premium history for Class={Class}, YOA={YOA}", className, yoa);
+                _logger.LogError(ex, "Error retrieving Premium for Class={Class}, ReservingClass={ReservingClass}, YOA={YOA}",
+                    className, reservingClass, yoa);
                 throw;
             }
         }
 
         /// <summary>
-        /// Get detailed records for a specific UpdateID
+        /// Get new version number for a combination
         /// </summary>
-        public async Task<IEnumerable<UltimatePremiumRecordModel>> GetUltimatePremiumHistoryDetail(int updateId)
+        public async Task<int> GetNewVersionNumber(string className, string reservingClass, int yoa)
         {
             try
             {
@@ -128,52 +92,31 @@ namespace sandboxapp.Services
                 await connection.OpenAsync();
 
                 var parameters = new DynamicParameters();
-                parameters.Add("@UpdateID", updateId, DbType.Int32);
+                parameters.Add("@Class", className, DbType.String);
+                parameters.Add("@ReservingClass", reservingClass, DbType.String);
+                parameters.Add("@YOA", yoa, DbType.Int32);
+                parameters.Add("@NewVersionNo", dbType: DbType.Int32, direction: ParameterDirection.Output);
 
-                var result = await connection.QueryAsync<UltimatePremiumRecordModel>(
-                    "Ultimates.spGetUltimatePremiumHistoryDetail",
+                await connection.ExecuteAsync(
+                    "Ultimates.spGetNewVersionNo",
                     parameters,
                     commandType: CommandType.StoredProcedure
                 );
 
-                return result ?? Enumerable.Empty<UltimatePremiumRecordModel>();
+                return parameters.Get<int>("@NewVersionNo");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving Ultimate Premium history detail for UpdateID={UpdateID}", updateId);
+                _logger.LogError(ex, "Error getting new version number for Class={Class}, ReservingClass={ReservingClass}, YOA={YOA}",
+                    className, reservingClass, yoa);
                 throw;
             }
         }
 
         /// <summary>
-        /// Get list of all Class/YOA combinations with summary data
+        /// Save Premium record (insert-only)
         /// </summary>
-        public async Task<IEnumerable<UltimatePremiumSummaryModel>> GetUltimatePremiumList()
-        {
-            try
-            {
-                using var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
-                await connection.OpenAsync();
-
-                var result = await connection.QueryAsync<UltimatePremiumSummaryModel>(
-                    "Ultimates.spGetUltimatePremiumListClassYOA",
-                    commandType: CommandType.StoredProcedure
-                );
-
-                return result ?? Enumerable.Empty<UltimatePremiumSummaryModel>();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving Ultimate Premium list");
-                throw;
-            }
-        }
-
-        /// <summary>
-        /// Save Ultimate Premium data for a Class/YOA
-        /// Creates a single Updates record and multiple Premium records for audit trail
-        /// </summary>
-        public async Task SaveUltimatePremium(UltimatePremiumEditModel model)
+        public async Task SavePremium(PremiumModel model)
         {
             try
             {
@@ -183,168 +126,32 @@ namespace sandboxapp.Services
                 using var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
                 await connection.OpenAsync();
 
-                using var transaction = connection.BeginTransaction();
-
-                try
-                {
-                    // Step 1: Create an Updates record to get a batch UpdateID
-                    var updateParams = new DynamicParameters();
-                    updateParams.Add("@UpdatedBy", userName, DbType.String);
-                    updateParams.Add("@Comments", $"Updated {model.Class}/{model.YOA}", DbType.String);
-
-                    var updateId = await connection.ExecuteScalarAsync<int>(
-                        @"INSERT INTO [Ultimates].[Updates] (UpdateDate, UpdatedBy, Comments)
-                          VALUES (GETDATE(), @UpdatedBy, @Comments);
-                          SELECT CAST(SCOPE_IDENTITY() as int)",
-                        updateParams,
-                        transaction: transaction
-                    );
-
-                    // Step 2: Insert new versions for all modified or new records with the same UpdateID
-                    foreach (var record in model.Records.Where(r => r.IsModified || r.IsNew))
-                    {
-                        var parameters = new DynamicParameters();
-                        parameters.Add("@UpdateID", updateId, DbType.Int32);
-                        parameters.Add("@Class", model.Class, DbType.String);
-                        parameters.Add("@ReservingClass", record.ReservingClass, DbType.String);
-                        parameters.Add("@YOA", model.YOA, DbType.Int32);
-                        parameters.Add("@DistributionChannel", record.DistributionChannel, DbType.String);
-                        parameters.Add("@Currency", record.Currency, DbType.String);
-                        parameters.Add("@ValueType", record.ValueType, DbType.String);
-                        parameters.Add("@GrossNet", record.GrossNet, DbType.String);
-                        parameters.Add("@UltimatePremium", record.UltimatePremium, DbType.Decimal);
-                        parameters.Add("@UltimateNetPremium", record.UltimateNetPremium, DbType.Decimal);
-                        parameters.Add("@Deductions", record.Deductions, DbType.Decimal);
-                        parameters.Add("@UltimateRIPs", record.UltimateRIPs, DbType.Decimal);
-                        parameters.Add("@UltimatePC", record.UltimatePC, DbType.Decimal);
-
-                        await connection.ExecuteAsync(
-                            "Ultimates.spUpsertUltimatePremium",
-                            parameters,
-                            commandType: CommandType.StoredProcedure,
-                            transaction: transaction
-                        );
-                    }
-
-                    transaction.Commit();
-                    _logger.LogInformation("Successfully saved Ultimate Premium for Class={Class}, YOA={YOA} with UpdateID={UpdateID} by {User}",
-                        model.Class, model.YOA, updateId, userName);
-                }
-                catch (Exception)
-                {
-                    transaction.Rollback();
-                    throw;
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error saving Ultimate Premium for Class={Class}, YOA={YOA}", model.Class, model.YOA);
-                throw;
-            }
-        }
-
-        /// <summary>
-        /// Get distinct list of Classes with Ultimate Premium data
-        /// </summary>
-        public async Task<IEnumerable<string>> GetClasses()
-        {
-            try
-            {
-                using var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
-                await connection.OpenAsync();
-
-                var result = await connection.QueryAsync<dynamic>(
-                    "Ultimates.spGetUltimatePremiumListClasses",
-                    commandType: CommandType.StoredProcedure
-                );
-
-                return result?.Select(r => (string)r.Class) ?? Enumerable.Empty<string>();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving Ultimate Premium classes");
-                throw;
-            }
-        }
-
-        /// <summary>
-        /// Get YOAs for a specific Class
-        /// </summary>
-        public async Task<IEnumerable<int>> GetYOAsByClass(string className)
-        {
-            try
-            {
-                using var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
-                await connection.OpenAsync();
+                // Get new version number
+                var newVersion = await GetNewVersionNumber(model.Class, model.ReservingClass, model.YOA);
 
                 var parameters = new DynamicParameters();
-                parameters.Add("@Class", className, DbType.String);
+                parameters.Add("@Class", model.Class, DbType.String);
+                parameters.Add("@ReservingClass", model.ReservingClass, DbType.String);
+                parameters.Add("@YOA", model.YOA, DbType.Int32);
+                parameters.Add("@Version", newVersion, DbType.Int32);
+                parameters.Add("@Selection", model.Selection, DbType.String);
+                parameters.Add("@GrossNetEntry", model.GrossNetEntry, DbType.String);
+                parameters.Add("@UpdatedBy", userName, DbType.String);
+                parameters.Add("@UpdateComments", model.UpdateComments, DbType.String);
 
-                var result = await connection.QueryAsync<dynamic>(
-                    "Ultimates.spGetUltimatePremiumYOAsByClass",
+                await connection.ExecuteAsync(
+                    "Ultimates.spUpsertUltimatePremium",
                     parameters,
                     commandType: CommandType.StoredProcedure
                 );
 
-                return result?.Select(r => (int)r.YOA) ?? Enumerable.Empty<int>();
+                _logger.LogInformation("Successfully saved Premium for Class={Class}, ReservingClass={ReservingClass}, YOA={YOA}, Version={Version} by {User}",
+                    model.Class, model.ReservingClass, model.YOA, newVersion, userName);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving YOAs for Class={Class}", className);
-                throw;
-            }
-        }
-
-        /// <summary>
-        /// Get all active FX rate sets
-        /// </summary>
-        public async Task<IEnumerable<FxRateSetModel>> GetFxRateSets()
-        {
-            try
-            {
-                using var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
-                await connection.OpenAsync();
-
-                var result = await connection.QueryAsync<FxRateSetModel>(
-                    "Ultimates.spGetFxRateSets",
-                    commandType: CommandType.StoredProcedure
-                );
-
-                return result ?? Enumerable.Empty<FxRateSetModel>();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving FX rate sets");
-                throw;
-            }
-        }
-
-        /// <summary>
-        /// Get FX rates for a specific rate set
-        /// </summary>
-        public async Task<IEnumerable<FxRateModel>> GetFxRates(int? fxRateSetId = null, string? rateSetName = null)
-        {
-            try
-            {
-                using var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
-                await connection.OpenAsync();
-
-                var parameters = new DynamicParameters();
-                parameters.Add("@FxRateSetID", fxRateSetId, DbType.Int32);
-                parameters.Add("@RateSetName", rateSetName, DbType.String);
-
-                var result = await connection.QueryAsync<FxRateModel>(
-                    "Ultimates.spGetFxRates",
-                    parameters,
-                    commandType: CommandType.StoredProcedure
-                );
-
-                return result ?? Enumerable.Empty<FxRateModel>();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving FX rates for RateSetID={RateSetID}, RateSetName={RateSetName}",
-                    fxRateSetId, rateSetName);
+                _logger.LogError(ex, "Error saving Premium for Class={Class}, ReservingClass={ReservingClass}, YOA={YOA}",
+                    model.Class, model.ReservingClass, model.YOA);
                 throw;
             }
         }
