@@ -17,12 +17,70 @@
         <h1>Ultimate Premium Tracking</h1>
         <p class="text-muted">View and edit ultimate premium selections by Class, Reserving Class, and YOA</p>
     </div>
-    <div class="col-auto">
-        <button type="button" class="btn btn-primary" @onclick="OpenCreateModal">
-            <i class="bi bi-plus-circle"></i> Create New
-        </button>
-    </div>
 </div>
+
+@if (premiumRecords != null && premiumRecords.Any())
+{
+    <!-- Filters Section -->
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="row">
+                <!-- Class Filter -->
+                <div class="col-md-6 mb-3">
+                    <h6 class="mb-2"><i class="bi bi-funnel"></i> Filter by Class</h6>
+                    <div class="d-flex flex-wrap gap-2">
+                        <button type="button"
+                                class="btn btn-sm @(selectedClass == null ? "btn-primary" : "btn-outline-primary")"
+                                @onclick="() => FilterByClass(null)">
+                            All
+                        </button>
+                        @foreach (var className in distinctClasses)
+                        {
+                            <button type="button"
+                                    class="btn btn-sm @(selectedClass == className ? "btn-primary" : "btn-outline-primary")"
+                                    @onclick="() => FilterByClass(className)">
+                                @className
+                            </button>
+                        }
+                    </div>
+                </div>
+
+                <!-- YOA Filter -->
+                <div class="col-md-6 mb-3">
+                    <h6 class="mb-2"><i class="bi bi-funnel"></i> Filter by YOA</h6>
+                    <div class="d-flex flex-wrap gap-2">
+                        <button type="button"
+                                class="btn btn-sm @(selectedYOA == null ? "btn-primary" : "btn-outline-primary")"
+                                @onclick="() => FilterByYOA(null)">
+                            All
+                        </button>
+                        @foreach (var yoa in distinctYOAs.OrderByDescending(y => y))
+                        {
+                            <button type="button"
+                                    class="btn btn-sm @(selectedYOA == yoa ? "btn-primary" : "btn-outline-primary")"
+                                    @onclick="() => FilterByYOA(yoa)">
+                                @yoa
+                            </button>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            @if (selectedClass != null || selectedYOA != null)
+            {
+                <div class="row">
+                    <div class="col-12">
+                        <small class="text-muted">
+                            Showing @filteredRecords.Count() of @premiumRecords.Count records
+                            @if (selectedClass != null) { <text> | Class: <strong>@selectedClass</strong></text> }
+                            @if (selectedYOA != null) { <text> | YOA: <strong>@selectedYOA</strong></text> }
+                        </small>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
 
 @if (isLoading)
 {
@@ -33,7 +91,7 @@
         <p class="mt-2">Loading Premium data...</p>
     </div>
 }
-else if (premiumRecords != null && premiumRecords.Any())
+else if (filteredRecords != null && filteredRecords.Any())
 {
     <!-- Data Table -->
     <div class="card">
@@ -58,7 +116,7 @@ else if (premiumRecords != null && premiumRecords.Any())
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var record in premiumRecords.OrderBy(r => r.Class).ThenBy(r => r.ReservingClass).ThenByDescending(r => r.YOA))
+                        @foreach (var record in filteredRecords.OrderBy(r => r.Class).ThenBy(r => r.ReservingClass).ThenByDescending(r => r.YOA))
                         {
                             <tr>
                                 <td><strong>@record.Class</strong></td>
@@ -86,11 +144,10 @@ else if (premiumRecords != null && premiumRecords.Any())
 else
 {
     <div class="alert alert-info">
-        <h5>No Premium Data Found</h5>
-        <p>No Premium data has been entered yet. Click "Create New" to add your first record.</p>
+        <h5>No Matching Records</h5>
+        <p>No Premium records match the selected filters.</p>
     </div>
 }
-
 <!-- Edit Modal Component -->
 @if (showEditModal)
 {
@@ -103,6 +160,11 @@ else
 
 @code {
     private List<PremiumListItemModel>? premiumRecords;
+    private IEnumerable<PremiumListItemModel> filteredRecords => ApplyFilters();
+    private List<string> distinctClasses = new();
+    private List<int> distinctYOAs = new();
+    private string? selectedClass = null;
+    private int? selectedYOA = null;
     private bool isLoading = true;
     private bool showEditModal = false;
     private bool isNewRecord = false;
@@ -121,6 +183,22 @@ else
             var data = await UltimatesService.GetLatestPremiumList();
             premiumRecords = data.ToList();
 
+            // Extract distinct values for filters
+            if (premiumRecords.Any())
+            {
+                distinctClasses = premiumRecords
+                    .Select(r => r.Class)
+                    .Distinct()
+                    .OrderBy(c => c)
+                    .ToList();
+
+                distinctYOAs = premiumRecords
+                    .Select(r => r.YOA)
+                    .Distinct()
+                    .OrderByDescending(y => y)
+                    .ToList();
+            }
+
             Logger.LogInformation("Loaded {RecordCount} Premium records", premiumRecords.Count);
         }
         catch (Exception ex)
@@ -134,11 +212,36 @@ else
         }
     }
 
-    private void OpenCreateModal()
+    private IEnumerable<PremiumListItemModel> ApplyFilters()
     {
-        selectedPremium = new PremiumModel();
-        isNewRecord = true;
-        showEditModal = true;
+        if (premiumRecords == null)
+            return Enumerable.Empty<PremiumListItemModel>();
+
+        var filtered = premiumRecords.AsEnumerable();
+
+        if (selectedClass != null)
+        {
+            filtered = filtered.Where(r => r.Class == selectedClass);
+        }
+
+        if (selectedYOA != null)
+        {
+            filtered = filtered.Where(r => r.YOA == selectedYOA);
+        }
+
+        return filtered;
+    }
+
+    private void FilterByClass(string? className)
+    {
+        selectedClass = className;
+        StateHasChanged();
+    }
+
+    private void FilterByYOA(int? yoa)
+    {
+        selectedYOA = yoa;
+        StateHasChanged();
     }
 
     private void OpenEditModal(PremiumListItemModel record)
@@ -158,18 +261,21 @@ else
         };
         isNewRecord = false;
         showEditModal = true;
+        StateHasChanged();
     }
 
     private void CloseEditModal()
     {
         showEditModal = false;
         selectedPremium = null;
+        StateHasChanged();
     }
 
     private async Task HandleSave()
     {
         showEditModal = false;
         await LoadData();
+        StateHasChanged();
     }
 
     private string GetSelectionBadgeColor(string selection) => selection switch
