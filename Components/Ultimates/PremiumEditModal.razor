@@ -1,6 +1,6 @@
 @using sandboxapp.Models.Ultimates
 @using sandboxapp.Services
-@inject PremiumService PremiumService
+@inject UltimatesService UltimatesService
 @inject ILogger<PremiumEditModal> Logger
 
 <!-- Full-screen modal overlay -->
@@ -263,7 +263,7 @@
 
         try
         {
-            await PremiumService.SavePremium(Premium);
+            await UltimatesService.SavePremium(Premium);
             successMessage = "Premium saved successfully!";
 
             await Task.Delay(1000);

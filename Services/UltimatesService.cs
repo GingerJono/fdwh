@@ -10,16 +10,16 @@ namespace sandboxapp.Services
     /// Uses insert-only, versioned snapshot model
     /// All operations via stored procedures
     /// </summary>
-    public class PremiumService
+    public class UltimatesService
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IConfiguration _configuration;
-        private readonly ILogger<PremiumService> _logger;
+        private readonly ILogger<UltimatesService> _logger;
 
-        public PremiumService(
+        public UltimatesService(
             IConfiguration configuration,
             IHttpContextAccessor httpContextAccessor,
-            ILogger<PremiumService> logger)
+            ILogger<UltimatesService> logger)
         {
             _configuration = configuration;
             _httpContextAccessor = httpContextAccessor;

@@ -1,7 +1,7 @@
 @page "/Ultimates/Premium"
 @using sandboxapp.Models.Ultimates
 @using sandboxapp.Services
-@inject PremiumService PremiumService
+@inject UltimatesService UltimatesService
 @inject NavigationManager NavigationManager
 @inject ILogger<PremiumList> Logger
 
@@ -118,7 +118,7 @@ else
         isLoading = true;
         try
         {
-            var data = await PremiumService.GetLatestPremiumList();
+            var data = await UltimatesService.GetLatestPremiumList();
             premiumRecords = data.ToList();
 
             Logger.LogInformation("Loaded {RecordCount} Premium records", premiumRecords.Count);
