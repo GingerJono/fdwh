@@ -4,6 +4,7 @@
 @inject UltimatesService UltimatesService
 @inject NavigationManager NavigationManager
 @inject ILogger<UltimatePremiumList> Logger
+@inject IJSRuntime JSRuntime
 
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
@@ -16,6 +17,20 @@
     <div class="col">
         <h1>Ultimate Premium Tracking</h1>
         <p class="text-muted">View and edit ultimate premium selections by Class, Reserving Class, and YOA</p>
+    </div>
+    <div class="col-auto">
+        @if (availableFxRateSets != null && availableFxRateSets.Any())
+        {
+            <label class="form-label mb-1"><small>FX Rate Set (Display Only)</small></label>
+            <select class="form-select form-select-sm" style="width: 250px;" @bind="selectedFxRateSetId" @bind:after="OnFxRateSetChanged">
+                @foreach (var rateSet in availableFxRateSets.OrderByDescending(rs => rs.EffectiveDate))
+                {
+                    <option value="@rateSet.FxRateSetID">
+                        @rateSet.RateSetName @(rateSet.EffectiveDate.HasValue ? $"({rateSet.EffectiveDate.Value:yyyy-MM-dd})" : "")
+                    </option>
+                }
+            </select>
+        }
     </div>
 </div>
 
@@ -109,6 +124,7 @@ else if (filteredRecords != null && filteredRecords.Any())
                             <th>Version</th>
                             <th>Selection</th>
                             <th>Gross/Net</th>
+                            <th class="text-end">GGWP USD</th>
                             <th>Last Updated</th>
                             <th>Updated By</th>
                             <th>Comments</th>
@@ -125,6 +141,7 @@ else if (filteredRecords != null && filteredRecords.Any())
                                 <td><span class="badge bg-info">@record.Version</span></td>
                                 <td><span class="badge bg-@GetSelectionBadgeColor(record.Selection)">@record.Selection</span></td>
                                 <td><span class="badge bg-secondary">@record.GrossNetEntry</span></td>
+                                <td class="text-end"><strong>@FormatCurrency(GetGGWPUSD(record))</strong></td>
                                 <td>@FormatDate(record.DateUpdated)</td>
                                 <td>@record.UpdatedBy</td>
                                 <td>@(record.UpdateComments ?? "-")</td>
@@ -152,7 +169,7 @@ else
 @if (showEditModal && selectedPremium != null)
 {
     <!-- Full-screen modal overlay -->
-    <div class="modal-overlay" @onclick="HandleOverlayClick">
+    <div class="modal-overlay" @onclick="HandleOverlayClick" @onkeydown="HandleKeyDown" tabindex="-1">
         <div class="modal-container" @onclick:stopPropagation="true">
             <div class="modal-header-custom">
                 <h3>Edit Premium: @selectedPremium.Class / @selectedPremium.ReservingClass / @selectedPremium.YOA</h3>
@@ -195,7 +212,7 @@ else
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Selection <span class="text-danger">*</span></label>
-                            <select class="form-select" @bind="selectedPremium.Selection" required>
+                            <select class="form-select" @bind="selectedPremium.Selection" @bind:after="OnFormChanged" required>
                                 <option value="Plan">Plan</option>
                                 <option value="Written">Written</option>
                                 <option value="Signed">Signed</option>
@@ -208,7 +225,7 @@ else
 
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Gross/Net Entry <span class="text-danger">*</span></label>
-                            <select class="form-select" @bind="selectedPremium.GrossNetEntry" required>
+                            <select class="form-select" @bind="selectedPremium.GrossNetEntry" @bind:after="OnFormChanged" required>
                                 <option value="Gross">Gross</option>
                                 <option value="Net">Net</option>
                             </select>
@@ -228,7 +245,7 @@ else
                     <div class="row mb-3">
                         <div class="col-12">
                             <label class="form-label fw-bold">Update Comments</label>
-                            <textarea class="form-control" rows="4" @bind="selectedPremium.UpdateComments"
+                            <textarea class="form-control" rows="4" @bind="selectedPremium.UpdateComments" @bind:event="oninput" @oninput="OnFormChanged"
                                       placeholder="Optional comments about this update..."></textarea>
                         </div>
                     </div>
@@ -256,6 +273,16 @@ else
                             <input type="text" class="form-control" value="@selectedPremium.UpdatedBy" disabled />
                         </div>
                     </div>
+
+                    @if (!string.IsNullOrWhiteSpace(priorComments))
+                    {
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Prior Comments</label>
+                                <textarea class="form-control bg-light" rows="3" value="@priorComments" disabled></textarea>
+                            </div>
+                        </div>
+                    }
 
                     <!-- Error Message -->
                     @if (!string.IsNullOrEmpty(modalErrorMessage))
@@ -355,13 +382,22 @@ else
     private bool isLoading = true;
     private bool showEditModal = false;
     private PremiumModel? selectedPremium;
+    private PremiumModel? originalPremium;
+    private string? priorComments;
     private bool isSaving = false;
     private string? modalErrorMessage;
     private string? modalSuccessMessage;
+    private bool isFormDirty = false;
+
+    // FX Rate Set management
+    private List<FxRateSetModel>? availableFxRateSets;
+    private int selectedFxRateSetId;
+    private Dictionary<string, decimal> fxRates = new();
 
     protected override async Task OnInitializedAsync()
     {
         await LoadData();
+        await LoadFxRateSets();
     }
 
     private async Task LoadData()
@@ -401,6 +437,70 @@ else
         }
     }
 
+    private async Task LoadFxRateSets()
+    {
+        try
+        {
+            var rateSets = await UltimatesService.GetFxRateSets();
+            availableFxRateSets = rateSets.ToList();
+
+            if (availableFxRateSets.Any())
+            {
+                // Select the most recent active rate set, or the most recent overall
+                var defaultRateSet = availableFxRateSets
+                    .Where(rs => rs.IsActive)
+                    .OrderByDescending(rs => rs.EffectiveDate)
+                    .FirstOrDefault() ?? availableFxRateSets.OrderByDescending(rs => rs.EffectiveDate).First();
+
+                selectedFxRateSetId = defaultRateSet.FxRateSetID;
+                await LoadFxRates();
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading FX rate sets");
+        }
+    }
+
+    private async Task LoadFxRates()
+    {
+        try
+        {
+            var rates = await UltimatesService.GetFxRates(selectedFxRateSetId);
+            fxRates = rates.ToDictionary(r => $"{r.FromCurrency}_{r.ToCurrency}", r => r.Rate);
+            Logger.LogInformation("Loaded {RateCount} FX rates for rate set {RateSetId}", fxRates.Count, selectedFxRateSetId);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading FX rates");
+            fxRates = new Dictionary<string, decimal>();
+        }
+    }
+
+    private async Task OnFxRateSetChanged()
+    {
+        await LoadFxRates();
+        StateHasChanged();
+    }
+
+    private decimal? GetGGWPUSD(PremiumListItemModel record)
+    {
+        // TODO: This will fetch PremiumCcy records and convert to USD
+        // For now, return null as the PremiumCcy table doesn't exist yet
+        // When implemented, this should:
+        // 1. Fetch all PremiumCcy records for this Premium record
+        // 2. Filter by the selected GGWP field (based on Selection)
+        // 3. Convert each currency amount to USD using fxRates
+        // 4. Sum and return the total
+        return null;
+    }
+
+    private string FormatCurrency(decimal? value)
+    {
+        if (!value.HasValue) return "-";
+        return value.Value.ToString("N0");
+    }
+
     private IEnumerable<PremiumListItemModel> ApplyFilters()
     {
         if (premiumRecords == null)
@@ -435,6 +535,9 @@ else
 
     private void OpenEditModal(PremiumListItemModel record)
     {
+        // Store prior comments
+        priorComments = record.UpdateComments;
+
         // Convert list item to full model for editing
         selectedPremium = new PremiumModel
         {
@@ -446,26 +549,58 @@ else
             GrossNetEntry = record.GrossNetEntry,
             DateUpdated = record.DateUpdated,
             UpdatedBy = record.UpdatedBy,
-            UpdateComments = record.UpdateComments
+            UpdateComments = null  // Don't pre-populate comments
         };
+
+        // Store original values for dirty checking
+        originalPremium = new PremiumModel
+        {
+            Selection = record.Selection,
+            GrossNetEntry = record.GrossNetEntry,
+            UpdateComments = null
+        };
+
+        isFormDirty = false;
         showEditModal = true;
         StateHasChanged();
     }
 
-    private void CloseEditModal()
+    private async Task CloseEditModal()
     {
+        if (isFormDirty && !isSaving)
+        {
+            bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "You have unsaved changes. Are you sure you want to close without saving?");
+            if (!confirmed)
+            {
+                return;
+            }
+        }
+
         showEditModal = false;
         selectedPremium = null;
+        originalPremium = null;
+        priorComments = null;
         modalErrorMessage = null;
         modalSuccessMessage = null;
         isSaving = false;
+        isFormDirty = false;
         StateHasChanged();
     }
 
     private async Task HandleOverlayClick()
     {
-        // Close modal when clicking outside
-        CloseEditModal();
+        // Close modal when clicking outside (with confirmation if dirty)
+        await CloseEditModal();
+    }
+
+    private void OnFormChanged()
+    {
+        if (selectedPremium == null || originalPremium == null) return;
+
+        // Check if any field has changed
+        isFormDirty = selectedPremium.Selection != originalPremium.Selection ||
+                      selectedPremium.GrossNetEntry != originalPremium.GrossNetEntry ||
+                      !string.IsNullOrWhiteSpace(selectedPremium.UpdateComments);
     }
 
     private async Task SavePremium()
@@ -503,7 +638,12 @@ else
         try
         {
             await UltimatesService.SavePremium(selectedPremium);
+
+            // Wait a moment then show success
+            await Task.Delay(500);
+
             modalSuccessMessage = "Premium saved successfully!";
+            isFormDirty = false;  // Mark form as clean after successful save
             StateHasChanged();
 
             await Task.Delay(1000);
@@ -522,6 +662,14 @@ else
         {
             isSaving = false;
             StateHasChanged();
+        }
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape")
+        {
+            await CloseEditModal();
         }
     }
 
