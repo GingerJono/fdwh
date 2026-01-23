@@ -155,5 +155,70 @@ namespace sandboxapp.Services
                 throw;
             }
         }
+
+        /// <summary>
+        /// Get all FX rate sets
+        /// </summary>
+        public async Task<IEnumerable<FxRateSetModel>> GetFxRateSets()
+        {
+            try
+            {
+                using var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
+                await connection.OpenAsync();
+
+                var sql = @"
+                    SELECT
+                        FxRateSetID,
+                        RateSetName,
+                        RateSetDescription,
+                        EffectiveDate,
+                        IsActive
+                    FROM Ultimates.FxRateSets
+                    ORDER BY EffectiveDate DESC, RateSetName";
+
+                var result = await connection.QueryAsync<FxRateSetModel>(sql);
+                return result ?? Enumerable.Empty<FxRateSetModel>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving FX rate sets");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Get FX rates for a specific rate set
+        /// </summary>
+        public async Task<IEnumerable<FxRateModel>> GetFxRates(int fxRateSetId)
+        {
+            try
+            {
+                using var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
+                await connection.OpenAsync();
+
+                var sql = @"
+                    SELECT
+                        r.FxRateID,
+                        r.FxRateSetID,
+                        rs.RateSetName,
+                        rs.RateSetDescription,
+                        rs.EffectiveDate,
+                        r.FromCurrency,
+                        r.ToCurrency,
+                        r.Rate
+                    FROM Ultimates.FxRates r
+                    INNER JOIN Ultimates.FxRateSets rs ON r.FxRateSetID = rs.FxRateSetID
+                    WHERE r.FxRateSetID = @FxRateSetID
+                    ORDER BY r.FromCurrency, r.ToCurrency";
+
+                var result = await connection.QueryAsync<FxRateModel>(sql, new { FxRateSetID = fxRateSetId });
+                return result ?? Enumerable.Empty<FxRateModel>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving FX rates for rate set {FxRateSetId}", fxRateSetId);
+                throw;
+            }
+        }
     }
 }
