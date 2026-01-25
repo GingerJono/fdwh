@@ -202,147 +202,143 @@ else
                     <!-- Premium Currency Data -->
                     @if (premiumCcyRecords != null && premiumCcyRecords.Any())
                     {
-                        <!-- GGWP Matrix -->
-                        <div class="row mb-2">
-                            <div class="col-12">
-                                <div class="card">
-                                    <div class="card-header bg-light py-2" style="cursor: pointer;" @onclick="() => ggwpExpanded = !ggwpExpanded">
-                                        <h6 class="mb-0">
-                                            <i class="bi bi-chevron-@(ggwpExpanded ? "down" : "right") me-2"></i>
-                                            GGWP by Currency
-                                        </h6>
-                                    </div>
-                                    @if (ggwpExpanded)
-                                    {
-                                        <div class="card-body p-0">
-                                            <div class="table-responsive">
-                                                <table class="table table-sm table-bordered mb-0">
-                                                    <thead class="table-light">
-                                                        <tr>
-                                                            <th>Currency</th>
-                                                            <th class="text-end">@(selectedPremium?.GrossNetEntry ?? "Gross") Premium</th>
-                                                            <th class="text-end">Selected</th>
-                                                            <th class="text-end">Plan</th>
-                                                            <th class="text-end">Written</th>
-                                                            <th class="text-end">Signed</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        @foreach (var ccy in premiumCcyRecords.OrderBy(c => c.Currency))
-                                                        {
-                                                            <tr>
-                                                                <td><strong>@ccy.Currency</strong></td>
-                                                                <td class="text-end">
-                                                                    <input type="text" class="form-control form-control-sm text-end"
-                                                                           value="@FormatCurrency(ccy.ManualGGWP)" readonly style="width: 120px; display: inline-block;" />
-                                                                </td>
-                                                                <td class="text-end"><strong>@FormatCurrency(GetSelectedValue(ccy, "GGWP"))</strong></td>
-                                                                <td class="text-end">@FormatCurrency(ccy.PlanGGWP)</td>
-                                                                <td class="text-end">@FormatCurrency(ccy.WrittenGGWP)</td>
-                                                                <td class="text-end">@FormatCurrency(ccy.SignedGGWP)</td>
-                                                            </tr>
-                                                        }
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    }
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Deductions Matrix -->
-                        <div class="row mb-2">
-                            <div class="col-12">
-                                <div class="card">
-                                    <div class="card-header bg-light py-2" style="cursor: pointer;" @onclick="() => deductionsExpanded = !deductionsExpanded">
-                                        <h6 class="mb-0">
-                                            <i class="bi bi-chevron-@(deductionsExpanded ? "down" : "right") me-2"></i>
-                                            Deductions by Currency
-                                        </h6>
-                                    </div>
-                                    @if (deductionsExpanded)
-                                    {
-                                        <div class="card-body p-0">
-                                            <div class="table-responsive">
-                                                <table class="table table-sm table-bordered mb-0">
-                                                    <thead class="table-light">
-                                                        <tr>
-                                                            <th>Currency</th>
-                                                            <th class="text-end">Deductions %</th>
-                                                            <th class="text-end">Selected</th>
-                                                            <th class="text-end">Plan</th>
-                                                            <th class="text-end">Written</th>
-                                                            <th class="text-end">Signed</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        @foreach (var ccy in premiumCcyRecords.OrderBy(c => c.Currency))
-                                                        {
-                                                            <tr>
-                                                                <td><strong>@ccy.Currency</strong></td>
-                                                                <td class="text-end">
-                                                                    <input type="text" class="form-control form-control-sm text-end"
-                                                                           value="@FormatPercentage(ccy.ManualDeductions)" readonly style="width: 100px; display: inline-block;" />
-                                                                </td>
-                                                                <td class="text-end"><strong>@FormatPercentage(GetSelectedValue(ccy, "Deductions"))</strong></td>
-                                                                <td class="text-end">@FormatPercentage(ccy.PlanDeductions)</td>
-                                                                <td class="text-end">@FormatPercentage(ccy.WrittenDeductions)</td>
-                                                                <td class="text-end">@FormatPercentage(ccy.SignedDeductions)</td>
-                                                            </tr>
-                                                        }
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    }
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- GNWP Matrix -->
+                        <!-- Summary Banner -->
                         <div class="row mb-3">
                             <div class="col-12">
-                                <div class="card">
-                                    <div class="card-header bg-light py-2" style="cursor: pointer;" @onclick="() => gnwpExpanded = !gnwpExpanded">
-                                        <h6 class="mb-0">
-                                            <i class="bi bi-chevron-@(gnwpExpanded ? "down" : "right") me-2"></i>
-                                            GNWP by Currency
-                                        </h6>
-                                    </div>
-                                    @if (gnwpExpanded)
-                                    {
-                                        <div class="card-body p-0">
-                                            <div class="table-responsive">
-                                                <table class="table table-sm table-bordered mb-0">
-                                                    <thead class="table-light">
-                                                        <tr>
-                                                            <th>Currency</th>
-                                                            <th class="text-end">GNWP</th>
-                                                            <th class="text-end">Selected</th>
-                                                            <th class="text-end">Plan</th>
-                                                            <th class="text-end">Written</th>
-                                                            <th class="text-end">Signed</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        @foreach (var ccy in premiumCcyRecords.OrderBy(c => c.Currency))
-                                                        {
-                                                            <tr>
-                                                                <td><strong>@ccy.Currency</strong></td>
-                                                                <td class="text-end">
-                                                                    <input type="text" class="form-control form-control-sm text-end"
-                                                                           value="@FormatCurrency(ccy.ManualGNWP)" readonly style="width: 120px; display: inline-block;" />
-                                                                </td>
-                                                                <td class="text-end"><strong>@FormatCurrency(GetSelectedValue(ccy, "GNWP"))</strong></td>
-                                                                <td class="text-end">@FormatCurrency(ccy.PlanGNWP)</td>
-                                                                <td class="text-end">@FormatCurrency(ccy.WrittenGNWP)</td>
-                                                                <td class="text-end">@FormatCurrency(ccy.SignedGNWP)</td>
-                                                            </tr>
-                                                        }
-                                                    </tbody>
-                                                </table>
+                                <div class="card bg-light">
+                                    <div class="card-body py-2">
+                                        <div class="row text-center">
+                                            <div class="col-3">
+                                                <small class="text-muted d-block">GGWP USD</small>
+                                                <h5 class="mb-0">@FormatCurrency(CalculateTotalGGWP("USD"))</h5>
                                             </div>
+                                            <div class="col-3">
+                                                <small class="text-muted d-block">GGWP GBP</small>
+                                                <h5 class="mb-0">@FormatCurrency(CalculateTotalGGWP("GBP"))</h5>
+                                            </div>
+                                            <div class="col-3">
+                                                <small class="text-muted d-block">GNWP USD</small>
+                                                <h5 class="mb-0">@FormatCurrency(CalculateTotalGNWP("USD"))</h5>
+                                            </div>
+                                            <div class="col-3">
+                                                <small class="text-muted d-block">GNWP GBP</small>
+                                                <h5 class="mb-0">@FormatCurrency(CalculateTotalGNWP("GBP"))</h5>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tabbed Matrices -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <ul class="nav nav-tabs" role="tablist">
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link @(activeTab == "ggwp" ? "active" : "")" @onclick="() => SetActiveTab(\"ggwp\")" type="button">
+                                            GGWP by Currency
+                                        </button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link @(activeTab == "deductions" ? "active" : "")" @onclick="() => SetActiveTab(\"deductions\")" type="button">
+                                            Deductions by Currency
+                                        </button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link @(activeTab == "gnwp" ? "active" : "")" @onclick="() => SetActiveTab(\"gnwp\")" type="button">
+                                            GNWP by Currency
+                                        </button>
+                                    </li>
+                                </ul>
+
+                                <div class="tab-content border border-top-0 p-0">
+                                    <!-- GGWP Tab -->
+                                    @if (activeTab == "ggwp")
+                                    {
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-bordered mb-0">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>Currency</th>
+                                                        <th class="text-end">Selected</th>
+                                                        <th class="text-end">Plan</th>
+                                                        <th class="text-end">Written</th>
+                                                        <th class="text-end">Signed</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var ccy in premiumCcyRecords.OrderBy(c => c.Currency))
+                                                    {
+                                                        <tr>
+                                                            <td><strong>@ccy.Currency</strong></td>
+                                                            <td class="text-end"><strong>@FormatCurrency(GetSelectedValue(ccy, "GGWP"))</strong></td>
+                                                            <td class="text-end">@FormatCurrency(ccy.PlanGGWP)</td>
+                                                            <td class="text-end">@FormatCurrency(ccy.WrittenGGWP)</td>
+                                                            <td class="text-end">@FormatCurrency(ccy.SignedGGWP)</td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    }
+
+                                    <!-- Deductions Tab -->
+                                    @if (activeTab == "deductions")
+                                    {
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-bordered mb-0">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>Currency</th>
+                                                        <th class="text-end">Selected</th>
+                                                        <th class="text-end">Plan</th>
+                                                        <th class="text-end">Written</th>
+                                                        <th class="text-end">Signed</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var ccy in premiumCcyRecords.OrderBy(c => c.Currency))
+                                                    {
+                                                        <tr>
+                                                            <td><strong>@ccy.Currency</strong></td>
+                                                            <td class="text-end"><strong>@FormatPercentage(GetSelectedValue(ccy, "Deductions"))</strong></td>
+                                                            <td class="text-end">@FormatPercentage(ccy.PlanDeductions)</td>
+                                                            <td class="text-end">@FormatPercentage(ccy.WrittenDeductions)</td>
+                                                            <td class="text-end">@FormatPercentage(ccy.SignedDeductions)</td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    }
+
+                                    <!-- GNWP Tab -->
+                                    @if (activeTab == "gnwp")
+                                    {
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-bordered mb-0">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>Currency</th>
+                                                        <th class="text-end">Selected</th>
+                                                        <th class="text-end">Plan</th>
+                                                        <th class="text-end">Written</th>
+                                                        <th class="text-end">Signed</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var ccy in premiumCcyRecords.OrderBy(c => c.Currency))
+                                                    {
+                                                        <tr>
+                                                            <td><strong>@ccy.Currency</strong></td>
+                                                            <td class="text-end"><strong>@FormatCurrency(GetSelectedValue(ccy, "GNWP"))</strong></td>
+                                                            <td class="text-end">@FormatCurrency(ccy.PlanGNWP)</td>
+                                                            <td class="text-end">@FormatCurrency(ccy.WrittenGNWP)</td>
+                                                            <td class="text-end">@FormatCurrency(ccy.SignedGNWP)</td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
                                         </div>
                                     }
                                 </div>
@@ -516,9 +512,7 @@ else
 
     // Premium Currency data
     private List<PremiumCcyModel>? premiumCcyRecords;
-    private bool ggwpExpanded = true;
-    private bool deductionsExpanded = false;
-    private bool gnwpExpanded = false;
+    private string activeTab = "ggwp";
 
     protected override async Task OnInitializedAsync()
     {
@@ -896,6 +890,78 @@ else
         OnFormChanged();
         // Force UI refresh to update premium column headers
         StateHasChanged();
+    }
+
+    private void SetActiveTab(string tab)
+    {
+        activeTab = tab;
+        StateHasChanged();
+    }
+
+    private decimal? CalculateTotalGGWP(string targetCurrency)
+    {
+        if (premiumCcyRecords == null || !premiumCcyRecords.Any() || !fxRates.Any())
+            return null;
+
+        decimal total = 0;
+
+        foreach (var ccy in premiumCcyRecords)
+        {
+            var ggwpValue = GetSelectedValue(ccy, "GGWP");
+            if (!ggwpValue.HasValue || ggwpValue.Value == 0)
+                continue;
+
+            // Convert to target currency
+            var converted = ConvertCurrency(ggwpValue.Value, ccy.Currency, targetCurrency);
+            if (converted.HasValue)
+                total += converted.Value;
+        }
+
+        return total > 0 ? total : null;
+    }
+
+    private decimal? CalculateTotalGNWP(string targetCurrency)
+    {
+        if (premiumCcyRecords == null || !premiumCcyRecords.Any() || !fxRates.Any())
+            return null;
+
+        decimal total = 0;
+
+        foreach (var ccy in premiumCcyRecords)
+        {
+            var gnwpValue = GetSelectedValue(ccy, "GNWP");
+            if (!gnwpValue.HasValue || gnwpValue.Value == 0)
+                continue;
+
+            // Convert to target currency
+            var converted = ConvertCurrency(gnwpValue.Value, ccy.Currency, targetCurrency);
+            if (converted.HasValue)
+                total += converted.Value;
+        }
+
+        return total > 0 ? total : null;
+    }
+
+    private decimal? ConvertCurrency(decimal amount, string fromCurrency, string toCurrency)
+    {
+        if (fromCurrency.Equals(toCurrency, StringComparison.OrdinalIgnoreCase))
+            return amount;
+
+        // Look up the FX rate
+        var rateKey = $"{fromCurrency}_{toCurrency}";
+        if (fxRates.TryGetValue(rateKey, out var rate))
+        {
+            return amount * rate;
+        }
+
+        // Try inverse rate
+        var inverseKey = $"{toCurrency}_{fromCurrency}";
+        if (fxRates.TryGetValue(inverseKey, out var inverseRate) && inverseRate != 0)
+        {
+            return amount / inverseRate;
+        }
+
+        return null;
     }
 
     private async Task SavePremium()
