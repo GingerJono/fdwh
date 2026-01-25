@@ -220,5 +220,67 @@ namespace sandboxapp.Services
                 throw;
             }
         }
+
+        /// <summary>
+        /// Get PremiumCcy records for a specific Premium record
+        /// </summary>
+        public async Task<IEnumerable<PremiumCcyModel>> GetPremiumCcy(string className, string reservingClass, int yoa, int version)
+        {
+            try
+            {
+                using var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
+                await connection.OpenAsync();
+
+                var sql = @"
+                    SELECT
+                        Class,
+                        ReservingClass,
+                        YOA,
+                        Version,
+                        Currency,
+                        SelectedGGWP,
+                        SelectedDeductions,
+                        SelectedGNWP,
+                        SelectedEU,
+                        ManualGGWP,
+                        ManualDeductions,
+                        ManualGNWP,
+                        ManualEU,
+                        PlanGGWP,
+                        PlanDeductions,
+                        PlanGNWP,
+                        PlanEU,
+                        WrittenGGWP,
+                        WrittenDeductions,
+                        WrittenGNWP,
+                        WrittenEU,
+                        SignedGGWP,
+                        SignedDeductions,
+                        SignedGNWP,
+                        SignedEU
+                    FROM Ultimates.PremiumCcy
+                    WHERE Class = @Class
+                      AND ReservingClass = @ReservingClass
+                      AND YOA = @YOA
+                      AND Version = @Version
+                    ORDER BY Currency";
+
+                var result = await connection.QueryAsync<PremiumCcyModel>(sql, new
+                {
+                    Class = className,
+                    ReservingClass = reservingClass,
+                    YOA = yoa,
+                    Version = version
+                });
+
+                return result ?? Enumerable.Empty<PremiumCcyModel>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving PremiumCcy for Class={Class}, ReservingClass={ReservingClass}, YOA={YOA}, Version={Version}",
+                    className, reservingClass, yoa, version);
+                throw;
+            }
+        }
     }
 }
