@@ -182,7 +182,7 @@ else
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Selection <span class="text-danger">*</span></label>
-                            <select class="form-select" @bind="selectedPremium.Selection" @bind:after="OnFormChanged" required>
+                            <select class="form-select" @bind="selectedPremium.Selection" @bind:after="OnSelectionChanged" required>
                                 <option value="Plan">Plan</option>
                                 <option value="Written">Written</option>
                                 <option value="Signed">Signed</option>
@@ -192,7 +192,7 @@ else
 
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Gross/Net Entry <span class="text-danger">*</span></label>
-                            <select class="form-select" @bind="selectedPremium.GrossNetEntry" @bind:after="OnFormChanged" required>
+                            <select class="form-select" @bind="selectedPremium.GrossNetEntry" @bind:after="OnGrossNetChanged" required>
                                 <option value="Gross">Gross</option>
                                 <option value="Net">Net</option>
                             </select>
@@ -220,8 +220,8 @@ else
                                                     <thead class="table-light">
                                                         <tr>
                                                             <th>Currency</th>
+                                                            <th class="text-end">@(selectedPremium?.GrossNetEntry ?? "Gross") Premium</th>
                                                             <th class="text-end">Selected</th>
-                                                            <th class="text-end">Manual</th>
                                                             <th class="text-end">Plan</th>
                                                             <th class="text-end">Written</th>
                                                             <th class="text-end">Signed</th>
@@ -232,8 +232,11 @@ else
                                                         {
                                                             <tr>
                                                                 <td><strong>@ccy.Currency</strong></td>
-                                                                <td class="text-end">@FormatCurrency(ccy.SelectedGGWP)</td>
-                                                                <td class="text-end">@FormatCurrency(ccy.ManualGGWP)</td>
+                                                                <td class="text-end">
+                                                                    <input type="text" class="form-control form-control-sm text-end"
+                                                                           value="@FormatCurrency(ccy.ManualGGWP)" readonly style="width: 120px; display: inline-block;" />
+                                                                </td>
+                                                                <td class="text-end"><strong>@FormatCurrency(GetSelectedValue(ccy, "GGWP"))</strong></td>
                                                                 <td class="text-end">@FormatCurrency(ccy.PlanGGWP)</td>
                                                                 <td class="text-end">@FormatCurrency(ccy.WrittenGGWP)</td>
                                                                 <td class="text-end">@FormatCurrency(ccy.SignedGGWP)</td>
@@ -266,8 +269,8 @@ else
                                                     <thead class="table-light">
                                                         <tr>
                                                             <th>Currency</th>
+                                                            <th class="text-end">Deductions %</th>
                                                             <th class="text-end">Selected</th>
-                                                            <th class="text-end">Manual</th>
                                                             <th class="text-end">Plan</th>
                                                             <th class="text-end">Written</th>
                                                             <th class="text-end">Signed</th>
@@ -278,11 +281,14 @@ else
                                                         {
                                                             <tr>
                                                                 <td><strong>@ccy.Currency</strong></td>
-                                                                <td class="text-end">@FormatCurrency(ccy.SelectedDeductions)</td>
-                                                                <td class="text-end">@FormatCurrency(ccy.ManualDeductions)</td>
-                                                                <td class="text-end">@FormatCurrency(ccy.PlanDeductions)</td>
-                                                                <td class="text-end">@FormatCurrency(ccy.WrittenDeductions)</td>
-                                                                <td class="text-end">@FormatCurrency(ccy.SignedDeductions)</td>
+                                                                <td class="text-end">
+                                                                    <input type="text" class="form-control form-control-sm text-end"
+                                                                           value="@FormatPercentage(ccy.ManualDeductions)" readonly style="width: 100px; display: inline-block;" />
+                                                                </td>
+                                                                <td class="text-end"><strong>@FormatPercentage(GetSelectedValue(ccy, "Deductions"))</strong></td>
+                                                                <td class="text-end">@FormatPercentage(ccy.PlanDeductions)</td>
+                                                                <td class="text-end">@FormatPercentage(ccy.WrittenDeductions)</td>
+                                                                <td class="text-end">@FormatPercentage(ccy.SignedDeductions)</td>
                                                             </tr>
                                                         }
                                                     </tbody>
@@ -312,8 +318,8 @@ else
                                                     <thead class="table-light">
                                                         <tr>
                                                             <th>Currency</th>
+                                                            <th class="text-end">GNWP</th>
                                                             <th class="text-end">Selected</th>
-                                                            <th class="text-end">Manual</th>
                                                             <th class="text-end">Plan</th>
                                                             <th class="text-end">Written</th>
                                                             <th class="text-end">Signed</th>
@@ -324,8 +330,11 @@ else
                                                         {
                                                             <tr>
                                                                 <td><strong>@ccy.Currency</strong></td>
-                                                                <td class="text-end">@FormatCurrency(ccy.SelectedGNWP)</td>
-                                                                <td class="text-end">@FormatCurrency(ccy.ManualGNWP)</td>
+                                                                <td class="text-end">
+                                                                    <input type="text" class="form-control form-control-sm text-end"
+                                                                           value="@FormatCurrency(ccy.ManualGNWP)" readonly style="width: 120px; display: inline-block;" />
+                                                                </td>
+                                                                <td class="text-end"><strong>@FormatCurrency(GetSelectedValue(ccy, "GNWP"))</strong></td>
                                                                 <td class="text-end">@FormatCurrency(ccy.PlanGNWP)</td>
                                                                 <td class="text-end">@FormatCurrency(ccy.WrittenGNWP)</td>
                                                                 <td class="text-end">@FormatCurrency(ccy.SignedGNWP)</td>
@@ -696,6 +705,56 @@ else
         return value.Value.ToString("N0");
     }
 
+    private string FormatPercentage(decimal? value)
+    {
+        if (!value.HasValue) return "-";
+        return value.Value.ToString("0.00") + "%";
+    }
+
+    private decimal? GetSelectedValue(PremiumCcyModel ccy, string fieldType)
+    {
+        if (selectedPremium == null) return null;
+
+        return selectedPremium.Selection switch
+        {
+            "Plan" => fieldType switch
+            {
+                "GGWP" => ccy.PlanGGWP,
+                "Deductions" => ccy.PlanDeductions,
+                "GNWP" => ccy.PlanGNWP,
+                _ => null
+            },
+            "Written" => fieldType switch
+            {
+                "GGWP" => ccy.WrittenGGWP,
+                "Deductions" => ccy.WrittenDeductions,
+                "GNWP" => ccy.WrittenGNWP,
+                _ => null
+            },
+            "Signed" => fieldType switch
+            {
+                "GGWP" => ccy.SignedGGWP,
+                "Deductions" => ccy.SignedDeductions,
+                "GNWP" => ccy.SignedGNWP,
+                _ => null
+            },
+            "Manual" => fieldType switch
+            {
+                "GGWP" => ccy.ManualGGWP,
+                "Deductions" => ccy.ManualDeductions,
+                "GNWP" => ccy.ManualGNWP,
+                _ => null
+            },
+            _ => fieldType switch
+            {
+                "GGWP" => ccy.SelectedGGWP,
+                "Deductions" => ccy.SelectedDeductions,
+                "GNWP" => ccy.SelectedGNWP,
+                _ => null
+            }
+        };
+    }
+
     private IEnumerable<PremiumListItemModel> ApplyFilters()
     {
         if (premiumRecords == null)
@@ -814,6 +873,20 @@ else
         isFormDirty = selectedPremium.Selection != originalPremium.Selection ||
                       selectedPremium.GrossNetEntry != originalPremium.GrossNetEntry ||
                       !string.IsNullOrWhiteSpace(selectedPremium.UpdateComments);
+    }
+
+    private void OnSelectionChanged()
+    {
+        OnFormChanged();
+        // Force UI refresh to update SELECTED columns in matrices
+        StateHasChanged();
+    }
+
+    private void OnGrossNetChanged()
+    {
+        OnFormChanged();
+        // Force UI refresh to update premium column headers
+        StateHasChanged();
     }
 
     private async Task SavePremium()
