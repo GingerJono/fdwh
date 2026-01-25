@@ -868,30 +868,43 @@ else
         // Store prior comments
         priorComments = record.UpdateComments;
 
-        // Convert list item to full model for editing
-        selectedPremium = new PremiumModel
+        // Fetch the full Premium record with all Manual fields
+        var fullRecord = await UltimatesService.GetLatestPremiumByKey(record.Class, record.ReservingClass, record.YOA);
+
+        if (fullRecord == null)
         {
-            Class = record.Class,
-            ReservingClass = record.ReservingClass,
-            YOA = record.YOA,
-            Version = record.Version,
-            Selection = record.Selection,
-            GrossNetEntry = record.GrossNetEntry,
-            DateUpdated = record.DateUpdated,
-            UpdatedBy = record.UpdatedBy,
-            UpdateComments = null  // Don't pre-populate comments
-        };
+            Logger.LogError("Failed to load Premium record for Class={Class}, ReservingClass={ReservingClass}, YOA={YOA}",
+                record.Class, record.ReservingClass, record.YOA);
+            return;
+        }
+
+        selectedPremium = fullRecord;
+        selectedPremium.UpdateComments = null; // Don't pre-populate comments
 
         // Store original values for dirty checking
         originalPremium = new PremiumModel
         {
-            Selection = record.Selection,
-            GrossNetEntry = record.GrossNetEntry,
-            UpdateComments = null
+            Selection = fullRecord.Selection,
+            GrossNetEntry = fullRecord.GrossNetEntry,
+            UpdateComments = null,
+            ManualGrossPremiumGBP = fullRecord.ManualGrossPremiumGBP,
+            ManualNetPremiumGBP = fullRecord.ManualNetPremiumGBP,
+            ManualDeductions = fullRecord.ManualDeductions,
+            ManualSplitGBP = fullRecord.ManualSplitGBP,
+            ManualSplitUSD = fullRecord.ManualSplitUSD,
+            ManualSplitCAD = fullRecord.ManualSplitCAD,
+            ManualSplitEUR = fullRecord.ManualSplitEUR,
+            ManualSplitJPY = fullRecord.ManualSplitJPY
         };
 
         // Load PremiumCcy data
         await LoadPremiumCcyData(record.Class, record.ReservingClass, record.YOA, record.Version);
+
+        // Calculate currency split total for display
+        if (selectedPremium.Selection == "Manual")
+        {
+            CalculateCurrencySplitTotal();
+        }
 
         isFormDirty = false;
         showEditModal = true;
@@ -957,6 +970,14 @@ else
         // Check if any field has changed
         isFormDirty = selectedPremium.Selection != originalPremium.Selection ||
                       selectedPremium.GrossNetEntry != originalPremium.GrossNetEntry ||
+                      selectedPremium.ManualGrossPremiumGBP != originalPremium.ManualGrossPremiumGBP ||
+                      selectedPremium.ManualNetPremiumGBP != originalPremium.ManualNetPremiumGBP ||
+                      selectedPremium.ManualDeductions != originalPremium.ManualDeductions ||
+                      selectedPremium.ManualSplitGBP != originalPremium.ManualSplitGBP ||
+                      selectedPremium.ManualSplitUSD != originalPremium.ManualSplitUSD ||
+                      selectedPremium.ManualSplitCAD != originalPremium.ManualSplitCAD ||
+                      selectedPremium.ManualSplitEUR != originalPremium.ManualSplitEUR ||
+                      selectedPremium.ManualSplitJPY != originalPremium.ManualSplitJPY ||
                       !string.IsNullOrWhiteSpace(selectedPremium.UpdateComments);
     }
 
