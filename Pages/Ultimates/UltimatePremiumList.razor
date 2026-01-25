@@ -136,7 +136,7 @@ else if (filteredRecords != null && filteredRecords.Any())
                         {
                             <tr>
                                 <td><strong>@record.Class</strong></td>
-                                <td><strong>@record.ReservingClass</strong></td>
+                                <td><strong>@GetReservingClassName(record.Class, record.ReservingClass)</strong></td>
                                 <td><strong>@record.YOA</strong></td>
                                 <td><span class="badge bg-info">@record.Version</span></td>
                                 <td><span class="badge bg-@GetSelectionBadgeColor(record.Selection)">@record.Selection</span></td>
@@ -172,7 +172,7 @@ else
     <div class="modal-overlay" @onclick="HandleOverlayClick" @onkeydown="HandleKeyDown" tabindex="-1">
         <div class="modal-container" @onclick:stopPropagation="true">
             <div class="modal-header-custom">
-                <h3>Edit Premium: @selectedPremium.Class / @selectedPremium.ReservingClass / @selectedPremium.YOA</h3>
+                <h3>Edit Premium: @selectedPremium.Class / @GetReservingClassName(selectedPremium.Class, selectedPremium.ReservingClass) / @selectedPremium.YOA</h3>
                 <button type="button" class="btn-close btn-close-white" @onclick="CloseEditModal"></button>
             </div>
 
@@ -413,7 +413,7 @@ else
                             </div>
                         </div>
 
-                        @if (currencySplitTotal.HasValue && currencySplitTotal.Value != 100)
+                        @if (currencySplitTotal.HasValue && Math.Round(currencySplitTotal.Value, 2) != 100)
                         {
                             <div class="row mb-3">
                                 <div class="col-12">
@@ -596,10 +596,36 @@ else
     // Manual Entry
     private decimal? currencySplitTotal;
 
+    // Reserving Class lookup
+    private Dictionary<string, string> reservingClassNames = new();
+
     protected override async Task OnInitializedAsync()
     {
         await LoadData();
         await LoadFxRateSets();
+        await LoadReservingClasses();
+    }
+
+    private async Task LoadReservingClasses()
+    {
+        try
+        {
+            var data = await UltimatesService.GetReservingClasses();
+            reservingClassNames = data.ToDictionary(
+                r => $"{r.ClassCode}_{r.ReservingClassCode}",
+                r => r.ReservingClassName
+            );
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading Reserving Classes");
+        }
+    }
+
+    private string GetReservingClassName(string classCode, string reservingClassCode)
+    {
+        var key = $"{classCode}_{reservingClassCode}";
+        return reservingClassNames.TryGetValue(key, out var name) ? name : reservingClassCode;
     }
 
     private async Task LoadData()
@@ -1101,11 +1127,31 @@ else
         var ggwpGBP = selectedPremium.ManualGrossPremiumGBP.Value;
         var ggwpAmountGBP = ggwpGBP * (splitPct / 100);
 
+        // Get FX rate
+        decimal fxRate = 1.0m;
+        if (currency != "GBP")
+        {
+            var rateKey = $"GBP_{currency}";
+            if (fxRates.TryGetValue(rateKey, out var rate))
+            {
+                fxRate = rate;
+            }
+            else
+            {
+                // Try inverse rate
+                var inverseKey = $"{currency}_GBP";
+                if (fxRates.TryGetValue(inverseKey, out var inverseRate) && inverseRate != 0)
+                {
+                    fxRate = 1 / inverseRate;
+                }
+            }
+        }
+
         // Convert to target currency
         var ggwpInCurrency = ConvertCurrency(ggwpAmountGBP, "GBP", currency) ?? ggwpAmountGBP;
         var rounded = Math.Round(ggwpInCurrency, 0);
 
-        return $"{currency} {rounded:N0}";
+        return $"{currency} {rounded:N0} @ {fxRate:F2}";
     }
 
     private void InitializeManualPremiumCcyRecords()
@@ -1166,7 +1212,7 @@ else
         if (!selectedPremium.ManualGrossPremiumGBP.HasValue) return;
 
         CalculateCurrencySplitTotal();
-        if (!currencySplitTotal.HasValue || currencySplitTotal.Value != 100) return;
+        if (!currencySplitTotal.HasValue || Math.Round(currencySplitTotal.Value, 2) != 100) return;
 
         var ggwpGBP = selectedPremium.ManualGrossPremiumGBP.Value;
         var gnwpGBP = selectedPremium.ManualNetPremiumGBP ?? ggwpGBP;
@@ -1316,7 +1362,7 @@ else
             }
 
             CalculateCurrencySplitTotal();
-            if (!currencySplitTotal.HasValue || currencySplitTotal.Value != 100)
+            if (!currencySplitTotal.HasValue || Math.Round(currencySplitTotal.Value, 2) != 100)
             {
                 modalErrorMessage = $"Currency splits must total 100% (currently {currencySplitTotal ?? 0:F2}%)";
                 StateHasChanged();

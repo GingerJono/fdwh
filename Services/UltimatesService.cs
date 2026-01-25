@@ -360,5 +360,29 @@ namespace sandboxapp.Services
                 throw;
             }
         }
+
+        /// <summary>
+        /// Get all Reserving Classes with their display names
+        /// </summary>
+        public async Task<IEnumerable<ReservingClassModel>> GetReservingClasses()
+        {
+            try
+            {
+                using var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
+                await connection.OpenAsync();
+
+                var result = await connection.QueryAsync<ReservingClassModel>(
+                    "Ultimates.spGetListReservingClass",
+                    commandType: CommandType.StoredProcedure
+                );
+
+                return result ?? Enumerable.Empty<ReservingClassModel>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving Reserving Classes");
+                throw;
+            }
+        }
     }
 }
