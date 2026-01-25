@@ -235,17 +235,17 @@ else
                             <div class="col-12">
                                 <ul class="nav nav-tabs" role="tablist">
                                     <li class="nav-item" role="presentation">
-                                        <button class="nav-link @(activeTab == "ggwp" ? "active" : "")" @onclick="() => SetActiveTab(\"ggwp\")" type="button">
+                                        <button class="nav-link @(activeTab == "ggwp" ? "active" : "")" @onclick="@(() => SetActiveTab("ggwp"))" type="button">
                                             GGWP by Currency
                                         </button>
                                     </li>
                                     <li class="nav-item" role="presentation">
-                                        <button class="nav-link @(activeTab == "deductions" ? "active" : "")" @onclick="() => SetActiveTab(\"deductions\")" type="button">
+                                        <button class="nav-link @(activeTab == "deductions" ? "active" : "")" @onclick="@(() => SetActiveTab("deductions"))" type="button">
                                             Deductions by Currency
                                         </button>
                                     </li>
                                     <li class="nav-item" role="presentation">
-                                        <button class="nav-link @(activeTab == "gnwp" ? "active" : "")" @onclick="() => SetActiveTab(\"gnwp\")" type="button">
+                                        <button class="nav-link @(activeTab == "gnwp" ? "active" : "")" @onclick="@(() => SetActiveTab("gnwp"))" type="button">
                                             GNWP by Currency
                                         </button>
                                     </li>
