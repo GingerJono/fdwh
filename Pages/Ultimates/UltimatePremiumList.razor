@@ -358,22 +358,22 @@ else
 
                             <div class="col-md-3">
                                 <label class="form-label fw-bold">Gross Premium (GBP)</label>
-                                <input type="number" step="0.01" class="form-control" @bind="selectedPremium.ManualGrossPremiumGBP"
+                                <input type="number" step="1" class="form-control" @bind="selectedPremium.ManualGrossPremiumGBP"
                                        @bind:event="oninput" @bind:after="OnManualGrossChanged"
                                        disabled="@(selectedPremium.GrossNetEntry == "Net")" />
-                            </div>
-
-                            <div class="col-md-3">
-                                <label class="form-label fw-bold">Net Premium (GBP)</label>
-                                <input type="number" step="0.01" class="form-control" @bind="selectedPremium.ManualNetPremiumGBP"
-                                       @bind:event="oninput" @bind:after="OnManualNetChanged"
-                                       disabled="@(selectedPremium.GrossNetEntry == "Gross")" />
                             </div>
 
                             <div class="col-md-3">
                                 <label class="form-label fw-bold">Deductions (%)</label>
                                 <input type="number" step="0.01" min="0" max="100" class="form-control" @bind="selectedPremium.ManualDeductions"
                                        @bind:event="oninput" @bind:after="OnManualDeductionsChanged" />
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold">Net Premium (GBP)</label>
+                                <input type="number" step="1" class="form-control" @bind="selectedPremium.ManualNetPremiumGBP"
+                                       @bind:event="oninput" @bind:after="OnManualNetChanged"
+                                       disabled="@(selectedPremium.GrossNetEntry == "Gross")" />
                             </div>
                         </div>
 
@@ -385,26 +385,31 @@ else
                                 <label class="form-label">GBP %</label>
                                 <input type="number" step="0.01" min="0" max="100" class="form-control" @bind="selectedPremium.ManualSplitGBP"
                                        @bind:event="oninput" @bind:after="OnCurrencySplitChanged" />
+                                <small class="text-muted">@GetCalculatedCurrencyValue("GBP")</small>
                             </div>
                             <div class="col">
                                 <label class="form-label">USD %</label>
                                 <input type="number" step="0.01" min="0" max="100" class="form-control" @bind="selectedPremium.ManualSplitUSD"
                                        @bind:event="oninput" @bind:after="OnCurrencySplitChanged" />
+                                <small class="text-muted">@GetCalculatedCurrencyValue("USD")</small>
                             </div>
                             <div class="col">
                                 <label class="form-label">CAD %</label>
                                 <input type="number" step="0.01" min="0" max="100" class="form-control" @bind="selectedPremium.ManualSplitCAD"
                                        @bind:event="oninput" @bind:after="OnCurrencySplitChanged" />
+                                <small class="text-muted">@GetCalculatedCurrencyValue("CAD")</small>
                             </div>
                             <div class="col">
                                 <label class="form-label">EUR %</label>
                                 <input type="number" step="0.01" min="0" max="100" class="form-control" @bind="selectedPremium.ManualSplitEUR"
                                        @bind:event="oninput" @bind:after="OnCurrencySplitChanged" />
+                                <small class="text-muted">@GetCalculatedCurrencyValue("EUR")</small>
                             </div>
                             <div class="col">
                                 <label class="form-label">JPY %</label>
                                 <input type="number" step="0.01" min="0" max="100" class="form-control" @bind="selectedPremium.ManualSplitJPY"
                                        @bind:event="oninput" @bind:after="OnCurrencySplitChanged" />
+                                <small class="text-muted">@GetCalculatedCurrencyValue("JPY")</small>
                             </div>
                         </div>
 
@@ -1030,7 +1035,8 @@ else
         if (!selectedPremium.ManualGrossPremiumGBP.HasValue) return;
 
         var deductions = selectedPremium.ManualDeductions ?? 0;
-        selectedPremium.ManualNetPremiumGBP = selectedPremium.ManualGrossPremiumGBP.Value * (1 - deductions / 100);
+        var calculated = selectedPremium.ManualGrossPremiumGBP.Value * (1 - deductions / 100);
+        selectedPremium.ManualNetPremiumGBP = Math.Round(calculated, 0);
     }
 
     private void CalculateGrossFromNet()
@@ -1040,7 +1046,8 @@ else
         var deductions = selectedPremium.ManualDeductions ?? 0;
         if (deductions >= 100) return; // Prevent division by zero
 
-        selectedPremium.ManualGrossPremiumGBP = selectedPremium.ManualNetPremiumGBP.Value / (1 - deductions / 100);
+        var calculated = selectedPremium.ManualNetPremiumGBP.Value / (1 - deductions / 100);
+        selectedPremium.ManualGrossPremiumGBP = Math.Round(calculated, 0);
     }
 
     private void CalculateCurrencySplitTotal()
@@ -1052,6 +1059,32 @@ else
                     (selectedPremium.ManualSplitJPY ?? 0);
 
         currencySplitTotal = total > 0 ? total : null;
+    }
+
+    private string GetCalculatedCurrencyValue(string currency)
+    {
+        if (!selectedPremium.ManualGrossPremiumGBP.HasValue) return string.Empty;
+
+        var splitPct = currency switch
+        {
+            "GBP" => selectedPremium.ManualSplitGBP ?? 0,
+            "USD" => selectedPremium.ManualSplitUSD ?? 0,
+            "CAD" => selectedPremium.ManualSplitCAD ?? 0,
+            "EUR" => selectedPremium.ManualSplitEUR ?? 0,
+            "JPY" => selectedPremium.ManualSplitJPY ?? 0,
+            _ => 0
+        };
+
+        if (splitPct <= 0) return string.Empty;
+
+        var ggwpGBP = selectedPremium.ManualGrossPremiumGBP.Value;
+        var ggwpAmountGBP = ggwpGBP * (splitPct / 100);
+
+        // Convert to target currency
+        var ggwpInCurrency = ConvertCurrency(ggwpAmountGBP, "GBP", currency) ?? ggwpAmountGBP;
+        var rounded = Math.Round(ggwpInCurrency, 0);
+
+        return $"{currency} {rounded:N0}";
     }
 
     private void InitializeManualPremiumCcyRecords()
@@ -1143,9 +1176,9 @@ else
             var ggwpInCurrency = ConvertCurrency(ggwpAmountGBP, "GBP", currency) ?? ggwpAmountGBP;
             var gnwpInCurrency = ConvertCurrency(gnwpAmountGBP, "GBP", currency) ?? gnwpAmountGBP;
 
-            // Update the ManualGGWP and ManualGNWP fields
-            ccyRecord.ManualGGWP = ggwpInCurrency;
-            ccyRecord.ManualGNWP = gnwpInCurrency;
+            // Update the ManualGGWP and ManualGNWP fields (rounded to 0 decimal places)
+            ccyRecord.ManualGGWP = Math.Round(ggwpInCurrency, 0);
+            ccyRecord.ManualGNWP = Math.Round(gnwpInCurrency, 0);
             ccyRecord.ManualDeductions = deductions;
         }
     }
