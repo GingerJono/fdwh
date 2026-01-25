@@ -828,6 +828,15 @@ else
         {
             var data = await UltimatesService.GetPremiumCcy(className, reservingClass, yoa, version);
             premiumCcyRecords = data.ToList();
+
+            // Ensure Class, ReservingClass, YOA are set on each record (they should come from DB but just in case)
+            foreach (var ccy in premiumCcyRecords)
+            {
+                ccy.Class = className;
+                ccy.ReservingClass = reservingClass;
+                ccy.YOA = yoa;
+            }
+
             Logger.LogInformation("Loaded {RecordCount} PremiumCcy records", premiumCcyRecords.Count);
         }
         catch (Exception ex)
@@ -923,7 +932,52 @@ else
 
         try
         {
-            await UltimatesService.SavePremium(selectedPremium);
+            // Save Premium header and get new version number
+            var newVersion = await UltimatesService.SavePremium(selectedPremium);
+
+            // Update SELECTED fields in PremiumCcy records based on Selection dropdown
+            if (premiumCcyRecords != null && premiumCcyRecords.Any())
+            {
+                foreach (var ccy in premiumCcyRecords)
+                {
+                    // Update version to new version
+                    ccy.Version = newVersion;
+
+                    // Update SELECTED fields based on Selection
+                    switch (selectedPremium.Selection)
+                    {
+                        case "Plan":
+                            ccy.SelectedGGWP = ccy.PlanGGWP;
+                            ccy.SelectedDeductions = ccy.PlanDeductions;
+                            ccy.SelectedGNWP = ccy.PlanGNWP;
+                            ccy.SelectedEU = ccy.PlanEU;
+                            break;
+                        case "Written":
+                            ccy.SelectedGGWP = ccy.WrittenGGWP;
+                            ccy.SelectedDeductions = ccy.WrittenDeductions;
+                            ccy.SelectedGNWP = ccy.WrittenGNWP;
+                            ccy.SelectedEU = ccy.WrittenEU;
+                            break;
+                        case "Signed":
+                            ccy.SelectedGGWP = ccy.SignedGGWP;
+                            ccy.SelectedDeductions = ccy.SignedDeductions;
+                            ccy.SelectedGNWP = ccy.SignedGNWP;
+                            ccy.SelectedEU = ccy.SignedEU;
+                            break;
+                        case "Manual":
+                            ccy.SelectedGGWP = ccy.ManualGGWP;
+                            ccy.SelectedDeductions = ccy.ManualDeductions;
+                            ccy.SelectedGNWP = ccy.ManualGNWP;
+                            ccy.SelectedEU = ccy.ManualEU;
+                            break;
+                    }
+
+                    // Save each currency record
+                    await UltimatesService.SavePremiumCcy(ccy);
+                }
+
+                Logger.LogInformation("Saved {Count} PremiumCcy records with version {Version}", premiumCcyRecords.Count, newVersion);
+            }
 
             // Wait a moment then show success
             await Task.Delay(500);

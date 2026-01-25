@@ -115,8 +115,9 @@ namespace sandboxapp.Services
 
         /// <summary>
         /// Save Premium record (insert-only)
+        /// Returns the new version number
         /// </summary>
-        public async Task SavePremium(PremiumModel model)
+        public async Task<int> SavePremium(PremiumModel model)
         {
             try
             {
@@ -147,11 +148,78 @@ namespace sandboxapp.Services
 
                 _logger.LogInformation("Successfully saved Premium for Class={Class}, ReservingClass={ReservingClass}, YOA={YOA}, Version={Version} by {User}",
                     model.Class, model.ReservingClass, model.YOA, newVersion, userName);
+
+                // Return the new version so caller can use it for PremiumCcy
+                return newVersion;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error saving Premium for Class={Class}, ReservingClass={ReservingClass}, YOA={YOA}",
                     model.Class, model.ReservingClass, model.YOA);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Save PremiumCcy record (insert-only)
+        /// </summary>
+        public async Task SavePremiumCcy(PremiumCcyModel model)
+        {
+            try
+            {
+                using var connection = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
+                await connection.OpenAsync();
+
+                var parameters = new DynamicParameters();
+                parameters.Add("@Class", model.Class, DbType.String);
+                parameters.Add("@ReservingClass", model.ReservingClass, DbType.String);
+                parameters.Add("@YOA", model.YOA, DbType.Int32);
+                parameters.Add("@Version", model.Version, DbType.Int32);
+                parameters.Add("@Currency", model.Currency, DbType.String);
+
+                // Selected
+                parameters.Add("@SelectedGGWP", model.SelectedGGWP, DbType.Decimal);
+                parameters.Add("@SelectedDeductions", model.SelectedDeductions, DbType.Decimal);
+                parameters.Add("@SelectedGNWP", model.SelectedGNWP, DbType.Decimal);
+                parameters.Add("@SelectedEU", model.SelectedEU, DbType.Decimal);
+
+                // Manual
+                parameters.Add("@ManualGGWP", model.ManualGGWP, DbType.Decimal);
+                parameters.Add("@ManualDeductions", model.ManualDeductions, DbType.Decimal);
+                parameters.Add("@ManualGNWP", model.ManualGNWP, DbType.Decimal);
+                parameters.Add("@ManualEU", model.ManualEU, DbType.Decimal);
+
+                // Plan
+                parameters.Add("@PlanGGWP", model.PlanGGWP, DbType.Decimal);
+                parameters.Add("@PlanDeductions", model.PlanDeductions, DbType.Decimal);
+                parameters.Add("@PlanGNWP", model.PlanGNWP, DbType.Decimal);
+                parameters.Add("@PlanEU", model.PlanEU, DbType.Decimal);
+
+                // Written
+                parameters.Add("@WrittenGGWP", model.WrittenGGWP, DbType.Decimal);
+                parameters.Add("@WrittenDeductions", model.WrittenDeductions, DbType.Decimal);
+                parameters.Add("@WrittenGNWP", model.WrittenGNWP, DbType.Decimal);
+                parameters.Add("@WrittenEU", model.WrittenEU, DbType.Decimal);
+
+                // Signed
+                parameters.Add("@SignedGGWP", model.SignedGGWP, DbType.Decimal);
+                parameters.Add("@SignedDeductions", model.SignedDeductions, DbType.Decimal);
+                parameters.Add("@SignedGNWP", model.SignedGNWP, DbType.Decimal);
+                parameters.Add("@SignedEU", model.SignedEU, DbType.Decimal);
+
+                await connection.ExecuteAsync(
+                    "Ultimates.spUpsertUltimatePremiumCurrency",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                );
+
+                _logger.LogInformation("Successfully saved PremiumCcy for Class={Class}, ReservingClass={ReservingClass}, YOA={YOA}, Version={Version}, Currency={Currency}",
+                    model.Class, model.ReservingClass, model.YOA, model.Version, model.Currency);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error saving PremiumCcy for Class={Class}, ReservingClass={ReservingClass}, YOA={YOA}, Version={Version}, Currency={Currency}",
+                    model.Class, model.ReservingClass, model.YOA, model.Version, model.Currency);
                 throw;
             }
         }
