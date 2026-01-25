@@ -146,7 +146,7 @@ else if (filteredRecords != null && filteredRecords.Any())
                                 <td>@record.UpdatedBy</td>
                                 <td>@(record.UpdateComments ?? "-")</td>
                                 <td class="text-center">
-                                    <button type="button" class="btn btn-sm btn-primary" @onclick="() => OpenEditModal(record)">
+                                    <button type="button" class="btn btn-sm btn-primary" @onclick="async () => await OpenEditModal(record)">
                                         <i class="bi bi-pencil"></i> Edit
                                     </button>
                                 </td>
@@ -198,6 +198,148 @@ else
                             </select>
                         </div>
                     </div>
+
+                    <!-- Premium Currency Data -->
+                    @if (premiumCcyRecords != null && premiumCcyRecords.Any())
+                    {
+                        <!-- GGWP Matrix -->
+                        <div class="row mb-2">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header bg-light py-2" style="cursor: pointer;" @onclick="() => ggwpExpanded = !ggwpExpanded">
+                                        <h6 class="mb-0">
+                                            <i class="bi bi-chevron-@(ggwpExpanded ? "down" : "right") me-2"></i>
+                                            GGWP by Currency
+                                        </h6>
+                                    </div>
+                                    @if (ggwpExpanded)
+                                    {
+                                        <div class="card-body p-0">
+                                            <div class="table-responsive">
+                                                <table class="table table-sm table-bordered mb-0">
+                                                    <thead class="table-light">
+                                                        <tr>
+                                                            <th>Currency</th>
+                                                            <th class="text-end">Selected</th>
+                                                            <th class="text-end">Manual</th>
+                                                            <th class="text-end">Plan</th>
+                                                            <th class="text-end">Written</th>
+                                                            <th class="text-end">Signed</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (var ccy in premiumCcyRecords.OrderBy(c => c.Currency))
+                                                        {
+                                                            <tr>
+                                                                <td><strong>@ccy.Currency</strong></td>
+                                                                <td class="text-end">@FormatCurrency(ccy.SelectedGGWP)</td>
+                                                                <td class="text-end">@FormatCurrency(ccy.ManualGGWP)</td>
+                                                                <td class="text-end">@FormatCurrency(ccy.PlanGGWP)</td>
+                                                                <td class="text-end">@FormatCurrency(ccy.WrittenGGWP)</td>
+                                                                <td class="text-end">@FormatCurrency(ccy.SignedGGWP)</td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Deductions Matrix -->
+                        <div class="row mb-2">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header bg-light py-2" style="cursor: pointer;" @onclick="() => deductionsExpanded = !deductionsExpanded">
+                                        <h6 class="mb-0">
+                                            <i class="bi bi-chevron-@(deductionsExpanded ? "down" : "right") me-2"></i>
+                                            Deductions by Currency
+                                        </h6>
+                                    </div>
+                                    @if (deductionsExpanded)
+                                    {
+                                        <div class="card-body p-0">
+                                            <div class="table-responsive">
+                                                <table class="table table-sm table-bordered mb-0">
+                                                    <thead class="table-light">
+                                                        <tr>
+                                                            <th>Currency</th>
+                                                            <th class="text-end">Selected</th>
+                                                            <th class="text-end">Manual</th>
+                                                            <th class="text-end">Plan</th>
+                                                            <th class="text-end">Written</th>
+                                                            <th class="text-end">Signed</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (var ccy in premiumCcyRecords.OrderBy(c => c.Currency))
+                                                        {
+                                                            <tr>
+                                                                <td><strong>@ccy.Currency</strong></td>
+                                                                <td class="text-end">@FormatCurrency(ccy.SelectedDeductions)</td>
+                                                                <td class="text-end">@FormatCurrency(ccy.ManualDeductions)</td>
+                                                                <td class="text-end">@FormatCurrency(ccy.PlanDeductions)</td>
+                                                                <td class="text-end">@FormatCurrency(ccy.WrittenDeductions)</td>
+                                                                <td class="text-end">@FormatCurrency(ccy.SignedDeductions)</td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- GNWP Matrix -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header bg-light py-2" style="cursor: pointer;" @onclick="() => gnwpExpanded = !gnwpExpanded">
+                                        <h6 class="mb-0">
+                                            <i class="bi bi-chevron-@(gnwpExpanded ? "down" : "right") me-2"></i>
+                                            GNWP by Currency
+                                        </h6>
+                                    </div>
+                                    @if (gnwpExpanded)
+                                    {
+                                        <div class="card-body p-0">
+                                            <div class="table-responsive">
+                                                <table class="table table-sm table-bordered mb-0">
+                                                    <thead class="table-light">
+                                                        <tr>
+                                                            <th>Currency</th>
+                                                            <th class="text-end">Selected</th>
+                                                            <th class="text-end">Manual</th>
+                                                            <th class="text-end">Plan</th>
+                                                            <th class="text-end">Written</th>
+                                                            <th class="text-end">Signed</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (var ccy in premiumCcyRecords.OrderBy(c => c.Currency))
+                                                        {
+                                                            <tr>
+                                                                <td><strong>@ccy.Currency</strong></td>
+                                                                <td class="text-end">@FormatCurrency(ccy.SelectedGNWP)</td>
+                                                                <td class="text-end">@FormatCurrency(ccy.ManualGNWP)</td>
+                                                                <td class="text-end">@FormatCurrency(ccy.PlanGNWP)</td>
+                                                                <td class="text-end">@FormatCurrency(ccy.WrittenGNWP)</td>
+                                                                <td class="text-end">@FormatCurrency(ccy.SignedGNWP)</td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
 
                     <!-- Comments -->
                     <div class="row mb-3">
@@ -363,6 +505,12 @@ else
     private int selectedFxRateSetId;
     private Dictionary<string, decimal> fxRates = new();
 
+    // Premium Currency data
+    private List<PremiumCcyModel>? premiumCcyRecords;
+    private bool ggwpExpanded = true;
+    private bool deductionsExpanded = false;
+    private bool gnwpExpanded = false;
+
     protected override async Task OnInitializedAsync()
     {
         await LoadData();
@@ -391,6 +539,9 @@ else
                     .Distinct()
                     .OrderByDescending(y => y)
                     .ToList();
+
+                // Pre-calculate GGWP USD for all records
+                await CalculateGGWPUSD();
             }
 
             Logger.LogInformation("Loaded {RecordCount} Premium records", premiumRecords.Count);
@@ -403,6 +554,18 @@ else
         finally
         {
             isLoading = false;
+        }
+    }
+
+    private async Task CalculateGGWPUSD()
+    {
+        ggwpUsdCache.Clear();
+
+        foreach (var record in premiumRecords ?? Enumerable.Empty<PremiumListItemModel>())
+        {
+            var value = await GetGGWPUSDAsync(record);
+            var key = $"{record.Class}_{record.ReservingClass}_{record.YOA}_{record.Version}";
+            ggwpUsdCache[key] = value;
         }
     }
 
@@ -452,16 +615,79 @@ else
         StateHasChanged();
     }
 
+    private async Task<decimal?> GetGGWPUSDAsync(PremiumListItemModel record)
+    {
+        try
+        {
+            // Fetch PremiumCcy records for this Premium record
+            var ccyRecords = await UltimatesService.GetPremiumCcy(record.Class, record.ReservingClass, record.YOA, record.Version);
+
+            if (!ccyRecords.Any() || !fxRates.Any())
+                return null;
+
+            decimal total = 0;
+
+            foreach (var ccy in ccyRecords)
+            {
+                // Get the GGWP value based on Selection
+                decimal? ggwpValue = record.Selection switch
+                {
+                    "Plan" => ccy.PlanGGWP,
+                    "Written" => ccy.WrittenGGWP,
+                    "Signed" => ccy.SignedGGWP,
+                    "Manual" => ccy.ManualGGWP,
+                    _ => ccy.SelectedGGWP
+                };
+
+                if (!ggwpValue.HasValue || ggwpValue.Value == 0)
+                    continue;
+
+                // Convert to USD if not already USD
+                if (ccy.Currency.Equals("USD", StringComparison.OrdinalIgnoreCase))
+                {
+                    total += ggwpValue.Value;
+                }
+                else
+                {
+                    // Look up the FX rate
+                    var rateKey = $"{ccy.Currency}_USD";
+                    if (fxRates.TryGetValue(rateKey, out var rate))
+                    {
+                        total += ggwpValue.Value * rate;
+                    }
+                    else
+                    {
+                        // If no direct rate, try inverse
+                        var inverseKey = $"USD_{ccy.Currency}";
+                        if (fxRates.TryGetValue(inverseKey, out var inverseRate) && inverseRate != 0)
+                        {
+                            total += ggwpValue.Value / inverseRate;
+                        }
+                    }
+                }
+            }
+
+            return total > 0 ? total : null;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error calculating GGWP USD for record");
+            return null;
+        }
+    }
+
+    // Synchronous wrapper for display - caches the result
+    private Dictionary<string, decimal?> ggwpUsdCache = new();
+
     private decimal? GetGGWPUSD(PremiumListItemModel record)
     {
-        // TODO: This will fetch PremiumCcy records and convert to USD
-        // For now, return null as the PremiumCcy table doesn't exist yet
-        // When implemented, this should:
-        // 1. Fetch all PremiumCcy records for this Premium record
-        // 2. Filter by the selected GGWP field (based on Selection)
-        // 3. Convert each currency amount to USD using fxRates
-        // 4. Sum and return the total
-        return null;
+        var key = $"{record.Class}_{record.ReservingClass}_{record.YOA}_{record.Version}";
+        if (!ggwpUsdCache.ContainsKey(key))
+        {
+            // This will be calculated async on page load, for now return null
+            return null;
+        }
+        return ggwpUsdCache[key];
     }
 
     private string FormatCurrency(decimal? value)
@@ -502,7 +728,7 @@ else
         StateHasChanged();
     }
 
-    private void OpenEditModal(PremiumListItemModel record)
+    private async Task OpenEditModal(PremiumListItemModel record)
     {
         // Store prior comments
         priorComments = record.UpdateComments;
@@ -529,9 +755,27 @@ else
             UpdateComments = null
         };
 
+        // Load PremiumCcy data
+        await LoadPremiumCcyData(record.Class, record.ReservingClass, record.YOA, record.Version);
+
         isFormDirty = false;
         showEditModal = true;
         StateHasChanged();
+    }
+
+    private async Task LoadPremiumCcyData(string className, string reservingClass, int yoa, int version)
+    {
+        try
+        {
+            var data = await UltimatesService.GetPremiumCcy(className, reservingClass, yoa, version);
+            premiumCcyRecords = data.ToList();
+            Logger.LogInformation("Loaded {RecordCount} PremiumCcy records", premiumCcyRecords.Count);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading PremiumCcy data");
+            premiumCcyRecords = new List<PremiumCcyModel>();
+        }
     }
 
     private async Task CloseEditModal()
