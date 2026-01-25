@@ -189,14 +189,6 @@ else
                                 <option value="Manual">Manual</option>
                             </select>
                         </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">Gross/Net Entry <span class="text-danger">*</span></label>
-                            <select class="form-select" @bind="selectedPremium.GrossNetEntry" @bind:after="OnGrossNetChanged" required>
-                                <option value="Gross">Gross</option>
-                                <option value="Net">Net</option>
-                            </select>
-                        </div>
                     </div>
 
                     <!-- Premium Currency Data -->
@@ -344,6 +336,88 @@ else
                                 </div>
                             </div>
                         </div>
+                    }
+
+                    <!-- Manual Entry Section -->
+                    @if (selectedPremium.Selection == "Manual")
+                    {
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h6 class="fw-bold mb-3">Manual Entry (GBP Values)</h6>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold">Entry Type <span class="text-danger">*</span></label>
+                                <select class="form-select" @bind="selectedPremium.GrossNetEntry" @bind:after="OnGrossNetChanged" required>
+                                    <option value="Gross">Gross</option>
+                                    <option value="Net">Net</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold">Gross Premium (GBP)</label>
+                                <input type="number" step="0.01" class="form-control" @bind="selectedPremium.ManualGrossPremiumGBP"
+                                       @bind:event="oninput" @bind:after="OnManualGrossChanged"
+                                       disabled="@(selectedPremium.GrossNetEntry == "Net")" />
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold">Net Premium (GBP)</label>
+                                <input type="number" step="0.01" class="form-control" @bind="selectedPremium.ManualNetPremiumGBP"
+                                       @bind:event="oninput" @bind:after="OnManualNetChanged"
+                                       disabled="@(selectedPremium.GrossNetEntry == "Gross")" />
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold">Deductions (%)</label>
+                                <input type="number" step="0.01" min="0" max="100" class="form-control" @bind="selectedPremium.ManualDeductions"
+                                       @bind:event="oninput" @bind:after="OnManualDeductionsChanged" />
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Currency Splits (must total 100%)</label>
+                            </div>
+                            <div class="col">
+                                <label class="form-label">GBP %</label>
+                                <input type="number" step="0.01" min="0" max="100" class="form-control" @bind="selectedPremium.ManualSplitGBP"
+                                       @bind:event="oninput" @bind:after="OnCurrencySplitChanged" />
+                            </div>
+                            <div class="col">
+                                <label class="form-label">USD %</label>
+                                <input type="number" step="0.01" min="0" max="100" class="form-control" @bind="selectedPremium.ManualSplitUSD"
+                                       @bind:event="oninput" @bind:after="OnCurrencySplitChanged" />
+                            </div>
+                            <div class="col">
+                                <label class="form-label">CAD %</label>
+                                <input type="number" step="0.01" min="0" max="100" class="form-control" @bind="selectedPremium.ManualSplitCAD"
+                                       @bind:event="oninput" @bind:after="OnCurrencySplitChanged" />
+                            </div>
+                            <div class="col">
+                                <label class="form-label">EUR %</label>
+                                <input type="number" step="0.01" min="0" max="100" class="form-control" @bind="selectedPremium.ManualSplitEUR"
+                                       @bind:event="oninput" @bind:after="OnCurrencySplitChanged" />
+                            </div>
+                            <div class="col">
+                                <label class="form-label">JPY %</label>
+                                <input type="number" step="0.01" min="0" max="100" class="form-control" @bind="selectedPremium.ManualSplitJPY"
+                                       @bind:event="oninput" @bind:after="OnCurrencySplitChanged" />
+                            </div>
+                        </div>
+
+                        @if (currencySplitTotal.HasValue && currencySplitTotal.Value != 100)
+                        {
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <div class="alert alert-warning py-2">
+                                        Currency splits total @currencySplitTotal.Value.ToString("F2")% (must equal 100%)
+                                    </div>
+                                </div>
+                            </div>
+                        }
                     }
 
                     <!-- Comments -->
@@ -513,6 +587,9 @@ else
     // Premium Currency data
     private List<PremiumCcyModel>? premiumCcyRecords;
     private string activeTab = "ggwp";
+
+    // Manual Entry
+    private decimal? currencySplitTotal;
 
     protected override async Task OnInitializedAsync()
     {
@@ -887,9 +964,190 @@ else
 
     private void OnGrossNetChanged()
     {
+        // Recalculate based on entry type
+        if (selectedPremium.GrossNetEntry == "Gross" && selectedPremium.ManualGrossPremiumGBP.HasValue)
+        {
+            CalculateNetFromGross();
+        }
+        else if (selectedPremium.GrossNetEntry == "Net" && selectedPremium.ManualNetPremiumGBP.HasValue)
+        {
+            CalculateGrossFromNet();
+        }
+
         OnFormChanged();
-        // Force UI refresh to update premium column headers
         StateHasChanged();
+    }
+
+    private void OnManualGrossChanged()
+    {
+        if (selectedPremium.GrossNetEntry == "Gross")
+        {
+            CalculateNetFromGross();
+        }
+        DistributeManualAmounts();
+        OnFormChanged();
+        StateHasChanged();
+    }
+
+    private void OnManualNetChanged()
+    {
+        if (selectedPremium.GrossNetEntry == "Net")
+        {
+            CalculateGrossFromNet();
+        }
+        DistributeManualAmounts();
+        OnFormChanged();
+        StateHasChanged();
+    }
+
+    private void OnManualDeductionsChanged()
+    {
+        // Recalculate based on entry type
+        if (selectedPremium.GrossNetEntry == "Gross" && selectedPremium.ManualGrossPremiumGBP.HasValue)
+        {
+            CalculateNetFromGross();
+        }
+        else if (selectedPremium.GrossNetEntry == "Net" && selectedPremium.ManualNetPremiumGBP.HasValue)
+        {
+            CalculateGrossFromNet();
+        }
+
+        DistributeManualAmounts();
+        OnFormChanged();
+        StateHasChanged();
+    }
+
+    private void OnCurrencySplitChanged()
+    {
+        CalculateCurrencySplitTotal();
+        DistributeManualAmounts();
+        OnFormChanged();
+        StateHasChanged();
+    }
+
+    private void CalculateNetFromGross()
+    {
+        if (!selectedPremium.ManualGrossPremiumGBP.HasValue) return;
+
+        var deductions = selectedPremium.ManualDeductions ?? 0;
+        selectedPremium.ManualNetPremiumGBP = selectedPremium.ManualGrossPremiumGBP.Value * (1 - deductions / 100);
+    }
+
+    private void CalculateGrossFromNet()
+    {
+        if (!selectedPremium.ManualNetPremiumGBP.HasValue) return;
+
+        var deductions = selectedPremium.ManualDeductions ?? 0;
+        if (deductions >= 100) return; // Prevent division by zero
+
+        selectedPremium.ManualGrossPremiumGBP = selectedPremium.ManualNetPremiumGBP.Value / (1 - deductions / 100);
+    }
+
+    private void CalculateCurrencySplitTotal()
+    {
+        var total = (selectedPremium.ManualSplitGBP ?? 0) +
+                    (selectedPremium.ManualSplitUSD ?? 0) +
+                    (selectedPremium.ManualSplitCAD ?? 0) +
+                    (selectedPremium.ManualSplitEUR ?? 0) +
+                    (selectedPremium.ManualSplitJPY ?? 0);
+
+        currencySplitTotal = total > 0 ? total : null;
+    }
+
+    private void InitializeManualPremiumCcyRecords()
+    {
+        if (selectedPremium == null) return;
+
+        premiumCcyRecords = new List<PremiumCcyModel>
+        {
+            new PremiumCcyModel
+            {
+                Class = selectedPremium.Class,
+                ReservingClass = selectedPremium.ReservingClass,
+                YOA = selectedPremium.YOA,
+                Version = selectedPremium.Version,
+                Currency = "GBP"
+            },
+            new PremiumCcyModel
+            {
+                Class = selectedPremium.Class,
+                ReservingClass = selectedPremium.ReservingClass,
+                YOA = selectedPremium.YOA,
+                Version = selectedPremium.Version,
+                Currency = "USD"
+            },
+            new PremiumCcyModel
+            {
+                Class = selectedPremium.Class,
+                ReservingClass = selectedPremium.ReservingClass,
+                YOA = selectedPremium.YOA,
+                Version = selectedPremium.Version,
+                Currency = "CAD"
+            },
+            new PremiumCcyModel
+            {
+                Class = selectedPremium.Class,
+                ReservingClass = selectedPremium.ReservingClass,
+                YOA = selectedPremium.YOA,
+                Version = selectedPremium.Version,
+                Currency = "EUR"
+            },
+            new PremiumCcyModel
+            {
+                Class = selectedPremium.Class,
+                ReservingClass = selectedPremium.ReservingClass,
+                YOA = selectedPremium.YOA,
+                Version = selectedPremium.Version,
+                Currency = "JPY"
+            }
+        };
+
+        // Populate the Manual fields
+        DistributeManualAmounts();
+    }
+
+    private void DistributeManualAmounts()
+    {
+        if (premiumCcyRecords == null || !premiumCcyRecords.Any()) return;
+        if (!selectedPremium.ManualGrossPremiumGBP.HasValue) return;
+
+        CalculateCurrencySplitTotal();
+        if (!currencySplitTotal.HasValue || currencySplitTotal.Value != 100) return;
+
+        var ggwpGBP = selectedPremium.ManualGrossPremiumGBP.Value;
+        var gnwpGBP = selectedPremium.ManualNetPremiumGBP ?? ggwpGBP;
+        var deductions = selectedPremium.ManualDeductions ?? 0;
+
+        // Distribute to each currency
+        var currencies = new[]
+        {
+            ("GBP", selectedPremium.ManualSplitGBP ?? 0),
+            ("USD", selectedPremium.ManualSplitUSD ?? 0),
+            ("CAD", selectedPremium.ManualSplitCAD ?? 0),
+            ("EUR", selectedPremium.ManualSplitEUR ?? 0),
+            ("JPY", selectedPremium.ManualSplitJPY ?? 0)
+        };
+
+        foreach (var (currency, splitPct) in currencies)
+        {
+            if (splitPct <= 0) continue;
+
+            var ccyRecord = premiumCcyRecords.FirstOrDefault(c => c.Currency == currency);
+            if (ccyRecord == null) continue;
+
+            // Calculate the GBP amount for this currency based on split
+            var ggwpAmountGBP = ggwpGBP * (splitPct / 100);
+            var gnwpAmountGBP = gnwpGBP * (splitPct / 100);
+
+            // Convert to target currency using FX rates
+            var ggwpInCurrency = ConvertCurrency(ggwpAmountGBP, "GBP", currency) ?? ggwpAmountGBP;
+            var gnwpInCurrency = ConvertCurrency(gnwpAmountGBP, "GBP", currency) ?? gnwpAmountGBP;
+
+            // Update the ManualGGWP and ManualGNWP fields
+            ccyRecord.ManualGGWP = ggwpInCurrency;
+            ccyRecord.ManualGNWP = gnwpInCurrency;
+            ccyRecord.ManualDeductions = deductions;
+        }
     }
 
     private void SetActiveTab(string tab)
@@ -991,6 +1249,31 @@ else
             modalErrorMessage = "Year of Account must be between 1900 and 2100";
             StateHasChanged();
             return;
+        }
+
+        // Validate Manual entry
+        if (selectedPremium.Selection == "Manual")
+        {
+            if (!selectedPremium.ManualGrossPremiumGBP.HasValue || selectedPremium.ManualGrossPremiumGBP.Value <= 0)
+            {
+                modalErrorMessage = "Manual Gross Premium must be entered for Manual selection";
+                StateHasChanged();
+                return;
+            }
+
+            CalculateCurrencySplitTotal();
+            if (!currencySplitTotal.HasValue || currencySplitTotal.Value != 100)
+            {
+                modalErrorMessage = $"Currency splits must total 100% (currently {currencySplitTotal ?? 0:F2}%)";
+                StateHasChanged();
+                return;
+            }
+
+            // Initialize PremiumCcy records if they don't exist
+            if (premiumCcyRecords == null || !premiumCcyRecords.Any())
+            {
+                InitializeManualPremiumCcyRecords();
+            }
         }
 
         isSaving = true;

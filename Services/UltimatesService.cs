@@ -140,6 +140,16 @@ namespace sandboxapp.Services
                 parameters.Add("@UpdatedBy", userName, DbType.String);
                 parameters.Add("@UpdateComments", model.UpdateComments, DbType.String);
 
+                // Manual Entry Fields
+                parameters.Add("@ManualGrossPremiumGBP", model.ManualGrossPremiumGBP, DbType.Decimal);
+                parameters.Add("@ManualNetPremiumGBP", model.ManualNetPremiumGBP, DbType.Decimal);
+                parameters.Add("@ManualDeductions", model.ManualDeductions, DbType.Decimal);
+                parameters.Add("@ManualSplitGBP", model.ManualSplitGBP, DbType.Decimal);
+                parameters.Add("@ManualSplitUSD", model.ManualSplitUSD, DbType.Decimal);
+                parameters.Add("@ManualSplitCAD", model.ManualSplitCAD, DbType.Decimal);
+                parameters.Add("@ManualSplitEUR", model.ManualSplitEUR, DbType.Decimal);
+                parameters.Add("@ManualSplitJPY", model.ManualSplitJPY, DbType.Decimal);
+
                 await connection.ExecuteAsync(
                     "Ultimates.spUpsertUltimatePremium",
                     parameters,
