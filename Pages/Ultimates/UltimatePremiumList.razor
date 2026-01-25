@@ -179,110 +179,140 @@ else
             <div class="modal-body-custom">
                 <div class="container-fluid">
                     <!-- Key Fields (read-only for existing) -->
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <h5 class="border-bottom pb-2">Identification</h5>
+                    <div class="section-card mb-4">
+                        <div class="section-header">
+                            <i class="bi bi-card-heading me-2"></i>
+                            <h5 class="mb-0">Identification</h5>
                         </div>
-                    </div>
+                        <div class="section-body">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label text-muted small mb-1">CLASS</label>
+                                    <div class="locked-field">
+                                        <i class="bi bi-lock-fill text-muted me-2"></i>
+                                        <strong>@selectedPremium.Class</strong>
+                                    </div>
+                                </div>
 
-                    <div class="row mb-3">
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold">Class</label>
-                            <input type="text" class="form-control" value="@selectedPremium.Class" disabled />
-                        </div>
+                                <div class="col-md-4">
+                                    <label class="form-label text-muted small mb-1">RESERVING CLASS</label>
+                                    <div class="locked-field">
+                                        <i class="bi bi-lock-fill text-muted me-2"></i>
+                                        <strong>@selectedPremium.ReservingClass</strong>
+                                    </div>
+                                </div>
 
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold">Reserving Class</label>
-                            <input type="text" class="form-control" value="@selectedPremium.ReservingClass" disabled />
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold">Year of Account</label>
-                            <input type="number" class="form-control" value="@selectedPremium.YOA" disabled />
+                                <div class="col-md-4">
+                                    <label class="form-label text-muted small mb-1">YEAR OF ACCOUNT</label>
+                                    <div class="locked-field">
+                                        <i class="bi bi-lock-fill text-muted me-2"></i>
+                                        <strong>@selectedPremium.YOA</strong>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Selection Fields -->
-                    <div class="row mb-4 mt-5">
-                        <div class="col-12">
-                            <h5 class="border-bottom pb-2">Selection</h5>
+                    <div class="section-card mb-4">
+                        <div class="section-header">
+                            <i class="bi bi-toggle-on me-2"></i>
+                            <h5 class="mb-0">Premium Selection</h5>
                         </div>
-                    </div>
+                        <div class="section-body">
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">
+                                        Selection Type <span class="text-danger">*</span>
+                                    </label>
+                                    <select class="form-select form-select-lg" @bind="selectedPremium.Selection" @bind:after="OnFormChanged" required>
+                                        <option value="Plan">📋 Plan</option>
+                                        <option value="Written">✍️ Written</option>
+                                        <option value="Signed">✅ Signed</option>
+                                        <option value="Manual">⌨️ Manual</option>
+                                    </select>
+                                    <small class="form-text text-muted mt-1 d-block">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        Determines which set of values to use
+                                    </small>
+                                </div>
 
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">Selection <span class="text-danger">*</span></label>
-                            <select class="form-select" @bind="selectedPremium.Selection" @bind:after="OnFormChanged" required>
-                                <option value="Plan">Plan</option>
-                                <option value="Written">Written</option>
-                                <option value="Signed">Signed</option>
-                                <option value="Manual">Manual</option>
-                            </select>
-                            <small class="form-text text-muted">
-                                Determines which set of values to use (Plan, Written, Signed, or Manual entry)
-                            </small>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">Gross/Net Entry <span class="text-danger">*</span></label>
-                            <select class="form-select" @bind="selectedPremium.GrossNetEntry" @bind:after="OnFormChanged" required>
-                                <option value="Gross">Gross</option>
-                                <option value="Net">Net</option>
-                            </select>
-                            <small class="form-text text-muted">
-                                Specifies whether entered values represent Gross or Net premium
-                            </small>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">
+                                        Gross/Net Entry <span class="text-danger">*</span>
+                                    </label>
+                                    <select class="form-select form-select-lg" @bind="selectedPremium.GrossNetEntry" @bind:after="OnFormChanged" required>
+                                        <option value="Gross">💰 Gross Premium</option>
+                                        <option value="Net">📊 Net Premium</option>
+                                    </select>
+                                    <small class="form-text text-muted mt-1 d-block">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        Specifies whether values are Gross or Net
+                                    </small>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Comments -->
-                    <div class="row mb-4 mt-5">
-                        <div class="col-12">
-                            <h5 class="border-bottom pb-2">Comments</h5>
+                    <div class="section-card mb-4">
+                        <div class="section-header">
+                            <i class="bi bi-chat-left-text me-2"></i>
+                            <h5 class="mb-0">Comments</h5>
                         </div>
-                    </div>
-
-                    <div class="row mb-3">
-                        <div class="col-12">
-                            <label class="form-label fw-bold">Update Comments</label>
+                        <div class="section-body">
+                            <label class="form-label fw-semibold">Update Comments</label>
                             <textarea class="form-control" rows="4" @bind="selectedPremium.UpdateComments" @bind:event="oninput" @bind:after="OnFormChanged"
-                                      placeholder="Optional comments about this update..."></textarea>
+                                      placeholder="Enter any comments about this update..." style="resize: vertical;"></textarea>
                         </div>
                     </div>
 
                     <!-- Audit Info (Read-only) -->
-                    <div class="row mb-4 mt-5">
-                        <div class="col-12">
-                            <h5 class="border-bottom pb-2">Audit Information</h5>
+                    <div class="section-card mb-4">
+                        <div class="section-header audit-header">
+                            <i class="bi bi-clock-history me-2"></i>
+                            <h5 class="mb-0">Audit Information</h5>
                         </div>
-                    </div>
+                        <div class="section-body">
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label class="form-label text-muted small mb-1">VERSION</label>
+                                    <div class="audit-field">
+                                        <span class="badge bg-info fs-6">v@selectedPremium.Version</span>
+                                    </div>
+                                </div>
 
-                    <div class="row mb-3">
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold">Version</label>
-                            <input type="number" class="form-control" value="@selectedPremium.Version" disabled />
-                        </div>
+                                <div class="col-md-4">
+                                    <label class="form-label text-muted small mb-1">LAST UPDATED</label>
+                                    <div class="audit-field">
+                                        <i class="bi bi-calendar-event text-muted me-2"></i>
+                                        @selectedPremium.DateUpdated.ToString("yyyy-MM-dd HH:mm")
+                                    </div>
+                                </div>
 
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold">Last Updated</label>
-                            <input type="text" class="form-control" value="@selectedPremium.DateUpdated.ToString("yyyy-MM-dd HH:mm")" disabled />
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold">Updated By</label>
-                            <input type="text" class="form-control" value="@selectedPremium.UpdatedBy" disabled />
-                        </div>
-                    </div>
-
-                    @if (!string.IsNullOrWhiteSpace(priorComments))
-                    {
-                        <div class="row mb-3">
-                            <div class="col-12">
-                                <label class="form-label fw-bold">Prior Comments</label>
-                                <textarea class="form-control bg-light" rows="3" value="@priorComments" disabled></textarea>
+                                <div class="col-md-4">
+                                    <label class="form-label text-muted small mb-1">UPDATED BY</label>
+                                    <div class="audit-field">
+                                        <i class="bi bi-person-fill text-muted me-2"></i>
+                                        @selectedPremium.UpdatedBy
+                                    </div>
+                                </div>
                             </div>
+
+                            @if (!string.IsNullOrWhiteSpace(priorComments))
+                            {
+                                <div class="prior-comments-box">
+                                    <label class="form-label text-muted small mb-2">
+                                        <i class="bi bi-archive me-1"></i>
+                                        PRIOR COMMENTS
+                                    </label>
+                                    <div class="prior-comments-content">
+                                        @priorComments
+                                    </div>
+                                </div>
+                            }
                         </div>
-                    }
+                    </div>
 
                     <!-- Error Message -->
                     @if (!string.IsNullOrEmpty(modalErrorMessage))
@@ -322,52 +352,239 @@ else
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(4px);
             z-index: 1050;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
+            animation: fadeIn 0.2s ease-in;
+        }
+
+        @@keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @@keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .modal-container {
-            background: white;
-            border-radius: 8px;
+            background: #f8f9fa;
+            border-radius: 12px;
             width: calc(100vw - 80px);
             max-width: 1400px;
             height: calc(100vh - 80px);
             display: flex;
             flex-direction: column;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            animation: slideUp 0.3s ease-out;
         }
 
         .modal-header-custom {
-            padding: 1.5rem 2rem;
+            padding: 1.75rem 2.5rem;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            border-radius: 8px 8px 0 0;
+            border-radius: 12px 12px 0 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .modal-header-custom h3 {
             margin: 0;
             font-size: 1.5rem;
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
 
         .modal-body-custom {
             flex: 1;
             overflow-y: auto;
-            padding: 2rem;
+            padding: 2rem 2.5rem;
+            background: #f8f9fa;
+        }
+
+        .modal-body-custom::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .modal-body-custom::-webkit-scrollbar-track {
+            background: #e9ecef;
+        }
+
+        .modal-body-custom::-webkit-scrollbar-thumb {
+            background: #adb5bd;
+            border-radius: 4px;
+        }
+
+        .modal-body-custom::-webkit-scrollbar-thumb:hover {
+            background: #6c757d;
+        }
+
+        .section-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e9ecef;
+            transition: box-shadow 0.2s ease;
+        }
+
+        .section-card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+        }
+
+        .section-header {
+            padding: 1rem 1.5rem;
+            background: linear-gradient(to right, #f8f9fa, #ffffff);
+            border-bottom: 2px solid #e9ecef;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-header i {
+            font-size: 1.25rem;
+            color: #667eea;
+        }
+
+        .section-header h5 {
+            color: #495057;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .audit-header {
+            background: linear-gradient(to right, #fff4e6, #ffffff);
+            border-bottom-color: #ffe0b2;
+        }
+
+        .audit-header i {
+            color: #ff9800;
+        }
+
+        .section-body {
+            padding: 1.5rem;
+        }
+
+        .locked-field {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            min-height: 42px;
+        }
+
+        .locked-field i {
+            font-size: 0.875rem;
+        }
+
+        .locked-field strong {
+            color: #495057;
+            font-size: 1.05rem;
+        }
+
+        .audit-field {
+            background: #fffbf5;
+            border: 1px solid #ffe0b2;
+            border-radius: 6px;
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            min-height: 42px;
+            color: #495057;
+        }
+
+        .prior-comments-box {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: linear-gradient(135deg, #fff9e6 0%, #fffbf5 100%);
+            border: 1px solid #ffe0b2;
+            border-radius: 6px;
+        }
+
+        .prior-comments-content {
+            padding: 0.75rem;
+            background: white;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            color: #6c757d;
+            font-style: italic;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .form-select-lg {
+            padding: 0.75rem 1rem;
+            font-size: 1.05rem;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .form-select-lg:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+
+        .form-control {
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
         }
 
         .modal-footer-custom {
-            padding: 1.5rem 2rem;
-            border-top: 1px solid #dee2e6;
+            padding: 1.5rem 2.5rem;
+            background: white;
+            border-top: 2px solid #e9ecef;
+            border-radius: 0 0 12px 12px;
             display: flex;
             justify-content: flex-end;
             gap: 1rem;
+        }
+
+        .modal-footer-custom .btn {
+            padding: 0.75rem 2rem;
+            font-weight: 500;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .modal-footer-custom .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            box-shadow: 0 2px 4px rgba(102, 126, 234, 0.4);
+        }
+
+        .modal-footer-custom .btn-primary:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.5);
+        }
+
+        .modal-footer-custom .btn-secondary {
+            background: #6c757d;
+            border: none;
+        }
+
+        .modal-footer-custom .btn-secondary:hover {
+            background: #5a6268;
         }
     </style>
 }
