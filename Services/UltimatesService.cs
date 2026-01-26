@@ -149,6 +149,7 @@ namespace sandboxapp.Services
                 parameters.Add("@ManualSplitCAD", model.ManualSplitCAD, DbType.Decimal);
                 parameters.Add("@ManualSplitEUR", model.ManualSplitEUR, DbType.Decimal);
                 parameters.Add("@ManualSplitJPY", model.ManualSplitJPY, DbType.Decimal);
+                parameters.Add("@ManualEUSplit", model.ManualEUSplit, DbType.Decimal);
 
                 await connection.ExecuteAsync(
                     "Ultimates.spUpsertUltimatePremium",
