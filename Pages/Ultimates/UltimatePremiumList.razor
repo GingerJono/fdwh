@@ -241,6 +241,11 @@ else
                                             GNWP by Currency
                                         </button>
                                     </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link @(activeTab == "eu" ? "active" : "")" @onclick="@(() => SetActiveTab("eu"))" type="button">
+                                            EU by Currency
+                                        </button>
+                                    </li>
                                 </ul>
 
                                 <div class="tab-content border border-top-0 p-0">
@@ -327,6 +332,36 @@ else
                                                             <td class="text-end">@FormatCurrency(ccy.PlanGNWP)</td>
                                                             <td class="text-end">@FormatCurrency(ccy.WrittenGNWP)</td>
                                                             <td class="text-end">@FormatCurrency(ccy.SignedGNWP)</td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    }
+
+                                    <!-- EU Tab -->
+                                    @if (activeTab == "eu")
+                                    {
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-bordered mb-0">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>Currency</th>
+                                                        <th class="text-end">Selected</th>
+                                                        <th class="text-end">Plan</th>
+                                                        <th class="text-end">Written</th>
+                                                        <th class="text-end">Signed</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var ccy in premiumCcyRecords.OrderBy(c => c.Currency))
+                                                    {
+                                                        <tr>
+                                                            <td><strong>@ccy.Currency</strong></td>
+                                                            <td class="text-end"><strong>@FormatPercentage(GetSelectedValue(ccy, "EU"))</strong></td>
+                                                            <td class="text-end">@FormatPercentage(ccy.PlanEU)</td>
+                                                            <td class="text-end">@FormatPercentage(ccy.WrittenEU)</td>
+                                                            <td class="text-end">@FormatPercentage(ccy.SignedEU)</td>
                                                         </tr>
                                                     }
                                                 </tbody>
@@ -423,6 +458,21 @@ else
                                 </div>
                             </div>
                         }
+
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label class="form-label fw-bold">EU / LNDN Split</label>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">EU %</label>
+                                <input type="number" step="0.01" min="0" max="100" class="form-control" @bind="selectedPremium.ManualEUSplit"
+                                       @bind:event="oninput" @bind:after="OnFormChanged" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">LNDN %</label>
+                                <input type="number" step="0.01" class="form-control" value="@GetLNDNSplit()" disabled />
+                            </div>
+                        </div>
                     }
 
                     <!-- Comments -->
@@ -920,7 +970,8 @@ else
             ManualSplitUSD = fullRecord.ManualSplitUSD,
             ManualSplitCAD = fullRecord.ManualSplitCAD,
             ManualSplitEUR = fullRecord.ManualSplitEUR,
-            ManualSplitJPY = fullRecord.ManualSplitJPY
+            ManualSplitJPY = fullRecord.ManualSplitJPY,
+            ManualEUSplit = fullRecord.ManualEUSplit
         };
 
         // Load PremiumCcy data
@@ -1004,6 +1055,7 @@ else
                       selectedPremium.ManualSplitCAD != originalPremium.ManualSplitCAD ||
                       selectedPremium.ManualSplitEUR != originalPremium.ManualSplitEUR ||
                       selectedPremium.ManualSplitJPY != originalPremium.ManualSplitJPY ||
+                      selectedPremium.ManualEUSplit != originalPremium.ManualEUSplit ||
                       !string.IsNullOrWhiteSpace(selectedPremium.UpdateComments);
     }
 
@@ -1106,6 +1158,11 @@ else
                     (selectedPremium.ManualSplitJPY ?? 0);
 
         currencySplitTotal = total > 0 ? total : null;
+    }
+
+    private decimal GetLNDNSplit()
+    {
+        return 100 - (selectedPremium.ManualEUSplit ?? 0);
     }
 
     private string GetCalculatedCurrencyValue(string currency)

@@ -38,6 +38,9 @@ namespace sandboxapp.Models.Ultimates
         public decimal? ManualSplitEUR { get; set; }
         public decimal? ManualSplitJPY { get; set; }
 
+        // EU/LNDN Split Percentage (EU %, LNDN is 100-EU)
+        public decimal? ManualEUSplit { get; set; }
+
         public DateTime DateUpdated { get; set; }
 
         public string UpdatedBy { get; set; } = string.Empty;
