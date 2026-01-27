@@ -222,6 +222,30 @@ public class MenuDataServiceSandbox
 			selected: false,
 			active: false,
 			dirChange: false
+		),
+		new MainMenuItems (
+			path: "Exceptions/Statuses",
+			type: "link",
+			title: "Statuses",
+			selected: false,
+			active: false,
+			dirChange: false
+		),
+		new MainMenuItems (
+			path: "Exceptions/Rules",
+			type: "link",
+			title: "Rules",
+			selected: false,
+			active: false,
+			dirChange: false
+		),
+		new MainMenuItems (
+			path: "Exceptions/Tolerances",
+			type: "link",
+			title: "Tolerances",
+			selected: false,
+			active: false,
+			dirChange: false
 		)
 	}
 ),
@@ -239,7 +263,7 @@ public class MenuDataServiceSandbox
 			children: new MainMenuItems[]
 			{
 				new MainMenuItems(
-					path: "Ultimates/Premium",
+					path: "Ultimates/UltimatePremium",
 					type: "link",
 					title: "Premium",
 					selected: false,

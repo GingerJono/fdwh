@@ -1,0 +1,159 @@
+@page "/Exceptions/Statuses"
+@using Sandbox.Models.Exceptions
+
+<div class="row mt-4 mb-4">
+    <h3>Exception Status Information</h3>
+    <p class="text-muted">Understanding the different exception statuses and their meanings</p>
+</div>
+
+<div class="card shadow mb-4 border">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Status Definitions</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th style="width: 15%;">Status</th>
+                        <th style="width: 15%;">Default Mode</th>
+                        <th style="width: 70%;">Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var status in StatusDefinitions)
+                    {
+                        <tr>
+                            <td><span class="badge @GetStatusBadgeClass(status.StatusName)">@status.StatusName</span></td>
+                            <td><span class="badge @GetModeBadgeClass(status.DefaultMode)">@status.DefaultMode</span></td>
+                            <td>@status.Description</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card shadow mb-4 border border-success">
+            <div class="card-header bg-success text-white">
+                <h6 class="mb-0">Edit Mode Statuses</h6>
+            </div>
+            <div class="card-body">
+                <p class="mb-2">These statuses require action and allow full editing capabilities:</p>
+                <ul class="mb-0">
+                    @foreach (var status in StatusDefinitions.Where(s => s.DefaultMode == "Edit"))
+                    {
+                        <li><strong>@status.StatusName</strong>: @status.Description</li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow mb-4 border border-info">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0">View Mode Statuses</h6>
+            </div>
+            <div class="card-body">
+                <p class="mb-2">These statuses are informational and have restricted editing:</p>
+                <ul class="mb-0">
+                    @foreach (var status in StatusDefinitions.Where(s => s.DefaultMode == "View"))
+                    {
+                        <li><strong>@status.StatusName</strong>: @status.Description</li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-3">
+    <a href="/AllExceptions" class="btn btn-primary">View All Exceptions</a>
+    <a href="/Exceptions/Rules" class="btn btn-info ms-2">View Rules</a>
+    <a href="/Exceptions/Tolerances" class="btn btn-success ms-2">View Tolerances</a>
+</div>
+
+@code {
+    private class StatusDefinition
+    {
+        public string StatusName { get; set; } = "";
+        public string DefaultMode { get; set; } = "";
+        public string Description { get; set; } = "";
+    }
+
+    private List<StatusDefinition> StatusDefinitions = new()
+    {
+        new StatusDefinition
+        {
+            StatusName = "New",
+            DefaultMode = "Edit",
+            Description = "Newly appearing Exception, not yet actioned"
+        },
+        new StatusDefinition
+        {
+            StatusName = "Disappeared",
+            DefaultMode = "View",
+            Description = "A previously appearing Exception that no longer appears due to a change in source data"
+        },
+        new StatusDefinition
+        {
+            StatusName = "Reappeared",
+            DefaultMode = "Edit",
+            Description = "An Exception that previously Disappeared due to a change in source data, now reappears due to a further change in source data"
+        },
+        new StatusDefinition
+        {
+            StatusName = "Checked",
+            DefaultMode = "View",
+            Description = "A User has manually approved that this Exception is valid"
+        },
+        new StatusDefinition
+        {
+            StatusName = "Deferred",
+            DefaultMode = "Edit",
+            Description = "The User has chosen to delay their activity by a week (e.g. to wait for broker to respond)"
+        },
+        new StatusDefinition
+        {
+            StatusName = "Changed",
+            DefaultMode = "View",
+            Description = "A User has attested that they have changed the source data (e.g. a correction)"
+        },
+        new StatusDefinition
+        {
+            StatusName = "Untoleranced",
+            DefaultMode = "Edit",
+            Description = "A Checked exception has reappeared due to a change in the source data outside of the agreed tolerance"
+        },
+        new StatusDefinition
+        {
+            StatusName = "Reflagged",
+            DefaultMode = "Edit",
+            Description = "An Exception marked previously as Changed has reappeared, potentially indicating that the correction was not implemented correctly"
+        }
+    };
+
+    private string GetStatusBadgeClass(string status)
+    {
+        return status switch
+        {
+            "New" => "bg-primary",
+            "Disappeared" => "bg-secondary",
+            "Reappeared" => "bg-warning",
+            "Checked" => "bg-success",
+            "Deferred" => "bg-info",
+            "Changed" => "bg-success",
+            "Untoleranced" => "bg-danger",
+            "Reflagged" => "bg-danger",
+            _ => "bg-secondary"
+        };
+    }
+
+    private string GetModeBadgeClass(string mode)
+    {
+        return mode == "Edit" ? "bg-success" : "bg-info";
+    }
+}

@@ -1,7 +1,9 @@
 @page "/Exception/{RuleID:int}/{BusinessID}"
 @using Sandbox.Models.Exceptions
 @using Sandbox.Services
+@using CardModel
 @inject ExceptionService ExceptionService
+@inject WindowpaneService WindowpaneService
 @inject NavigationManager NavigationManager
 
 <h3 class="mt-3 mb-4">Exception Details</h3>
@@ -40,12 +42,15 @@ else
 </div>
 
     <div class="card shadow mb-4 border">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">Exception Information</h5>
+        </div>
         <div class="card-body">
             <table class="table table-bordered table-sm mb-0">
                 <tbody>
-                    <tr><th>Rule ID</th><td>@CurrentStatic.RuleID</td></tr>
+                    <tr><th style="width: 25%;">Rule ID</th><td>@CurrentStatic.RuleID</td></tr>
                     <tr><th>Business ID</th><td>@CurrentStatic.BusinessID</td></tr>
-                    <tr><th>Status</th><td>@CurrentStatic.Status</td></tr>
+                    <tr><th>Status</th><td><span class="badge @GetStatusBadgeClass(CurrentStatic.Status)">@CurrentStatic.Status</span></td></tr>
                     <tr><th>Prior Status</th><td>@CurrentStatic.PriorStatus</td></tr>
                     <tr><th>Reason</th><td>@CurrentStatic.Reason</td></tr>
                     <tr><th>User</th><td>@CurrentStatic.User</td></tr>
@@ -55,17 +60,75 @@ else
         </div>
     </div>
 
+    @if (PolicyHeaderData.Count > 0)
+    {
+        <div class="card shadow mb-4 border">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Policy Details</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-bordered table-sm mb-0">
+                    <tbody>
+                        <tr><th style="width: 25%;">Assured</th><td>@PolicyHeaderData.GetValueOrDefault("Assured")</td></tr>
+                        <tr><th>Class</th><td>@PolicyHeaderData.GetValueOrDefault("Class")</td></tr>
+                        <tr><th>Reserving Class</th><td>@PolicyHeaderData.GetValueOrDefault("ReservingClass")</td></tr>
+                        <tr><th>Inception Date</th><td>@PolicyHeaderData.GetValueOrDefault("Inception")</td></tr>
+                        <tr><th>Underwriter</th><td>@PolicyHeaderData.GetValueOrDefault("UW")</td></tr>
+                        <tr><th>Status</th><td>@PolicyHeaderData.GetValueOrDefault("Status")</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+
+    @if (IsViewMode)
+    {
+        <div class="alert alert-info mb-4">
+            <i class="bi bi-info-circle"></i> This exception is in <strong>View Mode</strong> (Status: @CurrentStatic.Status). Editing is restricted for this status.
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-success mb-4">
+            <i class="bi bi-pencil"></i> This exception is in <strong>Edit Mode</strong> (Status: @CurrentStatic.Status). You can take action on this exception.
+        </div>
+    }
+
     <EditForm Model="@this" OnValidSubmit="() => SubmitAction(SelectedAction)">
         <div class="mb-3">
             <label for="notes" class="form-label">Notes</label>
-            <textarea id="notes" class="form-control" rows="6" @bind="@Notes" disabled="@IsDisabled"></textarea>
+            <textarea id="notes" class="form-control @(IsViewMode ? "view-mode-disabled" : "")" rows="6" @bind="@Notes" disabled="@(IsDisabled || IsViewMode)"></textarea>
         </div>
 
         <div class="mb-3 d-flex gap-2">
-            <button type="button" class="btn btn-outline-success" disabled="@IsDisabled" @onclick='() => SubmitAction("Checked")'>Mark as Checked</button>
-            <button type="button" class="btn btn-outline-warning" disabled="@IsDisabled" @onclick='() => SubmitAction("Changed")'>Mark as Changed</button>
-            <button type="button" class="btn btn-outline-primary" disabled="@IsDisabled" @onclick='() => SubmitAction("Assigned")'>Assign</button>
-            <button type="button" class="btn btn-outline-secondary" disabled="@IsDisabled" @onclick='() => SubmitAction("Deferred")'>Defer</button>
+            <button type="button" class="btn btn-outline-success @(IsViewMode || IsDisabled ? "view-mode-disabled" : "")" disabled="@(IsDisabled || IsViewMode)" @onclick='() => SubmitAction("Checked")'>
+                @if (IsViewMode || IsDisabled)
+                {
+                    <i class="bi bi-lock-fill"></i>
+                }
+                Mark as Checked
+            </button>
+            <button type="button" class="btn btn-outline-warning @(IsViewMode || IsDisabled ? "view-mode-disabled" : "")" disabled="@(IsDisabled || IsViewMode)" @onclick='() => SubmitAction("Changed")'>
+                @if (IsViewMode || IsDisabled)
+                {
+                    <i class="bi bi-lock-fill"></i>
+                }
+                Mark as Changed
+            </button>
+            <button type="button" class="btn btn-outline-primary @(IsViewMode || IsDisabled ? "view-mode-disabled" : "")" disabled="@(IsDisabled || IsViewMode)" @onclick='() => SubmitAction("Assigned")'>
+                @if (IsViewMode || IsDisabled)
+                {
+                    <i class="bi bi-lock-fill"></i>
+                }
+                Assign
+            </button>
+            <button type="button" class="btn btn-outline-secondary @(IsViewMode || IsDisabled ? "view-mode-disabled" : "")" disabled="@(IsDisabled || IsViewMode)" @onclick='() => SubmitAction("Deferred")'>
+                @if (IsViewMode || IsDisabled)
+                {
+                    <i class="bi bi-lock-fill"></i>
+                }
+                Defer
+            </button>
         </div>
     </EditForm>
 
@@ -99,6 +162,18 @@ else
             </table>
         </div>
     </div>
+
+    @if (!string.IsNullOrEmpty(BusinessID))
+    {
+        <h5 class="mt-5">Policy Documents</h5>
+        <DataCard DivClasses="mb-4" HeaderTitle="Documents" MethodName="GetPolicySnapshotDocuments" ID="@BusinessID" />
+
+        @if (ProgrammeRef != null)
+        {
+            <h5 class="mt-5">Programme Documents</h5>
+            <DataCard DivClasses="mb-4" HeaderTitle="Documents" MethodName="GetProgramSnapshotDocuments" ID="@ProgrammeRef" />
+        }
+    }
 }
 
 @code {
@@ -110,22 +185,92 @@ else
     private string Notes = string.Empty;
     private bool IsDisabled = false;
     private string SelectedAction;
+    private bool IsViewMode => GetIsViewMode();
+
+    private Dictionary<string, string> PolicyHeaderData { get; set; } = new();
+    private string? ProgrammeRef => !string.IsNullOrEmpty(BusinessID) && BusinessID.Length >= 10 ? BusinessID.Substring(0, 10) : null;
+
+    // View Mode statuses
+    private readonly HashSet<string> ViewModeStatuses = new()
+    {
+        "Disappeared",
+        "Checked",
+        "Changed"
+    };
+
+    // Edit Mode statuses
+    private readonly HashSet<string> EditModeStatuses = new()
+    {
+        "New",
+        "Reappeared",
+        "Deferred",
+        "Untoleranced",
+        "Reflagged"
+    };
 
     protected override async Task OnInitializedAsync()
     {
         History = await ExceptionService.GetExceptionHistoryAsync(RuleID, BusinessID);
         CurrentStatic = History.OrderByDescending(h => h.CreatedDate).FirstOrDefault();
+
+        // Fetch policy header data if BusinessID is provided
+        if (!string.IsNullOrEmpty(BusinessID))
+        {
+            PolicyHeaderData = WindowpaneService.GetPolicyHeaderKeyValuePairs(BusinessID)
+                ?? new Dictionary<string, string>();
+        }
+    }
+
+    private bool GetIsViewMode()
+    {
+        if (CurrentStatic == null) return false;
+        return ViewModeStatuses.Contains(CurrentStatic.Status);
     }
 
     private async Task SubmitAction(string action)
     {
-        if (IsDisabled) return;
+        if (IsDisabled || IsViewMode) return;
 
         SelectedAction = action;
         await ExceptionService.UpdateExceptionStatusAsync(RuleID, BusinessID, Environment.UserName, Notes, action);
 
         IsDisabled = true;
         History = await ExceptionService.GetExceptionHistoryAsync(RuleID, BusinessID);
+        CurrentStatic = History.OrderByDescending(h => h.CreatedDate).FirstOrDefault();
         StateHasChanged();
     }
+
+    private string GetStatusBadgeClass(string? status)
+    {
+        return status switch
+        {
+            "New" => "bg-primary",
+            "Disappeared" => "bg-secondary",
+            "Reappeared" => "bg-warning text-dark",
+            "Checked" => "bg-success",
+            "Deferred" => "bg-info text-dark",
+            "Changed" => "bg-success",
+            "Untoleranced" => "bg-danger",
+            "Reflagged" => "bg-danger",
+            _ => "bg-secondary"
+        };
+    }
 }
+
+<style>
+    .view-mode-disabled {
+        opacity: 0.5;
+        cursor: not-allowed !important;
+        background-color: #e9ecef !important;
+        border-color: #dee2e6 !important;
+    }
+
+    .view-mode-disabled:disabled {
+        opacity: 0.5;
+    }
+
+    textarea.view-mode-disabled {
+        background-color: #f8f9fa !important;
+        color: #6c757d !important;
+    }
+</style>

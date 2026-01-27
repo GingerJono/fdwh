@@ -1,0 +1,100 @@
+@page "/Exceptions/Tolerances"
+@inject Sandbox.Services.ExceptionService ExceptionService
+@using Sandbox.Models.Exceptions
+
+<div class="row mt-4 mb-4">
+    <h3>Tolerances</h3>
+    <p class="text-muted">Configure tolerances for exception rules</p>
+</div>
+
+@if (ClassTolerances == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <!-- Tabs Navigation -->
+    <ul class="nav nav-tabs mb-3" id="tolerancesTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="class-tolerances-tab" data-bs-toggle="tab" data-bs-target="#class-tolerances" type="button" role="tab" aria-controls="class-tolerances" aria-selected="true">
+                Class Tolerances
+            </button>
+        </li>
+    </ul>
+
+    <!-- Tabs Content -->
+    <div class="tab-content" id="tolerancesTabsContent">
+        <!-- Class Tolerances Tab -->
+        <div class="tab-pane fade show active" id="class-tolerances" role="tabpanel" aria-labelledby="class-tolerances-tab">
+            <div class="card shadow mb-4 border">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Class Tolerances</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th style="width: 30%;">Class Code</th>
+                                    <th style="width: 35%;">Deductions Above Percentage</th>
+                                    <th style="width: 35%;">Rate Change Below Percentage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var tolerance in ClassTolerances.OrderBy(t => t.ClassCode))
+                                {
+                                    <tr>
+                                        <td><strong>@tolerance.ClassCode</strong></td>
+                                        <td>
+                                            @if (tolerance.DeductionsAbovePercentage.HasValue)
+                                            {
+                                                <span class="badge bg-warning text-dark">@tolerance.DeductionsAbovePercentage.Value.ToString("0.00")%</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">N/A</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (tolerance.RateChangeBelowPercentage.HasValue)
+                                            {
+                                                <span class="badge bg-info text-dark">@tolerance.RateChangeBelowPercentage.Value.ToString("0.00")%</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">N/A</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert alert-info mt-3">
+                <h6 class="alert-heading">About Class Tolerances</h6>
+                <p class="mb-0">
+                    <strong>Deductions Above Percentage:</strong> Triggers an exception when total deductions exceed this percentage threshold.<br/>
+                    <strong>Rate Change Below Percentage:</strong> Triggers an exception when rate changes fall below this percentage threshold.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <a href="/AllExceptions" class="btn btn-primary">View All Exceptions</a>
+        <a href="/Exceptions/Rules" class="btn btn-info ms-2">View Rules</a>
+        <a href="/Exceptions/Statuses" class="btn btn-success ms-2">View Statuses</a>
+    </div>
+}
+
+@code {
+    private List<ClassTolerance>? ClassTolerances;
+
+    protected override async Task OnInitializedAsync()
+    {
+        ClassTolerances = (await ExceptionService.GetClassTolerancesAsync()).ToList();
+    }
+}

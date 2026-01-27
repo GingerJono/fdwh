@@ -1,0 +1,139 @@
+@page "/Exceptions/Rules"
+@inject Sandbox.Services.ExceptionService ExceptionService
+@using Sandbox.Models.Exceptions
+
+<div class="row mt-4 mb-4">
+    <h3>Exception Rules</h3>
+    <p class="text-muted">All rules and their associated exception counts</p>
+</div>
+
+@if (RulesWithCounts == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card shadow mb-4 border">
+                <div class="card-body">
+                    <h5 class="card-title mb-1">Total Rules</h5>
+                    <p class="fs-4 fw-bold mb-0">@RulesWithCounts.Count</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow mb-4 border">
+                <div class="card-body">
+                    <h5 class="card-title mb-1">Total Exceptions</h5>
+                    <p class="fs-4 fw-bold mb-0">@RulesWithCounts.Sum(r => r.TotalExceptionsCount)</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow mb-4 border">
+                <div class="card-body">
+                    <h5 class="card-title mb-1">Open Exceptions</h5>
+                    <p class="fs-4 fw-bold text-danger mb-0">@RulesWithCounts.Sum(r => r.OpenExceptionsCount)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4 border">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Rules List</h5>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-striped table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th style="width: 5%;">Rule ID</th>
+                        <th style="width: 25%;">Description</th>
+                        <th style="width: 10%;">Business Unit</th>
+                        <th style="width: 12%;">Field Name</th>
+                        <th style="width: 8%;">Value Type</th>
+                        <th style="width: 10%;">Comparison</th>
+                        <th style="width: 12%;">Responsible Team</th>
+                        <th style="width: 8%;" class="text-center">Historical Exceptions</th>
+                        <th style="width: 8%;" class="text-center">Open Exceptions</th>
+                        <th style="width: 10%;">Last Updated</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var rule in RulesWithCounts.OrderBy(r => r.RuleID))
+                    {
+                        <tr>
+                            <td>@rule.RuleID</td>
+                            <td>@rule.RuleDescription</td>
+                            <td>@rule.BusinessUnit</td>
+                            <td>@rule.FieldName</td>
+                            <td>@rule.ValueType</td>
+                            <td>@rule.GreaterThanLessThan</td>
+                            <td>@rule.ResponsibleTeam</td>
+                            <td class="text-center">
+                                <span class="badge bg-info">@rule.TotalExceptionsCount</span>
+                            </td>
+                            <td class="text-center">
+                                @if (rule.OpenExceptionsCount > 0)
+                                {
+                                    <span class="badge bg-danger">@rule.OpenExceptionsCount</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success">0</span>
+                                }
+                            </td>
+                            <td>@(rule.LastUpdated?.ToString("yyyy-MM-dd") ?? "N/A")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <a href="/AllExceptions" class="btn btn-primary">View All Exceptions</a>
+        <a href="/Exceptions/Statuses" class="btn btn-info ms-2">View Statuses</a>
+        <a href="/Exceptions/Tolerances" class="btn btn-success ms-2">View Tolerances</a>
+    </div>
+}
+
+@code {
+    private List<RuleWithCounts>? RulesWithCounts;
+    private List<ExceptionRecord>? AllExceptions;
+
+    // Edit statuses that are considered "Open"
+    private readonly HashSet<string> EditStatuses = new()
+    {
+        "New",
+        "Reappeared",
+        "Deferred",
+        "Untoleranced",
+        "Reflagged"
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        var rules = (await ExceptionService.GetRulesAsync()).ToList();
+        AllExceptions = (await ExceptionService.GetExceptions()).ToList();
+
+        RulesWithCounts = rules.Select(rule => new RuleWithCounts
+        {
+            RuleID = rule.RuleID,
+            RuleDescription = rule.RuleDescription,
+            BusinessUnit = rule.BusinessUnit,
+            FieldName = rule.FieldName,
+            ValueType = rule.ValueType,
+            GreaterThanLessThan = rule.GreaterThanLessThan,
+            ResponsibleTeam = rule.ResponsibleTeam,
+            ReappearanceThreshold = (double)rule.ReappearanceThreshold,
+            StoredProcedure = rule.StoredProcedure,
+            Comment = rule.Comment,
+            CreatedDate = rule.CreatedDate ?? DateTime.MinValue,
+            LastUpdated = rule.LastUpdated,
+            TotalExceptionsCount = AllExceptions.Count(e => e.RuleID == rule.RuleID),
+            OpenExceptionsCount = AllExceptions.Count(e => e.RuleID == rule.RuleID && EditStatuses.Contains(e.Status))
+        }).ToList();
+    }
+}

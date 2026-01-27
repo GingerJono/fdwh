@@ -1,29 +1,101 @@
-@page "/Ultimates/Premium"
+@page "/Ultimates/UltimatePremium"
 @using sandboxapp.Models.Ultimates
 @using sandboxapp.Services
-@using sandboxapp.Utilities
 @inject UltimatesService UltimatesService
-@inject FxConversionService FxConversion
-@inject CurrencySettingsService CurrencySettings
 @inject NavigationManager NavigationManager
 @inject ILogger<UltimatePremiumList> Logger
+@inject IJSRuntime JSRuntime
 
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="Ultimates/Premium">ULTIMATES</a></li>
+        <li class="breadcrumb-item"><a href="/Ultimates/UltimatePremium">ULTIMATES</a></li>
         <li class="breadcrumb-item active" aria-current="page">PREMIUM</li>
     </ol>
 </nav>
 
 <div class="row mb-2">
     <div class="col">
-        <h3 class="mb-1">Ultimate Premium Tracking</h3>
-        <p class="text-muted mb-0" style="font-size: 0.85rem;">View and edit underwriter selections of Ultimate Premium by Class and YOA</p>
+        <h1>Ultimate Premium Tracking</h1>
+        <p class="text-muted">View and edit ultimate premium selections by Class, Reserving Class, and YOA</p>
+    </div>
+    <div class="col-auto">
+        @if (availableFxRateSets != null && availableFxRateSets.Any())
+        {
+            <label class="form-label mb-1"><small>FX Rate Set (Display Only)</small></label>
+            <select class="form-select form-select-sm" style="width: 250px;" @bind="selectedFxRateSetId" @bind:after="OnFxRateSetChanged">
+                @foreach (var rateSet in availableFxRateSets.OrderByDescending(rs => rs.EffectiveDate))
+                {
+                    <option value="@rateSet.FxRateSetID">
+                        @rateSet.RateSetName @(rateSet.EffectiveDate.HasValue ? $"({rateSet.EffectiveDate.Value:yyyy-MM-dd})" : "")
+                    </option>
+                }
+            </select>
+        }
     </div>
 </div>
 
-<!-- Currency Settings Component -->
-<UltimateCurrencySettings OnSettingsChanged="OnCurrencySettingsChanged" />
+@if (premiumRecords != null && premiumRecords.Any())
+{
+    <!-- Filters Section -->
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="row">
+                <!-- Class Filter -->
+                <div class="col-md-6 mb-3">
+                    <h6 class="mb-2"><i class="bi bi-funnel"></i> Filter by Class</h6>
+                    <div class="d-flex flex-wrap gap-2">
+                        <button type="button"
+                                class="btn btn-sm @(selectedClass == null ? "btn-primary" : "btn-outline-primary")"
+                                @onclick="() => FilterByClass(null)">
+                            All
+                        </button>
+                        @foreach (var className in distinctClasses)
+                        {
+                            <button type="button"
+                                    class="btn btn-sm @(selectedClass == className ? "btn-primary" : "btn-outline-primary")"
+                                    @onclick="() => FilterByClass(className)">
+                                @className
+                            </button>
+                        }
+                    </div>
+                </div>
+
+                <!-- YOA Filter -->
+                <div class="col-md-6 mb-3">
+                    <h6 class="mb-2"><i class="bi bi-funnel"></i> Filter by YOA</h6>
+                    <div class="d-flex flex-wrap gap-2">
+                        <button type="button"
+                                class="btn btn-sm @(selectedYOA == null ? "btn-primary" : "btn-outline-primary")"
+                                @onclick="() => FilterByYOA(null)">
+                            All
+                        </button>
+                        @foreach (var yoa in distinctYOAs.OrderByDescending(y => y))
+                        {
+                            <button type="button"
+                                    class="btn btn-sm @(selectedYOA == yoa ? "btn-primary" : "btn-outline-primary")"
+                                    @onclick="() => FilterByYOA(yoa)">
+                                @yoa
+                            </button>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            @if (selectedClass != null || selectedYOA != null)
+            {
+                <div class="row">
+                    <div class="col-12">
+                        <small class="text-muted">
+                            Showing @filteredRecords.Count() of @premiumRecords.Count records
+                            @if (selectedClass != null) { <text> | Class: <strong>@selectedClass</strong></text> }
+                            @if (selectedYOA != null) { <text> | YOA: <strong>@selectedYOA</strong></text> }
+                        </small>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
 
 @if (isLoading)
 {
@@ -31,170 +103,15 @@
         <div class="spinner-border text-primary" role="status">
             <span class="visually-hidden">Loading...</span>
         </div>
-        <p class="mt-2">Loading Ultimate Premium data...</p>
+        <p class="mt-2">Loading Premium data...</p>
     </div>
 }
-else if (allRecords != null && allRecords.Any())
+else if (filteredRecords != null && filteredRecords.Any())
 {
-    <!-- Summary Cards (Left) and Heatmap (Right) -->
-    <div class="row mb-2">
-        <!-- Left: Summary Cards (6 cards in 2 columns) -->
-        <div class="col-md-6">
-            <div class="row g-2">
-                <div class="col-md-6">
-                    <div class="card border-primary h-100">
-                        <div class="card-body text-center py-2 px-2">
-                            <p class="text-muted text-uppercase mb-1" style="font-size: 0.7rem;">@GetCurrencySymbol() Gross Premium</p>
-                            <h4 class="mb-0 text-primary" style="font-size: 1.5rem;">@FormatCurrencyConverted(GetTotalGrossPremium())</h4>
-                            <small class="text-muted" style="font-size: 0.65rem;">@CurrencySettings.DisplayCurrency</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card border-success h-100">
-                        <div class="card-body text-center py-2 px-2">
-                            <p class="text-muted text-uppercase mb-1" style="font-size: 0.7rem;">@GetCurrencySymbol() Net Premium</p>
-                            <h4 class="mb-0 text-success" style="font-size: 1.5rem;">@FormatCurrencyConverted(GetTotalNetPremium())</h4>
-                            <small class="text-muted" style="font-size: 0.65rem;">@CurrencySettings.DisplayCurrency</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card border-warning h-100">
-                        <div class="card-body text-center py-2 px-2">
-                            <p class="text-muted text-uppercase mb-1" style="font-size: 0.7rem;">@GetCurrencySymbol() RIPs</p>
-                            <h4 class="mb-0 text-warning" style="font-size: 1.5rem;">@FormatCurrencyConverted(GetTotalRIPs())</h4>
-                            <small class="text-muted" style="font-size: 0.65rem;">@CurrencySettings.DisplayCurrency</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card border-info h-100">
-                        <div class="card-body text-center py-2 px-2">
-                            <p class="text-muted text-uppercase mb-1" style="font-size: 0.7rem;">@GetCurrencySymbol() PC</p>
-                            <h4 class="mb-0 text-info" style="font-size: 1.5rem;">@FormatCurrencyConverted(GetTotalPC())</h4>
-                            <small class="text-muted" style="font-size: 0.65rem;">@CurrencySettings.DisplayCurrency</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card border-secondary h-100">
-                        <div class="card-body text-center py-2 px-2">
-                            <p class="text-muted text-uppercase mb-1" style="font-size: 0.7rem;">Latest Update</p>
-                            <h4 class="mb-0 text-secondary" style="font-size: 1.5rem;">@FormatDate(GetLatestUpdateDate())</h4>
-                            <small class="text-muted" style="font-size: 0.65rem;">Most recent change</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card border-dark h-100">
-                        <div class="card-body text-center py-2 px-2">
-                            <p class="text-muted text-uppercase mb-1" style="font-size: 0.7rem;">Total Updates</p>
-                            <h4 class="mb-0 text-dark" style="font-size: 1.5rem;">@GetTotalUpdateCount()</h4>
-                            <small class="text-muted" style="font-size: 0.65rem;">All submissions</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Right: Heatmap -->
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header bg-success text-white py-1">
-                    <h6 class="mb-0" style="font-size: 0.85rem;">Gross Premium Heatmap (millions @CurrencySettings.DisplayCurrency)</h6>
-                </div>
-                <div class="card-body p-1">
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-sm mb-0" style="font-size: 0.75rem;">
-                            <thead>
-                                <tr>
-                                    <th class="text-center align-middle" style="padding: 2px 4px;">Class</th>
-                                    @foreach (var yoa in availableYOAs)
-                                    {
-                                        <th class="text-center align-middle" style="padding: 2px 4px;">@yoa</th>
-                                    }
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var className in availableClasses)
-                                {
-                                    <tr>
-                                        <td class="text-center fw-bold align-middle" style="padding: 2px 4px;">@className</td>
-                                        @foreach (var yoa in availableYOAs)
-                                        {
-                                            var cellData = GetHeatmapCellData(className, yoa);
-                                            var bgColor = GetHeatmapColor(cellData.GrossPremium);
-                                            var textColor = GetHeatmapTextColor(cellData.GrossPremium);
-                                            var tooltip = GetTooltipContent(cellData);
-
-                                            <td class="text-center align-middle"
-                                                style="padding: 2px 4px; background-color: @bgColor; color: @textColor; cursor: pointer;"
-                                                title="@tooltip"
-                                                data-bs-toggle="tooltip"
-                                                data-bs-html="true"
-                                                @onclick="@(() => NavigateToEdit(className, yoa))">
-                                                @FormatMillions(cellData.GrossPremium)
-                                            </td>
-                                        }
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Filters -->
-    <div class="card mb-2">
-        <div class="card-header bg-light py-1">
-            <h6 class="mb-0" style="font-size: 0.85rem;">Filters</h6>
-        </div>
-        <div class="card-body py-2 px-3">
-            <!-- YOA Filter Pills -->
-            <div class="mb-2">
-                <label class="form-label fw-bold mb-1" style="font-size: 0.8rem;">Year of Account:</label>
-                <div class="d-flex flex-wrap gap-1">
-                    <button class="btn btn-sm @(selectedYOA == null ? "btn-primary" : "btn-outline-primary")" style="padding: 0.15rem 0.5rem; font-size: 0.75rem;"
-                            @onclick="() => FilterByYOA(null)">
-                        All YOAs
-                    </button>
-                    @foreach (var yoa in availableYOAs)
-                    {
-                        <button class="btn btn-sm @(selectedYOA == yoa ? "btn-primary" : "btn-outline-primary")" style="padding: 0.15rem 0.5rem; font-size: 0.75rem;"
-                                @onclick="() => FilterByYOA(yoa)">
-                            @yoa
-                        </button>
-                    }
-                </div>
-            </div>
-
-            <!-- Class Filter Pills -->
-            <div class="mb-0">
-                <label class="form-label fw-bold mb-1" style="font-size: 0.8rem;">Class:</label>
-                <div class="d-flex flex-wrap gap-1">
-                    <button class="btn btn-sm @(selectedClass == null ? "btn-success" : "btn-outline-success")" style="padding: 0.15rem 0.5rem; font-size: 0.75rem;"
-                            @onclick="() => FilterByClass(null)">
-                        All Classes
-                    </button>
-                    @foreach (var className in availableClasses)
-                    {
-                        <button class="btn btn-sm @(selectedClass == className ? "btn-success" : "btn-outline-success")" style="padding: 0.15rem 0.5rem; font-size: 0.75rem;"
-                                @onclick="() => FilterByClass(className)">
-                            @className
-                        </button>
-                    }
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Data Table -->
     <div class="card">
-        <div class="card-header bg-primary text-white py-1">
-            <h6 class="mb-0" style="font-size: 0.85rem;">Class / YOA Summary (Converted to @CurrencySettings.DisplayCurrency)</h6>
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Premium Selections</h5>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -202,53 +119,40 @@ else if (allRecords != null && allRecords.Any())
                     <thead>
                         <tr>
                             <th>Class</th>
+                            <th>Reserving Class</th>
                             <th>YOA</th>
-                            <th class="text-end"># Records</th>
-                            <th class="text-end"># Updates</th>
-                            <th class="text-end">@GetCurrencySymbol() Total Gross Premium</th>
-                            <th class="text-end">@GetCurrencySymbol() Total Net Premium</th>
-                            <th class="text-end">@GetCurrencySymbol() Total RIPs</th>
-                            <th class="text-end">@GetCurrencySymbol() Total PC</th>
+                            <th>Version</th>
+                            <th>Selection</th>
+                            <th>Gross/Net</th>
+                            <th class="text-end">GGWP USD</th>
                             <th>Last Updated</th>
                             <th>Updated By</th>
+                            <th>Comments</th>
                             <th class="text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var summary in GetFilteredSummaries())
+                        @foreach (var record in filteredRecords.OrderBy(r => r.Class).ThenBy(r => r.ReservingClass).ThenByDescending(r => r.YOA))
                         {
                             <tr>
-                                <td><strong>@summary.Class</strong></td>
-                                <td><strong>@summary.YOA</strong></td>
-                                <td class="text-end">@summary.RecordCount</td>
-                                <td class="text-end"><span class="badge bg-info">@summary.UpdateCount</span></td>
-                                <td class="text-end">@FormatCurrencyConverted(summary.TotalGrossPremium)</td>
-                                <td class="text-end">@FormatCurrencyConverted(summary.TotalNetPremium)</td>
-                                <td class="text-end">@FormatCurrencyConverted(summary.TotalRIPs)</td>
-                                <td class="text-end">@FormatCurrencyConverted(summary.TotalPC)</td>
-                                <td>@FormatDate(summary.LastUpdatedDate)</td>
-                                <td>@summary.LastUpdatedBy</td>
+                                <td><strong>@record.Class</strong></td>
+                                <td><strong>@GetReservingClassName(record.Class, record.ReservingClass)</strong></td>
+                                <td><strong>@record.YOA</strong></td>
+                                <td><span class="badge bg-info">@record.Version</span></td>
+                                <td><span class="badge bg-@GetSelectionBadgeColor(record.Selection)">@record.Selection</span></td>
+                                <td><span class="badge bg-secondary">@record.GrossNetEntry</span></td>
+                                <td class="text-end"><strong>@FormatCurrency(GetGGWPUSD(record))</strong></td>
+                                <td>@FormatDate(record.DateUpdated)</td>
+                                <td>@record.UpdatedBy</td>
+                                <td>@(record.UpdateComments ?? "-")</td>
                                 <td class="text-center">
-                                    <a href="Ultimates/Premium/Edit/@summary.Class/@summary.YOA"
-                                       class="btn btn-sm btn-primary">
+                                    <button type="button" class="btn btn-sm btn-primary" @onclick="async () => await OpenEditModal(record)">
                                         <i class="bi bi-pencil"></i> Edit
-                                    </a>
+                                    </button>
                                 </td>
                             </tr>
                         }
                     </tbody>
-                    <tfoot>
-                        <tr class="table-secondary fw-bold">
-                            <td colspan="2">FILTERED TOTAL</td>
-                            <td class="text-end">@GetFilteredRecordCount()</td>
-                            <td class="text-end">@GetFilteredUpdateCount()</td>
-                            <td class="text-end">@FormatCurrencyConverted(GetFilteredTotalGrossPremium())</td>
-                            <td class="text-end">@FormatCurrencyConverted(GetFilteredTotalNetPremium())</td>
-                            <td class="text-end">@FormatCurrencyConverted(GetFilteredTotalRIPs())</td>
-                            <td class="text-end">@FormatCurrencyConverted(GetFilteredTotalPC())</td>
-                            <td colspan="3"></td>
-                        </tr>
-                    </tfoot>
                 </table>
             </div>
         </div>
@@ -257,58 +161,521 @@ else if (allRecords != null && allRecords.Any())
 else
 {
     <div class="alert alert-info">
-        <h5>No Ultimate Premium Data Found</h5>
-        <p>No Ultimate Premium data has been entered yet. Use the database scripts to populate initial data.</p>
+        <h5>No Matching Records</h5>
+        <p>No Premium records match the selected filters.</p>
     </div>
+}
+<!-- Edit Modal (Inline) -->
+@if (showEditModal && selectedPremium != null)
+{
+    <!-- Full-screen modal overlay -->
+    <div class="modal-overlay" @onclick="HandleOverlayClick" @onkeydown="HandleKeyDown" tabindex="-1">
+        <div class="modal-container" @onclick:stopPropagation="true">
+            <div class="modal-header-custom">
+                <h3>Edit Premium: @selectedPremium.Class / @GetReservingClassName(selectedPremium.Class, selectedPremium.ReservingClass) / @selectedPremium.YOA</h3>
+                <button type="button" class="btn-close btn-close-white" @onclick="CloseEditModal"></button>
+            </div>
+
+            <div class="modal-body-custom">
+                <div class="container-fluid">
+                    <!-- Selection Fields -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Selection <span class="text-danger">*</span></label>
+                            <select class="form-select" @bind="selectedPremium.Selection" @bind:after="OnSelectionChanged" required>
+                                <option value="Plan">Plan</option>
+                                <option value="Written">Written</option>
+                                <option value="Signed">Signed</option>
+                                <option value="Manual">Manual</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Premium Currency Data -->
+                    @if (premiumCcyRecords != null && premiumCcyRecords.Any())
+                    {
+                        <!-- Summary Banner -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <div class="card bg-light">
+                                    <div class="card-body py-2">
+                                        <div class="row text-center">
+                                            <div class="col-3">
+                                                <small class="text-muted d-block">GGWP USD</small>
+                                                <h5 class="mb-0">@FormatCurrency(CalculateTotalGGWP("USD"))</h5>
+                                            </div>
+                                            <div class="col-3">
+                                                <small class="text-muted d-block">GGWP GBP</small>
+                                                <h5 class="mb-0">@FormatCurrency(CalculateTotalGGWP("GBP"))</h5>
+                                            </div>
+                                            <div class="col-3">
+                                                <small class="text-muted d-block">GNWP USD</small>
+                                                <h5 class="mb-0">@FormatCurrency(CalculateTotalGNWP("USD"))</h5>
+                                            </div>
+                                            <div class="col-3">
+                                                <small class="text-muted d-block">GNWP GBP</small>
+                                                <h5 class="mb-0">@FormatCurrency(CalculateTotalGNWP("GBP"))</h5>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tabbed Matrices -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <ul class="nav nav-tabs" role="tablist">
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link @(activeTab == "ggwp" ? "active" : "")" @onclick="@(() => SetActiveTab("ggwp"))" type="button">
+                                            GGWP by Currency
+                                        </button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link @(activeTab == "deductions" ? "active" : "")" @onclick="@(() => SetActiveTab("deductions"))" type="button">
+                                            Deductions by Currency
+                                        </button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link @(activeTab == "gnwp" ? "active" : "")" @onclick="@(() => SetActiveTab("gnwp"))" type="button">
+                                            GNWP by Currency
+                                        </button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link @(activeTab == "eu" ? "active" : "")" @onclick="@(() => SetActiveTab("eu"))" type="button">
+                                            EU by Currency
+                                        </button>
+                                    </li>
+                                </ul>
+
+                                <div class="tab-content border border-top-0 p-0">
+                                    <!-- GGWP Tab -->
+                                    @if (activeTab == "ggwp")
+                                    {
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-bordered mb-0">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>Currency</th>
+                                                        <th class="text-end">Selected</th>
+                                                        <th class="text-end">Plan</th>
+                                                        <th class="text-end">Written</th>
+                                                        <th class="text-end">Signed</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var ccy in premiumCcyRecords.OrderBy(c => c.Currency))
+                                                    {
+                                                        <tr>
+                                                            <td><strong>@ccy.Currency</strong></td>
+                                                            <td class="text-end"><strong>@FormatCurrency(GetSelectedValue(ccy, "GGWP"))</strong></td>
+                                                            <td class="text-end">@FormatCurrency(ccy.PlanGGWP)</td>
+                                                            <td class="text-end">@FormatCurrency(ccy.WrittenGGWP)</td>
+                                                            <td class="text-end">@FormatCurrency(ccy.SignedGGWP)</td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    }
+
+                                    <!-- Deductions Tab -->
+                                    @if (activeTab == "deductions")
+                                    {
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-bordered mb-0">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>Currency</th>
+                                                        <th class="text-end">Selected</th>
+                                                        <th class="text-end">Plan</th>
+                                                        <th class="text-end">Written</th>
+                                                        <th class="text-end">Signed</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var ccy in premiumCcyRecords.OrderBy(c => c.Currency))
+                                                    {
+                                                        <tr>
+                                                            <td><strong>@ccy.Currency</strong></td>
+                                                            <td class="text-end"><strong>@FormatPercentage(GetSelectedValue(ccy, "Deductions"))</strong></td>
+                                                            <td class="text-end">@FormatPercentage(ccy.PlanDeductions)</td>
+                                                            <td class="text-end">@FormatPercentage(ccy.WrittenDeductions)</td>
+                                                            <td class="text-end">@FormatPercentage(ccy.SignedDeductions)</td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    }
+
+                                    <!-- GNWP Tab -->
+                                    @if (activeTab == "gnwp")
+                                    {
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-bordered mb-0">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>Currency</th>
+                                                        <th class="text-end">Selected</th>
+                                                        <th class="text-end">Plan</th>
+                                                        <th class="text-end">Written</th>
+                                                        <th class="text-end">Signed</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var ccy in premiumCcyRecords.OrderBy(c => c.Currency))
+                                                    {
+                                                        <tr>
+                                                            <td><strong>@ccy.Currency</strong></td>
+                                                            <td class="text-end"><strong>@FormatCurrency(GetSelectedValue(ccy, "GNWP"))</strong></td>
+                                                            <td class="text-end">@FormatCurrency(ccy.PlanGNWP)</td>
+                                                            <td class="text-end">@FormatCurrency(ccy.WrittenGNWP)</td>
+                                                            <td class="text-end">@FormatCurrency(ccy.SignedGNWP)</td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    }
+
+                                    <!-- EU Tab -->
+                                    @if (activeTab == "eu")
+                                    {
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-bordered mb-0">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>Currency</th>
+                                                        <th class="text-end">Selected</th>
+                                                        <th class="text-end">Plan</th>
+                                                        <th class="text-end">Written</th>
+                                                        <th class="text-end">Signed</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var ccy in premiumCcyRecords.OrderBy(c => c.Currency))
+                                                    {
+                                                        <tr>
+                                                            <td><strong>@ccy.Currency</strong></td>
+                                                            <td class="text-end"><strong>@FormatPercentage(GetSelectedValue(ccy, "EU"))</strong></td>
+                                                            <td class="text-end">@FormatPercentage(ccy.PlanEU)</td>
+                                                            <td class="text-end">@FormatPercentage(ccy.WrittenEU)</td>
+                                                            <td class="text-end">@FormatPercentage(ccy.SignedEU)</td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Manual Entry Section -->
+                    @if (selectedPremium.Selection == "Manual")
+                    {
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h6 class="fw-bold mb-3">Manual Entry (GBP Values)</h6>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold">Entry Type <span class="text-danger">*</span></label>
+                                <select class="form-select" @bind="selectedPremium.GrossNetEntry" @bind:after="OnGrossNetChanged" required>
+                                    <option value="Gross">Gross</option>
+                                    <option value="Net">Net</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold">Gross Premium (GBP)</label>
+                                <input type="number" step="1" class="form-control" @bind="selectedPremium.ManualGrossPremiumGBP"
+                                       @bind:event="oninput" @bind:after="OnManualGrossChanged"
+                                       disabled="@(selectedPremium.GrossNetEntry == "Net")" />
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold">Deductions (%)</label>
+                                <input type="number" step="0.01" min="0" max="100" class="form-control" @bind="selectedPremium.ManualDeductions"
+                                       @bind:event="oninput" @bind:after="OnManualDeductionsChanged" />
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold">Net Premium (GBP)</label>
+                                <input type="number" step="1" class="form-control" @bind="selectedPremium.ManualNetPremiumGBP"
+                                       @bind:event="oninput" @bind:after="OnManualNetChanged"
+                                       disabled="@(selectedPremium.GrossNetEntry == "Gross")" />
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Currency Splits (must total 100%)</label>
+                            </div>
+                            <div class="col">
+                                <label class="form-label">GBP %</label>
+                                <input type="number" step="0.01" min="0" max="100" class="form-control" @bind="selectedPremium.ManualSplitGBP"
+                                       @bind:event="oninput" @bind:after="OnCurrencySplitChanged" />
+                                <small class="text-muted">@GetCalculatedCurrencyValue("GBP")</small>
+                            </div>
+                            <div class="col">
+                                <label class="form-label">USD %</label>
+                                <input type="number" step="0.01" min="0" max="100" class="form-control" @bind="selectedPremium.ManualSplitUSD"
+                                       @bind:event="oninput" @bind:after="OnCurrencySplitChanged" />
+                                <small class="text-muted">@GetCalculatedCurrencyValue("USD")</small>
+                            </div>
+                            <div class="col">
+                                <label class="form-label">CAD %</label>
+                                <input type="number" step="0.01" min="0" max="100" class="form-control" @bind="selectedPremium.ManualSplitCAD"
+                                       @bind:event="oninput" @bind:after="OnCurrencySplitChanged" />
+                                <small class="text-muted">@GetCalculatedCurrencyValue("CAD")</small>
+                            </div>
+                            <div class="col">
+                                <label class="form-label">EUR %</label>
+                                <input type="number" step="0.01" min="0" max="100" class="form-control" @bind="selectedPremium.ManualSplitEUR"
+                                       @bind:event="oninput" @bind:after="OnCurrencySplitChanged" />
+                                <small class="text-muted">@GetCalculatedCurrencyValue("EUR")</small>
+                            </div>
+                            <div class="col">
+                                <label class="form-label">JPY %</label>
+                                <input type="number" step="0.01" min="0" max="100" class="form-control" @bind="selectedPremium.ManualSplitJPY"
+                                       @bind:event="oninput" @bind:after="OnCurrencySplitChanged" />
+                                <small class="text-muted">@GetCalculatedCurrencyValue("JPY")</small>
+                            </div>
+                        </div>
+
+                        @if (currencySplitTotal.HasValue && Math.Round(currencySplitTotal.Value, 2) != 100)
+                        {
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <div class="alert alert-warning py-2">
+                                        Currency splits total @currencySplitTotal.Value.ToString("F2")% (must equal 100%)
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label class="form-label fw-bold">EU / LNDN Split</label>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">EU %</label>
+                                <input type="number" step="0.01" min="0" max="100" class="form-control" @bind="selectedPremium.ManualEUSplit"
+                                       @bind:event="oninput" @bind:after="OnFormChanged" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">LNDN %</label>
+                                <input type="number" step="0.01" class="form-control" value="@GetLNDNSplit()" disabled />
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Comments -->
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <label class="form-label fw-bold">Update Comments</label>
+                            <textarea class="form-control" rows="3" @bind="selectedPremium.UpdateComments" @bind:event="oninput" @bind:after="OnFormChanged"
+                                      placeholder="Enter any comments about this update..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Audit Info -->
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <h6 class="text-muted mb-2">Audit Information</h6>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Version</label>
+                            <div class="form-control-plaintext"><span class="badge bg-info">v@(selectedPremium.Version)</span></div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">Last Updated</label>
+                            <div class="form-control-plaintext">@selectedPremium.DateUpdated.ToString("yyyy-MM-dd HH:mm")</div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">Updated By</label>
+                            <div class="form-control-plaintext">@selectedPremium.UpdatedBy</div>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(priorComments))
+                    {
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label class="form-label">Prior Comments</label>
+                                <div class="alert alert-secondary py-2">@priorComments</div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Error Message -->
+                    @if (!string.IsNullOrEmpty(modalErrorMessage))
+                    {
+                        <div class="alert alert-danger" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>@modalErrorMessage
+                        </div>
+                    }
+
+                    <!-- Success Message -->
+                    @if (!string.IsNullOrEmpty(modalSuccessMessage))
+                    {
+                        <div class="alert alert-success" role="alert">
+                            <i class="bi bi-check-circle-fill me-2"></i>@modalSuccessMessage
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="modal-footer-custom">
+                <button type="button" class="btn btn-secondary" @onclick="CloseEditModal">Cancel</button>
+                <button type="button" class="btn btn-primary" @onclick="SavePremium" disabled="@isSaving">
+                    @if (isSaving)
+                    {
+                        <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                    }
+                    <i class="bi bi-save me-2"></i>Save
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1050;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-container {
+            background: white;
+            border-radius: 8px;
+            width: calc(100vw - 80px);
+            max-width: 1400px;
+            height: calc(100vh - 80px);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header-custom {
+            padding: 1rem 1.5rem;
+            background: #2c3e50;
+            color: white;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header-custom h3 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 500;
+            color: white;
+        }
+
+        .modal-header-custom .btn-close {
+            font-size: 1.5rem;
+            opacity: 1;
+            width: 2rem;
+            height: 2rem;
+        }
+
+        .modal-body-custom {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+
+        .modal-footer-custom {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #dee2e6;
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+        }
+
+        .form-control-plaintext {
+            padding: 0.375rem 0;
+            font-size: 0.95rem;
+        }
+    </style>
 }
 
 @code {
-    private List<UltimatePremiumRecordModel>? allRecords;
-    private bool isLoading = true;
-
-    // Filter state
-    private int? selectedYOA = null;
+    private List<PremiumListItemModel>? premiumRecords;
+    private IEnumerable<PremiumListItemModel> filteredRecords => ApplyFilters();
+    private List<string> distinctClasses = new();
+    private List<int> distinctYOAs = new();
     private string? selectedClass = null;
+    private int? selectedYOA = null;
+    private bool isLoading = true;
+    private bool showEditModal = false;
+    private PremiumModel? selectedPremium;
+    private PremiumModel? originalPremium;
+    private string? priorComments;
+    private bool isSaving = false;
+    private string? modalErrorMessage;
+    private string? modalSuccessMessage;
+    private bool isFormDirty = false;
 
-    // Available filter values
-    private List<int> availableYOAs = new();
-    private List<string> availableClasses = new();
+    // FX Rate Set management
+    private List<FxRateSetModel>? availableFxRateSets;
+    private int selectedFxRateSetId;
+    private Dictionary<string, decimal> fxRates = new();
 
-    // Summary class for display
-    private class ClassYOASummary
-    {
-        public string Class { get; set; } = string.Empty;
-        public int YOA { get; set; }
-        public int RecordCount { get; set; }
-        public int UpdateCount { get; set; }
-        public decimal? TotalGrossPremium { get; set; }
-        public decimal? TotalNetPremium { get; set; }
-        public decimal? TotalRIPs { get; set; }
-        public decimal? TotalPC { get; set; }
-        public DateTime? LastUpdatedDate { get; set; }
-        public string? LastUpdatedBy { get; set; }
-    }
+    // Premium Currency data
+    private List<PremiumCcyModel>? premiumCcyRecords;
+    private string activeTab = "ggwp";
+
+    // Manual Entry
+    private decimal? currencySplitTotal;
+
+    // Reserving Class lookup
+    private Dictionary<string, string> reservingClassNames = new();
 
     protected override async Task OnInitializedAsync()
     {
-        await InitializeServices();
         await LoadData();
+        await LoadFxRateSets();
+        await LoadReservingClasses();
     }
 
-    private async Task InitializeServices()
+    private async Task LoadReservingClasses()
     {
         try
         {
-            // Initialize currency settings from localStorage
-            await CurrencySettings.InitializeAsync();
-
-            // Load FX rates for the selected rate set
-            await FxConversion.LoadRatesAsync();
+            var data = await UltimatesService.GetReservingClasses();
+            reservingClassNames = data.ToDictionary(
+                r => $"{r.ClassCode}_{r.ReservingClassCode}",
+                r => r.ReservingClassName
+            );
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Error initializing services");
+            Logger.LogError(ex, "Error loading Reserving Classes");
         }
+    }
+
+    private string GetReservingClassName(string classCode, string reservingClassCode)
+    {
+        var key = $"{classCode}_{reservingClassCode}";
+        return reservingClassNames.TryGetValue(key, out var name) ? name : reservingClassCode;
     }
 
     private async Task LoadData()
@@ -316,20 +683,34 @@ else
         isLoading = true;
         try
         {
-            // Load all records from snapshot (latest version of each record)
-            var data = await UltimatesService.GetUltimatePremiumSnapshot();
-            allRecords = data.ToList();
+            var data = await UltimatesService.GetLatestPremiumList();
+            premiumRecords = data.ToList();
 
-            // Extract available filter values
-            availableYOAs = allRecords.Select(r => r.YOA).Distinct().OrderByDescending(y => y).ToList();
-            availableClasses = allRecords.Select(r => r.Class).Distinct().OrderBy(c => c).ToList();
+            // Extract distinct values for filters
+            if (premiumRecords.Any())
+            {
+                distinctClasses = premiumRecords
+                    .Select(r => r.Class)
+                    .Distinct()
+                    .OrderBy(c => c)
+                    .ToList();
 
-            Logger.LogInformation("Loaded {RecordCount} Ultimate Premium records", allRecords.Count);
+                distinctYOAs = premiumRecords
+                    .Select(r => r.YOA)
+                    .Distinct()
+                    .OrderByDescending(y => y)
+                    .ToList();
+
+                // Pre-calculate GGWP USD for all records
+                await CalculateGGWPUSD();
+            }
+
+            Logger.LogInformation("Loaded {RecordCount} Premium records", premiumRecords.Count);
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Error loading Ultimate Premium list");
-            allRecords = new List<UltimatePremiumRecordModel>();
+            Logger.LogError(ex, "Error loading Premium list");
+            premiumRecords = new List<PremiumListItemModel>();
         }
         finally
         {
@@ -337,232 +718,819 @@ else
         }
     }
 
-    private async Task OnCurrencySettingsChanged()
+    private async Task CalculateGGWPUSD()
     {
-        // Reload FX rates if needed (FxConversion already handles this via event subscription)
-        // Just trigger a re-render
+        ggwpUsdCache.Clear();
+
+        foreach (var record in premiumRecords ?? Enumerable.Empty<PremiumListItemModel>())
+        {
+            var value = await GetGGWPUSDAsync(record);
+            var key = $"{record.Class}_{record.ReservingClass}_{record.YOA}_{record.Version}";
+            ggwpUsdCache[key] = value;
+        }
+    }
+
+    private async Task LoadFxRateSets()
+    {
+        try
+        {
+            var rateSets = await UltimatesService.GetFxRateSets();
+            availableFxRateSets = rateSets.ToList();
+
+            if (availableFxRateSets.Any())
+            {
+                // Select the most recent active rate set, or the most recent overall
+                var defaultRateSet = availableFxRateSets
+                    .Where(rs => rs.IsActive)
+                    .OrderByDescending(rs => rs.EffectiveDate)
+                    .FirstOrDefault() ?? availableFxRateSets.OrderByDescending(rs => rs.EffectiveDate).First();
+
+                selectedFxRateSetId = defaultRateSet.FxRateSetID;
+                await LoadFxRates();
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading FX rate sets");
+        }
+    }
+
+    private async Task LoadFxRates()
+    {
+        try
+        {
+            var rates = await UltimatesService.GetFxRates(selectedFxRateSetId);
+            fxRates = rates.ToDictionary(r => $"{r.FromCurrency}_{r.ToCurrency}", r => r.Rate);
+            Logger.LogInformation("Loaded {RateCount} FX rates for rate set {RateSetId}", fxRates.Count, selectedFxRateSetId);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading FX rates");
+            fxRates = new Dictionary<string, decimal>();
+        }
+    }
+
+    private async Task OnFxRateSetChanged()
+    {
+        await LoadFxRates();
+        StateHasChanged();
+    }
+
+    private async Task<decimal?> GetGGWPUSDAsync(PremiumListItemModel record)
+    {
+        try
+        {
+            // Fetch PremiumCcy records for this Premium record
+            var ccyRecords = await UltimatesService.GetPremiumCcy(record.Class, record.ReservingClass, record.YOA, record.Version);
+
+            if (!ccyRecords.Any() || !fxRates.Any())
+                return null;
+
+            decimal total = 0;
+
+            foreach (var ccy in ccyRecords)
+            {
+                // Get the GGWP value based on Selection
+                decimal? ggwpValue = record.Selection switch
+                {
+                    "Plan" => ccy.PlanGGWP,
+                    "Written" => ccy.WrittenGGWP,
+                    "Signed" => ccy.SignedGGWP,
+                    "Manual" => ccy.ManualGGWP,
+                    _ => ccy.SelectedGGWP
+                };
+
+                if (!ggwpValue.HasValue || ggwpValue.Value == 0)
+                    continue;
+
+                // Convert to USD if not already USD
+                if (ccy.Currency.Equals("USD", StringComparison.OrdinalIgnoreCase))
+                {
+                    total += ggwpValue.Value;
+                }
+                else
+                {
+                    // Look up the FX rate
+                    var rateKey = $"{ccy.Currency}_USD";
+                    if (fxRates.TryGetValue(rateKey, out var rate))
+                    {
+                        total += ggwpValue.Value * rate;
+                    }
+                    else
+                    {
+                        // If no direct rate, try inverse
+                        var inverseKey = $"USD_{ccy.Currency}";
+                        if (fxRates.TryGetValue(inverseKey, out var inverseRate) && inverseRate != 0)
+                        {
+                            total += ggwpValue.Value / inverseRate;
+                        }
+                    }
+                }
+            }
+
+            return total > 0 ? total : null;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error calculating GGWP USD for record");
+            return null;
+        }
+    }
+
+    // Synchronous wrapper for display - caches the result
+    private Dictionary<string, decimal?> ggwpUsdCache = new();
+
+    private decimal? GetGGWPUSD(PremiumListItemModel record)
+    {
+        var key = $"{record.Class}_{record.ReservingClass}_{record.YOA}_{record.Version}";
+        if (!ggwpUsdCache.ContainsKey(key))
+        {
+            // This will be calculated async on page load, for now return null
+            return null;
+        }
+        return ggwpUsdCache[key];
+    }
+
+    private string FormatCurrency(decimal? value)
+    {
+        if (!value.HasValue) return "-";
+        return value.Value.ToString("N0");
+    }
+
+    private string FormatPercentage(decimal? value)
+    {
+        if (!value.HasValue) return "-";
+        return value.Value.ToString("0.00") + "%";
+    }
+
+    private decimal? GetSelectedValue(PremiumCcyModel ccy, string fieldType)
+    {
+        if (selectedPremium == null) return null;
+
+        return selectedPremium.Selection switch
+        {
+            "Plan" => fieldType switch
+            {
+                "GGWP" => ccy.PlanGGWP,
+                "Deductions" => ccy.PlanDeductions,
+                "GNWP" => ccy.PlanGNWP,
+                _ => null
+            },
+            "Written" => fieldType switch
+            {
+                "GGWP" => ccy.WrittenGGWP,
+                "Deductions" => ccy.WrittenDeductions,
+                "GNWP" => ccy.WrittenGNWP,
+                _ => null
+            },
+            "Signed" => fieldType switch
+            {
+                "GGWP" => ccy.SignedGGWP,
+                "Deductions" => ccy.SignedDeductions,
+                "GNWP" => ccy.SignedGNWP,
+                _ => null
+            },
+            "Manual" => fieldType switch
+            {
+                "GGWP" => ccy.ManualGGWP,
+                "Deductions" => ccy.ManualDeductions,
+                "GNWP" => ccy.ManualGNWP,
+                _ => null
+            },
+            _ => fieldType switch
+            {
+                "GGWP" => ccy.SelectedGGWP,
+                "Deductions" => ccy.SelectedDeductions,
+                "GNWP" => ccy.SelectedGNWP,
+                _ => null
+            }
+        };
+    }
+
+    private IEnumerable<PremiumListItemModel> ApplyFilters()
+    {
+        if (premiumRecords == null)
+            return Enumerable.Empty<PremiumListItemModel>();
+
+        var filtered = premiumRecords.AsEnumerable();
+
+        if (selectedClass != null)
+        {
+            filtered = filtered.Where(r => r.Class == selectedClass);
+        }
+
+        if (selectedYOA != null)
+        {
+            filtered = filtered.Where(r => r.YOA == selectedYOA);
+        }
+
+        return filtered;
+    }
+
+    private void FilterByClass(string? className)
+    {
+        selectedClass = className;
         StateHasChanged();
     }
 
     private void FilterByYOA(int? yoa)
     {
         selectedYOA = yoa;
+        StateHasChanged();
     }
 
-    private void FilterByClass(string? className)
+    private async Task OpenEditModal(PremiumListItemModel record)
     {
-        selectedClass = className;
-    }
+        // Store prior comments
+        priorComments = record.UpdateComments;
 
-    private IEnumerable<UltimatePremiumRecordModel> GetFilteredRecords()
-    {
-        if (allRecords == null) return Enumerable.Empty<UltimatePremiumRecordModel>();
+        // Fetch the full Premium record with all Manual fields
+        var fullRecord = await UltimatesService.GetLatestPremiumByKey(record.Class, record.ReservingClass, record.YOA);
 
-        return allRecords
-            .Where(r => selectedYOA == null || r.YOA == selectedYOA)
-            .Where(r => selectedClass == null || r.Class == selectedClass);
-    }
-
-    private List<ClassYOASummary> GetFilteredSummaries()
-    {
-        var filtered = GetFilteredRecords();
-
-        return filtered
-            .GroupBy(r => new { r.Class, r.YOA })
-            .Select(g => new ClassYOASummary
-            {
-                Class = g.Key.Class,
-                YOA = g.Key.YOA,
-                RecordCount = g.Count(),
-                UpdateCount = g.Select(r => r.UpdateID).Distinct().Count(),
-                TotalGrossPremium = g.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateGrossPremium, r.Currency)),
-                TotalNetPremium = g.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateNetPremium, r.Currency)),
-                TotalRIPs = g.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateRIPs, r.Currency)),
-                TotalPC = g.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimatePC, r.Currency)),
-                LastUpdatedDate = g.Max(r => r.UpdateDate),
-                LastUpdatedBy = g.OrderByDescending(r => r.UpdateDate).FirstOrDefault()?.UpdatedBy
-            })
-            .OrderBy(s => s.Class)
-            .ThenByDescending(s => s.YOA)
-            .ToList();
-    }
-
-    private decimal? GetTotalGrossPremium()
-    {
-        if (allRecords == null) return 0;
-        return allRecords.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateGrossPremium, r.Currency));
-    }
-
-    private decimal? GetTotalNetPremium()
-    {
-        if (allRecords == null) return 0;
-        return allRecords.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateNetPremium, r.Currency));
-    }
-
-    private decimal? GetTotalRIPs()
-    {
-        if (allRecords == null) return 0;
-        return allRecords.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateRIPs, r.Currency));
-    }
-
-    private decimal? GetTotalPC()
-    {
-        if (allRecords == null) return 0;
-        return allRecords.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimatePC, r.Currency));
-    }
-
-    private DateTime? GetLatestUpdateDate()
-    {
-        if (allRecords == null) return null;
-        return allRecords.Max(r => r.UpdateDate);
-    }
-
-    private int GetTotalUpdateCount()
-    {
-        if (allRecords == null) return 0;
-        return allRecords.Select(r => r.UpdateID).Distinct().Count();
-    }
-
-    private int GetFilteredRecordCount()
-    {
-        return GetFilteredRecords().Count();
-    }
-
-    private int GetFilteredUpdateCount()
-    {
-        return GetFilteredRecords().Select(r => r.UpdateID).Distinct().Count();
-    }
-
-    private decimal? GetFilteredTotalGrossPremium()
-    {
-        return GetFilteredRecords().Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateGrossPremium, r.Currency));
-    }
-
-    private decimal? GetFilteredTotalNetPremium()
-    {
-        return GetFilteredRecords().Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateNetPremium, r.Currency));
-    }
-
-    private decimal? GetFilteredTotalRIPs()
-    {
-        return GetFilteredRecords().Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateRIPs, r.Currency));
-    }
-
-    private decimal? GetFilteredTotalPC()
-    {
-        return GetFilteredRecords().Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimatePC, r.Currency));
-    }
-
-    private string GetCurrencySymbol()
-    {
-        return CurrencySettings.DisplayCurrency == "GBP" ? "£" : "$";
-    }
-
-    private string FormatCurrencyConverted(decimal? value)
-    {
-        if (!value.HasValue) return "-";
-        return value.Value.ToString("N0");
-    }
-
-    private string FormatDate(DateTime? date)
-    {
-        if (!date.HasValue) return "-";
-        return date.Value.ToString("dd MMM yyyy");
-    }
-
-    // Heatmap helper class
-    private class HeatmapCellData
-    {
-        public decimal? GrossPremium { get; set; }
-        public decimal? NetPremium { get; set; }
-        public decimal? RIPs { get; set; }
-        public decimal? PC { get; set; }
-    }
-
-    private HeatmapCellData GetHeatmapCellData(string className, int yoa)
-    {
-        if (allRecords == null) return new HeatmapCellData();
-
-        var records = allRecords
-            .Where(r => r.Class == className && r.YOA == yoa)
-            .ToList();
-
-        if (!records.Any()) return new HeatmapCellData();
-
-        return new HeatmapCellData
+        if (fullRecord == null)
         {
-            GrossPremium = records.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateGrossPremium, r.Currency)),
-            NetPremium = records.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateNetPremium, r.Currency)),
-            RIPs = records.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateRIPs, r.Currency)),
-            PC = records.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimatePC, r.Currency))
+            Logger.LogError("Failed to load Premium record for Class={Class}, ReservingClass={ReservingClass}, YOA={YOA}",
+                record.Class, record.ReservingClass, record.YOA);
+            return;
+        }
+
+        selectedPremium = fullRecord;
+        selectedPremium.UpdateComments = null; // Don't pre-populate comments
+
+        // Store original values for dirty checking
+        originalPremium = new PremiumModel
+        {
+            Selection = fullRecord.Selection,
+            GrossNetEntry = fullRecord.GrossNetEntry,
+            UpdateComments = null,
+            ManualGrossPremiumGBP = fullRecord.ManualGrossPremiumGBP,
+            ManualNetPremiumGBP = fullRecord.ManualNetPremiumGBP,
+            ManualDeductions = fullRecord.ManualDeductions,
+            ManualSplitGBP = fullRecord.ManualSplitGBP,
+            ManualSplitUSD = fullRecord.ManualSplitUSD,
+            ManualSplitCAD = fullRecord.ManualSplitCAD,
+            ManualSplitEUR = fullRecord.ManualSplitEUR,
+            ManualSplitJPY = fullRecord.ManualSplitJPY,
+            ManualEUSplit = fullRecord.ManualEUSplit
         };
-    }
 
-    private string GetHeatmapColor(decimal? value)
-    {
-        if (!value.HasValue || value.Value == 0) return "#ffffff";
+        // Load PremiumCcy data
+        await LoadPremiumCcyData(record.Class, record.ReservingClass, record.YOA, record.Version);
 
-        // Get max value for normalization
-        var maxValue = allRecords?
-            .GroupBy(r => new { r.Class, r.YOA })
-            .Select(g => g.Sum(r => FxConversion.ConvertToDisplayCurrency(r.UltimateGrossPremium, r.Currency)))
-            .Max() ?? 0;
-
-        if (maxValue == 0) return "#ffffff";
-
-        // Calculate intensity (0 to 1)
-        var intensity = (double)(value.Value / maxValue);
-
-        // Green gradient: white (#ffffff) to dark green (#1e7e34)
-        // Using RGB interpolation
-        var r = (int)(255 - (255 - 30) * intensity);
-        var g = (int)(255 - (255 - 126) * intensity);
-        var b = (int)(255 - (255 - 52) * intensity);
-
-        return $"#{r:X2}{g:X2}{b:X2}";
-    }
-
-    private string GetHeatmapTextColor(decimal? value)
-    {
-        if (!value.HasValue) return "#000000";
-
-        // Convert to millions
-        var millions = value.Value / 1_000_000m;
-
-        // White text for values above 60 million
-        return millions > 60 ? "#ffffff" : "#000000";
-    }
-
-    private void NavigateToEdit(string className, int yoa)
-    {
-        NavigationManager.NavigateTo($"Ultimates/Premium/Edit/{className}/{yoa}");
-    }
-
-    private string GetTooltipContent(HeatmapCellData cellData)
-    {
-        var symbol = GetCurrencySymbol();
-        return $@"
-Gross Premium: {symbol}{FormatMillions(cellData.GrossPremium)}m
-Net Premium: {symbol}{FormatMillions(cellData.NetPremium)}m
-RIPs: {symbol}{FormatMillions(cellData.RIPs)}m
-PC: {symbol}{FormatMillions(cellData.PC)}m";
-    }
-
-    private string FormatMillions(decimal? value)
-    {
-        if (!value.HasValue || value.Value == 0) return "-";
-        return (value.Value / 1_000_000m).ToString("F1");
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (!firstRender) return;
-
-        // Initialize Bootstrap tooltips
-        await Task.Run(() =>
+        // Calculate currency split total for display
+        if (selectedPremium.Selection == "Manual")
         {
-            // Tooltips are initialized by Bootstrap automatically with data-bs-toggle="tooltip"
-        });
+            CalculateCurrencySplitTotal();
+        }
+
+        isFormDirty = false;
+        showEditModal = true;
+        StateHasChanged();
+    }
+
+    private async Task LoadPremiumCcyData(string className, string reservingClass, int yoa, int version)
+    {
+        try
+        {
+            var data = await UltimatesService.GetPremiumCcy(className, reservingClass, yoa, version);
+            premiumCcyRecords = data.ToList();
+
+            // Ensure Class, ReservingClass, YOA are set on each record (they should come from DB but just in case)
+            foreach (var ccy in premiumCcyRecords)
+            {
+                ccy.Class = className;
+                ccy.ReservingClass = reservingClass;
+                ccy.YOA = yoa;
+            }
+
+            Logger.LogInformation("Loaded {RecordCount} PremiumCcy records", premiumCcyRecords.Count);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading PremiumCcy data");
+            premiumCcyRecords = new List<PremiumCcyModel>();
+        }
+    }
+
+    private async Task CloseEditModal()
+    {
+        if (isFormDirty && !isSaving)
+        {
+            bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "You have unsaved changes. Are you sure you want to close without saving?");
+            if (!confirmed)
+            {
+                return;
+            }
+        }
+
+        showEditModal = false;
+        selectedPremium = null;
+        originalPremium = null;
+        priorComments = null;
+        modalErrorMessage = null;
+        modalSuccessMessage = null;
+        isSaving = false;
+        isFormDirty = false;
+        StateHasChanged();
+    }
+
+    private async Task HandleOverlayClick()
+    {
+        // Close modal when clicking outside (with confirmation if dirty)
+        await CloseEditModal();
+    }
+
+    private void OnFormChanged()
+    {
+        if (selectedPremium == null || originalPremium == null) return;
+
+        // Check if any field has changed
+        isFormDirty = selectedPremium.Selection != originalPremium.Selection ||
+                      selectedPremium.GrossNetEntry != originalPremium.GrossNetEntry ||
+                      selectedPremium.ManualGrossPremiumGBP != originalPremium.ManualGrossPremiumGBP ||
+                      selectedPremium.ManualNetPremiumGBP != originalPremium.ManualNetPremiumGBP ||
+                      selectedPremium.ManualDeductions != originalPremium.ManualDeductions ||
+                      selectedPremium.ManualSplitGBP != originalPremium.ManualSplitGBP ||
+                      selectedPremium.ManualSplitUSD != originalPremium.ManualSplitUSD ||
+                      selectedPremium.ManualSplitCAD != originalPremium.ManualSplitCAD ||
+                      selectedPremium.ManualSplitEUR != originalPremium.ManualSplitEUR ||
+                      selectedPremium.ManualSplitJPY != originalPremium.ManualSplitJPY ||
+                      selectedPremium.ManualEUSplit != originalPremium.ManualEUSplit ||
+                      !string.IsNullOrWhiteSpace(selectedPremium.UpdateComments);
+    }
+
+    private void OnSelectionChanged()
+    {
+        OnFormChanged();
+        // Force UI refresh to update SELECTED columns in matrices
+        StateHasChanged();
+    }
+
+    private void OnGrossNetChanged()
+    {
+        // Recalculate based on entry type
+        if (selectedPremium.GrossNetEntry == "Gross" && selectedPremium.ManualGrossPremiumGBP.HasValue)
+        {
+            CalculateNetFromGross();
+        }
+        else if (selectedPremium.GrossNetEntry == "Net" && selectedPremium.ManualNetPremiumGBP.HasValue)
+        {
+            CalculateGrossFromNet();
+        }
+
+        OnFormChanged();
+        StateHasChanged();
+    }
+
+    private void OnManualGrossChanged()
+    {
+        if (selectedPremium.GrossNetEntry == "Gross")
+        {
+            CalculateNetFromGross();
+        }
+        DistributeManualAmounts();
+        OnFormChanged();
+        StateHasChanged();
+    }
+
+    private void OnManualNetChanged()
+    {
+        if (selectedPremium.GrossNetEntry == "Net")
+        {
+            CalculateGrossFromNet();
+        }
+        DistributeManualAmounts();
+        OnFormChanged();
+        StateHasChanged();
+    }
+
+    private void OnManualDeductionsChanged()
+    {
+        // Recalculate based on entry type
+        if (selectedPremium.GrossNetEntry == "Gross" && selectedPremium.ManualGrossPremiumGBP.HasValue)
+        {
+            CalculateNetFromGross();
+        }
+        else if (selectedPremium.GrossNetEntry == "Net" && selectedPremium.ManualNetPremiumGBP.HasValue)
+        {
+            CalculateGrossFromNet();
+        }
+
+        DistributeManualAmounts();
+        OnFormChanged();
+        StateHasChanged();
+    }
+
+    private void OnCurrencySplitChanged()
+    {
+        CalculateCurrencySplitTotal();
+        DistributeManualAmounts();
+        OnFormChanged();
+        StateHasChanged();
+    }
+
+    private void CalculateNetFromGross()
+    {
+        if (!selectedPremium.ManualGrossPremiumGBP.HasValue) return;
+
+        var deductions = selectedPremium.ManualDeductions ?? 0;
+        var calculated = selectedPremium.ManualGrossPremiumGBP.Value * (1 - deductions / 100);
+        selectedPremium.ManualNetPremiumGBP = Math.Round(calculated, 0);
+    }
+
+    private void CalculateGrossFromNet()
+    {
+        if (!selectedPremium.ManualNetPremiumGBP.HasValue) return;
+
+        var deductions = selectedPremium.ManualDeductions ?? 0;
+        if (deductions >= 100) return; // Prevent division by zero
+
+        var calculated = selectedPremium.ManualNetPremiumGBP.Value / (1 - deductions / 100);
+        selectedPremium.ManualGrossPremiumGBP = Math.Round(calculated, 0);
+    }
+
+    private void CalculateCurrencySplitTotal()
+    {
+        var total = (selectedPremium.ManualSplitGBP ?? 0) +
+                    (selectedPremium.ManualSplitUSD ?? 0) +
+                    (selectedPremium.ManualSplitCAD ?? 0) +
+                    (selectedPremium.ManualSplitEUR ?? 0) +
+                    (selectedPremium.ManualSplitJPY ?? 0);
+
+        currencySplitTotal = total > 0 ? total : null;
+    }
+
+    private decimal GetLNDNSplit()
+    {
+        return 100 - (selectedPremium.ManualEUSplit ?? 0);
+    }
+
+    private string GetCalculatedCurrencyValue(string currency)
+    {
+        if (!selectedPremium.ManualGrossPremiumGBP.HasValue) return string.Empty;
+
+        var splitPct = currency switch
+        {
+            "GBP" => selectedPremium.ManualSplitGBP ?? 0,
+            "USD" => selectedPremium.ManualSplitUSD ?? 0,
+            "CAD" => selectedPremium.ManualSplitCAD ?? 0,
+            "EUR" => selectedPremium.ManualSplitEUR ?? 0,
+            "JPY" => selectedPremium.ManualSplitJPY ?? 0,
+            _ => 0
+        };
+
+        if (splitPct <= 0) return string.Empty;
+
+        var ggwpGBP = selectedPremium.ManualGrossPremiumGBP.Value;
+        var ggwpAmountGBP = ggwpGBP * (splitPct / 100);
+
+        // Get FX rate
+        decimal fxRate = 1.0m;
+        if (currency != "GBP")
+        {
+            var rateKey = $"GBP_{currency}";
+            if (fxRates.TryGetValue(rateKey, out var rate))
+            {
+                fxRate = rate;
+            }
+            else
+            {
+                // Try inverse rate
+                var inverseKey = $"{currency}_GBP";
+                if (fxRates.TryGetValue(inverseKey, out var inverseRate) && inverseRate != 0)
+                {
+                    fxRate = 1 / inverseRate;
+                }
+            }
+        }
+
+        // Convert to target currency
+        var ggwpInCurrency = ConvertCurrency(ggwpAmountGBP, "GBP", currency) ?? ggwpAmountGBP;
+        var rounded = Math.Round(ggwpInCurrency, 0);
+
+        return $"{currency} {rounded:N0} @ {fxRate:F2}";
+    }
+
+    private void InitializeManualPremiumCcyRecords()
+    {
+        if (selectedPremium == null) return;
+
+        premiumCcyRecords = new List<PremiumCcyModel>
+        {
+            new PremiumCcyModel
+            {
+                Class = selectedPremium.Class,
+                ReservingClass = selectedPremium.ReservingClass,
+                YOA = selectedPremium.YOA,
+                Version = selectedPremium.Version,
+                Currency = "GBP"
+            },
+            new PremiumCcyModel
+            {
+                Class = selectedPremium.Class,
+                ReservingClass = selectedPremium.ReservingClass,
+                YOA = selectedPremium.YOA,
+                Version = selectedPremium.Version,
+                Currency = "USD"
+            },
+            new PremiumCcyModel
+            {
+                Class = selectedPremium.Class,
+                ReservingClass = selectedPremium.ReservingClass,
+                YOA = selectedPremium.YOA,
+                Version = selectedPremium.Version,
+                Currency = "CAD"
+            },
+            new PremiumCcyModel
+            {
+                Class = selectedPremium.Class,
+                ReservingClass = selectedPremium.ReservingClass,
+                YOA = selectedPremium.YOA,
+                Version = selectedPremium.Version,
+                Currency = "EUR"
+            },
+            new PremiumCcyModel
+            {
+                Class = selectedPremium.Class,
+                ReservingClass = selectedPremium.ReservingClass,
+                YOA = selectedPremium.YOA,
+                Version = selectedPremium.Version,
+                Currency = "JPY"
+            }
+        };
+
+        // Populate the Manual fields
+        DistributeManualAmounts();
+    }
+
+    private void DistributeManualAmounts()
+    {
+        if (premiumCcyRecords == null || !premiumCcyRecords.Any()) return;
+        if (!selectedPremium.ManualGrossPremiumGBP.HasValue) return;
+
+        CalculateCurrencySplitTotal();
+        if (!currencySplitTotal.HasValue || Math.Round(currencySplitTotal.Value, 2) != 100) return;
+
+        var ggwpGBP = selectedPremium.ManualGrossPremiumGBP.Value;
+        var gnwpGBP = selectedPremium.ManualNetPremiumGBP ?? ggwpGBP;
+        var deductions = selectedPremium.ManualDeductions ?? 0;
+
+        // Distribute to each currency
+        var currencies = new[]
+        {
+            ("GBP", selectedPremium.ManualSplitGBP ?? 0),
+            ("USD", selectedPremium.ManualSplitUSD ?? 0),
+            ("CAD", selectedPremium.ManualSplitCAD ?? 0),
+            ("EUR", selectedPremium.ManualSplitEUR ?? 0),
+            ("JPY", selectedPremium.ManualSplitJPY ?? 0)
+        };
+
+        foreach (var (currency, splitPct) in currencies)
+        {
+            if (splitPct <= 0) continue;
+
+            var ccyRecord = premiumCcyRecords.FirstOrDefault(c => c.Currency == currency);
+            if (ccyRecord == null) continue;
+
+            // Calculate the GBP amount for this currency based on split
+            var ggwpAmountGBP = ggwpGBP * (splitPct / 100);
+            var gnwpAmountGBP = gnwpGBP * (splitPct / 100);
+
+            // Convert to target currency using FX rates
+            var ggwpInCurrency = ConvertCurrency(ggwpAmountGBP, "GBP", currency) ?? ggwpAmountGBP;
+            var gnwpInCurrency = ConvertCurrency(gnwpAmountGBP, "GBP", currency) ?? gnwpAmountGBP;
+
+            // Update the ManualGGWP and ManualGNWP fields (rounded to 0 decimal places)
+            ccyRecord.ManualGGWP = Math.Round(ggwpInCurrency, 0);
+            ccyRecord.ManualGNWP = Math.Round(gnwpInCurrency, 0);
+            ccyRecord.ManualDeductions = deductions;
+        }
+    }
+
+    private void SetActiveTab(string tab)
+    {
+        activeTab = tab;
+        StateHasChanged();
+    }
+
+    private decimal? CalculateTotalGGWP(string targetCurrency)
+    {
+        if (premiumCcyRecords == null || !premiumCcyRecords.Any() || !fxRates.Any())
+            return null;
+
+        decimal total = 0;
+
+        foreach (var ccy in premiumCcyRecords)
+        {
+            var ggwpValue = GetSelectedValue(ccy, "GGWP");
+            if (!ggwpValue.HasValue || ggwpValue.Value == 0)
+                continue;
+
+            // Convert to target currency
+            var converted = ConvertCurrency(ggwpValue.Value, ccy.Currency, targetCurrency);
+            if (converted.HasValue)
+                total += converted.Value;
+        }
+
+        return total > 0 ? total : null;
+    }
+
+    private decimal? CalculateTotalGNWP(string targetCurrency)
+    {
+        if (premiumCcyRecords == null || !premiumCcyRecords.Any() || !fxRates.Any())
+            return null;
+
+        decimal total = 0;
+
+        foreach (var ccy in premiumCcyRecords)
+        {
+            var gnwpValue = GetSelectedValue(ccy, "GNWP");
+            if (!gnwpValue.HasValue || gnwpValue.Value == 0)
+                continue;
+
+            // Convert to target currency
+            var converted = ConvertCurrency(gnwpValue.Value, ccy.Currency, targetCurrency);
+            if (converted.HasValue)
+                total += converted.Value;
+        }
+
+        return total > 0 ? total : null;
+    }
+
+    private decimal? ConvertCurrency(decimal amount, string fromCurrency, string toCurrency)
+    {
+        if (fromCurrency.Equals(toCurrency, StringComparison.OrdinalIgnoreCase))
+            return amount;
+
+        // Look up the FX rate
+        var rateKey = $"{fromCurrency}_{toCurrency}";
+        if (fxRates.TryGetValue(rateKey, out var rate))
+        {
+            return amount * rate;
+        }
+
+        // Try inverse rate
+        var inverseKey = $"{toCurrency}_{fromCurrency}";
+        if (fxRates.TryGetValue(inverseKey, out var inverseRate) && inverseRate != 0)
+        {
+            return amount / inverseRate;
+        }
+
+        return null;
+    }
+
+    private async Task SavePremium()
+    {
+        if (selectedPremium == null) return;
+
+        modalErrorMessage = null;
+        modalSuccessMessage = null;
+
+        // Validation
+        if (string.IsNullOrWhiteSpace(selectedPremium.Class))
+        {
+            modalErrorMessage = "Class is required";
+            StateHasChanged();
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(selectedPremium.ReservingClass))
+        {
+            modalErrorMessage = "Reserving Class is required";
+            StateHasChanged();
+            return;
+        }
+
+        if (selectedPremium.YOA < 1900 || selectedPremium.YOA > 2100)
+        {
+            modalErrorMessage = "Year of Account must be between 1900 and 2100";
+            StateHasChanged();
+            return;
+        }
+
+        // Validate Manual entry
+        if (selectedPremium.Selection == "Manual")
+        {
+            if (!selectedPremium.ManualGrossPremiumGBP.HasValue || selectedPremium.ManualGrossPremiumGBP.Value <= 0)
+            {
+                modalErrorMessage = "Manual Gross Premium must be entered for Manual selection";
+                StateHasChanged();
+                return;
+            }
+
+            CalculateCurrencySplitTotal();
+            if (!currencySplitTotal.HasValue || Math.Round(currencySplitTotal.Value, 2) != 100)
+            {
+                modalErrorMessage = $"Currency splits must total 100% (currently {currencySplitTotal ?? 0:F2}%)";
+                StateHasChanged();
+                return;
+            }
+
+            // Initialize PremiumCcy records if they don't exist
+            if (premiumCcyRecords == null || !premiumCcyRecords.Any())
+            {
+                InitializeManualPremiumCcyRecords();
+            }
+        }
+
+        isSaving = true;
+        StateHasChanged();
+
+        try
+        {
+            // Save Premium header and get new version number
+            var newVersion = await UltimatesService.SavePremium(selectedPremium);
+
+            // Update SELECTED fields in PremiumCcy records based on Selection dropdown
+            if (premiumCcyRecords != null && premiumCcyRecords.Any())
+            {
+                foreach (var ccy in premiumCcyRecords)
+                {
+                    // Update version to new version
+                    ccy.Version = newVersion;
+
+                    // Update SELECTED fields based on Selection
+                    switch (selectedPremium.Selection)
+                    {
+                        case "Plan":
+                            ccy.SelectedGGWP = ccy.PlanGGWP;
+                            ccy.SelectedDeductions = ccy.PlanDeductions;
+                            ccy.SelectedGNWP = ccy.PlanGNWP;
+                            ccy.SelectedEU = ccy.PlanEU;
+                            break;
+                        case "Written":
+                            ccy.SelectedGGWP = ccy.WrittenGGWP;
+                            ccy.SelectedDeductions = ccy.WrittenDeductions;
+                            ccy.SelectedGNWP = ccy.WrittenGNWP;
+                            ccy.SelectedEU = ccy.WrittenEU;
+                            break;
+                        case "Signed":
+                            ccy.SelectedGGWP = ccy.SignedGGWP;
+                            ccy.SelectedDeductions = ccy.SignedDeductions;
+                            ccy.SelectedGNWP = ccy.SignedGNWP;
+                            ccy.SelectedEU = ccy.SignedEU;
+                            break;
+                        case "Manual":
+                            ccy.SelectedGGWP = ccy.ManualGGWP;
+                            ccy.SelectedDeductions = ccy.ManualDeductions;
+                            ccy.SelectedGNWP = ccy.ManualGNWP;
+                            ccy.SelectedEU = ccy.ManualEU;
+                            break;
+                    }
+
+                    // Save each currency record
+                    await UltimatesService.SavePremiumCcy(ccy);
+                }
+
+                Logger.LogInformation("Saved {Count} PremiumCcy records with version {Version}", premiumCcyRecords.Count, newVersion);
+            }
+
+            // Wait a moment then show success
+            await Task.Delay(500);
+
+            modalSuccessMessage = "Premium saved successfully!";
+            isFormDirty = false;  // Mark form as clean after successful save
+            StateHasChanged();
+
+            await Task.Delay(1000);
+
+            showEditModal = false;
+            await LoadData();
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error saving Premium");
+            modalErrorMessage = $"Error saving: {ex.Message}";
+            StateHasChanged();
+        }
+        finally
+        {
+            isSaving = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape")
+        {
+            await CloseEditModal();
+        }
+    }
+
+    private string GetSelectionBadgeColor(string selection) => selection switch
+    {
+        "Plan" => "primary",
+        "Written" => "success",
+        "Signed" => "warning",
+        "Manual" => "secondary",
+        _ => "secondary"
+    };
+
+    private string FormatDate(DateTime date)
+    {
+        return date.ToString("yyyy-MM-dd HH:mm");
     }
 }
 
