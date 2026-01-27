@@ -1,0 +1,148 @@
+@page "/Watchlist"
+@inject Sandbox.Services.WindowpaneService WindowpaneService
+@using Sandbox.Models.Windowpane
+
+<div class="row mt-4 mb-4">
+	<h3>Watchlist</h3>
+	<p class="text-muted">Latest update per watchlist item</p>
+</div>
+
+@if (isLoading)
+{
+	<div class="d-flex align-items-center">
+		<div class="spinner-border text-primary me-2" role="status"></div>
+		<span>Loading watchlist...</span>
+	</div>
+}
+else if (watchlistItems?.Any() == true)
+{
+	<div class="row mb-4">
+		<div class="col-lg-3 col-md-6 mb-3">
+			<div class="card h-100 border-0 shadow-sm">
+				<div class="card-body">
+					<h6 class="text-muted">Active Watchlist Items</h6>
+					<h3 class="mb-0">@ActiveItemCount</h3>
+				</div>
+			</div>
+		</div>
+		<div class="col-lg-3 col-md-6 mb-3">
+			<div class="card h-100 border-0 shadow-sm">
+				<div class="card-body">
+					<h6 class="text-muted">Total IBNR (USD)</h6>
+					<h3 class="mb-0">@TotalIbnr.ToString("N0")</h3>
+				</div>
+			</div>
+		</div>
+		<div class="col-lg-3 col-md-6 mb-3">
+			<div class="card h-100 border-0 shadow-sm">
+				<div class="card-body">
+					<h6 class="text-muted">Total Current Reserve (USD)</h6>
+					<h3 class="mb-0">@TotalCurrentReserve.ToString("N0")</h3>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="card shadow mb-4 border">
+		<div class="table-responsive">
+			<table class="table table-striped table-hover text-nowrap align-middle">
+				<thead class="table-dark">
+					<tr>
+						<th>ID</th>
+						<th>Team Member</th>
+						<th>Type</th>
+						<th>Policy Ref</th>
+						<th>Claimant</th>
+						<th>Loss Type</th>
+						<th>Litigation</th>
+						<th>Active</th>
+						<th>Latest Update</th>
+						<th>Updated By</th>
+						<th>Update Type</th>
+						<th>Current Reserve</th>
+						<th>IBNR (USD)</th>
+						<th>Confidence</th>
+						<th>Narrative</th>
+					</tr>
+				</thead>
+				<tbody>
+					@foreach (var item in watchlistItems)
+					{
+						<tr>
+							<td>@item.WatchlistID</td>
+							<td>@item.TeamMember</td>
+							<td>@item.WatchlistType</td>
+							<td>@item.PolicyReference</td>
+							<td>@item.Claimant</td>
+							<td>@item.LossType</td>
+							<td>@(item.InLitigation == 1 ? "Yes" : "No")</td>
+							<td>
+								<span class="badge @(item.IsActive == 1 ? "bg-success" : "bg-secondary")">
+									@(item.IsActive == 1 ? "Active" : "Inactive")
+								</span>
+							</td>
+							<td>@item.UpdateDate?.ToString("dd/MM/yyyy")</td>
+							<td>@item.UpdatedBy</td>
+							<td>@GetUpdateTypeLabel(item)</td>
+							<td>@(item.CurrentReserveDaleShare?.ToString("N0") ?? "-")</td>
+							<td>@(item.IBNRAmountUSD?.ToString("N0") ?? "-")</td>
+							<td>@item.ReservingConfidenceRating</td>
+							<td class="text-wrap" style="max-width: 320px;">@item.UpdateNarrative</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+	</div>
+}
+else
+{
+	<div class="alert alert-info">
+		<strong>No watchlist items found.</strong>
+	</div>
+}
+
+@code {
+	private List<WatchlistWithLatestUpdate> watchlistItems = new();
+	private bool isLoading = true;
+
+	private int ActiveItemCount => watchlistItems.Count(item => item.IsActive == 1);
+	private decimal TotalIbnr => watchlistItems
+		.Where(item => item.IBNRRecommended == true && item.IBNRAmountUSD.HasValue)
+		.Sum(item => item.IBNRAmountUSD ?? 0);
+	private decimal TotalCurrentReserve => watchlistItems
+		.Where(item => item.CurrentReserveDaleShare.HasValue)
+		.Sum(item => item.CurrentReserveDaleShare ?? 0);
+
+	protected override async Task OnInitializedAsync()
+	{
+		try
+		{
+			watchlistItems = (await WindowpaneService.GetWatchlistWithLatestUpdateAsync())?.ToList() ?? new();
+		}
+		finally
+		{
+			isLoading = false;
+		}
+	}
+
+	private static string GetUpdateTypeLabel(WatchlistWithLatestUpdate item)
+	{
+		if (item.IsChaser == 1 && item.IsUpdate == 1)
+		{
+			return "Update + Chaser";
+		}
+
+		if (item.IsChaser == 1)
+		{
+			return "Chaser";
+		}
+
+		if (item.IsUpdate == 1)
+		{
+			return "Update";
+		}
+
+		return "-";
+	}
+}
