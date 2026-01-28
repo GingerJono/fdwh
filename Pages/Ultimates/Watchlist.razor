@@ -1,7 +1,7 @@
-@page "/Watchlist"
-@inject Sandbox.Services.WindowpaneService WindowpaneService
+@page "/Ultimates/Watchlist"
+@inject sandboxapp.Services.UltimatesService UltimatesService
 @inject IHttpContextAccessor HttpContextAccessor
-@using Sandbox.Models.Windowpane
+@using sandboxapp.Models.Ultimates
 
 <div class="row mt-4 mb-4">
 	<h3>Watchlist</h3>
@@ -29,8 +29,8 @@ else if (WatchlistRows?.Any() == true)
 		<div class="col-lg-3 col-md-6 mb-3">
 			<div class="card h-100 border-0 shadow-sm">
 				<div class="card-body">
-					<h6 class="text-muted">Total IBNR (USD)</h6>
-					<h3 class="mb-0">@TotalIbnr.ToString("N0")</h3>
+					<h6 class="text-muted">Total Ultimate (USD)</h6>
+					<h3 class="mb-0">@TotalUltimate.ToString("N0")</h3>
 				</div>
 			</div>
 		</div>
@@ -105,12 +105,21 @@ else if (WatchlistRows?.Any() == true)
 				<thead class="table-dark">
 					<tr>
 						<th>ID</th>
+						<th>View</th>
 						<th>Type</th>
 						<th>Policy Ref</th>
 						<th>Assured</th>
 						<th>Class</th>
 						<th>Reserving Class</th>
 						<th>YOA</th>
+						<th>Claimant</th>
+						<th>Loss Description</th>
+						<th>Current Reserve</th>
+						<th>Ultimate (USD)</th>
+						<th>Updates</th>
+						<th>Latest Update</th>
+						<th>Confidence</th>
+						<th>Probability %</th>
 						<th>Domicile</th>
 						<th>Leader</th>
 						<th>Currency</th>
@@ -118,14 +127,6 @@ else if (WatchlistRows?.Any() == true)
 						<th>XS</th>
 						<th>Dale Line</th>
 						<th>Dale Limit USD</th>
-						<th>Claimant</th>
-						<th>Loss Description</th>
-						<th>Current Reserve</th>
-						<th>IBNR (USD)</th>
-						<th>Updates</th>
-						<th>Latest Update</th>
-						<th>Confidence</th>
-						<th>View</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -134,23 +135,21 @@ else if (WatchlistRows?.Any() == true)
 						var item = row.Item;
 						<tr>
 							<td>@item.WatchlistID</td>
+							<td>
+								<button class="btn btn-sm btn-primary" @onclick="() => ShowDetailModal(item)">
+									View
+								</button>
+							</td>
 							<td>@item.WatchlistType</td>
 							<td>@item.PolicyReference</td>
 							<td>@item.AssuredName</td>
 							<td>@item.Class</td>
 							<td>@item.ReservingClass</td>
 							<td>@item.YOA</td>
-							<td>@item.DomicileCountry</td>
-							<td>@item.Leader</td>
-							<td>@item.Currency</td>
-							<td>@(item.Limit?.ToString("N0") ?? "-")</td>
-							<td>@(item.XS?.ToString("N0") ?? "-")</td>
-							<td>@(item.DaleLine?.ToString("N2") ?? "-")</td>
-							<td>@(item.DaleLimitUSDatQtrFX?.ToString("N0") ?? "-")</td>
 							<td>@item.Claimant</td>
 							<td class="text-wrap" style="max-width: 240px;">@item.WatchlistDescription</td>
-							<td>@(item.CurrentReserveDaleShare?.ToString("N0") ?? "-")</td>
-							<td>@(item.IBNRAmountUSD?.ToString("N0") ?? "-")</td>
+							<td>@(item.IncurredUSDAtQtrFX?.ToString("N0") ?? "-")</td>
+							<td>@(item.DaleShareUltimateUSD?.ToString("N0") ?? "-")</td>
 							<td>@row.UpdateCount</td>
 							<td>
 								@if (!string.IsNullOrWhiteSpace(item.UpdateNarrative))
@@ -174,11 +173,14 @@ else if (WatchlistRows?.Any() == true)
 									<span>-</span>
 								}
 							</td>
-							<td>
-								<button class="btn btn-sm btn-primary" @onclick="() => ShowDetailModal(item)">
-									View
-								</button>
-							</td>
+							<td>@(item.Probability?.ToString("N1") ?? "-")</td>
+							<td>@item.DomicileCountry</td>
+							<td>@item.Leader</td>
+							<td>@item.Currency</td>
+							<td>@(item.Limit?.ToString("N0") ?? "-")</td>
+							<td>@(item.XS?.ToString("N0") ?? "-")</td>
+							<td>@(item.DaleLine?.ToString("N2") ?? "-")</td>
+							<td>@(item.DaleLimitUSDatQtrFX?.ToString("N0") ?? "-")</td>
 						</tr>
 					}
 				</tbody>
@@ -205,6 +207,7 @@ else
 	private bool isSubmittingUpdate = false;
 	private string updateType = "Update";
 	private string ibnrRecommendedSelection = "";
+	private string riApplicableSelection = "";
 	private WatchlistUpdate newUpdate = new();
 	private List<string> distinctClasses = new();
 	private List<int> distinctYOAs = new();
@@ -212,9 +215,9 @@ else
 	private int? selectedYOA;
 
 	private int ActiveItemCount => WatchlistRows.Count(row => row.Item.IsActive == 1);
-	private decimal TotalIbnr => WatchlistRows
-		.Where(row => row.Item.IsActive == 1 && row.Item.IBNRRecommended == true && row.Item.IBNRAmountUSD.HasValue)
-		.Sum(row => row.Item.IBNRAmountUSD ?? 0);
+	private decimal TotalUltimate => WatchlistRows
+		.Where(row => row.Item.IsActive == 1 && row.Item.DaleShareUltimateUSD.HasValue)
+		.Sum(row => row.Item.DaleShareUltimateUSD ?? 0);
 
 	private IEnumerable<WatchlistRow> FilteredRows =>
 		ApplyFilters();
@@ -223,10 +226,10 @@ else
 	{
 		try
 		{
-			var items = (await WindowpaneService.GetWatchlistWithLatestUpdateAsync())?.ToList() ?? new();
+			var items = (await UltimatesService.GetWatchlistWithLatestUpdateAsync())?.ToList() ?? new();
 			var countTasks = items.Select(async item =>
 			{
-				var updates = await WindowpaneService.GetWatchlistUpdatesByIdAsync(item.WatchlistID);
+				var updates = await UltimatesService.GetWatchlistUpdatesByIdAsync(item.WatchlistID);
 				return new WatchlistRow
 				{
 					Item = item,
@@ -307,7 +310,7 @@ else
 		isLoadingUpdates = true;
 		try
 		{
-			selectedUpdates = (await WindowpaneService.GetWatchlistUpdatesByIdAsync(selectedItem.WatchlistID))?.ToList() ?? new();
+			selectedUpdates = (await UltimatesService.GetWatchlistUpdatesByIdAsync(selectedItem.WatchlistID))?.ToList() ?? new();
 		}
 		finally
 		{
@@ -335,11 +338,11 @@ else
 			WatchlistID = selectedItem.WatchlistID,
 			UpdateDate = DateTime.Today,
 			UpdatedBy = username,
-			CurrentReserveDaleShare = selectedItem.CurrentReserveDaleShare,
 			ReservingConfidenceRating = selectedItem.ReservingConfidenceRating,
 			IBNRRecommended = selectedItem.IBNRRecommended,
-			IBNRAmountUSD = selectedItem.IBNRAmountUSD,
-			RIApplicable = selectedItem.RIApplicable
+			DaleShareUltimateUSD = selectedItem.DaleShareUltimateUSD,
+			RIApplicable = selectedItem.RIApplicable,
+			Probability = selectedItem.Probability
 		};
 		updateType = "Update";
 		ibnrRecommendedSelection = selectedItem.IBNRRecommended switch
@@ -348,6 +351,7 @@ else
 			false => "false",
 			_ => ""
 		};
+		riApplicableSelection = selectedItem.RIApplicable;
 		showNewUpdateModal = true;
 	}
 
@@ -372,16 +376,16 @@ else
 				"false" => false,
 				_ => null
 			};
+			newUpdate.RIApplicable = riApplicableSelection;
 			ApplyUpdateType();
-			await WindowpaneService.AddWatchlistUpdateAsync(newUpdate);
+			await UltimatesService.AddWatchlistUpdateAsync(newUpdate);
 			await LoadUpdates();
 
 			var row = WatchlistRows.FirstOrDefault(r => r.Item.WatchlistID == selectedItem.WatchlistID);
 			if (row != null)
 			{
 				row.UpdateCount = selectedUpdates.Count;
-				row.Item.CurrentReserveDaleShare = newUpdate.CurrentReserveDaleShare;
-				row.Item.IBNRAmountUSD = newUpdate.IBNRAmountUSD;
+				row.Item.DaleShareUltimateUSD = newUpdate.DaleShareUltimateUSD;
 				row.Item.IBNRRecommended = newUpdate.IBNRRecommended;
 				row.Item.ReservingConfidenceRating = newUpdate.ReservingConfidenceRating;
 				row.Item.UpdateNarrative = newUpdate.UpdateNarrative;
@@ -389,6 +393,8 @@ else
 				row.Item.UpdatedBy = newUpdate.UpdatedBy;
 				row.Item.IsUpdate = newUpdate.IsUpdate;
 				row.Item.IsChaser = newUpdate.IsChaser;
+				row.Item.Probability = newUpdate.Probability;
+				row.Item.RIApplicable = newUpdate.RIApplicable;
 			}
 			showNewUpdateModal = false;
 		}
@@ -467,119 +473,95 @@ else
 				<div class="modal-body">
 					@if (selectedItem != null)
 					{
-						<div class="row mb-3">
-							<div class="col-md-4">
-								<label class="form-label"><strong>Team Member:</strong></label>
-								<div class="form-control-plaintext">@selectedItem.TeamMember</div>
-							</div>
-							<div class="col-md-4">
-								<label class="form-label"><strong>Watchlist Type:</strong></label>
-								<div class="form-control-plaintext">@selectedItem.WatchlistType</div>
-							</div>
-							<div class="col-md-4">
-								<label class="form-label"><strong>Policy Reference:</strong></label>
-								<div class="form-control-plaintext">@selectedItem.PolicyReference</div>
-							</div>
-						</div>
-						<div class="row mb-3">
-							<div class="col-md-4">
-								<label class="form-label"><strong>Assured Name:</strong></label>
-								<div class="form-control-plaintext">@selectedItem.AssuredName</div>
-							</div>
-							<div class="col-md-4">
-								<label class="form-label"><strong>Class:</strong></label>
-								<div class="form-control-plaintext">@selectedItem.Class</div>
-							</div>
-							<div class="col-md-4">
-								<label class="form-label"><strong>Reserving Class:</strong></label>
-								<div class="form-control-plaintext">@selectedItem.ReservingClass</div>
-							</div>
-						</div>
-						<div class="row mb-3">
-							<div class="col-md-4">
-								<label class="form-label"><strong>YOA:</strong></label>
-								<div class="form-control-plaintext">@selectedItem.YOA</div>
-							</div>
-							<div class="col-md-4">
-								<label class="form-label"><strong>Domicile Country:</strong></label>
-								<div class="form-control-plaintext">@selectedItem.DomicileCountry</div>
-							</div>
-							<div class="col-md-4">
-								<label class="form-label"><strong>Leader:</strong></label>
-								<div class="form-control-plaintext">@selectedItem.Leader</div>
-							</div>
-						</div>
-						<div class="row mb-3">
-							<div class="col-md-4">
-								<label class="form-label"><strong>Currency:</strong></label>
-								<div class="form-control-plaintext">@selectedItem.Currency</div>
-							</div>
-							<div class="col-md-4">
-								<label class="form-label"><strong>Limit:</strong></label>
-								<div class="form-control-plaintext">@selectedItem.Limit?.ToString("N0")</div>
-							</div>
-							<div class="col-md-4">
-								<label class="form-label"><strong>XS:</strong></label>
-								<div class="form-control-plaintext">@selectedItem.XS?.ToString("N0")</div>
-							</div>
-						</div>
-						<div class="row mb-3">
-							<div class="col-md-4">
-								<label class="form-label"><strong>Dale Line:</strong></label>
-								<div class="form-control-plaintext">@selectedItem.DaleLine?.ToString("N2")</div>
-							</div>
-							<div class="col-md-4">
-								<label class="form-label"><strong>Dale Limit USD:</strong></label>
-								<div class="form-control-plaintext">@selectedItem.DaleLimitUSDatQtrFX?.ToString("N0")</div>
-							</div>
-						</div>
-						<div class="row mb-3">
-							<div class="col-md-4">
-								<label class="form-label"><strong>UCR:</strong></label>
-								<div class="form-control-plaintext">@selectedItem.UCR</div>
-							</div>
-							<div class="col-md-4">
-								<label class="form-label"><strong>COR:</strong></label>
-								<div class="form-control-plaintext">@selectedItem.COR</div>
-							</div>
-							<div class="col-md-4">
-								<label class="form-label"><strong>DOL:</strong></label>
-								<div class="form-control-plaintext">@selectedItem.DOL</div>
-							</div>
-						</div>
-						<div class="row mb-3">
-							<div class="col-md-4">
-								<label class="form-label"><strong>WL Code:</strong></label>
-								<div class="form-control-plaintext">@selectedItem.WLCode</div>
-							</div>
-							<div class="col-md-4">
-								<label class="form-label"><strong>Claimant:</strong></label>
-								<div class="form-control-plaintext">@selectedItem.Claimant</div>
-							</div>
-							<div class="col-md-4">
-								<label class="form-label"><strong>Loss Type:</strong></label>
-								<div class="form-control-plaintext">@selectedItem.LossType</div>
-							</div>
-						</div>
-						<div class="row mb-3">
-							<div class="col-md-6">
-								<label class="form-label"><strong>Description:</strong></label>
-								<div class="form-control-plaintext">@selectedItem.WatchlistDescription</div>
-							</div>
-							<div class="col-md-3">
-								<label class="form-label"><strong>Litigation:</strong></label>
-								<div class="form-control-plaintext">@(selectedItem.InLitigation == 1 ? "Yes" : "No")</div>
-							</div>
-							<div class="col-md-3">
-								<label class="form-label"><strong>Jurisdiction:</strong></label>
-								<div class="form-control-plaintext">@selectedItem.Jurisdiction</div>
-							</div>
-						</div>
-						<div class="row mb-4">
-							<div class="col-md-3">
-								<label class="form-label"><strong>Active:</strong></label>
-								<div class="form-control-plaintext">@(selectedItem.IsActive == 1 ? "Yes" : "No")</div>
-							</div>
+						<div class="table-responsive mb-4">
+							<table class="table table-bordered table-sm align-middle">
+								<tbody>
+									<tr>
+										<th class="bg-light">Team Member</th>
+										<td>@selectedItem.TeamMember</td>
+										<th class="bg-light">Watchlist Type</th>
+										<td>@selectedItem.WatchlistType</td>
+									</tr>
+									<tr>
+										<th class="bg-light">Policy Reference</th>
+										<td>@selectedItem.PolicyReference</td>
+										<th class="bg-light">Assured Name</th>
+										<td>@selectedItem.AssuredName</td>
+									</tr>
+									<tr>
+										<th class="bg-light">Class</th>
+										<td>@selectedItem.Class</td>
+										<th class="bg-light">Reserving Class</th>
+										<td>@selectedItem.ReservingClass</td>
+									</tr>
+									<tr>
+										<th class="bg-light">YOA</th>
+										<td>@selectedItem.YOA</td>
+										<th class="bg-light">Domicile</th>
+										<td>@selectedItem.DomicileCountry</td>
+									</tr>
+									<tr>
+										<th class="bg-light">Leader</th>
+										<td>@selectedItem.Leader</td>
+										<th class="bg-light">Currency</th>
+										<td>@selectedItem.Currency</td>
+									</tr>
+									<tr>
+										<th class="bg-light">Limit</th>
+										<td>@selectedItem.Limit?.ToString("N0")</td>
+										<th class="bg-light">XS</th>
+										<td>@selectedItem.XS?.ToString("N0")</td>
+									</tr>
+									<tr>
+										<th class="bg-light">Dale Line</th>
+										<td>@selectedItem.DaleLine?.ToString("N2")</td>
+										<th class="bg-light">Dale Limit USD</th>
+										<td>@selectedItem.DaleLimitUSDatQtrFX?.ToString("N0")</td>
+									</tr>
+									<tr>
+										<th class="bg-light">UCR</th>
+										<td>@selectedItem.UCR</td>
+										<th class="bg-light">COR</th>
+										<td>@selectedItem.COR</td>
+									</tr>
+									<tr>
+										<th class="bg-light">DOL</th>
+										<td>@selectedItem.DOL</td>
+										<th class="bg-light">WL Code</th>
+										<td>@selectedItem.WLCode</td>
+									</tr>
+									<tr>
+										<th class="bg-light">Claimant</th>
+										<td>@selectedItem.Claimant</td>
+										<th class="bg-light">Loss Type</th>
+										<td>@selectedItem.LossType</td>
+									</tr>
+									<tr>
+										<th class="bg-light">Description</th>
+										<td>@selectedItem.WatchlistDescription</td>
+										<th class="bg-light">Litigation</th>
+										<td>@(selectedItem.InLitigation == 1 ? "Yes" : "No")</td>
+									</tr>
+									<tr>
+										<th class="bg-light">Jurisdiction</th>
+										<td>@selectedItem.Jurisdiction</td>
+										<th class="bg-light">Active</th>
+										<td>@(selectedItem.IsActive == 1 ? "Yes" : "No")</td>
+									</tr>
+									<tr>
+										<th class="bg-light">Current Reserve</th>
+										<td>@selectedItem.IncurredUSDAtQtrFX?.ToString("N0")</td>
+										<th class="bg-light">Ultimate (USD)</th>
+										<td>@selectedItem.DaleShareUltimateUSD?.ToString("N0")</td>
+									</tr>
+									<tr>
+										<th class="bg-light">Confidence</th>
+										<td>@selectedItem.ReservingConfidenceRating</td>
+										<th class="bg-light">Probability %</th>
+										<td>@selectedItem.Probability?.ToString("N1")</td>
+									</tr>
+								</tbody>
+							</table>
 						</div>
 
 						<div class="d-flex justify-content-between align-items-center mb-3">
@@ -604,9 +586,9 @@ else
 											<th>Date</th>
 											<th>Updated By</th>
 											<th>Type</th>
-											<th>Current Reserve</th>
-											<th>IBNR (USD)</th>
+											<th>Ultimate (USD)</th>
 											<th>Confidence</th>
+											<th>Probability %</th>
 											<th>Narrative</th>
 										</tr>
 									</thead>
@@ -618,8 +600,7 @@ else
 												<td>@update.UpdateDate.ToString("dd/MM/yyyy")</td>
 												<td>@update.UpdatedBy</td>
 												<td>@GetUpdateTypeLabel(update)</td>
-												<td>@(update.CurrentReserveDaleShare?.ToString("N0") ?? "-")</td>
-												<td>@(update.IBNRAmountUSD?.ToString("N0") ?? "-")</td>
+												<td>@(update.DaleShareUltimateUSD?.ToString("N0") ?? "-")</td>
 												<td>
 													@if (!string.IsNullOrWhiteSpace(update.ReservingConfidenceRating))
 													{
@@ -632,6 +613,7 @@ else
 														<span>-</span>
 													}
 												</td>
+												<td>@(update.Probability?.ToString("N1") ?? "-")</td>
 												<td class="text-wrap" style="max-width: 360px;">@update.UpdateNarrative</td>
 											</tr>
 										}
@@ -684,17 +666,23 @@ else
 						</div>
 						<div class="col-md-6">
 							<label class="form-label">Confidence Rating</label>
-							<input class="form-control" @bind="newUpdate.ReservingConfidenceRating" />
+							<select class="form-select" @bind="newUpdate.ReservingConfidenceRating">
+								<option value="">Select...</option>
+								<option>Green</option>
+								<option>Amber</option>
+								<option>Red</option>
+								<option>Other</option>
+							</select>
 						</div>
 					</div>
 					<div class="row mb-3">
 						<div class="col-md-6">
-							<label class="form-label">Current Reserve (Dale Share)</label>
-							<input class="form-control" type="number" step="0.01" @bind="newUpdate.CurrentReserveDaleShare" />
+							<label class="form-label">Ultimate (USD)</label>
+							<input class="form-control" type="number" step="0.01" @bind="newUpdate.DaleShareUltimateUSD" />
 						</div>
 						<div class="col-md-6">
-							<label class="form-label">IBNR Amount (USD)</label>
-							<input class="form-control" type="number" step="0.01" @bind="newUpdate.IBNRAmountUSD" />
+							<label class="form-label">Probability %</label>
+							<input class="form-control" type="number" step="0.01" @bind="newUpdate.Probability" />
 						</div>
 					</div>
 					<div class="row mb-3">
@@ -708,7 +696,12 @@ else
 						</div>
 						<div class="col-md-6">
 							<label class="form-label">RI Applicable</label>
-							<input class="form-control" @bind="newUpdate.RIApplicable" />
+							<select class="form-select" @bind="riApplicableSelection">
+								<option value="">Select...</option>
+								<option value="1">Yes</option>
+								<option value="0">No</option>
+								<option value="2">Potential</option>
+							</select>
 						</div>
 					</div>
 					<div class="mb-3">

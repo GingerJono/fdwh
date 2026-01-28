@@ -1,4 +1,4 @@
-namespace Sandbox.Models.Windowpane
+namespace sandboxapp.Models.Ultimates
 {
 	public class WatchlistItem
 	{
@@ -26,10 +26,10 @@ namespace Sandbox.Models.Windowpane
 		public DateTime UpdateDate { get; set; }
 		public int IsChaser { get; set; }
 		public int IsUpdate { get; set; }
-		public decimal? CurrentReserveDaleShare { get; set; }
+		public decimal? Probability { get; set; }
 		public string ReservingConfidenceRating { get; set; }
 		public bool? IBNRRecommended { get; set; }
-		public decimal? IBNRAmountUSD { get; set; }
+		public decimal? DaleShareUltimateUSD { get; set; }
 		public string RIApplicable { get; set; }
 		public string UpdateNarrative { get; set; }
 	}
@@ -55,10 +55,10 @@ namespace Sandbox.Models.Windowpane
 		public DateTime? UpdateDate { get; set; }
 		public int? IsChaser { get; set; }
 		public int? IsUpdate { get; set; }
-		public decimal? CurrentReserveDaleShare { get; set; }
+		public decimal? Probability { get; set; }
 		public string ReservingConfidenceRating { get; set; }
 		public bool? IBNRRecommended { get; set; }
-		public decimal? IBNRAmountUSD { get; set; }
+		public decimal? DaleShareUltimateUSD { get; set; }
 		public string RIApplicable { get; set; }
 		public string UpdateNarrative { get; set; }
 		public string AssuredName { get; set; }
@@ -72,5 +72,6 @@ namespace Sandbox.Models.Windowpane
 		public decimal? XS { get; set; }
 		public decimal? DaleLine { get; set; }
 		public decimal? DaleLimitUSDatQtrFX { get; set; }
+		public decimal? IncurredUSDAtQtrFX { get; set; }
 	}
 }
