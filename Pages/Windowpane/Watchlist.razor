@@ -1,5 +1,6 @@
 @page "/Watchlist"
 @inject Sandbox.Services.WindowpaneService WindowpaneService
+@inject IHttpContextAccessor HttpContextAccessor
 @using Sandbox.Models.Windowpane
 
 <div class="row mt-4 mb-4">
@@ -14,7 +15,7 @@
 		<span>Loading watchlist...</span>
 	</div>
 }
-else if (watchlistItems?.Any() == true)
+else if (WatchlistRows?.Any() == true)
 {
 	<div class="row mb-4">
 		<div class="col-lg-3 col-md-6 mb-3">
@@ -33,14 +34,11 @@ else if (watchlistItems?.Any() == true)
 				</div>
 			</div>
 		</div>
-		<div class="col-lg-3 col-md-6 mb-3">
-			<div class="card h-100 border-0 shadow-sm">
-				<div class="card-body">
-					<h6 class="text-muted">Total Current Reserve (USD)</h6>
-					<h3 class="mb-0">@TotalCurrentReserve.ToString("N0")</h3>
-				</div>
-			</div>
-		</div>
+	</div>
+
+	<div class="form-check form-switch mb-3">
+		<input class="form-check-input" type="checkbox" id="showInactive" @bind="showInactive" />
+		<label class="form-check-label" for="showInactive">Show inactive items</label>
 	</div>
 
 	<div class="card shadow mb-4 border">
@@ -49,45 +47,56 @@ else if (watchlistItems?.Any() == true)
 				<thead class="table-dark">
 					<tr>
 						<th>ID</th>
-						<th>Team Member</th>
 						<th>Type</th>
-						<th>Policy Ref</th>
 						<th>Claimant</th>
-						<th>Loss Type</th>
-						<th>Litigation</th>
-						<th>Active</th>
-						<th>Latest Update</th>
-						<th>Updated By</th>
-						<th>Update Type</th>
+						<th>Loss Description</th>
 						<th>Current Reserve</th>
 						<th>IBNR (USD)</th>
+						<th>Updates</th>
+						<th>Latest Update</th>
 						<th>Confidence</th>
-						<th>Narrative</th>
+						<th>View</th>
 					</tr>
 				</thead>
 				<tbody>
-					@foreach (var item in watchlistItems)
+					@foreach (var row in FilteredRows)
 					{
+						var item = row.Item;
 						<tr>
 							<td>@item.WatchlistID</td>
-							<td>@item.TeamMember</td>
 							<td>@item.WatchlistType</td>
-							<td>@item.PolicyReference</td>
 							<td>@item.Claimant</td>
-							<td>@item.LossType</td>
-							<td>@(item.InLitigation == 1 ? "Yes" : "No")</td>
-							<td>
-								<span class="badge @(item.IsActive == 1 ? "bg-success" : "bg-secondary")">
-									@(item.IsActive == 1 ? "Active" : "Inactive")
-								</span>
-							</td>
-							<td>@item.UpdateDate?.ToString("dd/MM/yyyy")</td>
-							<td>@item.UpdatedBy</td>
-							<td>@GetUpdateTypeLabel(item)</td>
+							<td class="text-wrap" style="max-width: 240px;">@item.WatchlistDescription</td>
 							<td>@(item.CurrentReserveDaleShare?.ToString("N0") ?? "-")</td>
 							<td>@(item.IBNRAmountUSD?.ToString("N0") ?? "-")</td>
-							<td>@item.ReservingConfidenceRating</td>
-							<td class="text-wrap" style="max-width: 320px;">@item.UpdateNarrative</td>
+							<td>@row.UpdateCount</td>
+							<td>
+								@if (!string.IsNullOrWhiteSpace(item.UpdateNarrative))
+								{
+									<span class="text-decoration-underline" title="@item.UpdateNarrative">Hover to view</span>
+								}
+								else
+								{
+									<span>-</span>
+								}
+							</td>
+							<td>
+								@if (!string.IsNullOrWhiteSpace(item.ReservingConfidenceRating))
+								{
+									<span class="badge @GetConfidenceBadgeClass(item.ReservingConfidenceRating)">
+										@item.ReservingConfidenceRating
+									</span>
+								}
+								else
+								{
+									<span>-</span>
+								}
+							</td>
+							<td>
+								<button class="btn btn-sm btn-primary" @onclick="() => ShowDetailModal(item)">
+									View
+								</button>
+							</td>
 						</tr>
 					}
 				</tbody>
@@ -103,22 +112,45 @@ else
 }
 
 @code {
-	private List<WatchlistWithLatestUpdate> watchlistItems = new();
+	private List<WatchlistRow> WatchlistRows = new();
+	private List<WatchlistUpdate> selectedUpdates = new();
+	private WatchlistWithLatestUpdate selectedItem;
 	private bool isLoading = true;
+	private bool showInactive = false;
+	private bool showDetailModal = false;
+	private bool showNewUpdateModal = false;
+	private bool isLoadingUpdates = false;
+	private bool isSubmittingUpdate = false;
+	private string updateType = "Update";
+	private string ibnrRecommendedSelection = "";
+	private WatchlistUpdate newUpdate = new();
 
-	private int ActiveItemCount => watchlistItems.Count(item => item.IsActive == 1);
-	private decimal TotalIbnr => watchlistItems
-		.Where(item => item.IBNRRecommended == true && item.IBNRAmountUSD.HasValue)
-		.Sum(item => item.IBNRAmountUSD ?? 0);
-	private decimal TotalCurrentReserve => watchlistItems
-		.Where(item => item.CurrentReserveDaleShare.HasValue)
-		.Sum(item => item.CurrentReserveDaleShare ?? 0);
+	private int ActiveItemCount => WatchlistRows.Count(row => row.Item.IsActive == 1);
+	private decimal TotalIbnr => WatchlistRows
+		.Where(row => row.Item.IsActive == 1 && row.Item.IBNRRecommended == true && row.Item.IBNRAmountUSD.HasValue)
+		.Sum(row => row.Item.IBNRAmountUSD ?? 0);
+
+	private IEnumerable<WatchlistRow> FilteredRows =>
+		showInactive
+			? WatchlistRows
+			: WatchlistRows.Where(row => row.Item.IsActive == 1);
 
 	protected override async Task OnInitializedAsync()
 	{
 		try
 		{
-			watchlistItems = (await WindowpaneService.GetWatchlistWithLatestUpdateAsync())?.ToList() ?? new();
+			var items = (await WindowpaneService.GetWatchlistWithLatestUpdateAsync())?.ToList() ?? new();
+			var countTasks = items.Select(async item =>
+			{
+				var updates = await WindowpaneService.GetWatchlistUpdatesByIdAsync(item.WatchlistID);
+				return new WatchlistRow
+				{
+					Item = item,
+					UpdateCount = updates?.Count() ?? 0
+				};
+			});
+
+			WatchlistRows = (await Task.WhenAll(countTasks)).ToList();
 		}
 		finally
 		{
@@ -126,23 +158,387 @@ else
 		}
 	}
 
-	private static string GetUpdateTypeLabel(WatchlistWithLatestUpdate item)
+	private async Task ShowDetailModal(WatchlistWithLatestUpdate item)
 	{
-		if (item.IsChaser == 1 && item.IsUpdate == 1)
+		selectedItem = item;
+		showDetailModal = true;
+		await LoadUpdates();
+	}
+
+	private async Task LoadUpdates()
+	{
+		if (selectedItem == null)
+		{
+			return;
+		}
+
+		isLoadingUpdates = true;
+		try
+		{
+			selectedUpdates = (await WindowpaneService.GetWatchlistUpdatesByIdAsync(selectedItem.WatchlistID))?.ToList() ?? new();
+		}
+		finally
+		{
+			isLoadingUpdates = false;
+		}
+	}
+
+	private void CloseDetailModal()
+	{
+		showDetailModal = false;
+		selectedItem = null;
+		selectedUpdates = new();
+	}
+
+	private void ShowNewUpdateModal()
+	{
+		if (selectedItem == null)
+		{
+			return;
+		}
+
+		var username = HttpContextAccessor.HttpContext?.User?.Identity?.Name ?? "Unknown";
+		newUpdate = new WatchlistUpdate
+		{
+			WatchlistID = selectedItem.WatchlistID,
+			UpdateDate = DateTime.Today,
+			UpdatedBy = username,
+			CurrentReserveDaleShare = selectedItem.CurrentReserveDaleShare,
+			ReservingConfidenceRating = selectedItem.ReservingConfidenceRating,
+			IBNRRecommended = selectedItem.IBNRRecommended,
+			IBNRAmountUSD = selectedItem.IBNRAmountUSD,
+			RIApplicable = selectedItem.RIApplicable
+		};
+		updateType = "Update";
+		ibnrRecommendedSelection = selectedItem.IBNRRecommended switch
+		{
+			true => "true",
+			false => "false",
+			_ => ""
+		};
+		showNewUpdateModal = true;
+	}
+
+	private void CloseNewUpdateModal()
+	{
+		showNewUpdateModal = false;
+	}
+
+	private async Task SubmitNewUpdate()
+	{
+		if (selectedItem == null)
+		{
+			return;
+		}
+
+		isSubmittingUpdate = true;
+		try
+		{
+			newUpdate.IBNRRecommended = ibnrRecommendedSelection switch
+			{
+				"true" => true,
+				"false" => false,
+				_ => null
+			};
+			ApplyUpdateType();
+			await WindowpaneService.AddWatchlistUpdateAsync(newUpdate);
+			await LoadUpdates();
+
+			var row = WatchlistRows.FirstOrDefault(r => r.Item.WatchlistID == selectedItem.WatchlistID);
+			if (row != null)
+			{
+				row.UpdateCount = selectedUpdates.Count;
+				row.Item.CurrentReserveDaleShare = newUpdate.CurrentReserveDaleShare;
+				row.Item.IBNRAmountUSD = newUpdate.IBNRAmountUSD;
+				row.Item.IBNRRecommended = newUpdate.IBNRRecommended;
+				row.Item.ReservingConfidenceRating = newUpdate.ReservingConfidenceRating;
+				row.Item.UpdateNarrative = newUpdate.UpdateNarrative;
+				row.Item.UpdateDate = newUpdate.UpdateDate;
+				row.Item.UpdatedBy = newUpdate.UpdatedBy;
+				row.Item.IsUpdate = newUpdate.IsUpdate;
+				row.Item.IsChaser = newUpdate.IsChaser;
+			}
+			showNewUpdateModal = false;
+		}
+		finally
+		{
+			isSubmittingUpdate = false;
+		}
+	}
+
+	private void ApplyUpdateType()
+	{
+		switch (updateType)
+		{
+			case "Chaser":
+				newUpdate.IsChaser = 1;
+				newUpdate.IsUpdate = 0;
+				break;
+			case "Note":
+				newUpdate.IsChaser = 0;
+				newUpdate.IsUpdate = 0;
+				break;
+			default:
+				newUpdate.IsChaser = 0;
+				newUpdate.IsUpdate = 1;
+				break;
+		}
+	}
+
+	private static string GetConfidenceBadgeClass(string rating)
+	{
+		return rating?.Trim().ToLowerInvariant() switch
+		{
+			"green" => "bg-success",
+			"amber" => "bg-warning text-dark",
+			"red" => "bg-danger",
+			_ => "bg-secondary"
+		};
+	}
+
+	private static string GetUpdateTypeLabel(WatchlistUpdate update)
+	{
+		if (update.IsChaser == 1 && update.IsUpdate == 1)
 		{
 			return "Update + Chaser";
 		}
 
-		if (item.IsChaser == 1)
+		if (update.IsChaser == 1)
 		{
 			return "Chaser";
 		}
 
-		if (item.IsUpdate == 1)
+		if (update.IsUpdate == 1)
 		{
 			return "Update";
 		}
 
-		return "-";
+		return "Note";
 	}
+
+	private class WatchlistRow
+	{
+		public WatchlistWithLatestUpdate Item { get; set; }
+		public int UpdateCount { get; set; }
+	}
+}
+
+@if (showDetailModal)
+{
+	<div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+		<div class="modal-dialog modal-xl modal-dialog-scrollable">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Watchlist Item @selectedItem?.WatchlistID</h5>
+					<button type="button" class="btn-close" @onclick="CloseDetailModal"></button>
+				</div>
+				<div class="modal-body">
+					@if (selectedItem != null)
+					{
+						<div class="row mb-3">
+							<div class="col-md-4">
+								<label class="form-label"><strong>Team Member:</strong></label>
+								<div class="form-control-plaintext">@selectedItem.TeamMember</div>
+							</div>
+							<div class="col-md-4">
+								<label class="form-label"><strong>Watchlist Type:</strong></label>
+								<div class="form-control-plaintext">@selectedItem.WatchlistType</div>
+							</div>
+							<div class="col-md-4">
+								<label class="form-label"><strong>Policy Reference:</strong></label>
+								<div class="form-control-plaintext">@selectedItem.PolicyReference</div>
+							</div>
+						</div>
+						<div class="row mb-3">
+							<div class="col-md-4">
+								<label class="form-label"><strong>UCR:</strong></label>
+								<div class="form-control-plaintext">@selectedItem.UCR</div>
+							</div>
+							<div class="col-md-4">
+								<label class="form-label"><strong>COR:</strong></label>
+								<div class="form-control-plaintext">@selectedItem.COR</div>
+							</div>
+							<div class="col-md-4">
+								<label class="form-label"><strong>DOL:</strong></label>
+								<div class="form-control-plaintext">@selectedItem.DOL</div>
+							</div>
+						</div>
+						<div class="row mb-3">
+							<div class="col-md-4">
+								<label class="form-label"><strong>WL Code:</strong></label>
+								<div class="form-control-plaintext">@selectedItem.WLCode</div>
+							</div>
+							<div class="col-md-4">
+								<label class="form-label"><strong>Claimant:</strong></label>
+								<div class="form-control-plaintext">@selectedItem.Claimant</div>
+							</div>
+							<div class="col-md-4">
+								<label class="form-label"><strong>Loss Type:</strong></label>
+								<div class="form-control-plaintext">@selectedItem.LossType</div>
+							</div>
+						</div>
+						<div class="row mb-3">
+							<div class="col-md-6">
+								<label class="form-label"><strong>Description:</strong></label>
+								<div class="form-control-plaintext">@selectedItem.WatchlistDescription</div>
+							</div>
+							<div class="col-md-3">
+								<label class="form-label"><strong>Litigation:</strong></label>
+								<div class="form-control-plaintext">@(selectedItem.InLitigation == 1 ? "Yes" : "No")</div>
+							</div>
+							<div class="col-md-3">
+								<label class="form-label"><strong>Jurisdiction:</strong></label>
+								<div class="form-control-plaintext">@selectedItem.Jurisdiction</div>
+							</div>
+						</div>
+						<div class="row mb-4">
+							<div class="col-md-3">
+								<label class="form-label"><strong>Active:</strong></label>
+								<div class="form-control-plaintext">@(selectedItem.IsActive == 1 ? "Yes" : "No")</div>
+							</div>
+						</div>
+
+						<div class="d-flex justify-content-between align-items-center mb-3">
+							<h6 class="mb-0">Update History</h6>
+							<button class="btn btn-sm btn-success" @onclick="ShowNewUpdateModal">New Update</button>
+						</div>
+
+						@if (isLoadingUpdates)
+						{
+							<div class="d-flex align-items-center">
+								<div class="spinner-border text-primary me-2" role="status"></div>
+								<span>Loading updates...</span>
+							</div>
+						}
+						else if (selectedUpdates.Any())
+						{
+							<div class="table-responsive">
+								<table class="table table-sm table-striped align-middle">
+									<thead class="table-light">
+										<tr>
+											<th>#</th>
+											<th>Date</th>
+											<th>Updated By</th>
+											<th>Type</th>
+											<th>Current Reserve</th>
+											<th>IBNR (USD)</th>
+											<th>Confidence</th>
+											<th>Narrative</th>
+										</tr>
+									</thead>
+									<tbody>
+										@foreach (var update in selectedUpdates)
+										{
+											<tr>
+												<td>@update.NthUpdate</td>
+												<td>@update.UpdateDate.ToString("dd/MM/yyyy")</td>
+												<td>@update.UpdatedBy</td>
+												<td>@GetUpdateTypeLabel(update)</td>
+												<td>@(update.CurrentReserveDaleShare?.ToString("N0") ?? "-")</td>
+												<td>@(update.IBNRAmountUSD?.ToString("N0") ?? "-")</td>
+												<td>
+													@if (!string.IsNullOrWhiteSpace(update.ReservingConfidenceRating))
+													{
+														<span class="badge @GetConfidenceBadgeClass(update.ReservingConfidenceRating)">
+															@update.ReservingConfidenceRating
+														</span>
+													}
+													else
+													{
+														<span>-</span>
+													}
+												</td>
+												<td class="text-wrap" style="max-width: 360px;">@update.UpdateNarrative</td>
+											</tr>
+										}
+									</tbody>
+								</table>
+							</div>
+						}
+						else
+						{
+							<div class="alert alert-info">No updates found.</div>
+						}
+					}
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" @onclick="CloseDetailModal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+@if (showNewUpdateModal)
+{
+	<div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">New Update</h5>
+					<button type="button" class="btn-close" @onclick="CloseNewUpdateModal"></button>
+				</div>
+				<div class="modal-body">
+					<div class="row mb-3">
+						<div class="col-md-6">
+							<label class="form-label">Updated By</label>
+							<div class="form-control-plaintext">@newUpdate.UpdatedBy</div>
+						</div>
+						<div class="col-md-6">
+							<label class="form-label">Update Date</label>
+							<div class="form-control-plaintext">@newUpdate.UpdateDate.ToString("dd/MM/yyyy")</div>
+						</div>
+					</div>
+					<div class="row mb-3">
+						<div class="col-md-6">
+							<label class="form-label">Update Type</label>
+							<select class="form-select" @bind="updateType">
+								<option>Update</option>
+								<option>Chaser</option>
+								<option>Note</option>
+							</select>
+						</div>
+						<div class="col-md-6">
+							<label class="form-label">Confidence Rating</label>
+							<input class="form-control" @bind="newUpdate.ReservingConfidenceRating" />
+						</div>
+					</div>
+					<div class="row mb-3">
+						<div class="col-md-6">
+							<label class="form-label">Current Reserve (Dale Share)</label>
+							<input class="form-control" type="number" step="0.01" @bind="newUpdate.CurrentReserveDaleShare" />
+						</div>
+						<div class="col-md-6">
+							<label class="form-label">IBNR Amount (USD)</label>
+							<input class="form-control" type="number" step="0.01" @bind="newUpdate.IBNRAmountUSD" />
+						</div>
+					</div>
+					<div class="row mb-3">
+						<div class="col-md-6">
+							<label class="form-label">IBNR Recommended</label>
+							<select class="form-select" @bind="ibnrRecommendedSelection">
+								<option value="">Select...</option>
+								<option value="true">Yes</option>
+								<option value="false">No</option>
+							</select>
+						</div>
+						<div class="col-md-6">
+							<label class="form-label">RI Applicable</label>
+							<input class="form-control" @bind="newUpdate.RIApplicable" />
+						</div>
+					</div>
+					<div class="mb-3">
+						<label class="form-label">Narrative</label>
+						<textarea class="form-control" rows="4" @bind="newUpdate.UpdateNarrative"></textarea>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" @onclick="CloseNewUpdateModal">Cancel</button>
+					<button type="button" class="btn btn-primary" disabled="@isSubmittingUpdate" @onclick="SubmitNewUpdate">
+						@(isSubmittingUpdate ? "Saving..." : "Save Update")
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
 }
