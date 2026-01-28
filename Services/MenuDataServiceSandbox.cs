@@ -285,6 +285,14 @@ public class MenuDataServiceSandbox
 					selected: false,
 					active: false,
 					dirChange: false
+				),
+				new MainMenuItems(
+					path: "Ultimates/Watchlist",
+					type: "link",
+					title: "Watchlist",
+					selected: false,
+					active: false,
+					dirChange: false
 				)
 			}
 		),
