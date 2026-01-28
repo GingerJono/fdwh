@@ -145,8 +145,6 @@ namespace Sandbox.Services
 				commandType: CommandType.StoredProcedure);
 		}
 
-
-
 		// method for generating Excel proforma
 
 		public byte[] GenerateDFProformaExcelFile(string id)

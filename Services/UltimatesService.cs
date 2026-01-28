@@ -385,5 +385,77 @@ namespace sandboxapp.Services
                 throw;
             }
         }
+
+		public async Task<long> GetNextWatchlistIdAsync()
+		{
+			using var db = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
+			return await db.QuerySingleAsync<long>(
+				"[Ultimates].[spWatchlist_GetNextID]",
+				commandType: CommandType.StoredProcedure);
+		}
+
+		public async Task AddWatchlistItemAsync(WatchlistItem watchlistItem)
+		{
+			using var db = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
+			await db.ExecuteAsync(
+				"[Ultimates].[spWatchlist_Add]",
+				new
+				{
+					watchlistItem.WatchlistID,
+					watchlistItem.TeamMember,
+					watchlistItem.WatchlistType,
+					watchlistItem.PolicyReference,
+					watchlistItem.UCR,
+					watchlistItem.COR,
+					watchlistItem.DOL,
+					watchlistItem.WLCode,
+					watchlistItem.Claimant,
+					watchlistItem.LossType,
+					watchlistItem.WatchlistDescription,
+					watchlistItem.InLitigation,
+					watchlistItem.Jurisdiction,
+					watchlistItem.IsActive
+				},
+				commandType: CommandType.StoredProcedure);
+		}
+
+		public async Task AddWatchlistUpdateAsync(WatchlistUpdate update)
+		{
+			using var db = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
+			await db.ExecuteAsync(
+				"[Ultimates].[spWatchlistUpdates_Add]",
+				new
+				{
+					update.WatchlistID,
+					update.UpdatedBy,
+					update.UpdateDate,
+					update.IsChaser,
+					update.IsUpdate,
+					update.ReservingConfidenceRating,
+					update.IBNRRecommended,
+					update.DaleShareUltimateUSD,
+					update.RIApplicable,
+					update.UpdateNarrative,
+					update.Probability
+				},
+				commandType: CommandType.StoredProcedure);
+		}
+
+		public async Task<IEnumerable<WatchlistWithLatestUpdate>> GetWatchlistWithLatestUpdateAsync()
+		{
+			using var db = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
+			return await db.QueryAsync<WatchlistWithLatestUpdate>(
+				"[Ultimates].[spWatchlist_GetAllWithLatestUpdate]",
+				commandType: CommandType.StoredProcedure);
+		}
+
+		public async Task<IEnumerable<WatchlistUpdate>> GetWatchlistUpdatesByIdAsync(long watchlistId)
+		{
+			using var db = new SqlConnection(_configuration.GetConnectionString("DaleSandboxConnection"));
+			return await db.QueryAsync<WatchlistUpdate>(
+				"[Ultimates].[spWatchlistUpdates_GetByWatchlistID]",
+				new { WatchlistID = watchlistId },
+				commandType: CommandType.StoredProcedure);
+		}
     }
 }
