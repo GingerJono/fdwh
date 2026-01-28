@@ -36,9 +36,67 @@ else if (WatchlistRows?.Any() == true)
 		</div>
 	</div>
 
-	<div class="form-check form-switch mb-3">
-		<input class="form-check-input" type="checkbox" id="showInactive" @bind="showInactive" />
-		<label class="form-check-label" for="showInactive">Show inactive items</label>
+	<div class="card mb-3">
+		<div class="card-body">
+			<div class="row">
+				<div class="col-md-6 mb-3">
+					<h6 class="mb-2"><i class="bi bi-funnel"></i> Filter by Class</h6>
+					<div class="d-flex flex-wrap gap-2">
+						<button type="button"
+								class="btn btn-sm @(selectedClass == null ? "btn-primary" : "btn-outline-primary")"
+								@onclick="() => FilterByClass(null)">
+							All
+						</button>
+						@foreach (var className in distinctClasses)
+						{
+							<button type="button"
+									class="btn btn-sm @(selectedClass == className ? "btn-primary" : "btn-outline-primary")"
+									@onclick="() => FilterByClass(className)">
+								@className
+							</button>
+						}
+					</div>
+				</div>
+
+				<div class="col-md-6 mb-3">
+					<h6 class="mb-2"><i class="bi bi-funnel"></i> Filter by YOA</h6>
+					<div class="d-flex flex-wrap gap-2">
+						<button type="button"
+								class="btn btn-sm @(selectedYOA == null ? "btn-primary" : "btn-outline-primary")"
+								@onclick="() => FilterByYOA(null)">
+							All
+						</button>
+						@foreach (var yoa in distinctYOAs.OrderByDescending(y => y))
+						{
+							<button type="button"
+									class="btn btn-sm @(selectedYOA == yoa ? "btn-primary" : "btn-outline-primary")"
+									@onclick="() => FilterByYOA(yoa)">
+								@yoa
+							</button>
+						}
+					</div>
+				</div>
+			</div>
+
+			<div class="row align-items-center">
+				<div class="col-md-6">
+					<div class="form-check form-switch">
+						<input class="form-check-input" type="checkbox" id="showInactive" @bind="showInactive" />
+						<label class="form-check-label" for="showInactive">Show inactive items</label>
+					</div>
+				</div>
+				@if (selectedClass != null || selectedYOA != null)
+				{
+					<div class="col-md-6 text-md-end mt-2 mt-md-0">
+						<small class="text-muted">
+							Showing @FilteredRows.Count() of @WatchlistRows.Count records
+							@if (selectedClass != null) { <text> | Class: <strong>@selectedClass</strong></text> }
+							@if (selectedYOA != null) { <text> | YOA: <strong>@selectedYOA</strong></text> }
+						</small>
+					</div>
+				}
+			</div>
+		</div>
 	</div>
 
 	<div class="card shadow mb-4 border">
@@ -48,6 +106,18 @@ else if (WatchlistRows?.Any() == true)
 					<tr>
 						<th>ID</th>
 						<th>Type</th>
+						<th>Policy Ref</th>
+						<th>Assured</th>
+						<th>Class</th>
+						<th>Reserving Class</th>
+						<th>YOA</th>
+						<th>Domicile</th>
+						<th>Leader</th>
+						<th>Currency</th>
+						<th>Limit</th>
+						<th>XS</th>
+						<th>Dale Line</th>
+						<th>Dale Limit USD</th>
 						<th>Claimant</th>
 						<th>Loss Description</th>
 						<th>Current Reserve</th>
@@ -65,6 +135,18 @@ else if (WatchlistRows?.Any() == true)
 						<tr>
 							<td>@item.WatchlistID</td>
 							<td>@item.WatchlistType</td>
+							<td>@item.PolicyReference</td>
+							<td>@item.AssuredName</td>
+							<td>@item.Class</td>
+							<td>@item.ReservingClass</td>
+							<td>@item.YOA</td>
+							<td>@item.DomicileCountry</td>
+							<td>@item.Leader</td>
+							<td>@item.Currency</td>
+							<td>@(item.Limit?.ToString("N0") ?? "-")</td>
+							<td>@(item.XS?.ToString("N0") ?? "-")</td>
+							<td>@(item.DaleLine?.ToString("N2") ?? "-")</td>
+							<td>@(item.DaleLimitUSDatQtrFX?.ToString("N0") ?? "-")</td>
 							<td>@item.Claimant</td>
 							<td class="text-wrap" style="max-width: 240px;">@item.WatchlistDescription</td>
 							<td>@(item.CurrentReserveDaleShare?.ToString("N0") ?? "-")</td>
@@ -124,6 +206,10 @@ else
 	private string updateType = "Update";
 	private string ibnrRecommendedSelection = "";
 	private WatchlistUpdate newUpdate = new();
+	private List<string> distinctClasses = new();
+	private List<int> distinctYOAs = new();
+	private string selectedClass;
+	private int? selectedYOA;
 
 	private int ActiveItemCount => WatchlistRows.Count(row => row.Item.IsActive == 1);
 	private decimal TotalIbnr => WatchlistRows
@@ -131,9 +217,7 @@ else
 		.Sum(row => row.Item.IBNRAmountUSD ?? 0);
 
 	private IEnumerable<WatchlistRow> FilteredRows =>
-		showInactive
-			? WatchlistRows
-			: WatchlistRows.Where(row => row.Item.IsActive == 1);
+		ApplyFilters();
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -151,11 +235,59 @@ else
 			});
 
 			WatchlistRows = (await Task.WhenAll(countTasks)).ToList();
+			SetDistinctFilters();
 		}
 		finally
 		{
 			isLoading = false;
 		}
+	}
+
+	private IEnumerable<WatchlistRow> ApplyFilters()
+	{
+		var filtered = showInactive
+			? WatchlistRows
+			: WatchlistRows.Where(row => row.Item.IsActive == 1);
+
+		if (!string.IsNullOrWhiteSpace(selectedClass))
+		{
+			filtered = filtered.Where(row => row.Item.Class == selectedClass);
+		}
+
+		if (selectedYOA.HasValue)
+		{
+			filtered = filtered.Where(row => row.Item.YOA == selectedYOA);
+		}
+
+		return filtered;
+	}
+
+	private void SetDistinctFilters()
+	{
+		distinctClasses = WatchlistRows
+			.Select(row => row.Item.Class)
+			.Where(value => !string.IsNullOrWhiteSpace(value))
+			.Distinct()
+			.OrderBy(value => value)
+			.ToList();
+
+		distinctYOAs = WatchlistRows
+			.Select(row => row.Item.YOA)
+			.Where(value => value.HasValue)
+			.Select(value => value.Value)
+			.Distinct()
+			.OrderByDescending(value => value)
+			.ToList();
+	}
+
+	private void FilterByClass(string className)
+	{
+		selectedClass = className;
+	}
+
+	private void FilterByYOA(int? yoa)
+	{
+		selectedYOA = yoa;
 	}
 
 	private async Task ShowDetailModal(WatchlistWithLatestUpdate item)
@@ -347,6 +479,58 @@ else
 							<div class="col-md-4">
 								<label class="form-label"><strong>Policy Reference:</strong></label>
 								<div class="form-control-plaintext">@selectedItem.PolicyReference</div>
+							</div>
+						</div>
+						<div class="row mb-3">
+							<div class="col-md-4">
+								<label class="form-label"><strong>Assured Name:</strong></label>
+								<div class="form-control-plaintext">@selectedItem.AssuredName</div>
+							</div>
+							<div class="col-md-4">
+								<label class="form-label"><strong>Class:</strong></label>
+								<div class="form-control-plaintext">@selectedItem.Class</div>
+							</div>
+							<div class="col-md-4">
+								<label class="form-label"><strong>Reserving Class:</strong></label>
+								<div class="form-control-plaintext">@selectedItem.ReservingClass</div>
+							</div>
+						</div>
+						<div class="row mb-3">
+							<div class="col-md-4">
+								<label class="form-label"><strong>YOA:</strong></label>
+								<div class="form-control-plaintext">@selectedItem.YOA</div>
+							</div>
+							<div class="col-md-4">
+								<label class="form-label"><strong>Domicile Country:</strong></label>
+								<div class="form-control-plaintext">@selectedItem.DomicileCountry</div>
+							</div>
+							<div class="col-md-4">
+								<label class="form-label"><strong>Leader:</strong></label>
+								<div class="form-control-plaintext">@selectedItem.Leader</div>
+							</div>
+						</div>
+						<div class="row mb-3">
+							<div class="col-md-4">
+								<label class="form-label"><strong>Currency:</strong></label>
+								<div class="form-control-plaintext">@selectedItem.Currency</div>
+							</div>
+							<div class="col-md-4">
+								<label class="form-label"><strong>Limit:</strong></label>
+								<div class="form-control-plaintext">@selectedItem.Limit?.ToString("N0")</div>
+							</div>
+							<div class="col-md-4">
+								<label class="form-label"><strong>XS:</strong></label>
+								<div class="form-control-plaintext">@selectedItem.XS?.ToString("N0")</div>
+							</div>
+						</div>
+						<div class="row mb-3">
+							<div class="col-md-4">
+								<label class="form-label"><strong>Dale Line:</strong></label>
+								<div class="form-control-plaintext">@selectedItem.DaleLine?.ToString("N2")</div>
+							</div>
+							<div class="col-md-4">
+								<label class="form-label"><strong>Dale Limit USD:</strong></label>
+								<div class="form-control-plaintext">@selectedItem.DaleLimitUSDatQtrFX?.ToString("N0")</div>
 							</div>
 						</div>
 						<div class="row mb-3">

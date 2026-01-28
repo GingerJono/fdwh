@@ -61,5 +61,16 @@ namespace Sandbox.Models.Windowpane
 		public decimal? IBNRAmountUSD { get; set; }
 		public string RIApplicable { get; set; }
 		public string UpdateNarrative { get; set; }
+		public string AssuredName { get; set; }
+		public string Class { get; set; }
+		public string ReservingClass { get; set; }
+		public int? YOA { get; set; }
+		public string DomicileCountry { get; set; }
+		public string Leader { get; set; }
+		public string Currency { get; set; }
+		public decimal? Limit { get; set; }
+		public decimal? XS { get; set; }
+		public decimal? DaleLine { get; set; }
+		public decimal? DaleLimitUSDatQtrFX { get; set; }
 	}
 }
