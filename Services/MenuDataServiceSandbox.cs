@@ -140,6 +140,14 @@ public class MenuDataServiceSandbox
 					dirChange: false
 				),
 				new MainMenuItems (
+					path: "Watchlist",
+					type: "link",
+					title: "Watchlist",
+					selected: false,
+					active: false,
+					dirChange: false
+				),
+				new MainMenuItems (
 					path: "HighLevelWorkflow",
 					type: "link",
 					title: "High-Level Workflow",
