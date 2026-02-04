@@ -41,7 +41,7 @@
         <div class="card-body">
             <div class="row">
                 <!-- Class Filter -->
-                <div class="col-md-6 mb-3">
+                <div class="col-md-4 mb-3">
                     <h6 class="mb-2"><i class="bi bi-funnel"></i> Filter by Class</h6>
                     <div class="d-flex flex-wrap gap-2">
                         <button type="button"
@@ -60,8 +60,35 @@
                     </div>
                 </div>
 
+                <!-- Reserving Class Filter -->
+                <div class="col-md-4 mb-3">
+                    <h6 class="mb-2"><i class="bi bi-funnel"></i> Filter by Reserving Class</h6>
+                    <div class="d-flex flex-wrap gap-2">
+                        @if (selectedClass == null)
+                        {
+                            <span class="text-muted"><em>Select a Class first</em></span>
+                        }
+                        else
+                        {
+                            <button type="button"
+                                    class="btn btn-sm @(selectedReservingClass == null ? "btn-primary" : "btn-outline-primary")"
+                                    @onclick="() => FilterByReservingClass(null)">
+                                All
+                            </button>
+                            @foreach (var reservingClass in distinctReservingClasses)
+                            {
+                                <button type="button"
+                                        class="btn btn-sm @(selectedReservingClass == reservingClass ? "btn-primary" : "btn-outline-primary")"
+                                        @onclick="() => FilterByReservingClass(reservingClass)">
+                                    @GetReservingClassName(selectedClass, reservingClass)
+                                </button>
+                            }
+                        }
+                    </div>
+                </div>
+
                 <!-- YOA Filter -->
-                <div class="col-md-6 mb-3">
+                <div class="col-md-4 mb-3">
                     <h6 class="mb-2"><i class="bi bi-funnel"></i> Filter by YOA</h6>
                     <div class="d-flex flex-wrap gap-2">
                         <button type="button"
@@ -81,13 +108,14 @@
                 </div>
             </div>
 
-            @if (selectedClass != null || selectedYOA != null)
+            @if (selectedClass != null || selectedReservingClass != null || selectedYOA != null)
             {
                 <div class="row">
                     <div class="col-12">
                         <small class="text-muted">
                             Showing @filteredRecords.Count() of @premiumRecords.Count records
                             @if (selectedClass != null) { <text> | Class: <strong>@selectedClass</strong></text> }
+                            @if (selectedReservingClass != null) { <text> | Reserving Class: <strong>@GetReservingClassName(selectedClass!, selectedReservingClass)</strong></text> }
                             @if (selectedYOA != null) { <text> | YOA: <strong>@selectedYOA</strong></text> }
                         </small>
                     </div>
@@ -622,7 +650,9 @@ else
     private IEnumerable<PremiumListItemModel> filteredRecords => ApplyFilters();
     private List<string> distinctClasses = new();
     private List<int> distinctYOAs = new();
+    private List<string> distinctReservingClasses = new();
     private string? selectedClass = null;
+    private string? selectedReservingClass = null;
     private int? selectedYOA = null;
     private bool isLoading = true;
     private bool showEditModal = false;
@@ -919,6 +949,11 @@ else
             filtered = filtered.Where(r => r.Class == selectedClass);
         }
 
+        if (selectedReservingClass != null)
+        {
+            filtered = filtered.Where(r => r.ReservingClass == selectedReservingClass);
+        }
+
         if (selectedYOA != null)
         {
             filtered = filtered.Where(r => r.YOA == selectedYOA);
@@ -930,6 +965,32 @@ else
     private void FilterByClass(string? className)
     {
         selectedClass = className;
+
+        // Reset ReservingClass filter and update available options
+        selectedReservingClass = null;
+
+        if (className != null && premiumRecords != null)
+        {
+            // Populate distinct ReservingClasses for the selected Class
+            distinctReservingClasses = premiumRecords
+                .Where(r => r.Class == className)
+                .Select(r => r.ReservingClass)
+                .Distinct()
+                .OrderBy(rc => rc)
+                .ToList();
+        }
+        else
+        {
+            // Clear ReservingClass options when no Class is selected
+            distinctReservingClasses = new List<string>();
+        }
+
+        StateHasChanged();
+    }
+
+    private void FilterByReservingClass(string? reservingClass)
+    {
+        selectedReservingClass = reservingClass;
         StateHasChanged();
     }
 
