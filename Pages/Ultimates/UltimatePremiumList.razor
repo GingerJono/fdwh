@@ -367,7 +367,7 @@ else
                                         </div>
                                     }
 
-                                    <!-- EU Split Tab -->
+                                    <!-- EU Tab (calculated EU amounts = GNWP × EU Split) -->
                                     @if (activeTab == "eu")
                                     {
                                         <div class="table-responsive">
@@ -386,10 +386,10 @@ else
                                                     {
                                                         <tr>
                                                             <td><strong>@ccy.Currency</strong></td>
-                                                            <td class="text-end"><strong>@FormatPercentage(GetSelectedEUSplitValue(ccy) * 100)</strong></td>
-                                                            <td class="text-end">@FormatPercentage((ccy.PlanEUSplit ?? 0) * 100)</td>
-                                                            <td class="text-end">@FormatPercentage((ccy.WrittenEUSplit ?? 0) * 100)</td>
-                                                            <td class="text-end">@FormatPercentage((ccy.SignedEUSplit ?? 0) * 100)</td>
+                                                            <td class="text-end"><strong>@FormatCurrency(GetSelectedEUAmount(ccy))</strong></td>
+                                                            <td class="text-end">@FormatCurrency((ccy.PlanGNWP ?? 0) * (ccy.PlanEUSplit ?? 0))</td>
+                                                            <td class="text-end">@FormatCurrency((ccy.WrittenGNWP ?? 0) * (ccy.WrittenEUSplit ?? 0))</td>
+                                                            <td class="text-end">@FormatCurrency((ccy.SignedGNWP ?? 0) * (ccy.SignedEUSplit ?? 0))</td>
                                                         </tr>
                                                     }
                                                 </tbody>
@@ -1170,6 +1170,14 @@ else
 
     private void OnSelectionChanged()
     {
+        // When main Selection changes, also set CcySplitSelection and EUSplitSelection to match
+        if (selectedPremium != null && selectedPremium.Selection != "Manual")
+        {
+            selectedPremium.CcySplitSelection = selectedPremium.Selection;
+            selectedPremium.EUSplitSelection = selectedPremium.Selection;
+        }
+
+        CalculateCurrencySplitTotal();
         OnFormChanged();
         // Force UI refresh to update SELECTED columns in matrices
         StateHasChanged();
@@ -1335,18 +1343,30 @@ else
         return 100 - euSplit;
     }
 
-    private decimal GetSelectedEUSplitValue(PremiumCcyModel ccy)
+    private decimal GetSelectedEUAmount(PremiumCcyModel ccy)
     {
         if (selectedPremium == null) return 0;
 
-        // Returns the EU split as decimal (0.008 = 0.8%) based on EUSplitSelection
-        return selectedPremium.EUSplitSelection switch
+        // Get the selected GNWP value based on main Selection
+        var gnwp = selectedPremium.Selection switch
+        {
+            "Plan" => ccy.PlanGNWP ?? 0,
+            "Written" => ccy.WrittenGNWP ?? 0,
+            "Signed" => ccy.SignedGNWP ?? 0,
+            _ => ccy.ManualGNWP ?? 0 // Manual
+        };
+
+        // Get the EU split based on EUSplitSelection
+        var euSplit = selectedPremium.EUSplitSelection switch
         {
             "Plan" => ccy.PlanEUSplit ?? 0,
             "Written" => ccy.WrittenEUSplit ?? 0,
             "Signed" => ccy.SignedEUSplit ?? 0,
             _ => ccy.ManualEUSplit ?? 0 // Manual
         };
+
+        // EU amount = GNWP × EU Split %
+        return gnwp * euSplit;
     }
 
     private void CalculateNetFromGross()
