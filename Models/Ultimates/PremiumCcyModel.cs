@@ -108,8 +108,131 @@ namespace sandboxapp.Models.Ultimates
             return gnwp * (1 - euSplit);
         }
 
+        // ========== Selection-based getters ==========
+
         /// <summary>
-        /// Get value by selection type and field
+        /// Get GGWP based on selection type
+        /// </summary>
+        public decimal GetGGWP(string selection) => selection switch
+        {
+            "Plan" => PlanGGWP ?? 0,
+            "Written" => WrittenGGWP ?? 0,
+            "Signed" => SignedGGWP ?? 0,
+            _ => ManualGGWP ?? 0
+        };
+
+        /// <summary>
+        /// Get Deductions based on selection type
+        /// </summary>
+        public decimal GetDeductions(string selection) => selection switch
+        {
+            "Plan" => PlanDeductions ?? 0,
+            "Written" => WrittenDeductions ?? 0,
+            "Signed" => SignedDeductions ?? 0,
+            _ => ManualDeductions ?? 0
+        };
+
+        /// <summary>
+        /// Get GNWP based on selection type
+        /// </summary>
+        public decimal GetGNWP(string selection) => selection switch
+        {
+            "Plan" => PlanGNWP ?? 0,
+            "Written" => WrittenGNWP ?? 0,
+            "Signed" => SignedGNWP ?? 0,
+            _ => ManualGNWP ?? 0
+        };
+
+        /// <summary>
+        /// Get Currency Split based on selection type (as decimal, e.g., 0.5 = 50%)
+        /// </summary>
+        public decimal GetCcySplit(string selection) => selection switch
+        {
+            "Plan" => PlanCcySplit ?? 0,
+            "Written" => WrittenCcySplit ?? 0,
+            "Signed" => SignedCcySplit ?? 0,
+            _ => ManualCcySplit ?? 0
+        };
+
+        /// <summary>
+        /// Get Currency Split as percentage for display (e.g., 50 for 50%)
+        /// </summary>
+        public decimal GetCcySplitPercent(string selection) => GetCcySplit(selection) * 100;
+
+        /// <summary>
+        /// Get EU Split based on selection type (as decimal, e.g., 0.5 = 50%)
+        /// </summary>
+        public decimal GetEUSplit(string selection) => selection switch
+        {
+            "Plan" => PlanEUSplit ?? 0,
+            "Written" => WrittenEUSplit ?? 0,
+            "Signed" => SignedEUSplit ?? 0,
+            _ => ManualEUSplit ?? 0
+        };
+
+        /// <summary>
+        /// Get EU Split as percentage for display (e.g., 50 for 50%)
+        /// </summary>
+        public decimal GetEUSplitPercent(string selection) => GetEUSplit(selection) * 100;
+
+        /// <summary>
+        /// Get LNDN Split as percentage (100 - EU Split %)
+        /// </summary>
+        public decimal GetLNDNSplitPercent(string selection) => 100 - GetEUSplitPercent(selection);
+
+        // ========== Setters for Manual values ==========
+
+        /// <summary>
+        /// Set Manual Currency Split from percentage value
+        /// </summary>
+        public void SetManualCcySplitPercent(decimal percent) => ManualCcySplit = percent / 100;
+
+        /// <summary>
+        /// Set Manual EU Split from percentage value
+        /// </summary>
+        public void SetManualEUSplitPercent(decimal percent) => ManualEUSplit = percent / 100;
+
+        // ========== Copy selection values to Selected/Manual fields ==========
+
+        /// <summary>
+        /// Copy values from specified selection to Selected fields
+        /// </summary>
+        public void CopyToSelected(string selection)
+        {
+            SelectedGGWP = GetGGWP(selection);
+            SelectedDeductions = GetDeductions(selection);
+            SelectedGNWP = GetGNWP(selection);
+            SelectedEU = GetValue(selection, "EU");
+        }
+
+        /// <summary>
+        /// Copy CcySplit from specified selection to SelectedCcySplit and ManualCcySplit
+        /// </summary>
+        public void CopyCcySplitToSelected(string selection)
+        {
+            var value = GetCcySplit(selection);
+            SelectedCcySplit = value;
+            if (selection != "Manual")
+            {
+                ManualCcySplit = value;
+            }
+        }
+
+        /// <summary>
+        /// Copy EUSplit from specified selection to SelectedEUSplit and ManualEUSplit
+        /// </summary>
+        public void CopyEUSplitToSelected(string selection)
+        {
+            var value = GetEUSplit(selection);
+            SelectedEUSplit = value;
+            if (selection != "Manual")
+            {
+                ManualEUSplit = value;
+            }
+        }
+
+        /// <summary>
+        /// Get value by selection type and field (generic accessor)
         /// </summary>
         public decimal? GetValue(string selection, string field)
         {

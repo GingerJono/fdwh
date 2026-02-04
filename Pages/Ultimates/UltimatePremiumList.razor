@@ -1263,20 +1263,8 @@ else
     private decimal? GetDisplayCcySplitValue(string currency)
     {
         if (selectedPremium == null || premiumCcyRecords == null) return 0;
-
         var ccyRecord = premiumCcyRecords.FirstOrDefault(c => c.Currency == currency);
-        if (ccyRecord == null) return 0; // No row for this currency = 0% split
-
-        // DB stores as decimal (0.5 = 50%), convert to percentage for display
-        var dbValue = selectedPremium.CcySplitSelection switch
-        {
-            "Plan" => ccyRecord.PlanCcySplit,
-            "Written" => ccyRecord.WrittenCcySplit,
-            "Signed" => ccyRecord.SignedCcySplit,
-            _ => ccyRecord.ManualCcySplit // Manual
-        };
-
-        return (dbValue ?? 0) * 100;
+        return ccyRecord?.GetCcySplitPercent(selectedPremium.CcySplitSelection) ?? 0;
     }
 
     private void SetManualCcySplitValue(string currency, ChangeEventArgs e)
@@ -1287,34 +1275,18 @@ else
         var ccyRecord = premiumCcyRecords.FirstOrDefault(c => c.Currency == currency);
         if (ccyRecord == null) return;
 
-        // Convert from percentage (50) to decimal (0.5) for DB storage
-        decimal? value = null;
         if (decimal.TryParse(e.Value?.ToString(), out var parsed))
         {
-            value = parsed / 100;
+            ccyRecord.SetManualCcySplitPercent(parsed);
         }
-
-        ccyRecord.ManualCcySplit = value;
         OnCurrencySplitChanged();
     }
 
     private decimal? GetDisplayEUSplitValue(string currency)
     {
         if (selectedPremium == null || premiumCcyRecords == null) return 0;
-
         var ccyRecord = premiumCcyRecords.FirstOrDefault(c => c.Currency == currency);
-        if (ccyRecord == null) return 0; // No row for this currency = 0% EU split
-
-        // DB stores as decimal (0.5 = 50%), convert to percentage for display
-        var dbValue = selectedPremium.EUSplitSelection switch
-        {
-            "Plan" => ccyRecord.PlanEUSplit,
-            "Written" => ccyRecord.WrittenEUSplit,
-            "Signed" => ccyRecord.SignedEUSplit,
-            _ => ccyRecord.ManualEUSplit // Manual
-        };
-
-        return (dbValue ?? 0) * 100;
+        return ccyRecord?.GetEUSplitPercent(selectedPremium.EUSplitSelection) ?? 0;
     }
 
     private void SetManualEUSplitValue(string currency, ChangeEventArgs e)
@@ -1325,22 +1297,19 @@ else
         var ccyRecord = premiumCcyRecords.FirstOrDefault(c => c.Currency == currency);
         if (ccyRecord == null) return;
 
-        // Convert from percentage (50) to decimal (0.5) for DB storage
-        decimal? value = null;
         if (decimal.TryParse(e.Value?.ToString(), out var parsed))
         {
-            value = parsed / 100;
+            ccyRecord.SetManualEUSplitPercent(parsed);
         }
-
-        ccyRecord.ManualEUSplit = value;
         OnFormChanged();
         StateHasChanged();
     }
 
     private decimal GetLNDNSplitForCurrency(string currency)
     {
-        var euSplit = GetDisplayEUSplitValue(currency) ?? 0;
-        return 100 - euSplit;
+        if (selectedPremium == null || premiumCcyRecords == null) return 100;
+        var ccyRecord = premiumCcyRecords.FirstOrDefault(c => c.Currency == currency);
+        return ccyRecord?.GetLNDNSplitPercent(selectedPremium.EUSplitSelection) ?? 100;
     }
 
     private void CalculateNetFromGross()
@@ -1642,86 +1611,18 @@ else
             // Save Premium header and get new version number
             var newVersion = await UltimatesService.SavePremium(selectedPremium);
 
-            // Update SELECTED fields in PremiumCcy records based on Selection dropdown
+            // Update SELECTED fields in PremiumCcy records based on selections
             if (premiumCcyRecords != null && premiumCcyRecords.Any())
             {
                 foreach (var ccy in premiumCcyRecords)
                 {
-                    // Update version to new version
                     ccy.Version = newVersion;
 
-                    // Update SELECTED fields based on Selection (for GGWP, Deductions, GNWP, EU)
-                    switch (selectedPremium.Selection)
-                    {
-                        case "Plan":
-                            ccy.SelectedGGWP = ccy.PlanGGWP;
-                            ccy.SelectedDeductions = ccy.PlanDeductions;
-                            ccy.SelectedGNWP = ccy.PlanGNWP;
-                            ccy.SelectedEU = ccy.PlanEU;
-                            break;
-                        case "Written":
-                            ccy.SelectedGGWP = ccy.WrittenGGWP;
-                            ccy.SelectedDeductions = ccy.WrittenDeductions;
-                            ccy.SelectedGNWP = ccy.WrittenGNWP;
-                            ccy.SelectedEU = ccy.WrittenEU;
-                            break;
-                        case "Signed":
-                            ccy.SelectedGGWP = ccy.SignedGGWP;
-                            ccy.SelectedDeductions = ccy.SignedDeductions;
-                            ccy.SelectedGNWP = ccy.SignedGNWP;
-                            ccy.SelectedEU = ccy.SignedEU;
-                            break;
-                        case "Manual":
-                            ccy.SelectedGGWP = ccy.ManualGGWP;
-                            ccy.SelectedDeductions = ccy.ManualDeductions;
-                            ccy.SelectedGNWP = ccy.ManualGNWP;
-                            ccy.SelectedEU = ccy.ManualEU;
-                            break;
-                    }
+                    // Copy values to Selected fields using model methods
+                    ccy.CopyToSelected(selectedPremium.Selection);
+                    ccy.CopyCcySplitToSelected(selectedPremium.CcySplitSelection);
+                    ccy.CopyEUSplitToSelected(selectedPremium.EUSplitSelection);
 
-                    // Update SelectedCcySplit based on CcySplitSelection
-                    switch (selectedPremium.CcySplitSelection)
-                    {
-                        case "Plan":
-                            ccy.SelectedCcySplit = ccy.PlanCcySplit;
-                            // Also copy to ManualCcySplit for storage
-                            ccy.ManualCcySplit = ccy.PlanCcySplit;
-                            break;
-                        case "Written":
-                            ccy.SelectedCcySplit = ccy.WrittenCcySplit;
-                            ccy.ManualCcySplit = ccy.WrittenCcySplit;
-                            break;
-                        case "Signed":
-                            ccy.SelectedCcySplit = ccy.SignedCcySplit;
-                            ccy.ManualCcySplit = ccy.SignedCcySplit;
-                            break;
-                        case "Manual":
-                            ccy.SelectedCcySplit = ccy.ManualCcySplit;
-                            break;
-                    }
-
-                    // Update SelectedEUSplit based on EUSplitSelection
-                    switch (selectedPremium.EUSplitSelection)
-                    {
-                        case "Plan":
-                            ccy.SelectedEUSplit = ccy.PlanEUSplit;
-                            // Also copy to ManualEUSplit for storage
-                            ccy.ManualEUSplit = ccy.PlanEUSplit;
-                            break;
-                        case "Written":
-                            ccy.SelectedEUSplit = ccy.WrittenEUSplit;
-                            ccy.ManualEUSplit = ccy.WrittenEUSplit;
-                            break;
-                        case "Signed":
-                            ccy.SelectedEUSplit = ccy.SignedEUSplit;
-                            ccy.ManualEUSplit = ccy.SignedEUSplit;
-                            break;
-                        case "Manual":
-                            ccy.SelectedEUSplit = ccy.ManualEUSplit;
-                            break;
-                    }
-
-                    // Save each currency record
                     await UltimatesService.SavePremiumCcy(ccy);
                 }
 
