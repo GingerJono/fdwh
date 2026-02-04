@@ -444,34 +444,53 @@ else
                             <div class="col-12">
                                 <label class="form-label fw-bold">Currency Splits (must total 100%)</label>
                             </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Source</label>
+                                <select class="form-select" @bind="selectedPremium.SplitSelection" @bind:after="OnSplitSelectionChanged">
+                                    <option value="Plan">Plan</option>
+                                    <option value="Written">Written</option>
+                                    <option value="Signed">Signed</option>
+                                    <option value="Manual">Manual</option>
+                                </select>
+                            </div>
                             <div class="col">
                                 <label class="form-label">GBP %</label>
-                                <input type="number" step="0.01" min="0" max="100" class="form-control" @bind="selectedPremium.ManualSplitGBP"
-                                       @bind:event="oninput" @bind:after="OnCurrencySplitChanged" />
+                                <input type="number" step="0.01" min="0" max="100" class="form-control"
+                                       value="@GetDisplaySplitValue("GBP")"
+                                       @onchange="@(e => SetManualSplitValue("GBP", e))"
+                                       disabled="@(selectedPremium.SplitSelection != "Manual")" />
                                 <small class="text-muted">@GetCalculatedCurrencyValue("GBP")</small>
                             </div>
                             <div class="col">
                                 <label class="form-label">USD %</label>
-                                <input type="number" step="0.01" min="0" max="100" class="form-control" @bind="selectedPremium.ManualSplitUSD"
-                                       @bind:event="oninput" @bind:after="OnCurrencySplitChanged" />
+                                <input type="number" step="0.01" min="0" max="100" class="form-control"
+                                       value="@GetDisplaySplitValue("USD")"
+                                       @onchange="@(e => SetManualSplitValue("USD", e))"
+                                       disabled="@(selectedPremium.SplitSelection != "Manual")" />
                                 <small class="text-muted">@GetCalculatedCurrencyValue("USD")</small>
                             </div>
                             <div class="col">
                                 <label class="form-label">CAD %</label>
-                                <input type="number" step="0.01" min="0" max="100" class="form-control" @bind="selectedPremium.ManualSplitCAD"
-                                       @bind:event="oninput" @bind:after="OnCurrencySplitChanged" />
+                                <input type="number" step="0.01" min="0" max="100" class="form-control"
+                                       value="@GetDisplaySplitValue("CAD")"
+                                       @onchange="@(e => SetManualSplitValue("CAD", e))"
+                                       disabled="@(selectedPremium.SplitSelection != "Manual")" />
                                 <small class="text-muted">@GetCalculatedCurrencyValue("CAD")</small>
                             </div>
                             <div class="col">
                                 <label class="form-label">EUR %</label>
-                                <input type="number" step="0.01" min="0" max="100" class="form-control" @bind="selectedPremium.ManualSplitEUR"
-                                       @bind:event="oninput" @bind:after="OnCurrencySplitChanged" />
+                                <input type="number" step="0.01" min="0" max="100" class="form-control"
+                                       value="@GetDisplaySplitValue("EUR")"
+                                       @onchange="@(e => SetManualSplitValue("EUR", e))"
+                                       disabled="@(selectedPremium.SplitSelection != "Manual")" />
                                 <small class="text-muted">@GetCalculatedCurrencyValue("EUR")</small>
                             </div>
                             <div class="col">
                                 <label class="form-label">JPY %</label>
-                                <input type="number" step="0.01" min="0" max="100" class="form-control" @bind="selectedPremium.ManualSplitJPY"
-                                       @bind:event="oninput" @bind:after="OnCurrencySplitChanged" />
+                                <input type="number" step="0.01" min="0" max="100" class="form-control"
+                                       value="@GetDisplaySplitValue("JPY")"
+                                       @onchange="@(e => SetManualSplitValue("JPY", e))"
+                                       disabled="@(selectedPremium.SplitSelection != "Manual")" />
                                 <small class="text-muted">@GetCalculatedCurrencyValue("JPY")</small>
                             </div>
                         </div>
@@ -1023,6 +1042,7 @@ else
         {
             Selection = fullRecord.Selection,
             GrossNetEntry = fullRecord.GrossNetEntry,
+            SplitSelection = fullRecord.SplitSelection,
             UpdateComments = null,
             ManualGrossPremiumGBP = fullRecord.ManualGrossPremiumGBP,
             ManualNetPremiumGBP = fullRecord.ManualNetPremiumGBP,
@@ -1039,10 +1059,7 @@ else
         await LoadPremiumCcyData(record.Class, record.ReservingClass, record.YOA, record.Version);
 
         // Calculate currency split total for display
-        if (selectedPremium.Selection == "Manual")
-        {
-            CalculateCurrencySplitTotal();
-        }
+        CalculateCurrencySplitTotal();
 
         isFormDirty = false;
         showEditModal = true;
@@ -1108,6 +1125,7 @@ else
         // Check if any field has changed
         isFormDirty = selectedPremium.Selection != originalPremium.Selection ||
                       selectedPremium.GrossNetEntry != originalPremium.GrossNetEntry ||
+                      selectedPremium.SplitSelection != originalPremium.SplitSelection ||
                       selectedPremium.ManualGrossPremiumGBP != originalPremium.ManualGrossPremiumGBP ||
                       selectedPremium.ManualNetPremiumGBP != originalPremium.ManualNetPremiumGBP ||
                       selectedPremium.ManualDeductions != originalPremium.ManualDeductions ||
@@ -1190,6 +1208,81 @@ else
         StateHasChanged();
     }
 
+    private void OnSplitSelectionChanged()
+    {
+        CalculateCurrencySplitTotal();
+        DistributeManualAmounts();
+        OnFormChanged();
+        StateHasChanged();
+    }
+
+    private decimal? GetDisplaySplitValue(string currency)
+    {
+        if (selectedPremium == null) return null;
+
+        return selectedPremium.SplitSelection switch
+        {
+            "Plan" => currency switch
+            {
+                "GBP" => selectedPremium.PlanSplitGBP,
+                "USD" => selectedPremium.PlanSplitUSD,
+                "CAD" => selectedPremium.PlanSplitCAD,
+                "EUR" => selectedPremium.PlanSplitEUR,
+                "JPY" => selectedPremium.PlanSplitJPY,
+                _ => null
+            },
+            "Written" => currency switch
+            {
+                "GBP" => selectedPremium.WrittenSplitGBP,
+                "USD" => selectedPremium.WrittenSplitUSD,
+                "CAD" => selectedPremium.WrittenSplitCAD,
+                "EUR" => selectedPremium.WrittenSplitEUR,
+                "JPY" => selectedPremium.WrittenSplitJPY,
+                _ => null
+            },
+            "Signed" => currency switch
+            {
+                "GBP" => selectedPremium.SignedSplitGBP,
+                "USD" => selectedPremium.SignedSplitUSD,
+                "CAD" => selectedPremium.SignedSplitCAD,
+                "EUR" => selectedPremium.SignedSplitEUR,
+                "JPY" => selectedPremium.SignedSplitJPY,
+                _ => null
+            },
+            _ => currency switch // Manual
+            {
+                "GBP" => selectedPremium.ManualSplitGBP,
+                "USD" => selectedPremium.ManualSplitUSD,
+                "CAD" => selectedPremium.ManualSplitCAD,
+                "EUR" => selectedPremium.ManualSplitEUR,
+                "JPY" => selectedPremium.ManualSplitJPY,
+                _ => null
+            }
+        };
+    }
+
+    private void SetManualSplitValue(string currency, ChangeEventArgs e)
+    {
+        if (selectedPremium == null || selectedPremium.SplitSelection != "Manual") return;
+
+        decimal? value = null;
+        if (decimal.TryParse(e.Value?.ToString(), out var parsed))
+        {
+            value = parsed;
+        }
+
+        switch (currency)
+        {
+            case "GBP": selectedPremium.ManualSplitGBP = value; break;
+            case "USD": selectedPremium.ManualSplitUSD = value; break;
+            case "CAD": selectedPremium.ManualSplitCAD = value; break;
+            case "EUR": selectedPremium.ManualSplitEUR = value; break;
+            case "JPY": selectedPremium.ManualSplitJPY = value; break;
+        }
+
+        OnCurrencySplitChanged();
+    }
+
     private void CalculateNetFromGross()
     {
         if (!selectedPremium.ManualGrossPremiumGBP.HasValue) return;
@@ -1212,11 +1305,11 @@ else
 
     private void CalculateCurrencySplitTotal()
     {
-        var total = (selectedPremium.ManualSplitGBP ?? 0) +
-                    (selectedPremium.ManualSplitUSD ?? 0) +
-                    (selectedPremium.ManualSplitCAD ?? 0) +
-                    (selectedPremium.ManualSplitEUR ?? 0) +
-                    (selectedPremium.ManualSplitJPY ?? 0);
+        var total = (GetDisplaySplitValue("GBP") ?? 0) +
+                    (GetDisplaySplitValue("USD") ?? 0) +
+                    (GetDisplaySplitValue("CAD") ?? 0) +
+                    (GetDisplaySplitValue("EUR") ?? 0) +
+                    (GetDisplaySplitValue("JPY") ?? 0);
 
         currencySplitTotal = total > 0 ? total : null;
     }
@@ -1230,15 +1323,7 @@ else
     {
         if (!selectedPremium.ManualGrossPremiumGBP.HasValue) return string.Empty;
 
-        var splitPct = currency switch
-        {
-            "GBP" => selectedPremium.ManualSplitGBP ?? 0,
-            "USD" => selectedPremium.ManualSplitUSD ?? 0,
-            "CAD" => selectedPremium.ManualSplitCAD ?? 0,
-            "EUR" => selectedPremium.ManualSplitEUR ?? 0,
-            "JPY" => selectedPremium.ManualSplitJPY ?? 0,
-            _ => 0
-        };
+        var splitPct = GetDisplaySplitValue(currency) ?? 0;
 
         if (splitPct <= 0) return string.Empty;
 
@@ -1336,14 +1421,14 @@ else
         var gnwpGBP = selectedPremium.ManualNetPremiumGBP ?? ggwpGBP;
         var deductions = selectedPremium.ManualDeductions ?? 0;
 
-        // Distribute to each currency
+        // Distribute to each currency using selected split values
         var currencies = new[]
         {
-            ("GBP", selectedPremium.ManualSplitGBP ?? 0),
-            ("USD", selectedPremium.ManualSplitUSD ?? 0),
-            ("CAD", selectedPremium.ManualSplitCAD ?? 0),
-            ("EUR", selectedPremium.ManualSplitEUR ?? 0),
-            ("JPY", selectedPremium.ManualSplitJPY ?? 0)
+            ("GBP", GetDisplaySplitValue("GBP") ?? 0),
+            ("USD", GetDisplaySplitValue("USD") ?? 0),
+            ("CAD", GetDisplaySplitValue("CAD") ?? 0),
+            ("EUR", GetDisplaySplitValue("EUR") ?? 0),
+            ("JPY", GetDisplaySplitValue("JPY") ?? 0)
         };
 
         foreach (var (currency, splitPct) in currencies)

@@ -151,6 +151,30 @@ namespace sandboxapp.Services
                 parameters.Add("@ManualSplitJPY", model.ManualSplitJPY, DbType.Decimal);
                 parameters.Add("@ManualEUSplit", model.ManualEUSplit, DbType.Decimal);
 
+                // Split Selection
+                parameters.Add("@SplitSelection", model.SplitSelection, DbType.String);
+
+                // Plan Splits
+                parameters.Add("@PlanSplitGBP", model.PlanSplitGBP, DbType.Decimal);
+                parameters.Add("@PlanSplitUSD", model.PlanSplitUSD, DbType.Decimal);
+                parameters.Add("@PlanSplitCAD", model.PlanSplitCAD, DbType.Decimal);
+                parameters.Add("@PlanSplitEUR", model.PlanSplitEUR, DbType.Decimal);
+                parameters.Add("@PlanSplitJPY", model.PlanSplitJPY, DbType.Decimal);
+
+                // Written Splits
+                parameters.Add("@WrittenSplitGBP", model.WrittenSplitGBP, DbType.Decimal);
+                parameters.Add("@WrittenSplitUSD", model.WrittenSplitUSD, DbType.Decimal);
+                parameters.Add("@WrittenSplitCAD", model.WrittenSplitCAD, DbType.Decimal);
+                parameters.Add("@WrittenSplitEUR", model.WrittenSplitEUR, DbType.Decimal);
+                parameters.Add("@WrittenSplitJPY", model.WrittenSplitJPY, DbType.Decimal);
+
+                // Signed Splits
+                parameters.Add("@SignedSplitGBP", model.SignedSplitGBP, DbType.Decimal);
+                parameters.Add("@SignedSplitUSD", model.SignedSplitUSD, DbType.Decimal);
+                parameters.Add("@SignedSplitCAD", model.SignedSplitCAD, DbType.Decimal);
+                parameters.Add("@SignedSplitEUR", model.SignedSplitEUR, DbType.Decimal);
+                parameters.Add("@SignedSplitJPY", model.SignedSplitJPY, DbType.Decimal);
+
                 await connection.ExecuteAsync(
                     "Ultimates.spUpsertUltimatePremium",
                     parameters,
