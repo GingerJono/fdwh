@@ -446,7 +446,7 @@ else
                             </div>
                             <div class="col-md-2">
                                 <label class="form-label">Source</label>
-                                <select class="form-select" @bind="selectedPremium.SplitSelection" @bind:after="OnSplitSelectionChanged">
+                                <select class="form-select" @bind="selectedPremium.CcySplitSelection" @bind:after="OnCcySplitSelectionChanged">
                                     <option value="Plan">Plan</option>
                                     <option value="Written">Written</option>
                                     <option value="Signed">Signed</option>
@@ -456,41 +456,41 @@ else
                             <div class="col">
                                 <label class="form-label">GBP %</label>
                                 <input type="number" step="0.01" min="0" max="100" class="form-control"
-                                       value="@GetDisplaySplitValue("GBP")"
-                                       @onchange="@(e => SetManualSplitValue("GBP", e))"
-                                       disabled="@(selectedPremium.SplitSelection != "Manual")" />
+                                       value="@GetDisplayCcySplitValue("GBP")"
+                                       @onchange="@(e => SetManualCcySplitValue("GBP", e))"
+                                       disabled="@(selectedPremium.CcySplitSelection != "Manual")" />
                                 <small class="text-muted">@GetCalculatedCurrencyValue("GBP")</small>
                             </div>
                             <div class="col">
                                 <label class="form-label">USD %</label>
                                 <input type="number" step="0.01" min="0" max="100" class="form-control"
-                                       value="@GetDisplaySplitValue("USD")"
-                                       @onchange="@(e => SetManualSplitValue("USD", e))"
-                                       disabled="@(selectedPremium.SplitSelection != "Manual")" />
+                                       value="@GetDisplayCcySplitValue("USD")"
+                                       @onchange="@(e => SetManualCcySplitValue("USD", e))"
+                                       disabled="@(selectedPremium.CcySplitSelection != "Manual")" />
                                 <small class="text-muted">@GetCalculatedCurrencyValue("USD")</small>
                             </div>
                             <div class="col">
                                 <label class="form-label">CAD %</label>
                                 <input type="number" step="0.01" min="0" max="100" class="form-control"
-                                       value="@GetDisplaySplitValue("CAD")"
-                                       @onchange="@(e => SetManualSplitValue("CAD", e))"
-                                       disabled="@(selectedPremium.SplitSelection != "Manual")" />
+                                       value="@GetDisplayCcySplitValue("CAD")"
+                                       @onchange="@(e => SetManualCcySplitValue("CAD", e))"
+                                       disabled="@(selectedPremium.CcySplitSelection != "Manual")" />
                                 <small class="text-muted">@GetCalculatedCurrencyValue("CAD")</small>
                             </div>
                             <div class="col">
                                 <label class="form-label">EUR %</label>
                                 <input type="number" step="0.01" min="0" max="100" class="form-control"
-                                       value="@GetDisplaySplitValue("EUR")"
-                                       @onchange="@(e => SetManualSplitValue("EUR", e))"
-                                       disabled="@(selectedPremium.SplitSelection != "Manual")" />
+                                       value="@GetDisplayCcySplitValue("EUR")"
+                                       @onchange="@(e => SetManualCcySplitValue("EUR", e))"
+                                       disabled="@(selectedPremium.CcySplitSelection != "Manual")" />
                                 <small class="text-muted">@GetCalculatedCurrencyValue("EUR")</small>
                             </div>
                             <div class="col">
                                 <label class="form-label">JPY %</label>
                                 <input type="number" step="0.01" min="0" max="100" class="form-control"
-                                       value="@GetDisplaySplitValue("JPY")"
-                                       @onchange="@(e => SetManualSplitValue("JPY", e))"
-                                       disabled="@(selectedPremium.SplitSelection != "Manual")" />
+                                       value="@GetDisplayCcySplitValue("JPY")"
+                                       @onchange="@(e => SetManualCcySplitValue("JPY", e))"
+                                       disabled="@(selectedPremium.CcySplitSelection != "Manual")" />
                                 <small class="text-muted">@GetCalculatedCurrencyValue("JPY")</small>
                             </div>
                         </div>
@@ -508,16 +508,56 @@ else
 
                         <div class="row mb-3">
                             <div class="col-12">
-                                <label class="form-label fw-bold">EU / LNDN Split</label>
+                                <label class="form-label fw-bold">EU / LNDN Split (per Currency)</label>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">EU %</label>
-                                <input type="number" step="0.01" min="0" max="100" class="form-control" @bind="selectedPremium.ManualEUSplit"
-                                       @bind:event="oninput" @bind:after="OnFormChanged" />
+                            <div class="col-md-2">
+                                <label class="form-label">Source</label>
+                                <select class="form-select" @bind="selectedPremium.EUSplitSelection" @bind:after="OnEUSplitSelectionChanged">
+                                    <option value="Plan">Plan</option>
+                                    <option value="Written">Written</option>
+                                    <option value="Signed">Signed</option>
+                                    <option value="Manual">Manual</option>
+                                </select>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">LNDN %</label>
-                                <input type="number" step="0.01" class="form-control" value="@GetLNDNSplit()" disabled />
+                            <div class="col">
+                                <label class="form-label">GBP EU%</label>
+                                <input type="number" step="0.01" min="0" max="100" class="form-control"
+                                       value="@GetDisplayEUSplitValue("GBP")"
+                                       @onchange="@(e => SetManualEUSplitValue("GBP", e))"
+                                       disabled="@(selectedPremium.EUSplitSelection != "Manual")" />
+                                <small class="text-muted">LNDN: @GetLNDNSplitForCurrency("GBP")%</small>
+                            </div>
+                            <div class="col">
+                                <label class="form-label">USD EU%</label>
+                                <input type="number" step="0.01" min="0" max="100" class="form-control"
+                                       value="@GetDisplayEUSplitValue("USD")"
+                                       @onchange="@(e => SetManualEUSplitValue("USD", e))"
+                                       disabled="@(selectedPremium.EUSplitSelection != "Manual")" />
+                                <small class="text-muted">LNDN: @GetLNDNSplitForCurrency("USD")%</small>
+                            </div>
+                            <div class="col">
+                                <label class="form-label">CAD EU%</label>
+                                <input type="number" step="0.01" min="0" max="100" class="form-control"
+                                       value="@GetDisplayEUSplitValue("CAD")"
+                                       @onchange="@(e => SetManualEUSplitValue("CAD", e))"
+                                       disabled="@(selectedPremium.EUSplitSelection != "Manual")" />
+                                <small class="text-muted">LNDN: @GetLNDNSplitForCurrency("CAD")%</small>
+                            </div>
+                            <div class="col">
+                                <label class="form-label">EUR EU%</label>
+                                <input type="number" step="0.01" min="0" max="100" class="form-control"
+                                       value="@GetDisplayEUSplitValue("EUR")"
+                                       @onchange="@(e => SetManualEUSplitValue("EUR", e))"
+                                       disabled="@(selectedPremium.EUSplitSelection != "Manual")" />
+                                <small class="text-muted">LNDN: @GetLNDNSplitForCurrency("EUR")%</small>
+                            </div>
+                            <div class="col">
+                                <label class="form-label">JPY EU%</label>
+                                <input type="number" step="0.01" min="0" max="100" class="form-control"
+                                       value="@GetDisplayEUSplitValue("JPY")"
+                                       @onchange="@(e => SetManualEUSplitValue("JPY", e))"
+                                       disabled="@(selectedPremium.EUSplitSelection != "Manual")" />
+                                <small class="text-muted">LNDN: @GetLNDNSplitForCurrency("JPY")%</small>
                             </div>
                         </div>
                     }
@@ -1042,12 +1082,12 @@ else
         {
             Selection = fullRecord.Selection,
             GrossNetEntry = fullRecord.GrossNetEntry,
-            SplitSelection = fullRecord.SplitSelection,
+            CcySplitSelection = fullRecord.CcySplitSelection,
+            EUSplitSelection = fullRecord.EUSplitSelection,
             UpdateComments = null,
             ManualGrossPremiumGBP = fullRecord.ManualGrossPremiumGBP,
             ManualNetPremiumGBP = fullRecord.ManualNetPremiumGBP,
-            ManualDeductions = fullRecord.ManualDeductions,
-            ManualEUSplit = fullRecord.ManualEUSplit
+            ManualDeductions = fullRecord.ManualDeductions
         };
 
         // Load PremiumCcy data
@@ -1120,11 +1160,11 @@ else
         // Check if any field has changed
         isFormDirty = selectedPremium.Selection != originalPremium.Selection ||
                       selectedPremium.GrossNetEntry != originalPremium.GrossNetEntry ||
-                      selectedPremium.SplitSelection != originalPremium.SplitSelection ||
+                      selectedPremium.CcySplitSelection != originalPremium.CcySplitSelection ||
+                      selectedPremium.EUSplitSelection != originalPremium.EUSplitSelection ||
                       selectedPremium.ManualGrossPremiumGBP != originalPremium.ManualGrossPremiumGBP ||
                       selectedPremium.ManualNetPremiumGBP != originalPremium.ManualNetPremiumGBP ||
                       selectedPremium.ManualDeductions != originalPremium.ManualDeductions ||
-                      selectedPremium.ManualEUSplit != originalPremium.ManualEUSplit ||
                       !string.IsNullOrWhiteSpace(selectedPremium.UpdateComments);
     }
 
@@ -1198,7 +1238,7 @@ else
         StateHasChanged();
     }
 
-    private void OnSplitSelectionChanged()
+    private void OnCcySplitSelectionChanged()
     {
         CalculateCurrencySplitTotal();
         DistributeManualAmounts();
@@ -1206,7 +1246,13 @@ else
         StateHasChanged();
     }
 
-    private decimal? GetDisplaySplitValue(string currency)
+    private void OnEUSplitSelectionChanged()
+    {
+        OnFormChanged();
+        StateHasChanged();
+    }
+
+    private decimal? GetDisplayCcySplitValue(string currency)
     {
         if (selectedPremium == null || premiumCcyRecords == null) return 0;
 
@@ -1214,20 +1260,20 @@ else
         if (ccyRecord == null) return 0; // No row for this currency = 0% split
 
         // DB stores as decimal (0.5 = 50%), convert to percentage for display
-        var dbValue = selectedPremium.SplitSelection switch
+        var dbValue = selectedPremium.CcySplitSelection switch
         {
-            "Plan" => ccyRecord.PlanSplit,
-            "Written" => ccyRecord.WrittenSplit,
-            "Signed" => ccyRecord.SignedSplit,
-            _ => ccyRecord.ManualSplit // Manual
+            "Plan" => ccyRecord.PlanCcySplit,
+            "Written" => ccyRecord.WrittenCcySplit,
+            "Signed" => ccyRecord.SignedCcySplit,
+            _ => ccyRecord.ManualCcySplit // Manual
         };
 
         return (dbValue ?? 0) * 100;
     }
 
-    private void SetManualSplitValue(string currency, ChangeEventArgs e)
+    private void SetManualCcySplitValue(string currency, ChangeEventArgs e)
     {
-        if (selectedPremium == null || selectedPremium.SplitSelection != "Manual") return;
+        if (selectedPremium == null || selectedPremium.CcySplitSelection != "Manual") return;
         if (premiumCcyRecords == null) return;
 
         var ccyRecord = premiumCcyRecords.FirstOrDefault(c => c.Currency == currency);
@@ -1240,8 +1286,53 @@ else
             value = parsed / 100;
         }
 
-        ccyRecord.ManualSplit = value;
+        ccyRecord.ManualCcySplit = value;
         OnCurrencySplitChanged();
+    }
+
+    private decimal? GetDisplayEUSplitValue(string currency)
+    {
+        if (selectedPremium == null || premiumCcyRecords == null) return 0;
+
+        var ccyRecord = premiumCcyRecords.FirstOrDefault(c => c.Currency == currency);
+        if (ccyRecord == null) return 0; // No row for this currency = 0% EU split
+
+        // DB stores as decimal (0.5 = 50%), convert to percentage for display
+        var dbValue = selectedPremium.EUSplitSelection switch
+        {
+            "Plan" => ccyRecord.PlanEUSplit,
+            "Written" => ccyRecord.WrittenEUSplit,
+            "Signed" => ccyRecord.SignedEUSplit,
+            _ => ccyRecord.ManualEUSplit // Manual
+        };
+
+        return (dbValue ?? 0) * 100;
+    }
+
+    private void SetManualEUSplitValue(string currency, ChangeEventArgs e)
+    {
+        if (selectedPremium == null || selectedPremium.EUSplitSelection != "Manual") return;
+        if (premiumCcyRecords == null) return;
+
+        var ccyRecord = premiumCcyRecords.FirstOrDefault(c => c.Currency == currency);
+        if (ccyRecord == null) return;
+
+        // Convert from percentage (50) to decimal (0.5) for DB storage
+        decimal? value = null;
+        if (decimal.TryParse(e.Value?.ToString(), out var parsed))
+        {
+            value = parsed / 100;
+        }
+
+        ccyRecord.ManualEUSplit = value;
+        OnFormChanged();
+        StateHasChanged();
+    }
+
+    private decimal GetLNDNSplitForCurrency(string currency)
+    {
+        var euSplit = GetDisplayEUSplitValue(currency) ?? 0;
+        return 100 - euSplit;
     }
 
     private void CalculateNetFromGross()
@@ -1266,25 +1357,20 @@ else
 
     private void CalculateCurrencySplitTotal()
     {
-        var total = (GetDisplaySplitValue("GBP") ?? 0) +
-                    (GetDisplaySplitValue("USD") ?? 0) +
-                    (GetDisplaySplitValue("CAD") ?? 0) +
-                    (GetDisplaySplitValue("EUR") ?? 0) +
-                    (GetDisplaySplitValue("JPY") ?? 0);
+        var total = (GetDisplayCcySplitValue("GBP") ?? 0) +
+                    (GetDisplayCcySplitValue("USD") ?? 0) +
+                    (GetDisplayCcySplitValue("CAD") ?? 0) +
+                    (GetDisplayCcySplitValue("EUR") ?? 0) +
+                    (GetDisplayCcySplitValue("JPY") ?? 0);
 
         currencySplitTotal = total > 0 ? total : null;
-    }
-
-    private decimal GetLNDNSplit()
-    {
-        return 100 - (selectedPremium.ManualEUSplit ?? 0);
     }
 
     private string GetCalculatedCurrencyValue(string currency)
     {
         if (!selectedPremium.ManualGrossPremiumGBP.HasValue) return string.Empty;
 
-        var splitPct = GetDisplaySplitValue(currency) ?? 0;
+        var splitPct = GetDisplayCcySplitValue(currency) ?? 0;
 
         if (splitPct <= 0) return string.Empty;
 
@@ -1385,11 +1471,11 @@ else
         // Distribute to each currency using selected split values
         var currencies = new[]
         {
-            ("GBP", GetDisplaySplitValue("GBP") ?? 0),
-            ("USD", GetDisplaySplitValue("USD") ?? 0),
-            ("CAD", GetDisplaySplitValue("CAD") ?? 0),
-            ("EUR", GetDisplaySplitValue("EUR") ?? 0),
-            ("JPY", GetDisplaySplitValue("JPY") ?? 0)
+            ("GBP", GetDisplayCcySplitValue("GBP") ?? 0),
+            ("USD", GetDisplayCcySplitValue("USD") ?? 0),
+            ("CAD", GetDisplayCcySplitValue("CAD") ?? 0),
+            ("EUR", GetDisplayCcySplitValue("EUR") ?? 0),
+            ("JPY", GetDisplayCcySplitValue("JPY") ?? 0)
         };
 
         foreach (var (currency, splitPct) in currencies)
@@ -1585,24 +1671,45 @@ else
                             break;
                     }
 
-                    // Update SelectedSplit based on SplitSelection
-                    switch (selectedPremium.SplitSelection)
+                    // Update SelectedCcySplit based on CcySplitSelection
+                    switch (selectedPremium.CcySplitSelection)
                     {
                         case "Plan":
-                            ccy.SelectedSplit = ccy.PlanSplit;
-                            // Also copy to ManualSplit for storage
-                            ccy.ManualSplit = ccy.PlanSplit;
+                            ccy.SelectedCcySplit = ccy.PlanCcySplit;
+                            // Also copy to ManualCcySplit for storage
+                            ccy.ManualCcySplit = ccy.PlanCcySplit;
                             break;
                         case "Written":
-                            ccy.SelectedSplit = ccy.WrittenSplit;
-                            ccy.ManualSplit = ccy.WrittenSplit;
+                            ccy.SelectedCcySplit = ccy.WrittenCcySplit;
+                            ccy.ManualCcySplit = ccy.WrittenCcySplit;
                             break;
                         case "Signed":
-                            ccy.SelectedSplit = ccy.SignedSplit;
-                            ccy.ManualSplit = ccy.SignedSplit;
+                            ccy.SelectedCcySplit = ccy.SignedCcySplit;
+                            ccy.ManualCcySplit = ccy.SignedCcySplit;
                             break;
                         case "Manual":
-                            ccy.SelectedSplit = ccy.ManualSplit;
+                            ccy.SelectedCcySplit = ccy.ManualCcySplit;
+                            break;
+                    }
+
+                    // Update SelectedEUSplit based on EUSplitSelection
+                    switch (selectedPremium.EUSplitSelection)
+                    {
+                        case "Plan":
+                            ccy.SelectedEUSplit = ccy.PlanEUSplit;
+                            // Also copy to ManualEUSplit for storage
+                            ccy.ManualEUSplit = ccy.PlanEUSplit;
+                            break;
+                        case "Written":
+                            ccy.SelectedEUSplit = ccy.WrittenEUSplit;
+                            ccy.ManualEUSplit = ccy.WrittenEUSplit;
+                            break;
+                        case "Signed":
+                            ccy.SelectedEUSplit = ccy.SignedEUSplit;
+                            ccy.ManualEUSplit = ccy.SignedEUSplit;
+                            break;
+                        case "Manual":
+                            ccy.SelectedEUSplit = ccy.ManualEUSplit;
                             break;
                     }
 

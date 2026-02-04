@@ -33,10 +33,11 @@ namespace sandboxapp.Models.Ultimates
 
         // Currency Split Selection (Plan | Written | Signed | Manual)
         // Actual split percentages are stored per-currency in PremiumCcy
-        public string SplitSelection { get; set; } = "Manual";
+        public string CcySplitSelection { get; set; } = "Manual";
 
-        // EU/LNDN Split Percentage (EU %, LNDN is 100-EU)
-        public decimal? ManualEUSplit { get; set; }
+        // EU/LNDN Split Selection (Plan | Written | Signed | Manual)
+        // Actual EU split percentages are stored per-currency in PremiumCcy
+        public string EUSplitSelection { get; set; } = "Manual";
 
         public DateTime DateUpdated { get; set; }
 

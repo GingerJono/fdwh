@@ -144,10 +144,10 @@ namespace sandboxapp.Services
                 parameters.Add("@ManualGrossPremiumGBP", model.ManualGrossPremiumGBP, DbType.Decimal);
                 parameters.Add("@ManualNetPremiumGBP", model.ManualNetPremiumGBP, DbType.Decimal);
                 parameters.Add("@ManualDeductions", model.ManualDeductions, DbType.Decimal);
-                parameters.Add("@ManualEUSplit", model.ManualEUSplit, DbType.Decimal);
 
-                // Split Selection (actual split percentages are in PremiumCcy)
-                parameters.Add("@SplitSelection", model.SplitSelection, DbType.String);
+                // Split Selections (actual split percentages are in PremiumCcy)
+                parameters.Add("@CcySplitSelection", model.CcySplitSelection, DbType.String);
+                parameters.Add("@EUSplitSelection", model.EUSplitSelection, DbType.String);
 
                 await connection.ExecuteAsync(
                     "Ultimates.spUpsertUltimatePremium",
@@ -191,35 +191,40 @@ namespace sandboxapp.Services
                 parameters.Add("@SelectedDeductions", model.SelectedDeductions, DbType.Decimal);
                 parameters.Add("@SelectedGNWP", model.SelectedGNWP, DbType.Decimal);
                 parameters.Add("@SelectedEU", model.SelectedEU, DbType.Decimal);
-                parameters.Add("@SelectedSplit", model.SelectedSplit, DbType.Decimal);
+                parameters.Add("@SelectedCcySplit", model.SelectedCcySplit, DbType.Decimal);
+                parameters.Add("@SelectedEUSplit", model.SelectedEUSplit, DbType.Decimal);
 
                 // Manual
                 parameters.Add("@ManualGGWP", model.ManualGGWP, DbType.Decimal);
                 parameters.Add("@ManualDeductions", model.ManualDeductions, DbType.Decimal);
                 parameters.Add("@ManualGNWP", model.ManualGNWP, DbType.Decimal);
                 parameters.Add("@ManualEU", model.ManualEU, DbType.Decimal);
-                parameters.Add("@ManualSplit", model.ManualSplit, DbType.Decimal);
+                parameters.Add("@ManualCcySplit", model.ManualCcySplit, DbType.Decimal);
+                parameters.Add("@ManualEUSplit", model.ManualEUSplit, DbType.Decimal);
 
                 // Plan
                 parameters.Add("@PlanGGWP", model.PlanGGWP, DbType.Decimal);
                 parameters.Add("@PlanDeductions", model.PlanDeductions, DbType.Decimal);
                 parameters.Add("@PlanGNWP", model.PlanGNWP, DbType.Decimal);
                 parameters.Add("@PlanEU", model.PlanEU, DbType.Decimal);
-                parameters.Add("@PlanSplit", model.PlanSplit, DbType.Decimal);
+                parameters.Add("@PlanCcySplit", model.PlanCcySplit, DbType.Decimal);
+                parameters.Add("@PlanEUSplit", model.PlanEUSplit, DbType.Decimal);
 
                 // Written
                 parameters.Add("@WrittenGGWP", model.WrittenGGWP, DbType.Decimal);
                 parameters.Add("@WrittenDeductions", model.WrittenDeductions, DbType.Decimal);
                 parameters.Add("@WrittenGNWP", model.WrittenGNWP, DbType.Decimal);
                 parameters.Add("@WrittenEU", model.WrittenEU, DbType.Decimal);
-                parameters.Add("@WrittenSplit", model.WrittenSplit, DbType.Decimal);
+                parameters.Add("@WrittenCcySplit", model.WrittenCcySplit, DbType.Decimal);
+                parameters.Add("@WrittenEUSplit", model.WrittenEUSplit, DbType.Decimal);
 
                 // Signed
                 parameters.Add("@SignedGGWP", model.SignedGGWP, DbType.Decimal);
                 parameters.Add("@SignedDeductions", model.SignedDeductions, DbType.Decimal);
                 parameters.Add("@SignedGNWP", model.SignedGNWP, DbType.Decimal);
                 parameters.Add("@SignedEU", model.SignedEU, DbType.Decimal);
-                parameters.Add("@SignedSplit", model.SignedSplit, DbType.Decimal);
+                parameters.Add("@SignedCcySplit", model.SignedCcySplit, DbType.Decimal);
+                parameters.Add("@SignedEUSplit", model.SignedEUSplit, DbType.Decimal);
 
                 await connection.ExecuteAsync(
                     "Ultimates.spUpsertUltimatePremiumCurrency",
@@ -324,27 +329,32 @@ namespace sandboxapp.Services
                         SelectedDeductions,
                         SelectedGNWP,
                         SelectedEU,
-                        ISNULL(SelectedSplit, 0) AS SelectedSplit,
+                        ISNULL(SelectedCcySplit, 0) AS SelectedCcySplit,
+                        ISNULL(SelectedEUSplit, 0) AS SelectedEUSplit,
                         ManualGGWP,
                         ManualDeductions,
                         ManualGNWP,
                         ManualEU,
-                        ISNULL(ManualSplit, 0) AS ManualSplit,
+                        ISNULL(ManualCcySplit, 0) AS ManualCcySplit,
+                        ISNULL(ManualEUSplit, 0) AS ManualEUSplit,
                         PlanGGWP,
                         PlanDeductions,
                         PlanGNWP,
                         PlanEU,
-                        ISNULL(PlanSplit, 0) AS PlanSplit,
+                        ISNULL(PlanCcySplit, 0) AS PlanCcySplit,
+                        ISNULL(PlanEUSplit, 0) AS PlanEUSplit,
                         WrittenGGWP,
                         WrittenDeductions,
                         WrittenGNWP,
                         WrittenEU,
-                        ISNULL(WrittenSplit, 0) AS WrittenSplit,
+                        ISNULL(WrittenCcySplit, 0) AS WrittenCcySplit,
+                        ISNULL(WrittenEUSplit, 0) AS WrittenEUSplit,
                         SignedGGWP,
                         SignedDeductions,
                         SignedGNWP,
                         SignedEU,
-                        ISNULL(SignedSplit, 0) AS SignedSplit
+                        ISNULL(SignedCcySplit, 0) AS SignedCcySplit,
+                        ISNULL(SignedEUSplit, 0) AS SignedEUSplit
                     FROM Ultimates.PremiumCcy
                     WHERE Class = @Class
                       AND ReservingClass = @ReservingClass
