@@ -386,10 +386,10 @@ else
                                                     {
                                                         <tr>
                                                             <td><strong>@ccy.Currency</strong></td>
-                                                            <td class="text-end"><strong>@FormatCurrency(GetSelectedEUAmount(ccy))</strong></td>
-                                                            <td class="text-end">@FormatCurrency((ccy.PlanGNWP ?? 0) * (ccy.PlanEUSplit ?? 0))</td>
-                                                            <td class="text-end">@FormatCurrency((ccy.WrittenGNWP ?? 0) * (ccy.WrittenEUSplit ?? 0))</td>
-                                                            <td class="text-end">@FormatCurrency((ccy.SignedGNWP ?? 0) * (ccy.SignedEUSplit ?? 0))</td>
+                                                            <td class="text-end"><strong>@FormatCurrency(ccy.GetEUAmount(selectedPremium.Selection, selectedPremium.EUSplitSelection))</strong></td>
+                                                            <td class="text-end">@FormatCurrency(ccy.PlanEUAmount)</td>
+                                                            <td class="text-end">@FormatCurrency(ccy.WrittenEUAmount)</td>
+                                                            <td class="text-end">@FormatCurrency(ccy.SignedEUAmount)</td>
                                                         </tr>
                                                     }
                                                 </tbody>
@@ -1341,32 +1341,6 @@ else
     {
         var euSplit = GetDisplayEUSplitValue(currency) ?? 0;
         return 100 - euSplit;
-    }
-
-    private decimal GetSelectedEUAmount(PremiumCcyModel ccy)
-    {
-        if (selectedPremium == null) return 0;
-
-        // Get the selected GNWP value based on main Selection
-        var gnwp = selectedPremium.Selection switch
-        {
-            "Plan" => ccy.PlanGNWP ?? 0,
-            "Written" => ccy.WrittenGNWP ?? 0,
-            "Signed" => ccy.SignedGNWP ?? 0,
-            _ => ccy.ManualGNWP ?? 0 // Manual
-        };
-
-        // Get the EU split based on EUSplitSelection
-        var euSplit = selectedPremium.EUSplitSelection switch
-        {
-            "Plan" => ccy.PlanEUSplit ?? 0,
-            "Written" => ccy.WrittenEUSplit ?? 0,
-            "Signed" => ccy.SignedEUSplit ?? 0,
-            _ => ccy.ManualEUSplit ?? 0 // Manual
-        };
-
-        // EU amount = GNWP × EU Split %
-        return gnwp * euSplit;
     }
 
     private void CalculateNetFromGross()
