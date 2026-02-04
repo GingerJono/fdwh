@@ -228,21 +228,29 @@ else
                                 <div class="card bg-light">
                                     <div class="card-body py-2">
                                         <div class="row text-center">
-                                            <div class="col-3">
+                                            <div class="col-2">
                                                 <small class="text-muted d-block">GGWP USD</small>
                                                 <h5 class="mb-0">@FormatCurrency(CalculateTotalGGWP("USD"))</h5>
                                             </div>
-                                            <div class="col-3">
-                                                <small class="text-muted d-block">GGWP GBP</small>
-                                                <h5 class="mb-0">@FormatCurrency(CalculateTotalGGWP("GBP"))</h5>
-                                            </div>
-                                            <div class="col-3">
+                                            <div class="col-2">
                                                 <small class="text-muted d-block">GNWP USD</small>
                                                 <h5 class="mb-0">@FormatCurrency(CalculateTotalGNWP("USD"))</h5>
                                             </div>
-                                            <div class="col-3">
-                                                <small class="text-muted d-block">GNWP GBP</small>
-                                                <h5 class="mb-0">@FormatCurrency(CalculateTotalGNWP("GBP"))</h5>
+                                            <div class="col-2">
+                                                <small class="text-muted d-block">EU USD</small>
+                                                <h5 class="mb-0">@FormatCurrency(CalculateTotalEU("USD"))</h5>
+                                            </div>
+                                            <div class="col-2">
+                                                <small class="text-muted d-block">LNDN USD</small>
+                                                <h5 class="mb-0">@FormatCurrency(CalculateTotalLNDN("USD"))</h5>
+                                            </div>
+                                            <div class="col-2">
+                                                <small class="text-muted d-block">EU GBP</small>
+                                                <h5 class="mb-0">@FormatCurrency(CalculateTotalEU("GBP"))</h5>
+                                            </div>
+                                            <div class="col-2">
+                                                <small class="text-muted d-block">LNDN GBP</small>
+                                                <h5 class="mb-0">@FormatCurrency(CalculateTotalLNDN("GBP"))</h5>
                                             </div>
                                         </div>
                                     </div>
@@ -1543,6 +1551,74 @@ else
 
             // Convert to target currency
             var converted = ConvertCurrency(gnwpValue.Value, ccy.Currency, targetCurrency);
+            if (converted.HasValue)
+                total += converted.Value;
+        }
+
+        return total > 0 ? total : null;
+    }
+
+    private decimal? CalculateTotalEU(string targetCurrency)
+    {
+        if (premiumCcyRecords == null || !premiumCcyRecords.Any() || !fxRates.Any() || selectedPremium == null)
+            return null;
+
+        decimal total = 0;
+
+        foreach (var ccy in premiumCcyRecords)
+        {
+            var gnwpValue = GetSelectedValue(ccy, "GNWP");
+            if (!gnwpValue.HasValue || gnwpValue.Value == 0)
+                continue;
+
+            // Get the EU split % for this currency (stored as decimal, e.g., 0.5 = 50%)
+            var euSplitDecimal = selectedPremium.EUSplitSelection switch
+            {
+                "Plan" => ccy.PlanEUSplit,
+                "Written" => ccy.WrittenEUSplit,
+                "Signed" => ccy.SignedEUSplit,
+                _ => ccy.ManualEUSplit
+            } ?? 0;
+
+            // Calculate EU amount = GNWP * EU split
+            var euAmount = gnwpValue.Value * euSplitDecimal;
+
+            // Convert to target currency
+            var converted = ConvertCurrency(euAmount, ccy.Currency, targetCurrency);
+            if (converted.HasValue)
+                total += converted.Value;
+        }
+
+        return total > 0 ? total : null;
+    }
+
+    private decimal? CalculateTotalLNDN(string targetCurrency)
+    {
+        if (premiumCcyRecords == null || !premiumCcyRecords.Any() || !fxRates.Any() || selectedPremium == null)
+            return null;
+
+        decimal total = 0;
+
+        foreach (var ccy in premiumCcyRecords)
+        {
+            var gnwpValue = GetSelectedValue(ccy, "GNWP");
+            if (!gnwpValue.HasValue || gnwpValue.Value == 0)
+                continue;
+
+            // Get the EU split % for this currency (stored as decimal, e.g., 0.5 = 50%)
+            var euSplitDecimal = selectedPremium.EUSplitSelection switch
+            {
+                "Plan" => ccy.PlanEUSplit,
+                "Written" => ccy.WrittenEUSplit,
+                "Signed" => ccy.SignedEUSplit,
+                _ => ccy.ManualEUSplit
+            } ?? 0;
+
+            // Calculate LNDN amount = GNWP * (1 - EU split)
+            var lndnAmount = gnwpValue.Value * (1 - euSplitDecimal);
+
+            // Convert to target currency
+            var converted = ConvertCurrency(lndnAmount, ccy.Currency, targetCurrency);
             if (converted.HasValue)
                 total += converted.Value;
         }
