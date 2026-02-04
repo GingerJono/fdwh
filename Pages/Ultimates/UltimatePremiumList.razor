@@ -1554,6 +1554,17 @@ else
             return;
         }
 
+        // Copy selected split values to Manual split fields for storage
+        // This ensures the actual splits used are preserved in the record
+        if (selectedPremium.SplitSelection != "Manual")
+        {
+            selectedPremium.ManualSplitGBP = GetDisplaySplitValue("GBP");
+            selectedPremium.ManualSplitUSD = GetDisplaySplitValue("USD");
+            selectedPremium.ManualSplitCAD = GetDisplaySplitValue("CAD");
+            selectedPremium.ManualSplitEUR = GetDisplaySplitValue("EUR");
+            selectedPremium.ManualSplitJPY = GetDisplaySplitValue("JPY");
+        }
+
         // Validate Manual entry
         if (selectedPremium.Selection == "Manual")
         {
