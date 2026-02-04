@@ -1,128 +1,60 @@
 -- =============================================
--- Add Currency Split Selection Feature
--- Adds Plan/Written/Signed split columns and SplitSelection to Ultimates.Premium table
+-- Add Currency Split Selection Feature (CORRECTED)
+-- Split percentages are stored per-currency in PremiumCcy table
+-- SplitSelection stored in Premium table
 -- =============================================
 
 -- =============================================
--- 1. Add new columns to Ultimates.Premium table
+-- 1. Add SplitSelection column to Ultimates.Premium table
 -- =============================================
 IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Ultimates.Premium') AND name = 'SplitSelection')
 BEGIN
     ALTER TABLE Ultimates.Premium ADD SplitSelection VARCHAR(20) NULL DEFAULT 'Manual';
-    PRINT 'Added SplitSelection column';
-END
-GO
-
--- Plan Split Columns
-IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Ultimates.Premium') AND name = 'PlanSplitGBP')
-BEGIN
-    ALTER TABLE Ultimates.Premium ADD PlanSplitGBP DECIMAL(18,4) NULL;
-    PRINT 'Added PlanSplitGBP column';
-END
-GO
-
-IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Ultimates.Premium') AND name = 'PlanSplitUSD')
-BEGIN
-    ALTER TABLE Ultimates.Premium ADD PlanSplitUSD DECIMAL(18,4) NULL;
-    PRINT 'Added PlanSplitUSD column';
-END
-GO
-
-IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Ultimates.Premium') AND name = 'PlanSplitCAD')
-BEGIN
-    ALTER TABLE Ultimates.Premium ADD PlanSplitCAD DECIMAL(18,4) NULL;
-    PRINT 'Added PlanSplitCAD column';
-END
-GO
-
-IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Ultimates.Premium') AND name = 'PlanSplitEUR')
-BEGIN
-    ALTER TABLE Ultimates.Premium ADD PlanSplitEUR DECIMAL(18,4) NULL;
-    PRINT 'Added PlanSplitEUR column';
-END
-GO
-
-IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Ultimates.Premium') AND name = 'PlanSplitJPY')
-BEGIN
-    ALTER TABLE Ultimates.Premium ADD PlanSplitJPY DECIMAL(18,4) NULL;
-    PRINT 'Added PlanSplitJPY column';
-END
-GO
-
--- Written Split Columns
-IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Ultimates.Premium') AND name = 'WrittenSplitGBP')
-BEGIN
-    ALTER TABLE Ultimates.Premium ADD WrittenSplitGBP DECIMAL(18,4) NULL;
-    PRINT 'Added WrittenSplitGBP column';
-END
-GO
-
-IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Ultimates.Premium') AND name = 'WrittenSplitUSD')
-BEGIN
-    ALTER TABLE Ultimates.Premium ADD WrittenSplitUSD DECIMAL(18,4) NULL;
-    PRINT 'Added WrittenSplitUSD column';
-END
-GO
-
-IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Ultimates.Premium') AND name = 'WrittenSplitCAD')
-BEGIN
-    ALTER TABLE Ultimates.Premium ADD WrittenSplitCAD DECIMAL(18,4) NULL;
-    PRINT 'Added WrittenSplitCAD column';
-END
-GO
-
-IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Ultimates.Premium') AND name = 'WrittenSplitEUR')
-BEGIN
-    ALTER TABLE Ultimates.Premium ADD WrittenSplitEUR DECIMAL(18,4) NULL;
-    PRINT 'Added WrittenSplitEUR column';
-END
-GO
-
-IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Ultimates.Premium') AND name = 'WrittenSplitJPY')
-BEGIN
-    ALTER TABLE Ultimates.Premium ADD WrittenSplitJPY DECIMAL(18,4) NULL;
-    PRINT 'Added WrittenSplitJPY column';
-END
-GO
-
--- Signed Split Columns
-IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Ultimates.Premium') AND name = 'SignedSplitGBP')
-BEGIN
-    ALTER TABLE Ultimates.Premium ADD SignedSplitGBP DECIMAL(18,4) NULL;
-    PRINT 'Added SignedSplitGBP column';
-END
-GO
-
-IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Ultimates.Premium') AND name = 'SignedSplitUSD')
-BEGIN
-    ALTER TABLE Ultimates.Premium ADD SignedSplitUSD DECIMAL(18,4) NULL;
-    PRINT 'Added SignedSplitUSD column';
-END
-GO
-
-IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Ultimates.Premium') AND name = 'SignedSplitCAD')
-BEGIN
-    ALTER TABLE Ultimates.Premium ADD SignedSplitCAD DECIMAL(18,4) NULL;
-    PRINT 'Added SignedSplitCAD column';
-END
-GO
-
-IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Ultimates.Premium') AND name = 'SignedSplitEUR')
-BEGIN
-    ALTER TABLE Ultimates.Premium ADD SignedSplitEUR DECIMAL(18,4) NULL;
-    PRINT 'Added SignedSplitEUR column';
-END
-GO
-
-IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Ultimates.Premium') AND name = 'SignedSplitJPY')
-BEGIN
-    ALTER TABLE Ultimates.Premium ADD SignedSplitJPY DECIMAL(18,4) NULL;
-    PRINT 'Added SignedSplitJPY column';
+    PRINT 'Added SplitSelection column to Premium table';
 END
 GO
 
 -- =============================================
--- 2. Update spGetLatestUltimatePremiumByClassRsvClassYOA to return new columns
+-- 2. Add Split columns to Ultimates.PremiumCcy table
+-- =============================================
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Ultimates.PremiumCcy') AND name = 'SelectedSplit')
+BEGIN
+    ALTER TABLE Ultimates.PremiumCcy ADD SelectedSplit DECIMAL(18,4) NULL;
+    PRINT 'Added SelectedSplit column to PremiumCcy table';
+END
+GO
+
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Ultimates.PremiumCcy') AND name = 'ManualSplit')
+BEGIN
+    ALTER TABLE Ultimates.PremiumCcy ADD ManualSplit DECIMAL(18,4) NULL;
+    PRINT 'Added ManualSplit column to PremiumCcy table';
+END
+GO
+
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Ultimates.PremiumCcy') AND name = 'PlanSplit')
+BEGIN
+    ALTER TABLE Ultimates.PremiumCcy ADD PlanSplit DECIMAL(18,4) NULL;
+    PRINT 'Added PlanSplit column to PremiumCcy table';
+END
+GO
+
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Ultimates.PremiumCcy') AND name = 'WrittenSplit')
+BEGIN
+    ALTER TABLE Ultimates.PremiumCcy ADD WrittenSplit DECIMAL(18,4) NULL;
+    PRINT 'Added WrittenSplit column to PremiumCcy table';
+END
+GO
+
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Ultimates.PremiumCcy') AND name = 'SignedSplit')
+BEGIN
+    ALTER TABLE Ultimates.PremiumCcy ADD SignedSplit DECIMAL(18,4) NULL;
+    PRINT 'Added SignedSplit column to PremiumCcy table';
+END
+GO
+
+-- =============================================
+-- 3. Update spGetLatestUltimatePremiumByClassRsvClassYOA
+--    Returns Premium record with SplitSelection
 -- =============================================
 CREATE OR ALTER PROCEDURE [Ultimates].[spGetLatestUltimatePremiumByClassRsvClassYOA]
     @Class VARCHAR(50),
@@ -142,33 +74,8 @@ BEGIN
         ManualGrossPremiumGBP,
         ManualNetPremiumGBP,
         ManualDeductions,
-        ManualSplitGBP,
-        ManualSplitUSD,
-        ManualSplitCAD,
-        ManualSplitEUR,
-        ManualSplitJPY,
         ManualEUSplit,
-        -- New Split Selection
         ISNULL(SplitSelection, 'Manual') AS SplitSelection,
-        -- Plan Splits
-        PlanSplitGBP,
-        PlanSplitUSD,
-        PlanSplitCAD,
-        PlanSplitEUR,
-        PlanSplitJPY,
-        -- Written Splits
-        WrittenSplitGBP,
-        WrittenSplitUSD,
-        WrittenSplitCAD,
-        WrittenSplitEUR,
-        WrittenSplitJPY,
-        -- Signed Splits
-        SignedSplitGBP,
-        SignedSplitUSD,
-        SignedSplitCAD,
-        SignedSplitEUR,
-        SignedSplitJPY,
-        -- Audit
         DateUpdated,
         UpdatedBy,
         UpdateComments
@@ -181,7 +88,8 @@ END
 GO
 
 -- =============================================
--- 3. Update spUpsertUltimatePremium to handle new columns
+-- 4. Update spUpsertUltimatePremium
+--    Saves Premium record with SplitSelection
 -- =============================================
 CREATE OR ALTER PROCEDURE [Ultimates].[spUpsertUltimatePremium]
     @Class VARCHAR(50),
@@ -195,32 +103,8 @@ CREATE OR ALTER PROCEDURE [Ultimates].[spUpsertUltimatePremium]
     @ManualGrossPremiumGBP DECIMAL(18,4) = NULL,
     @ManualNetPremiumGBP DECIMAL(18,4) = NULL,
     @ManualDeductions DECIMAL(18,4) = NULL,
-    @ManualSplitGBP DECIMAL(18,4) = NULL,
-    @ManualSplitUSD DECIMAL(18,4) = NULL,
-    @ManualSplitCAD DECIMAL(18,4) = NULL,
-    @ManualSplitEUR DECIMAL(18,4) = NULL,
-    @ManualSplitJPY DECIMAL(18,4) = NULL,
     @ManualEUSplit DECIMAL(18,4) = NULL,
-    -- New Split Selection parameter
-    @SplitSelection VARCHAR(20) = 'Manual',
-    -- Plan Splits
-    @PlanSplitGBP DECIMAL(18,4) = NULL,
-    @PlanSplitUSD DECIMAL(18,4) = NULL,
-    @PlanSplitCAD DECIMAL(18,4) = NULL,
-    @PlanSplitEUR DECIMAL(18,4) = NULL,
-    @PlanSplitJPY DECIMAL(18,4) = NULL,
-    -- Written Splits
-    @WrittenSplitGBP DECIMAL(18,4) = NULL,
-    @WrittenSplitUSD DECIMAL(18,4) = NULL,
-    @WrittenSplitCAD DECIMAL(18,4) = NULL,
-    @WrittenSplitEUR DECIMAL(18,4) = NULL,
-    @WrittenSplitJPY DECIMAL(18,4) = NULL,
-    -- Signed Splits
-    @SignedSplitGBP DECIMAL(18,4) = NULL,
-    @SignedSplitUSD DECIMAL(18,4) = NULL,
-    @SignedSplitCAD DECIMAL(18,4) = NULL,
-    @SignedSplitEUR DECIMAL(18,4) = NULL,
-    @SignedSplitJPY DECIMAL(18,4) = NULL
+    @SplitSelection VARCHAR(20) = 'Manual'
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -235,28 +119,8 @@ BEGIN
         ManualGrossPremiumGBP,
         ManualNetPremiumGBP,
         ManualDeductions,
-        ManualSplitGBP,
-        ManualSplitUSD,
-        ManualSplitCAD,
-        ManualSplitEUR,
-        ManualSplitJPY,
         ManualEUSplit,
         SplitSelection,
-        PlanSplitGBP,
-        PlanSplitUSD,
-        PlanSplitCAD,
-        PlanSplitEUR,
-        PlanSplitJPY,
-        WrittenSplitGBP,
-        WrittenSplitUSD,
-        WrittenSplitCAD,
-        WrittenSplitEUR,
-        WrittenSplitJPY,
-        SignedSplitGBP,
-        SignedSplitUSD,
-        SignedSplitCAD,
-        SignedSplitEUR,
-        SignedSplitJPY,
         DateUpdated,
         UpdatedBy,
         UpdateComments
@@ -271,28 +135,8 @@ BEGIN
         @ManualGrossPremiumGBP,
         @ManualNetPremiumGBP,
         @ManualDeductions,
-        @ManualSplitGBP,
-        @ManualSplitUSD,
-        @ManualSplitCAD,
-        @ManualSplitEUR,
-        @ManualSplitJPY,
         @ManualEUSplit,
         @SplitSelection,
-        @PlanSplitGBP,
-        @PlanSplitUSD,
-        @PlanSplitCAD,
-        @PlanSplitEUR,
-        @PlanSplitJPY,
-        @WrittenSplitGBP,
-        @WrittenSplitUSD,
-        @WrittenSplitCAD,
-        @WrittenSplitEUR,
-        @WrittenSplitJPY,
-        @SignedSplitGBP,
-        @SignedSplitUSD,
-        @SignedSplitCAD,
-        @SignedSplitEUR,
-        @SignedSplitJPY,
         GETUTCDATE(),
         @UpdatedBy,
         @UpdateComments
@@ -301,7 +145,7 @@ END
 GO
 
 -- =============================================
--- 4. Update spGetLatestUltimatePremium (list view) to return new columns
+-- 5. Update spGetLatestUltimatePremium (list view)
 -- =============================================
 CREATE OR ALTER PROCEDURE [Ultimates].[spGetLatestUltimatePremium]
 AS
@@ -335,6 +179,222 @@ BEGIN
         AND p.YOA = lv.YOA
         AND p.Version = lv.LatestVersion
     ORDER BY p.Class, p.ReservingClass, p.YOA DESC;
+END
+GO
+
+-- =============================================
+-- 6. Update spUpsertUltimatePremiumCurrency
+--    Now includes Split columns
+-- =============================================
+CREATE OR ALTER PROCEDURE [Ultimates].[spUpsertUltimatePremiumCurrency]
+    @Class VARCHAR(50),
+    @ReservingClass VARCHAR(50),
+    @YOA INT,
+    @Version INT,
+    @Currency VARCHAR(10),
+    -- Selected
+    @SelectedGGWP DECIMAL(18,4) = NULL,
+    @SelectedDeductions DECIMAL(18,4) = NULL,
+    @SelectedGNWP DECIMAL(18,4) = NULL,
+    @SelectedEU DECIMAL(18,4) = NULL,
+    @SelectedSplit DECIMAL(18,4) = NULL,
+    -- Manual
+    @ManualGGWP DECIMAL(18,4) = NULL,
+    @ManualDeductions DECIMAL(18,4) = NULL,
+    @ManualGNWP DECIMAL(18,4) = NULL,
+    @ManualEU DECIMAL(18,4) = NULL,
+    @ManualSplit DECIMAL(18,4) = NULL,
+    -- Plan
+    @PlanGGWP DECIMAL(18,4) = NULL,
+    @PlanDeductions DECIMAL(18,4) = NULL,
+    @PlanGNWP DECIMAL(18,4) = NULL,
+    @PlanEU DECIMAL(18,4) = NULL,
+    @PlanSplit DECIMAL(18,4) = NULL,
+    -- Written
+    @WrittenGGWP DECIMAL(18,4) = NULL,
+    @WrittenDeductions DECIMAL(18,4) = NULL,
+    @WrittenGNWP DECIMAL(18,4) = NULL,
+    @WrittenEU DECIMAL(18,4) = NULL,
+    @WrittenSplit DECIMAL(18,4) = NULL,
+    -- Signed
+    @SignedGGWP DECIMAL(18,4) = NULL,
+    @SignedDeductions DECIMAL(18,4) = NULL,
+    @SignedGNWP DECIMAL(18,4) = NULL,
+    @SignedEU DECIMAL(18,4) = NULL,
+    @SignedSplit DECIMAL(18,4) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Check if record exists
+    IF EXISTS (
+        SELECT 1 FROM Ultimates.PremiumCcy
+        WHERE Class = @Class
+          AND ReservingClass = @ReservingClass
+          AND YOA = @YOA
+          AND Version = @Version
+          AND Currency = @Currency
+    )
+    BEGIN
+        -- Update existing record
+        UPDATE Ultimates.PremiumCcy
+        SET
+            SelectedGGWP = @SelectedGGWP,
+            SelectedDeductions = @SelectedDeductions,
+            SelectedGNWP = @SelectedGNWP,
+            SelectedEU = @SelectedEU,
+            SelectedSplit = @SelectedSplit,
+            ManualGGWP = @ManualGGWP,
+            ManualDeductions = @ManualDeductions,
+            ManualGNWP = @ManualGNWP,
+            ManualEU = @ManualEU,
+            ManualSplit = @ManualSplit,
+            PlanGGWP = @PlanGGWP,
+            PlanDeductions = @PlanDeductions,
+            PlanGNWP = @PlanGNWP,
+            PlanEU = @PlanEU,
+            PlanSplit = @PlanSplit,
+            WrittenGGWP = @WrittenGGWP,
+            WrittenDeductions = @WrittenDeductions,
+            WrittenGNWP = @WrittenGNWP,
+            WrittenEU = @WrittenEU,
+            WrittenSplit = @WrittenSplit,
+            SignedGGWP = @SignedGGWP,
+            SignedDeductions = @SignedDeductions,
+            SignedGNWP = @SignedGNWP,
+            SignedEU = @SignedEU,
+            SignedSplit = @SignedSplit
+        WHERE Class = @Class
+          AND ReservingClass = @ReservingClass
+          AND YOA = @YOA
+          AND Version = @Version
+          AND Currency = @Currency;
+    END
+    ELSE
+    BEGIN
+        -- Insert new record
+        INSERT INTO Ultimates.PremiumCcy (
+            Class,
+            ReservingClass,
+            YOA,
+            Version,
+            Currency,
+            SelectedGGWP,
+            SelectedDeductions,
+            SelectedGNWP,
+            SelectedEU,
+            SelectedSplit,
+            ManualGGWP,
+            ManualDeductions,
+            ManualGNWP,
+            ManualEU,
+            ManualSplit,
+            PlanGGWP,
+            PlanDeductions,
+            PlanGNWP,
+            PlanEU,
+            PlanSplit,
+            WrittenGGWP,
+            WrittenDeductions,
+            WrittenGNWP,
+            WrittenEU,
+            WrittenSplit,
+            SignedGGWP,
+            SignedDeductions,
+            SignedGNWP,
+            SignedEU,
+            SignedSplit
+        )
+        VALUES (
+            @Class,
+            @ReservingClass,
+            @YOA,
+            @Version,
+            @Currency,
+            @SelectedGGWP,
+            @SelectedDeductions,
+            @SelectedGNWP,
+            @SelectedEU,
+            @SelectedSplit,
+            @ManualGGWP,
+            @ManualDeductions,
+            @ManualGNWP,
+            @ManualEU,
+            @ManualSplit,
+            @PlanGGWP,
+            @PlanDeductions,
+            @PlanGNWP,
+            @PlanEU,
+            @PlanSplit,
+            @WrittenGGWP,
+            @WrittenDeductions,
+            @WrittenGNWP,
+            @WrittenEU,
+            @WrittenSplit,
+            @SignedGGWP,
+            @SignedDeductions,
+            @SignedGNWP,
+            @SignedEU,
+            @SignedSplit
+        );
+    END
+END
+GO
+
+-- =============================================
+-- 7. Create/Update procedure to get PremiumCcy records
+-- =============================================
+CREATE OR ALTER PROCEDURE [Ultimates].[spGetPremiumCcy]
+    @Class VARCHAR(50),
+    @ReservingClass VARCHAR(50),
+    @YOA INT,
+    @Version INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        Class,
+        ReservingClass,
+        YOA,
+        Version,
+        Currency,
+        -- Selected
+        SelectedGGWP,
+        SelectedDeductions,
+        SelectedGNWP,
+        SelectedEU,
+        ISNULL(SelectedSplit, 0) AS SelectedSplit,
+        -- Manual
+        ManualGGWP,
+        ManualDeductions,
+        ManualGNWP,
+        ManualEU,
+        ISNULL(ManualSplit, 0) AS ManualSplit,
+        -- Plan
+        PlanGGWP,
+        PlanDeductions,
+        PlanGNWP,
+        PlanEU,
+        ISNULL(PlanSplit, 0) AS PlanSplit,
+        -- Written
+        WrittenGGWP,
+        WrittenDeductions,
+        WrittenGNWP,
+        WrittenEU,
+        ISNULL(WrittenSplit, 0) AS WrittenSplit,
+        -- Signed
+        SignedGGWP,
+        SignedDeductions,
+        SignedGNWP,
+        SignedEU,
+        ISNULL(SignedSplit, 0) AS SignedSplit
+    FROM Ultimates.PremiumCcy
+    WHERE Class = @Class
+      AND ReservingClass = @ReservingClass
+      AND YOA = @YOA
+      AND Version = @Version
+    ORDER BY Currency;
 END
 GO
 

@@ -1047,11 +1047,6 @@ else
             ManualGrossPremiumGBP = fullRecord.ManualGrossPremiumGBP,
             ManualNetPremiumGBP = fullRecord.ManualNetPremiumGBP,
             ManualDeductions = fullRecord.ManualDeductions,
-            ManualSplitGBP = fullRecord.ManualSplitGBP,
-            ManualSplitUSD = fullRecord.ManualSplitUSD,
-            ManualSplitCAD = fullRecord.ManualSplitCAD,
-            ManualSplitEUR = fullRecord.ManualSplitEUR,
-            ManualSplitJPY = fullRecord.ManualSplitJPY,
             ManualEUSplit = fullRecord.ManualEUSplit
         };
 
@@ -1129,11 +1124,6 @@ else
                       selectedPremium.ManualGrossPremiumGBP != originalPremium.ManualGrossPremiumGBP ||
                       selectedPremium.ManualNetPremiumGBP != originalPremium.ManualNetPremiumGBP ||
                       selectedPremium.ManualDeductions != originalPremium.ManualDeductions ||
-                      selectedPremium.ManualSplitGBP != originalPremium.ManualSplitGBP ||
-                      selectedPremium.ManualSplitUSD != originalPremium.ManualSplitUSD ||
-                      selectedPremium.ManualSplitCAD != originalPremium.ManualSplitCAD ||
-                      selectedPremium.ManualSplitEUR != originalPremium.ManualSplitEUR ||
-                      selectedPremium.ManualSplitJPY != originalPremium.ManualSplitJPY ||
                       selectedPremium.ManualEUSplit != originalPremium.ManualEUSplit ||
                       !string.IsNullOrWhiteSpace(selectedPremium.UpdateComments);
     }
@@ -1218,52 +1208,27 @@ else
 
     private decimal? GetDisplaySplitValue(string currency)
     {
-        if (selectedPremium == null) return null;
+        if (selectedPremium == null || premiumCcyRecords == null) return null;
+
+        var ccyRecord = premiumCcyRecords.FirstOrDefault(c => c.Currency == currency);
+        if (ccyRecord == null) return null;
 
         return selectedPremium.SplitSelection switch
         {
-            "Plan" => currency switch
-            {
-                "GBP" => selectedPremium.PlanSplitGBP,
-                "USD" => selectedPremium.PlanSplitUSD,
-                "CAD" => selectedPremium.PlanSplitCAD,
-                "EUR" => selectedPremium.PlanSplitEUR,
-                "JPY" => selectedPremium.PlanSplitJPY,
-                _ => null
-            },
-            "Written" => currency switch
-            {
-                "GBP" => selectedPremium.WrittenSplitGBP,
-                "USD" => selectedPremium.WrittenSplitUSD,
-                "CAD" => selectedPremium.WrittenSplitCAD,
-                "EUR" => selectedPremium.WrittenSplitEUR,
-                "JPY" => selectedPremium.WrittenSplitJPY,
-                _ => null
-            },
-            "Signed" => currency switch
-            {
-                "GBP" => selectedPremium.SignedSplitGBP,
-                "USD" => selectedPremium.SignedSplitUSD,
-                "CAD" => selectedPremium.SignedSplitCAD,
-                "EUR" => selectedPremium.SignedSplitEUR,
-                "JPY" => selectedPremium.SignedSplitJPY,
-                _ => null
-            },
-            _ => currency switch // Manual
-            {
-                "GBP" => selectedPremium.ManualSplitGBP,
-                "USD" => selectedPremium.ManualSplitUSD,
-                "CAD" => selectedPremium.ManualSplitCAD,
-                "EUR" => selectedPremium.ManualSplitEUR,
-                "JPY" => selectedPremium.ManualSplitJPY,
-                _ => null
-            }
+            "Plan" => ccyRecord.PlanSplit,
+            "Written" => ccyRecord.WrittenSplit,
+            "Signed" => ccyRecord.SignedSplit,
+            _ => ccyRecord.ManualSplit // Manual
         };
     }
 
     private void SetManualSplitValue(string currency, ChangeEventArgs e)
     {
         if (selectedPremium == null || selectedPremium.SplitSelection != "Manual") return;
+        if (premiumCcyRecords == null) return;
+
+        var ccyRecord = premiumCcyRecords.FirstOrDefault(c => c.Currency == currency);
+        if (ccyRecord == null) return;
 
         decimal? value = null;
         if (decimal.TryParse(e.Value?.ToString(), out var parsed))
@@ -1271,15 +1236,7 @@ else
             value = parsed;
         }
 
-        switch (currency)
-        {
-            case "GBP": selectedPremium.ManualSplitGBP = value; break;
-            case "USD": selectedPremium.ManualSplitUSD = value; break;
-            case "CAD": selectedPremium.ManualSplitCAD = value; break;
-            case "EUR": selectedPremium.ManualSplitEUR = value; break;
-            case "JPY": selectedPremium.ManualSplitJPY = value; break;
-        }
-
+        ccyRecord.ManualSplit = value;
         OnCurrencySplitChanged();
     }
 
@@ -1554,17 +1511,6 @@ else
             return;
         }
 
-        // Copy selected split values to Manual split fields for storage
-        // This ensures the actual splits used are preserved in the record
-        if (selectedPremium.SplitSelection != "Manual")
-        {
-            selectedPremium.ManualSplitGBP = GetDisplaySplitValue("GBP");
-            selectedPremium.ManualSplitUSD = GetDisplaySplitValue("USD");
-            selectedPremium.ManualSplitCAD = GetDisplaySplitValue("CAD");
-            selectedPremium.ManualSplitEUR = GetDisplaySplitValue("EUR");
-            selectedPremium.ManualSplitJPY = GetDisplaySplitValue("JPY");
-        }
-
         // Validate Manual entry
         if (selectedPremium.Selection == "Manual")
         {
@@ -1606,7 +1552,7 @@ else
                     // Update version to new version
                     ccy.Version = newVersion;
 
-                    // Update SELECTED fields based on Selection
+                    // Update SELECTED fields based on Selection (for GGWP, Deductions, GNWP, EU)
                     switch (selectedPremium.Selection)
                     {
                         case "Plan":
@@ -1632,6 +1578,27 @@ else
                             ccy.SelectedDeductions = ccy.ManualDeductions;
                             ccy.SelectedGNWP = ccy.ManualGNWP;
                             ccy.SelectedEU = ccy.ManualEU;
+                            break;
+                    }
+
+                    // Update SelectedSplit based on SplitSelection
+                    switch (selectedPremium.SplitSelection)
+                    {
+                        case "Plan":
+                            ccy.SelectedSplit = ccy.PlanSplit;
+                            // Also copy to ManualSplit for storage
+                            ccy.ManualSplit = ccy.PlanSplit;
+                            break;
+                        case "Written":
+                            ccy.SelectedSplit = ccy.WrittenSplit;
+                            ccy.ManualSplit = ccy.WrittenSplit;
+                            break;
+                        case "Signed":
+                            ccy.SelectedSplit = ccy.SignedSplit;
+                            ccy.ManualSplit = ccy.SignedSplit;
+                            break;
+                        case "Manual":
+                            ccy.SelectedSplit = ccy.ManualSplit;
                             break;
                     }
 
