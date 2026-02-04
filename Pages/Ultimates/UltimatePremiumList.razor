@@ -1208,18 +1208,21 @@ else
 
     private decimal? GetDisplaySplitValue(string currency)
     {
-        if (selectedPremium == null || premiumCcyRecords == null) return null;
+        if (selectedPremium == null || premiumCcyRecords == null) return 0;
 
         var ccyRecord = premiumCcyRecords.FirstOrDefault(c => c.Currency == currency);
-        if (ccyRecord == null) return null;
+        if (ccyRecord == null) return 0; // No row for this currency = 0% split
 
-        return selectedPremium.SplitSelection switch
+        // DB stores as decimal (0.5 = 50%), convert to percentage for display
+        var dbValue = selectedPremium.SplitSelection switch
         {
             "Plan" => ccyRecord.PlanSplit,
             "Written" => ccyRecord.WrittenSplit,
             "Signed" => ccyRecord.SignedSplit,
             _ => ccyRecord.ManualSplit // Manual
         };
+
+        return (dbValue ?? 0) * 100;
     }
 
     private void SetManualSplitValue(string currency, ChangeEventArgs e)
@@ -1230,10 +1233,11 @@ else
         var ccyRecord = premiumCcyRecords.FirstOrDefault(c => c.Currency == currency);
         if (ccyRecord == null) return;
 
+        // Convert from percentage (50) to decimal (0.5) for DB storage
         decimal? value = null;
         if (decimal.TryParse(e.Value?.ToString(), out var parsed))
         {
-            value = parsed;
+            value = parsed / 100;
         }
 
         ccyRecord.ManualSplit = value;
