@@ -1178,6 +1178,7 @@ else
         }
 
         CalculateCurrencySplitTotal();
+        DistributeManualAmounts(); // Recalculate manual values when selection changes
         OnFormChanged();
         // Force UI refresh to update SELECTED columns in matrices
         StateHasChanged();
@@ -1457,10 +1458,17 @@ else
 
         foreach (var (currency, splitPct) in currencies)
         {
-            if (splitPct <= 0) continue;
-
             var ccyRecord = premiumCcyRecords.FirstOrDefault(c => c.Currency == currency);
             if (ccyRecord == null) continue;
+
+            // When currency split is 0%, set manual values to 0
+            if (splitPct <= 0)
+            {
+                ccyRecord.ManualGGWP = 0;
+                ccyRecord.ManualGNWP = 0;
+                ccyRecord.ManualDeductions = 0;
+                continue;
+            }
 
             // Calculate the GBP amount for this currency based on split
             var ggwpAmountGBP = ggwpGBP * (splitPct / 100);
