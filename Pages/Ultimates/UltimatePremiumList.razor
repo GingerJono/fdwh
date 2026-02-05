@@ -206,401 +206,439 @@ else
 
             <div class="modal-body-custom">
                 <div class="container-fluid">
-                    <!-- Selection Fields -->
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">Selection <span class="text-danger">*</span></label>
-                            <select class="form-select" @bind="selectedPremium.Selection" @bind:after="OnSelectionChanged" required>
-                                <option value="Plan">Plan</option>
-                                <option value="Written">Written</option>
-                                <option value="Signed">Signed</option>
-                                <option value="Manual">Manual</option>
-                            </select>
+                    <!-- Section 1: Selection -->
+                    <div class="section-box section-selection mb-4">
+                        <div class="section-header bg-primary text-white">
+                            <h6 class="mb-0"><i class="bi bi-check-circle me-2"></i>Selection</h6>
+                        </div>
+                        <div class="section-content">
+                            <div class="row align-items-center">
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold mb-1">Premium Selection <span class="text-danger">*</span></label>
+                                    <select class="form-select" @bind="selectedPremium.Selection" @bind:after="OnSelectionChanged" required>
+                                        <option value="Plan">Plan</option>
+                                        <option value="Written">Written</option>
+                                        <option value="Signed">Signed</option>
+                                        <option value="Manual">Manual</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="info-box">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        Choose which premium values to use. Select "Manual" to enter custom values.
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Premium Currency Data -->
+                    <!-- Section 2: Selected Values -->
                     @if (premiumCcyRecords != null && premiumCcyRecords.Any())
                     {
-                        <!-- Summary Banner -->
-                        <div class="row mb-3">
-                            <div class="col-12">
-                                <div class="card bg-light">
-                                    <div class="card-body py-2">
-                                        <div class="row text-center">
-                                            <div class="col-3">
-                                                <small class="text-muted d-block">GGWP USD</small>
-                                                <h5 class="mb-0">@FormatCurrency(CalculateTotalGGWP("USD"))</h5>
+                        <div class="section-box mb-4">
+                            <div class="section-header">
+                                <h6 class="mb-0"><i class="bi bi-bar-chart me-2"></i>Selected Values</h6>
+                            </div>
+                            <div class="section-content">
+                                <!-- Summary Totals -->
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <div class="card bg-light">
+                                            <div class="card-body py-2">
+                                                <div class="row text-center">
+                                                    <div class="col-3">
+                                                        <span class="summary-label">GGWP USD</span>
+                                                        <h5 class="mb-0 summary-value">@FormatCurrency(CalculateTotalGGWP("USD"))</h5>
+                                                    </div>
+                                                    <div class="col-3">
+                                                        <span class="summary-label">GGWP GBP</span>
+                                                        <h5 class="mb-0 summary-value">@FormatCurrency(CalculateTotalGGWP("GBP"))</h5>
+                                                    </div>
+                                                    <div class="col-3">
+                                                        <span class="summary-label">GNWP USD</span>
+                                                        <h5 class="mb-0 summary-value">@FormatCurrency(CalculateTotalGNWP("USD"))</h5>
+                                                    </div>
+                                                    <div class="col-3">
+                                                        <span class="summary-label">GNWP GBP</span>
+                                                        <h5 class="mb-0 summary-value">@FormatCurrency(CalculateTotalGNWP("GBP"))</h5>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div class="col-3">
-                                                <small class="text-muted d-block">GGWP GBP</small>
-                                                <h5 class="mb-0">@FormatCurrency(CalculateTotalGGWP("GBP"))</h5>
-                                            </div>
-                                            <div class="col-3">
-                                                <small class="text-muted d-block">GNWP USD</small>
-                                                <h5 class="mb-0">@FormatCurrency(CalculateTotalGNWP("USD"))</h5>
-                                            </div>
-                                            <div class="col-3">
-                                                <small class="text-muted d-block">GNWP GBP</small>
-                                                <h5 class="mb-0">@FormatCurrency(CalculateTotalGNWP("GBP"))</h5>
-                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Tabbed Matrices -->
+                                <div class="row">
+                                    <div class="col-12">
+                                        <ul class="nav nav-tabs" role="tablist">
+                                            <li class="nav-item" role="presentation">
+                                                <button class="nav-link @(activeTab == "ggwp" ? "active" : "")" @onclick="@(() => SetActiveTab("ggwp"))" type="button">
+                                                    GGWP by Currency
+                                                </button>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <button class="nav-link @(activeTab == "deductions" ? "active" : "")" @onclick="@(() => SetActiveTab("deductions"))" type="button">
+                                                    Deductions by Currency
+                                                </button>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <button class="nav-link @(activeTab == "gnwp" ? "active" : "")" @onclick="@(() => SetActiveTab("gnwp"))" type="button">
+                                                    GNWP by Currency
+                                                </button>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <button class="nav-link @(activeTab == "eu" ? "active" : "")" @onclick="@(() => SetActiveTab("eu"))" type="button">
+                                                    EU by Currency
+                                                </button>
+                                            </li>
+                                        </ul>
+
+                                        <div class="tab-content border border-top-0 p-0">
+                                            <!-- GGWP Tab -->
+                                            @if (activeTab == "ggwp")
+                                            {
+                                                <div class="table-responsive">
+                                                    <table class="table table-sm table-bordered mb-0 data-table">
+                                                        <thead class="table-light">
+                                                            <tr>
+                                                                <th>Currency</th>
+                                                                <th class="text-end">Selected</th>
+                                                                <th class="text-end">Plan</th>
+                                                                <th class="text-end">Written</th>
+                                                                <th class="text-end">Signed</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @foreach (var ccy in premiumCcyRecords.OrderBy(c => c.Currency))
+                                                            {
+                                                                <tr>
+                                                                    <td><strong>@ccy.Currency</strong></td>
+                                                                    <td class="text-end"><strong>@FormatCurrency(GetSelectedValue(ccy, "GGWP"))</strong></td>
+                                                                    <td class="text-end">@FormatCurrency(ccy.PlanGGWP)</td>
+                                                                    <td class="text-end">@FormatCurrency(ccy.WrittenGGWP)</td>
+                                                                    <td class="text-end">@FormatCurrency(ccy.SignedGGWP)</td>
+                                                                </tr>
+                                                            }
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            }
+
+                                            <!-- Deductions Tab -->
+                                            @if (activeTab == "deductions")
+                                            {
+                                                <div class="table-responsive">
+                                                    <table class="table table-sm table-bordered mb-0 data-table">
+                                                        <thead class="table-light">
+                                                            <tr>
+                                                                <th>Currency</th>
+                                                                <th class="text-end">Selected</th>
+                                                                <th class="text-end">Plan</th>
+                                                                <th class="text-end">Written</th>
+                                                                <th class="text-end">Signed</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @foreach (var ccy in premiumCcyRecords.OrderBy(c => c.Currency))
+                                                            {
+                                                                <tr>
+                                                                    <td><strong>@ccy.Currency</strong></td>
+                                                                    <td class="text-end"><strong>@FormatPercentage(GetSelectedValue(ccy, "Deductions"))</strong></td>
+                                                                    <td class="text-end">@FormatPercentage(ccy.PlanDeductions)</td>
+                                                                    <td class="text-end">@FormatPercentage(ccy.WrittenDeductions)</td>
+                                                                    <td class="text-end">@FormatPercentage(ccy.SignedDeductions)</td>
+                                                                </tr>
+                                                            }
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            }
+
+                                            <!-- GNWP Tab -->
+                                            @if (activeTab == "gnwp")
+                                            {
+                                                <div class="table-responsive">
+                                                    <table class="table table-sm table-bordered mb-0 data-table">
+                                                        <thead class="table-light">
+                                                            <tr>
+                                                                <th>Currency</th>
+                                                                <th class="text-end">Selected</th>
+                                                                <th class="text-end">Plan</th>
+                                                                <th class="text-end">Written</th>
+                                                                <th class="text-end">Signed</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @foreach (var ccy in premiumCcyRecords.OrderBy(c => c.Currency))
+                                                            {
+                                                                <tr>
+                                                                    <td><strong>@ccy.Currency</strong></td>
+                                                                    <td class="text-end"><strong>@FormatCurrency(GetSelectedValue(ccy, "GNWP"))</strong></td>
+                                                                    <td class="text-end">@FormatCurrency(ccy.PlanGNWP)</td>
+                                                                    <td class="text-end">@FormatCurrency(ccy.WrittenGNWP)</td>
+                                                                    <td class="text-end">@FormatCurrency(ccy.SignedGNWP)</td>
+                                                                </tr>
+                                                            }
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            }
+
+                                            <!-- EU Tab -->
+                                            @if (activeTab == "eu")
+                                            {
+                                                <div class="table-responsive">
+                                                    <table class="table table-sm table-bordered mb-0 data-table">
+                                                        <thead class="table-light">
+                                                            <tr>
+                                                                <th>Currency</th>
+                                                                <th class="text-end">Selected</th>
+                                                                <th class="text-end">Plan</th>
+                                                                <th class="text-end">Written</th>
+                                                                <th class="text-end">Signed</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @foreach (var ccy in premiumCcyRecords.OrderBy(c => c.Currency))
+                                                            {
+                                                                <tr>
+                                                                    <td><strong>@ccy.Currency</strong></td>
+                                                                    <td class="text-end"><strong>@FormatCurrency(ccy.GetEUAmount(selectedPremium.Selection, selectedPremium.EUSplitSelection))</strong></td>
+                                                                    <td class="text-end">@FormatCurrency(ccy.PlanEUAmount)</td>
+                                                                    <td class="text-end">@FormatCurrency(ccy.WrittenEUAmount)</td>
+                                                                    <td class="text-end">@FormatCurrency(ccy.SignedEUAmount)</td>
+                                                                </tr>
+                                                            }
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            }
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Tabbed Matrices -->
-                        <div class="row mb-3">
-                            <div class="col-12">
-                                <ul class="nav nav-tabs" role="tablist">
-                                    <li class="nav-item" role="presentation">
-                                        <button class="nav-link @(activeTab == "ggwp" ? "active" : "")" @onclick="@(() => SetActiveTab("ggwp"))" type="button">
-                                            GGWP by Currency
-                                        </button>
-                                    </li>
-                                    <li class="nav-item" role="presentation">
-                                        <button class="nav-link @(activeTab == "deductions" ? "active" : "")" @onclick="@(() => SetActiveTab("deductions"))" type="button">
-                                            Deductions by Currency
-                                        </button>
-                                    </li>
-                                    <li class="nav-item" role="presentation">
-                                        <button class="nav-link @(activeTab == "gnwp" ? "active" : "")" @onclick="@(() => SetActiveTab("gnwp"))" type="button">
-                                            GNWP by Currency
-                                        </button>
-                                    </li>
-                                    <li class="nav-item" role="presentation">
-                                        <button class="nav-link @(activeTab == "eu" ? "active" : "")" @onclick="@(() => SetActiveTab("eu"))" type="button">
-                                            EU by Currency
-                                        </button>
-                                    </li>
-                                </ul>
-
-                                <div class="tab-content border border-top-0 p-0">
-                                    <!-- GGWP Tab -->
-                                    @if (activeTab == "ggwp")
-                                    {
-                                        <div class="table-responsive">
-                                            <table class="table table-sm table-bordered mb-0">
-                                                <thead class="table-light">
-                                                    <tr>
-                                                        <th>Currency</th>
-                                                        <th class="text-end">Selected</th>
-                                                        <th class="text-end">Plan</th>
-                                                        <th class="text-end">Written</th>
-                                                        <th class="text-end">Signed</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    @foreach (var ccy in premiumCcyRecords.OrderBy(c => c.Currency))
-                                                    {
-                                                        <tr>
-                                                            <td><strong>@ccy.Currency</strong></td>
-                                                            <td class="text-end"><strong>@FormatCurrency(GetSelectedValue(ccy, "GGWP"))</strong></td>
-                                                            <td class="text-end">@FormatCurrency(ccy.PlanGGWP)</td>
-                                                            <td class="text-end">@FormatCurrency(ccy.WrittenGGWP)</td>
-                                                            <td class="text-end">@FormatCurrency(ccy.SignedGGWP)</td>
-                                                        </tr>
-                                                    }
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    }
-
-                                    <!-- Deductions Tab -->
-                                    @if (activeTab == "deductions")
-                                    {
-                                        <div class="table-responsive">
-                                            <table class="table table-sm table-bordered mb-0">
-                                                <thead class="table-light">
-                                                    <tr>
-                                                        <th>Currency</th>
-                                                        <th class="text-end">Selected</th>
-                                                        <th class="text-end">Plan</th>
-                                                        <th class="text-end">Written</th>
-                                                        <th class="text-end">Signed</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    @foreach (var ccy in premiumCcyRecords.OrderBy(c => c.Currency))
-                                                    {
-                                                        <tr>
-                                                            <td><strong>@ccy.Currency</strong></td>
-                                                            <td class="text-end"><strong>@FormatPercentage(GetSelectedValue(ccy, "Deductions"))</strong></td>
-                                                            <td class="text-end">@FormatPercentage(ccy.PlanDeductions)</td>
-                                                            <td class="text-end">@FormatPercentage(ccy.WrittenDeductions)</td>
-                                                            <td class="text-end">@FormatPercentage(ccy.SignedDeductions)</td>
-                                                        </tr>
-                                                    }
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    }
-
-                                    <!-- GNWP Tab -->
-                                    @if (activeTab == "gnwp")
-                                    {
-                                        <div class="table-responsive">
-                                            <table class="table table-sm table-bordered mb-0">
-                                                <thead class="table-light">
-                                                    <tr>
-                                                        <th>Currency</th>
-                                                        <th class="text-end">Selected</th>
-                                                        <th class="text-end">Plan</th>
-                                                        <th class="text-end">Written</th>
-                                                        <th class="text-end">Signed</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    @foreach (var ccy in premiumCcyRecords.OrderBy(c => c.Currency))
-                                                    {
-                                                        <tr>
-                                                            <td><strong>@ccy.Currency</strong></td>
-                                                            <td class="text-end"><strong>@FormatCurrency(GetSelectedValue(ccy, "GNWP"))</strong></td>
-                                                            <td class="text-end">@FormatCurrency(ccy.PlanGNWP)</td>
-                                                            <td class="text-end">@FormatCurrency(ccy.WrittenGNWP)</td>
-                                                            <td class="text-end">@FormatCurrency(ccy.SignedGNWP)</td>
-                                                        </tr>
-                                                    }
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    }
-
-                                    <!-- EU Tab (calculated EU amounts = GNWP × EU Split) -->
-                                    @if (activeTab == "eu")
-                                    {
-                                        <div class="table-responsive">
-                                            <table class="table table-sm table-bordered mb-0">
-                                                <thead class="table-light">
-                                                    <tr>
-                                                        <th>Currency</th>
-                                                        <th class="text-end">Selected</th>
-                                                        <th class="text-end">Plan</th>
-                                                        <th class="text-end">Written</th>
-                                                        <th class="text-end">Signed</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    @foreach (var ccy in premiumCcyRecords.OrderBy(c => c.Currency))
-                                                    {
-                                                        <tr>
-                                                            <td><strong>@ccy.Currency</strong></td>
-                                                            <td class="text-end"><strong>@FormatCurrency(ccy.GetEUAmount(selectedPremium.Selection, selectedPremium.EUSplitSelection))</strong></td>
-                                                            <td class="text-end">@FormatCurrency(ccy.PlanEUAmount)</td>
-                                                            <td class="text-end">@FormatCurrency(ccy.WrittenEUAmount)</td>
-                                                            <td class="text-end">@FormatCurrency(ccy.SignedEUAmount)</td>
-                                                        </tr>
-                                                    }
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    }
-                                </div>
-                            </div>
-                        </div>
                     }
 
-                    <!-- Manual Entry Section -->
+                    <!-- Section 3: Manual Entry (only when Manual selected) -->
                     @if (selectedPremium.Selection == "Manual")
                     {
-                        <div class="row mb-3">
-                            <div class="col-12">
-                                <h6 class="fw-bold mb-3">Manual Entry (GBP Values)</h6>
+                        <div class="section-box mb-4">
+                            <div class="section-header">
+                                <h6 class="mb-0"><i class="bi bi-pencil-square me-2"></i>Manual Entry</h6>
                             </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-3">
-                                <label class="form-label fw-bold">Entry Type <span class="text-danger">*</span></label>
-                                <select class="form-select" @bind="selectedPremium.GrossNetEntry" @bind:after="OnGrossNetChanged" required>
-                                    <option value="Gross">Gross</option>
-                                    <option value="Net">Net</option>
-                                </select>
-                            </div>
-
-                            <div class="col-md-3">
-                                <label class="form-label fw-bold">Gross Premium (GBP)</label>
-                                <input type="number" step="1" class="form-control" @bind="selectedPremium.ManualGrossPremiumGBP"
-                                       @bind:event="oninput" @bind:after="OnManualGrossChanged"
-                                       disabled="@(selectedPremium.GrossNetEntry == "Net")" />
-                            </div>
-
-                            <div class="col-md-3">
-                                <label class="form-label fw-bold">Deductions (%)</label>
-                                <input type="number" step="0.01" min="0" max="100" class="form-control" @bind="selectedPremium.ManualDeductions"
-                                       @bind:event="oninput" @bind:after="OnManualDeductionsChanged" />
-                            </div>
-
-                            <div class="col-md-3">
-                                <label class="form-label fw-bold">Net Premium (GBP)</label>
-                                <input type="number" step="1" class="form-control" @bind="selectedPremium.ManualNetPremiumGBP"
-                                       @bind:event="oninput" @bind:after="OnManualNetChanged"
-                                       disabled="@(selectedPremium.GrossNetEntry == "Gross")" />
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-12">
-                                <label class="form-label fw-bold">Currency Splits (must total 100%)</label>
-                            </div>
-                            <div class="col-md-2">
-                                <label class="form-label">Source</label>
-                                <select class="form-select" @bind="selectedPremium.CcySplitSelection" @bind:after="OnCcySplitSelectionChanged">
-                                    <option value="Plan">Plan</option>
-                                    <option value="Written">Written</option>
-                                    <option value="Signed">Signed</option>
-                                    <option value="Manual">Manual</option>
-                                </select>
-                            </div>
-                            <div class="col">
-                                <label class="form-label">GBP %</label>
-                                <input type="number" step="0.01" min="0" max="100" class="form-control"
-                                       value="@GetDisplayCcySplitValue("GBP")"
-                                       @onchange="@(e => SetManualCcySplitValue("GBP", e))"
-                                       disabled="@(selectedPremium.CcySplitSelection != "Manual")" />
-                                <small class="text-muted">@GetCalculatedCurrencyValue("GBP")</small>
-                            </div>
-                            <div class="col">
-                                <label class="form-label">USD %</label>
-                                <input type="number" step="0.01" min="0" max="100" class="form-control"
-                                       value="@GetDisplayCcySplitValue("USD")"
-                                       @onchange="@(e => SetManualCcySplitValue("USD", e))"
-                                       disabled="@(selectedPremium.CcySplitSelection != "Manual")" />
-                                <small class="text-muted">@GetCalculatedCurrencyValue("USD")</small>
-                            </div>
-                            <div class="col">
-                                <label class="form-label">CAD %</label>
-                                <input type="number" step="0.01" min="0" max="100" class="form-control"
-                                       value="@GetDisplayCcySplitValue("CAD")"
-                                       @onchange="@(e => SetManualCcySplitValue("CAD", e))"
-                                       disabled="@(selectedPremium.CcySplitSelection != "Manual")" />
-                                <small class="text-muted">@GetCalculatedCurrencyValue("CAD")</small>
-                            </div>
-                            <div class="col">
-                                <label class="form-label">EUR %</label>
-                                <input type="number" step="0.01" min="0" max="100" class="form-control"
-                                       value="@GetDisplayCcySplitValue("EUR")"
-                                       @onchange="@(e => SetManualCcySplitValue("EUR", e))"
-                                       disabled="@(selectedPremium.CcySplitSelection != "Manual")" />
-                                <small class="text-muted">@GetCalculatedCurrencyValue("EUR")</small>
-                            </div>
-                            <div class="col">
-                                <label class="form-label">JPY %</label>
-                                <input type="number" step="0.01" min="0" max="100" class="form-control"
-                                       value="@GetDisplayCcySplitValue("JPY")"
-                                       @onchange="@(e => SetManualCcySplitValue("JPY", e))"
-                                       disabled="@(selectedPremium.CcySplitSelection != "Manual")" />
-                                <small class="text-muted">@GetCalculatedCurrencyValue("JPY")</small>
-                            </div>
-                        </div>
-
-                        @if (currencySplitTotal.HasValue && Math.Round(currencySplitTotal.Value, 2) != 100)
-                        {
-                            <div class="row mb-3">
-                                <div class="col-12">
-                                    <div class="alert alert-warning py-2">
-                                        Currency splits total @currencySplitTotal.Value.ToString("F2")% (must equal 100%)
+                            <div class="section-content">
+                                <div class="info-box mb-3">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Enter premium values in GBP. The system will convert to other currencies using the selected FX rates.
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <label class="form-label fw-bold">Entry Type <span class="text-danger">*</span></label>
+                                        <select class="form-select" @bind="selectedPremium.GrossNetEntry" @bind:after="OnGrossNetChanged" required>
+                                            <option value="Gross">Gross</option>
+                                            <option value="Net">Net</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label fw-bold">Gross Premium (GBP)</label>
+                                        <input type="number" step="1" class="form-control" @bind="selectedPremium.ManualGrossPremiumGBP"
+                                               @bind:event="oninput" @bind:after="OnManualGrossChanged"
+                                               disabled="@(selectedPremium.GrossNetEntry == "Net")" />
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label fw-bold">Deductions (%)</label>
+                                        <input type="number" step="0.01" min="0" max="100" class="form-control" @bind="selectedPremium.ManualDeductions"
+                                               @bind:event="oninput" @bind:after="OnManualDeductionsChanged" />
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label fw-bold">Net Premium (GBP)</label>
+                                        <input type="number" step="1" class="form-control" @bind="selectedPremium.ManualNetPremiumGBP"
+                                               @bind:event="oninput" @bind:after="OnManualNetChanged"
+                                               disabled="@(selectedPremium.GrossNetEntry == "Gross")" />
                                     </div>
                                 </div>
                             </div>
-                        }
+                        </div>
 
-                        <div class="row mb-3">
-                            <div class="col-12">
-                                <label class="form-label fw-bold">EU / LNDN Split (per Currency)</label>
+                        <!-- Section 4: Currency Splits -->
+                        <div class="section-box mb-4">
+                            <div class="section-header">
+                                <h6 class="mb-0"><i class="bi bi-pie-chart me-2"></i>Currency Splits</h6>
                             </div>
-                            <div class="col-md-2">
-                                <label class="form-label">Source</label>
-                                <select class="form-select" @bind="selectedPremium.EUSplitSelection" @bind:after="OnEUSplitSelectionChanged">
-                                    <option value="Plan">Plan</option>
-                                    <option value="Written">Written</option>
-                                    <option value="Signed">Signed</option>
-                                    <option value="Manual">Manual</option>
-                                </select>
+                            <div class="section-content">
+                                <div class="info-box mb-3">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Define how the total premium is distributed across currencies. Percentages must total 100%.
+                                </div>
+                                <div class="row align-items-end">
+                                    <div class="col-md-2">
+                                        <label class="form-label fw-bold">Source</label>
+                                        <select class="form-select" @bind="selectedPremium.CcySplitSelection" @bind:after="OnCcySplitSelectionChanged">
+                                            <option value="Plan">Plan</option>
+                                            <option value="Written">Written</option>
+                                            <option value="Signed">Signed</option>
+                                            <option value="Manual">Manual</option>
+                                        </select>
+                                    </div>
+                                    <div class="col">
+                                        <label class="form-label">GBP %</label>
+                                        <input type="number" step="0.01" min="0" max="100" class="form-control"
+                                               value="@GetDisplayCcySplitValue("GBP")"
+                                               @onchange="@(e => SetManualCcySplitValue("GBP", e))"
+                                               disabled="@(selectedPremium.CcySplitSelection != "Manual")" />
+                                        <small class="text-muted">@GetCalculatedCurrencyValue("GBP")</small>
+                                    </div>
+                                    <div class="col">
+                                        <label class="form-label">USD %</label>
+                                        <input type="number" step="0.01" min="0" max="100" class="form-control"
+                                               value="@GetDisplayCcySplitValue("USD")"
+                                               @onchange="@(e => SetManualCcySplitValue("USD", e))"
+                                               disabled="@(selectedPremium.CcySplitSelection != "Manual")" />
+                                        <small class="text-muted">@GetCalculatedCurrencyValue("USD")</small>
+                                    </div>
+                                    <div class="col">
+                                        <label class="form-label">CAD %</label>
+                                        <input type="number" step="0.01" min="0" max="100" class="form-control"
+                                               value="@GetDisplayCcySplitValue("CAD")"
+                                               @onchange="@(e => SetManualCcySplitValue("CAD", e))"
+                                               disabled="@(selectedPremium.CcySplitSelection != "Manual")" />
+                                        <small class="text-muted">@GetCalculatedCurrencyValue("CAD")</small>
+                                    </div>
+                                    <div class="col">
+                                        <label class="form-label">EUR %</label>
+                                        <input type="number" step="0.01" min="0" max="100" class="form-control"
+                                               value="@GetDisplayCcySplitValue("EUR")"
+                                               @onchange="@(e => SetManualCcySplitValue("EUR", e))"
+                                               disabled="@(selectedPremium.CcySplitSelection != "Manual")" />
+                                        <small class="text-muted">@GetCalculatedCurrencyValue("EUR")</small>
+                                    </div>
+                                    <div class="col">
+                                        <label class="form-label">JPY %</label>
+                                        <input type="number" step="0.01" min="0" max="100" class="form-control"
+                                               value="@GetDisplayCcySplitValue("JPY")"
+                                               @onchange="@(e => SetManualCcySplitValue("JPY", e))"
+                                               disabled="@(selectedPremium.CcySplitSelection != "Manual")" />
+                                        <small class="text-muted">@GetCalculatedCurrencyValue("JPY")</small>
+                                    </div>
+                                </div>
+                                @if (currencySplitTotal.HasValue && Math.Round(currencySplitTotal.Value, 2) != 100)
+                                {
+                                    <div class="alert alert-warning py-2 mt-3 mb-0">
+                                        <i class="bi bi-exclamation-triangle me-1"></i>
+                                        Currency splits total @currencySplitTotal.Value.ToString("F2")% (must equal 100%)
+                                    </div>
+                                }
                             </div>
-                            <div class="col">
-                                <label class="form-label">GBP EU%</label>
-                                <input type="number" step="0.01" min="0" max="100" class="form-control"
-                                       value="@GetDisplayEUSplitValue("GBP")"
-                                       @onchange="@(e => SetManualEUSplitValue("GBP", e))"
-                                       disabled="@(selectedPremium.EUSplitSelection != "Manual")" />
-                                <small class="text-muted">LNDN: @GetLNDNSplitForCurrency("GBP")%</small>
+                        </div>
+
+                        <!-- Section 5: EU / LNDN Splits -->
+                        <div class="section-box mb-4">
+                            <div class="section-header">
+                                <h6 class="mb-0"><i class="bi bi-globe-europe-africa me-2"></i>EU / LNDN Splits</h6>
                             </div>
-                            <div class="col">
-                                <label class="form-label">USD EU%</label>
-                                <input type="number" step="0.01" min="0" max="100" class="form-control"
-                                       value="@GetDisplayEUSplitValue("USD")"
-                                       @onchange="@(e => SetManualEUSplitValue("USD", e))"
-                                       disabled="@(selectedPremium.EUSplitSelection != "Manual")" />
-                                <small class="text-muted">LNDN: @GetLNDNSplitForCurrency("USD")%</small>
-                            </div>
-                            <div class="col">
-                                <label class="form-label">CAD EU%</label>
-                                <input type="number" step="0.01" min="0" max="100" class="form-control"
-                                       value="@GetDisplayEUSplitValue("CAD")"
-                                       @onchange="@(e => SetManualEUSplitValue("CAD", e))"
-                                       disabled="@(selectedPremium.EUSplitSelection != "Manual")" />
-                                <small class="text-muted">LNDN: @GetLNDNSplitForCurrency("CAD")%</small>
-                            </div>
-                            <div class="col">
-                                <label class="form-label">EUR EU%</label>
-                                <input type="number" step="0.01" min="0" max="100" class="form-control"
-                                       value="@GetDisplayEUSplitValue("EUR")"
-                                       @onchange="@(e => SetManualEUSplitValue("EUR", e))"
-                                       disabled="@(selectedPremium.EUSplitSelection != "Manual")" />
-                                <small class="text-muted">LNDN: @GetLNDNSplitForCurrency("EUR")%</small>
-                            </div>
-                            <div class="col">
-                                <label class="form-label">JPY EU%</label>
-                                <input type="number" step="0.01" min="0" max="100" class="form-control"
-                                       value="@GetDisplayEUSplitValue("JPY")"
-                                       @onchange="@(e => SetManualEUSplitValue("JPY", e))"
-                                       disabled="@(selectedPremium.EUSplitSelection != "Manual")" />
-                                <small class="text-muted">LNDN: @GetLNDNSplitForCurrency("JPY")%</small>
+                            <div class="section-content">
+                                <div class="info-box mb-3">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Split premium between EU and London markets for each currency. LNDN % is automatically calculated as 100% minus EU %.
+                                </div>
+                                <div class="row align-items-end">
+                                    <div class="col-md-2">
+                                        <label class="form-label fw-bold">Source</label>
+                                        <select class="form-select" @bind="selectedPremium.EUSplitSelection" @bind:after="OnEUSplitSelectionChanged">
+                                            <option value="Plan">Plan</option>
+                                            <option value="Written">Written</option>
+                                            <option value="Signed">Signed</option>
+                                            <option value="Manual">Manual</option>
+                                        </select>
+                                    </div>
+                                    <div class="col">
+                                        <label class="form-label">GBP EU%</label>
+                                        <input type="number" step="0.01" min="0" max="100" class="form-control"
+                                               value="@GetDisplayEUSplitValue("GBP")"
+                                               @onchange="@(e => SetManualEUSplitValue("GBP", e))"
+                                               disabled="@(selectedPremium.EUSplitSelection != "Manual")" />
+                                        <small class="text-muted">LNDN: @GetLNDNSplitForCurrency("GBP")%</small>
+                                    </div>
+                                    <div class="col">
+                                        <label class="form-label">USD EU%</label>
+                                        <input type="number" step="0.01" min="0" max="100" class="form-control"
+                                               value="@GetDisplayEUSplitValue("USD")"
+                                               @onchange="@(e => SetManualEUSplitValue("USD", e))"
+                                               disabled="@(selectedPremium.EUSplitSelection != "Manual")" />
+                                        <small class="text-muted">LNDN: @GetLNDNSplitForCurrency("USD")%</small>
+                                    </div>
+                                    <div class="col">
+                                        <label class="form-label">CAD EU%</label>
+                                        <input type="number" step="0.01" min="0" max="100" class="form-control"
+                                               value="@GetDisplayEUSplitValue("CAD")"
+                                               @onchange="@(e => SetManualEUSplitValue("CAD", e))"
+                                               disabled="@(selectedPremium.EUSplitSelection != "Manual")" />
+                                        <small class="text-muted">LNDN: @GetLNDNSplitForCurrency("CAD")%</small>
+                                    </div>
+                                    <div class="col">
+                                        <label class="form-label">EUR EU%</label>
+                                        <input type="number" step="0.01" min="0" max="100" class="form-control"
+                                               value="@GetDisplayEUSplitValue("EUR")"
+                                               @onchange="@(e => SetManualEUSplitValue("EUR", e))"
+                                               disabled="@(selectedPremium.EUSplitSelection != "Manual")" />
+                                        <small class="text-muted">LNDN: @GetLNDNSplitForCurrency("EUR")%</small>
+                                    </div>
+                                    <div class="col">
+                                        <label class="form-label">JPY EU%</label>
+                                        <input type="number" step="0.01" min="0" max="100" class="form-control"
+                                               value="@GetDisplayEUSplitValue("JPY")"
+                                               @onchange="@(e => SetManualEUSplitValue("JPY", e))"
+                                               disabled="@(selectedPremium.EUSplitSelection != "Manual")" />
+                                        <small class="text-muted">LNDN: @GetLNDNSplitForCurrency("JPY")%</small>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     }
 
-                    <!-- Comments -->
-                    <div class="row mb-3">
-                        <div class="col-12">
+                    <!-- Section 6: Comments -->
+                    <div class="section-box mb-4">
+                        <div class="section-header">
+                            <h6 class="mb-0"><i class="bi bi-chat-text me-2"></i>Comments</h6>
+                        </div>
+                        <div class="section-content">
                             <label class="form-label fw-bold">Update Comments</label>
                             <textarea class="form-control" rows="3" @bind="selectedPremium.UpdateComments" @bind:event="oninput" @bind:after="OnFormChanged"
                                       placeholder="Enter any comments about this update..."></textarea>
+                            @if (!string.IsNullOrWhiteSpace(priorComments))
+                            {
+                                <div class="mt-3">
+                                    <label class="form-label text-muted">Prior Comments</label>
+                                    <div class="alert alert-secondary py-2 mb-0">@priorComments</div>
+                                </div>
+                            }
                         </div>
                     </div>
 
-                    <!-- Audit Info -->
-                    <div class="row mb-3">
-                        <div class="col-12">
-                            <h6 class="text-muted mb-2">Audit Information</h6>
+                    <!-- Section 7: Audit Information -->
+                    <div class="section-box mb-3">
+                        <div class="section-header">
+                            <h6 class="mb-0"><i class="bi bi-clock-history me-2"></i>Audit Information</h6>
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Version</label>
-                            <div class="form-control-plaintext"><span class="badge bg-info">v@(selectedPremium.Version)</span></div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label">Last Updated</label>
-                            <div class="form-control-plaintext">@selectedPremium.DateUpdated.ToString("yyyy-MM-dd HH:mm")</div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label">Updated By</label>
-                            <div class="form-control-plaintext">@selectedPremium.UpdatedBy</div>
-                        </div>
-                    </div>
-
-                    @if (!string.IsNullOrWhiteSpace(priorComments))
-                    {
-                        <div class="row mb-3">
-                            <div class="col-12">
-                                <label class="form-label">Prior Comments</label>
-                                <div class="alert alert-secondary py-2">@priorComments</div>
+                        <div class="section-content">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label class="form-label text-muted">Version</label>
+                                    <div class="form-control-plaintext"><span class="badge bg-info">v@(selectedPremium.Version)</span></div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label text-muted">Last Updated</label>
+                                    <div class="form-control-plaintext">@selectedPremium.DateUpdated.ToString("yyyy-MM-dd HH:mm")</div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label text-muted">Updated By</label>
+                                    <div class="form-control-plaintext">@selectedPremium.UpdatedBy</div>
+                                </div>
                             </div>
                         </div>
-                    }
+                    </div>
 
                     <!-- Error Message -->
                     @if (!string.IsNullOrEmpty(modalErrorMessage))
@@ -687,6 +725,7 @@ else
             flex: 1;
             overflow-y: auto;
             padding: 1.5rem;
+            font-size: 0.875rem; /* 14px base, min 12px for small text */
         }
 
         .modal-footer-custom {
@@ -699,7 +738,115 @@ else
 
         .form-control-plaintext {
             padding: 0.375rem 0;
-            font-size: 0.95rem;
+            font-size: 0.875rem;
+        }
+
+        /* Section box styling */
+        .section-box {
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .section-header {
+            background: #f8f9fa;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .section-header h6 {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: #495057;
+            margin: 0;
+        }
+
+        .section-header.bg-primary {
+            background: #0d6efd !important;
+            border-bottom-color: #0d6efd;
+        }
+
+        .section-header.bg-primary h6 {
+            color: white;
+        }
+
+        .section-selection .section-header {
+            background: #0d6efd;
+            border-bottom-color: #0d6efd;
+        }
+
+        .section-selection .section-header h6 {
+            color: white;
+        }
+
+        .section-content {
+            padding: 1rem;
+            background: white;
+        }
+
+        /* Info box styling */
+        .info-box {
+            background: #e7f3ff;
+            border: 1px solid #b6d4fe;
+            border-radius: 4px;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.8125rem;
+            color: #0a58ca;
+        }
+
+        .info-box i {
+            opacity: 0.8;
+        }
+
+        /* Summary values */
+        .summary-label {
+            display: block;
+            font-size: 0.75rem;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .summary-value {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #212529;
+        }
+
+        /* Data tables */
+        .data-table {
+            font-size: 0.875rem;
+        }
+
+        .data-table th {
+            font-size: 0.8125rem;
+            font-weight: 600;
+        }
+
+        /* Form elements */
+        .form-label {
+            font-size: 0.8125rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .form-select, .form-control {
+            font-size: 0.875rem;
+        }
+
+        /* Tab styling */
+        .nav-tabs .nav-link {
+            font-size: 0.8125rem;
+            padding: 0.5rem 1rem;
+        }
+
+        /* Small text helpers */
+        small.text-muted {
+            font-size: 0.75rem;
+        }
+
+        /* Alert styling in sections */
+        .section-content .alert {
+            font-size: 0.8125rem;
         }
     </style>
 }
