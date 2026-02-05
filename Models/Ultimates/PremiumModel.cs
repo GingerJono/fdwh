@@ -31,15 +31,13 @@ namespace sandboxapp.Models.Ultimates
         public decimal? ManualNetPremiumGBP { get; set; }
         public decimal? ManualDeductions { get; set; } // As percentage
 
-        // Currency Split Percentages (must sum to 100)
-        public decimal? ManualSplitGBP { get; set; }
-        public decimal? ManualSplitUSD { get; set; }
-        public decimal? ManualSplitCAD { get; set; }
-        public decimal? ManualSplitEUR { get; set; }
-        public decimal? ManualSplitJPY { get; set; }
+        // Currency Split Selection (Plan | Written | Signed | Manual)
+        // Actual split percentages are stored per-currency in PremiumCcy
+        public string CcySplitSelection { get; set; } = "Manual";
 
-        // EU/LNDN Split Percentage (EU %, LNDN is 100-EU)
-        public decimal? ManualEUSplit { get; set; }
+        // EU/LNDN Split Selection (Plan | Written | Signed | Manual)
+        // Actual EU split percentages are stored per-currency in PremiumCcy
+        public string EUSplitSelection { get; set; } = "Manual";
 
         public DateTime DateUpdated { get; set; }
 
