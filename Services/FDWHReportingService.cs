@@ -164,11 +164,7 @@ namespace Sandbox.Services
 			using var reader = await cmd.ExecuteReaderAsync();
 			while (await reader.ReadAsync())
 			{
-				var value = reader.GetString(0);
-				if (int.TryParse(value, out int month))
-				{
-					months.Add(month);
-				}
+				months.Add(reader.GetInt32(0));
 			}
 			return months;
 		}
