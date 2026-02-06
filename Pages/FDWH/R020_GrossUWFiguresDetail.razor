@@ -66,15 +66,11 @@
                         <option value="1954">1954</option>
                     </InputSelect>
                 </div>
-                <div class="col-md-4">
-                    <label class="form-label">SUA Version</label>
-                    <InputSelect @bind-Value="paramModel.SUAVersionID" class="form-select">
-                        <option value="0">-- Select SUA Version --</option>
-                        @foreach (var v in suaVersions)
-                        {
-                            <option value="@v.VersionID">@v.DisplayText</option>
-                        }
-                    </InputSelect>
+                <div class="col-md-4 d-flex align-items-end">
+                    <div class="form-check mb-2">
+                        <InputCheckbox @bind-Value="paramModel.SUA" class="form-check-input" id="suaCheck" />
+                        <label class="form-check-label" for="suaCheck">SUA</label>
+                    </div>
                 </div>
                 <div class="col-12">
                     <button type="submit" class="btn btn-success" disabled="@isRunning">
@@ -173,15 +169,13 @@
     private string errorMessage = string.Empty;
     private string errorStackTrace = string.Empty;
     private HashSet<int> expandedParams = new();
-    private ReportParams paramModel = new() { RunType = "MVT", ProcessingMonth = 202509, FromMonth = 202506, Syndicate = "1729", SUAVersionID = 0 };
+    private ReportParams paramModel = new() { RunType = "MVT", ProcessingMonth = 202509, FromMonth = 202506, Syndicate = "1729", SUA = false };
     private List<FDWHReportRun> runs = new();
     private List<int> availableMonths = new();
-    private List<SUAVersion> suaVersions = new();
 
     protected override async Task OnInitializedAsync()
     {
         availableMonths = await ReportingService.GetAvailableProcessingMonthsAsync();
-        suaVersions = await ReportingService.GetSUAVersionsAsync();
 
         // R020 defaults: n/a, MVT, n/a, n/a (use latest available for both)
         if (availableMonths.Count > 0)
@@ -207,7 +201,7 @@
                 { "@ProcessingMonth", paramModel.ProcessingMonth },
                 { "@FromMonth", paramModel.FromMonth },
                 { "@Syndicate", paramModel.Syndicate },
-                { "@SUAVersionID", paramModel.SUAVersionID }
+                { "@sua", paramModel.SUA ? 1 : 0 }
             };
 
             var bytes = await ReportingService.RunReportAndExportAsync(
@@ -259,6 +253,6 @@
         public int ProcessingMonth { get; set; }
         public int FromMonth { get; set; }
         public string Syndicate { get; set; }
-        public int SUAVersionID { get; set; }
+        public bool SUA { get; set; }
     }
 }

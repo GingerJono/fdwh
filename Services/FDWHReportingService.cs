@@ -173,35 +173,6 @@ namespace Sandbox.Services
 			return months;
 		}
 
-		public async Task<List<SUAVersion>> GetSUAVersionsAsync()
-		{
-			var versions = new List<SUAVersion>();
-			using var conn = new SqlConnection(GetFDWHConnection());
-			using var cmd = new SqlCommand(@"
-				SELECT VersionID, [Version], Syndicate, ProcessingMonth, UploadedBy, UploadedDate, IsActive, Comments
-				FROM dbo.SUAVersions
-				WHERE IsActive = 1
-				ORDER BY VersionID DESC", conn);
-
-			await conn.OpenAsync();
-			using var reader = await cmd.ExecuteReaderAsync();
-			while (await reader.ReadAsync())
-			{
-				versions.Add(new SUAVersion
-				{
-					VersionID = Convert.ToInt32(reader["VersionID"]),
-					Version = reader.IsDBNull(reader.GetOrdinal("Version")) ? null : Convert.ToString(reader["Version"]),
-					Syndicate = reader.IsDBNull(reader.GetOrdinal("Syndicate")) ? null : Convert.ToString(reader["Syndicate"]),
-					ProcessingMonth = Convert.ToInt32(reader["ProcessingMonth"]),
-					UploadedBy = reader.IsDBNull(reader.GetOrdinal("UploadedBy")) ? null : Convert.ToString(reader["UploadedBy"]),
-					UploadedDate = Convert.ToDateTime(reader["UploadedDate"]),
-					IsActive = Convert.ToBoolean(reader["IsActive"]),
-					Comments = reader.IsDBNull(reader.GetOrdinal("Comments")) ? null : Convert.ToString(reader["Comments"])
-				});
-			}
-			return versions;
-		}
-
 		// Helper method to check if a month is a quarter end (03, 06, 09, 12)
 		public static bool IsQuarterEnd(int processingMonth)
 		{
