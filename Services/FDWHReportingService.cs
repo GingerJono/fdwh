@@ -50,17 +50,24 @@ namespace Sandbox.Services
 		{
 			try
 			{
-				var dt = new DataTable();
+				var ds = new DataSet();
 				using var conn = new SqlConnection(GetFDWHConnection());
 				using var cmd = new SqlCommand(storedProc, conn) { CommandType = CommandType.StoredProcedure, CommandTimeout = 300 };
 				foreach (var p in parameters) cmd.Parameters.AddWithValue(p.Key, p.Value ?? DBNull.Value);
 				await conn.OpenAsync();
 				using var adapter = new SqlDataAdapter(cmd);
-				adapter.Fill(dt);
+				adapter.Fill(ds);
 
 				using var package = new ExcelPackage();
-				var outputSheet = package.Workbook.Worksheets.Add("Output");
-				outputSheet.Cells["A1"].LoadFromDataTable(dt, true);
+				int totalRows = 0;
+				for (int i = 0; i < ds.Tables.Count; i++)
+				{
+					var dt = ds.Tables[i];
+					var sheetName = ds.Tables.Count == 1 ? "Output" : $"Output{i + 1}";
+					var ws = package.Workbook.Worksheets.Add(sheetName);
+					ws.Cells["A1"].LoadFromDataTable(dt, true);
+					totalRows += dt.Rows.Count;
+				}
 
 				var controlSheet = package.Workbook.Worksheets.Add("Control");
 				controlSheet.Cells["A1"].Value = "Report ID";
@@ -77,7 +84,7 @@ namespace Sandbox.Services
 
 				await LogRunAsync(reportId, runBy,
 					System.Text.Json.JsonSerializer.Serialize(parameters),
-					version, null, dt.Rows.Count);
+					version, null, totalRows);
 
 				return await package.GetAsByteArrayAsync();
 			}
