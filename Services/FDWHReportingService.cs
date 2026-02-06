@@ -164,7 +164,11 @@ namespace Sandbox.Services
 			using var reader = await cmd.ExecuteReaderAsync();
 			while (await reader.ReadAsync())
 			{
-				months.Add(reader.GetInt32(0));
+				var value = reader.GetString(0);
+				if (int.TryParse(value, out int month))
+				{
+					months.Add(month);
+				}
 			}
 			return months;
 		}
@@ -185,14 +189,14 @@ namespace Sandbox.Services
 			{
 				versions.Add(new SUAVersion
 				{
-					VersionID = reader.GetInt32(reader.GetOrdinal("VersionID")),
-					Version = reader.IsDBNull(reader.GetOrdinal("Version")) ? null : reader.GetString(reader.GetOrdinal("Version")),
-					Syndicate = reader.IsDBNull(reader.GetOrdinal("Syndicate")) ? null : reader.GetString(reader.GetOrdinal("Syndicate")),
-					ProcessingMonth = reader.GetInt32(reader.GetOrdinal("ProcessingMonth")),
-					UploadedBy = reader.IsDBNull(reader.GetOrdinal("UploadedBy")) ? null : reader.GetString(reader.GetOrdinal("UploadedBy")),
-					UploadedDate = reader.GetDateTime(reader.GetOrdinal("UploadedDate")),
-					IsActive = reader.GetBoolean(reader.GetOrdinal("IsActive")),
-					Comments = reader.IsDBNull(reader.GetOrdinal("Comments")) ? null : reader.GetString(reader.GetOrdinal("Comments"))
+					VersionID = Convert.ToInt32(reader["VersionID"]),
+					Version = reader.IsDBNull(reader.GetOrdinal("Version")) ? null : Convert.ToString(reader["Version"]),
+					Syndicate = reader.IsDBNull(reader.GetOrdinal("Syndicate")) ? null : Convert.ToString(reader["Syndicate"]),
+					ProcessingMonth = Convert.ToInt32(reader["ProcessingMonth"]),
+					UploadedBy = reader.IsDBNull(reader.GetOrdinal("UploadedBy")) ? null : Convert.ToString(reader["UploadedBy"]),
+					UploadedDate = Convert.ToDateTime(reader["UploadedDate"]),
+					IsActive = Convert.ToBoolean(reader["IsActive"]),
+					Comments = reader.IsDBNull(reader.GetOrdinal("Comments")) ? null : Convert.ToString(reader["Comments"])
 				});
 			}
 			return versions;
