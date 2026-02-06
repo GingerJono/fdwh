@@ -1,4 +1,4 @@
-@page "/FDWH/R010_QtrResultsFlatFile"
+@page "/FDWH/r110_RIbyPolicy"
 @inject Sandbox.Services.FDWHReportingService ReportingService
 @inject IJSRuntime JS
 @inject Helpers.SandboxContext SandboxContext
@@ -6,7 +6,7 @@
 @using Sandbox.Models.FDWH
 @using Sandbox.Services
 
-<h3 class="mb-3">R010 - Quarter Results Flat File</h3>
+<h3 class="mb-3">R110 - RI by Policy</h3>
 
 <div class="card mb-4 shadow-sm border-0">
     <div class="card-header bg-light d-flex justify-content-between align-items-center">
@@ -18,12 +18,11 @@
     @if (showInfo)
     {
         <div class="card-body">
-            <p><strong>Description:</strong> Master procedure for Quarter Results Flat File - runs either ITD or MVT based on RunType.</p>
+            <p><strong>Description:</strong> RI outputs from Prism by policy.</p>
             <p><strong>Parameters:</strong></p>
             <ul>
-                <li><strong>RunType</strong> - 'ITD' (Inception to Date) or 'MVT' (Movement)</li>
                 <li><strong>ProcessingMonth</strong> - Current processing month (YYYYMM format)</li>
-                <li><strong>FromMonth</strong> - Starting month for movement calculations (YYYYMM format)</li>
+                <li><strong>Syndicate</strong> - Syndicate number (1729, 6131, or 1954)</li>
             </ul>
         </div>
     }
@@ -34,14 +33,7 @@
     <div class="card-body">
         <EditForm Model="@paramModel" OnValidSubmit="RunReport">
             <div class="row g-3">
-                <div class="col-md-4">
-                    <label class="form-label">Run Type</label>
-                    <InputSelect @bind-Value="paramModel.RunType" class="form-select">
-                        <option value="ITD">ITD (Inception to Date)</option>
-                        <option value="MVT">MVT (Movement)</option>
-                    </InputSelect>
-                </div>
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <label class="form-label">Processing Month (YYYYMM)</label>
                     <InputSelect @bind-Value="paramModel.ProcessingMonth" class="form-select">
                         @foreach (var month in availableMonths)
@@ -50,31 +42,12 @@
                         }
                     </InputSelect>
                 </div>
-                <div class="col-md-4">
-                    <label class="form-label">From Month (YYYYMM)</label>
-                    <InputSelect @bind-Value="paramModel.FromMonth" class="form-select">
-                        @foreach (var month in availableMonths)
-                        {
-                            <option value="@month">@month</option>
-                        }
-                    </InputSelect>
-                </div>
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <label class="form-label">Syndicate</label>
                     <InputSelect @bind-Value="paramModel.Syndicate" class="form-select">
                         <option value="1729">1729</option>
                         <option value="6131">6131</option>
                         <option value="1954">1954</option>
-                    </InputSelect>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">SUA Version</label>
-                    <InputSelect @bind-Value="paramModel.SUAVersionID" class="form-select">
-                        <option value="0">-- Select SUA Version --</option>
-                        @foreach (var v in suaVersions)
-                        {
-                            <option value="@v.VersionID">@v.DisplayText</option>
-                        }
                     </InputSelect>
                 </div>
                 <div class="col-12">
@@ -167,42 +140,25 @@
 }
 
 @code {
-    private const int REPORT_ID = 10;
+    private const int REPORT_ID = 110;
     private bool showInfo = true;
     private bool isRunning = false;
     private bool showErrorModal = false;
     private string errorMessage = string.Empty;
     private string errorStackTrace = string.Empty;
     private HashSet<int> expandedParams = new();
-    private ReportParams paramModel = new() { RunType = "ITD", ProcessingMonth = 202509, FromMonth = 202506, Syndicate = "1729", SUAVersionID = 0 };
+    private ReportParams paramModel = new() { ProcessingMonth = 202509, Syndicate = "1729" };
     private List<FDWHReportRun> runs = new();
     private List<int> availableMonths = new();
-    private List<SUAVersion> suaVersions = new();
 
     protected override async Task OnInitializedAsync()
     {
         availableMonths = await ReportingService.GetAvailableProcessingMonthsAsync();
-        suaVersions = await ReportingService.GetSUAVersionsAsync();
 
-        // R010 defaults: Quarterly, ITD, Latest QE, Prev QE
         if (availableMonths.Count > 0)
         {
-            // Get latest quarter end (Latest QE)
-            var latestQE = FDWHReportingService.GetLatestQuarterEnd(availableMonths);
-            if (latestQE > 0)
-            {
-                paramModel.ProcessingMonth = latestQE;
-                // Get previous quarter end (Prev QE)
-                paramModel.FromMonth = FDWHReportingService.GetPreviousQuarter(latestQE);
-            }
-            else
-            {
-                // Fallback to latest available month if no quarter ends found
-                paramModel.ProcessingMonth = availableMonths[0];
-                paramModel.FromMonth = availableMonths[0];
-            }
+            paramModel.ProcessingMonth = availableMonths[0];
         }
-
 
         runs = (await ReportingService.GetReportRunsAsync())
             .Where(r => r.ReportID == REPORT_ID)
@@ -216,21 +172,18 @@
         try
         {
             var parameters = new Dictionary<string, object> {
-                { "@RunType", paramModel.RunType },
                 { "@ProcessingMonth", paramModel.ProcessingMonth },
-                { "@FromMonth", paramModel.FromMonth },
-                { "@Syndicate", paramModel.Syndicate },
-                { "@SUAVersionID", paramModel.SUAVersionID }
+                { "@Syndicate", paramModel.Syndicate }
             };
 
             var bytes = await ReportingService.RunReportAndExportAsync(
                 REPORT_ID,
-                "reporting.r010_QtrResultsFlatFile",
+                "reporting.r110_RIbyPolicy",
                 parameters,
                 SandboxContext.EffectiveUserName ?? "unknown",
                 1);
 
-            var fileName = $"R010_QtrResultsFlatFile_{paramModel.RunType}_{paramModel.ProcessingMonth}_{DateTime.UtcNow:yyyyMMddHHmmss}.xlsx";
+            var fileName = $"R110_RIbyPolicy_{paramModel.Syndicate}_{paramModel.ProcessingMonth}_{DateTime.UtcNow:yyyyMMddHHmmss}.xlsx";
             using var streamRef = new DotNetStreamReference(new MemoryStream(bytes));
             await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
 
@@ -268,10 +221,7 @@
 
     public class ReportParams
     {
-        public string RunType { get; set; }
         public int ProcessingMonth { get; set; }
-        public int FromMonth { get; set; }
         public string Syndicate { get; set; }
-        public int SUAVersionID { get; set; }
     }
 }

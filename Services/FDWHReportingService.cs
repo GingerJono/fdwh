@@ -173,6 +173,35 @@ namespace Sandbox.Services
 			return months;
 		}
 
+		public async Task<List<SUAVersion>> GetSUAVersionsAsync()
+		{
+			var versions = new List<SUAVersion>();
+			using var conn = new SqlConnection(GetFDWHConnection());
+			using var cmd = new SqlCommand(@"
+				SELECT VersionID, [Version], Syndicate, ProcessingMonth, UploadedBy, UploadedDate, IsActive, Comments
+				FROM dbo.SUAVersions
+				WHERE IsActive = 1
+				ORDER BY VersionID DESC", conn);
+
+			await conn.OpenAsync();
+			using var reader = await cmd.ExecuteReaderAsync();
+			while (await reader.ReadAsync())
+			{
+				versions.Add(new SUAVersion
+				{
+					VersionID = reader.GetInt32(reader.GetOrdinal("VersionID")),
+					Version = reader.IsDBNull(reader.GetOrdinal("Version")) ? null : reader.GetString(reader.GetOrdinal("Version")),
+					Syndicate = reader.IsDBNull(reader.GetOrdinal("Syndicate")) ? null : reader.GetString(reader.GetOrdinal("Syndicate")),
+					ProcessingMonth = reader.GetInt32(reader.GetOrdinal("ProcessingMonth")),
+					UploadedBy = reader.IsDBNull(reader.GetOrdinal("UploadedBy")) ? null : reader.GetString(reader.GetOrdinal("UploadedBy")),
+					UploadedDate = reader.GetDateTime(reader.GetOrdinal("UploadedDate")),
+					IsActive = reader.GetBoolean(reader.GetOrdinal("IsActive")),
+					Comments = reader.IsDBNull(reader.GetOrdinal("Comments")) ? null : reader.GetString(reader.GetOrdinal("Comments"))
+				});
+			}
+			return versions;
+		}
+
 		// Helper method to check if a month is a quarter end (03, 06, 09, 12)
 		public static bool IsQuarterEnd(int processingMonth)
 		{

@@ -10,6 +10,20 @@ namespace Sandbox.Models.FDWH
 		public bool IsActive { get; set; }
 	}
 
+	public class SUAVersion
+	{
+		public int VersionID { get; set; }
+		public string Version { get; set; }
+		public string Syndicate { get; set; }
+		public int ProcessingMonth { get; set; }
+		public string UploadedBy { get; set; }
+		public DateTime UploadedDate { get; set; }
+		public bool IsActive { get; set; }
+		public string Comments { get; set; }
+
+		public string DisplayText => $"{Version} - {Comments}";
+	}
+
 	public class FDWHReportRun
 	{
 		public int RunID { get; set; }
